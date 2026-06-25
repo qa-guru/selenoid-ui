@@ -585,9 +585,6 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
         const ws = new WebSocket(wsUrl);
         playwrightSocket.current = ws;
 
-        ws.onopen = () => {
-            onLoading(false);
-        };
         ws.onerror = () => {
             if (!navigated) {
                 finish("Failed to start Playwright session", true);
