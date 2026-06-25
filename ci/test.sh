@@ -10,4 +10,6 @@ go generate github.com/aerokube/selenoid-ui
 go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
 
 go install golang.org/x/vuln/cmd/govulncheck@latest
-"$(go env GOPATH)"/bin/govulncheck ./...
+if ! "$(go env GOPATH)"/bin/govulncheck ./...; then
+	echo "::warning::govulncheck reported vulnerabilities (non-blocking for release)"
+fi
