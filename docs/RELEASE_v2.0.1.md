@@ -15,8 +15,11 @@
 | **Go** | 1.20 | **1.23.x** |
 | **CI** (build/test) | 1.21.5 | **1.23.8** |
 | **docker-compose** | — | `DOCKER_API_VERSION=1.45` для selenoid |
+| **Release binaries** | динамическая линковка (`gox`) | **статическая** (`CGO_ENABLED=0`, как Docker-образ) |
 
 Функциональность Playwright UI без изменений относительно v2.0.0.
+
+Бинарники GitHub Release пересобраны статически — работают в обёртке `aerokube/selenoid-ui` через `cm selenoid-ui start/update`.
 
 ---
 
