@@ -27,7 +27,7 @@ curl -sL https://github.com/qa-guru/selenoid-ui/releases/download/v2.0.1/selenoi
 chmod +x selenoid-ui
 
 docker pull qaguru/selenoid-ui:v2.0.1
-./cm selenoid-ui start -v v2.0.1
+./cm selenoid-ui start
 ```
 
 Связанный релиз hub: [qa-guru/selenoid v2.0.1](https://github.com/qa-guru/selenoid/releases/tag/v2.0.1).
