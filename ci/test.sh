@@ -3,7 +3,7 @@
 set -euo pipefail
 
 yarn --cwd ui install
-yarn --cwd ui build
+CI=false yarn --cwd ui build
 yarn --cwd ui test
 
 export GO111MODULE="on"

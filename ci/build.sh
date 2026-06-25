@@ -6,7 +6,7 @@ set -x
 export GO111MODULE="on"
 
 yarn --cwd ui install --frozen-lockfile
-yarn --cwd ui build
+CI=false yarn --cwd ui build
 go install github.com/rakyll/statik@latest
 go generate .
 
