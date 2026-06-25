@@ -54,7 +54,6 @@ func mux(sse *sse.SseBroker) http.Handler {
 	mux.Handle("/events", sse)
 	mux.HandleFunc("/ws/", ws)
 	mux.HandleFunc("/playwright/", playwright)
-	mux.HandleFunc("/browser/playwright/", playwright)
 	mux.HandleFunc("/ping", ping)
 	mux.HandleFunc("/status", status)
 	mux.HandleFunc("/browsers-config", browsersConfig)
@@ -62,10 +61,6 @@ func mux(sse *sse.SseBroker) http.Handler {
 		reverseProxy(statusURI).ServeHTTP(w, r)
 	})
 	mux.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
-		reverseProxy(webdriverURI).ServeHTTP(w, r)
-	})
-	mux.HandleFunc("/browser/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/browser")
 		reverseProxy(webdriverURI).ServeHTTP(w, r)
 	})
 	mux.HandleFunc("/clipboard/", func(w http.ResponseWriter, r *http.Request) {

@@ -32,23 +32,18 @@ const manualPlaywrightSelenoidOptions = () => ({
     "labels.manual": "true",
 });
 
-const playwrightApiWsBase = (browser, version) => {
+const playwrightWsBase = (browser, version) => {
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${wsProtocol}//${window.location.host}/playwright/${browser}/${version}`;
 };
 
-const playwrightBrowserWsBase = (browser, version) => {
-    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${wsProtocol}//${window.location.host}/browser/playwright/${browser}/${version}`;
-};
-
 const playwrightEndpoint = (browser, version) => {
     const params = new URLSearchParams(manualPlaywrightSelenoidOptions());
-    return `${playwrightBrowserWsBase(browser, version)}?${params.toString()}`;
+    return `${playwrightWsBase(browser, version)}?${params.toString()}`;
 };
 
 const playwrightSnippet = (browser, version) => {
-    const base = playwrightApiWsBase(browser, version);
+    const base = playwrightWsBase(browser, version);
     const selenoidOptions = defaultPlaywrightSelenoidOptions();
     const query = new URLSearchParams(selenoidOptions).toString();
     return { base, selenoidOptions, query, full: `${base}?${query}` };
@@ -90,6 +85,14 @@ const rubySelenoidOptionsBlock = selenoidOptions => {
 };
 
 const PLAYWRIGHT_BROWSER_NAMES = new Set(["chromium", "webkit", "firefox-playwright"]);
+
+const primeBasicAuth = () =>
+    ajax({
+        url: "/wd/hub/status",
+        method: "GET",
+        withCredentials: true,
+    });
+
 
 const isPlaywrightBrowser = (browserProtocols, name, version) => {
     if (PLAYWRIGHT_BROWSER_NAMES.has(name)) {
@@ -496,25 +499,29 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
                         selenoidOptions = Object.assign(selenoidOptions, additionalCaps);
                     }
 
-                    return ajax({
-                        url: "/browser/wd/hub/session",
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        timeout: 300000,
-                        body: {
-                            desiredCapabilities,
-                            capabilities: {
-                                alwaysMatch: {
-                                    browserName: `${name}`,
-                                    browserVersion: `${version}`,
-                                    "selenoid:options": selenoidOptions,
+                    return primeBasicAuth().pipe(
+                        flatMap(() =>
+                            ajax({
+                                url: "/wd/hub/session",
+                                method: "POST",
+                                withCredentials: true,
+                                headers: {
+                                    "Content-Type": "application/json",
                                 },
-                                firstMatch: [{}],
-                            },
-                        },
-                    }).pipe(
+                                timeout: 300000,
+                                body: {
+                                    desiredCapabilities,
+                                    capabilities: {
+                                        alwaysMatch: {
+                                            browserName: `${name}`,
+                                            browserVersion: `${version}`,
+                                            "selenoid:options": selenoidOptions,
+                                        },
+                                        firstMatch: [{}],
+                                    },
+                                },
+                            })
+                        ),
                         filter(({ status }) => status === 200),
                         tap(res => history.push(`/sessions/${sessionIdFrom(res)}`))
                     );
@@ -587,19 +594,29 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
 
         tryNavigate({ sessions });
 
-        const ws = new WebSocket(wsUrl);
-        playwrightSocket.current = ws;
+        const openWebSocket = () => {
+            const ws = new WebSocket(wsUrl);
+            playwrightSocket.current = ws;
 
-        ws.onerror = () => {
-            if (!navigated) {
-                finish("Failed to start Playwright session", true);
-            }
+            ws.onerror = () => {
+                if (!navigated) {
+                    finish("Failed to start Playwright session", true);
+                }
+            };
+            ws.onclose = () => {
+                if (!navigated) {
+                    finish("Playwright session closed before it was ready", true);
+                }
+            };
         };
-        ws.onclose = () => {
-            if (!navigated) {
-                finish("Playwright session closed before it was ready", true);
-            }
-        };
+
+        primeBasicAuth().subscribe({
+            next: () => openWebSocket(),
+            error: err => {
+                console.error("Playwright auth failed", err);
+                finish("Authentication failed", true);
+            },
+        });
     };
 
     const onCreateSession = () => {
