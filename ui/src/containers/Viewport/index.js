@@ -46,7 +46,7 @@ const Viewport = () => {
     // can be checked offline with simple
     // const {origin, sse, status, state, browsers = {}, sessions = {}} = require("../../sse-example.json");
 
-    const { origin, state = {}, browsers = {}, sessions = {}, version = "unknown" } = useObservable(
+    const { origin, state = {}, browsers = {}, sessions = {}, browserProtocols = {}, version = "unknown" } = useObservable(
         in$ => {
             return in$.pipe(
                 flatMap(([pushStatus]) =>
@@ -174,7 +174,14 @@ const Viewport = () => {
                     <Route
                         exact={true}
                         path="/capabilities"
-                        render={() => <Capabilities browsers={state.browsers} origin={origin} />}
+                        render={() => (
+                            <Capabilities
+                                browsers={state.browsers}
+                                browserProtocols={browserProtocols}
+                                sessions={sessions}
+                                origin={origin}
+                            />
+                        )}
                     />
 
                     <Route

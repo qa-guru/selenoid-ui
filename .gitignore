@@ -16,3 +16,4 @@ coverage.txt
 .DS_Store
 dist/**
 docs/output/*.html
+licenses/
