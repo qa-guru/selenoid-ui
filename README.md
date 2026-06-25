@@ -1,3 +1,11 @@
+# Selenoid UI (qa-guru fork)
+
+Форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) с поддержкой **Playwright-сессий** в Capabilities (WebSocket, VNC, прокси `/playwright/`).
+
+Сборка и запуск в монорепо: [README](../README.md#selenoid-ui-playwright-в-capabilities).
+
+---
+
 # Selenoid UI
 [![Build Status](https://travis-ci.org/aerokube/selenoid-ui.svg?branch=master)](https://travis-ci.org/aerokube/selenoid-ui)
 [![Coverage](https://codecov.io/github/aerokube/selenoid-ui/coverage.svg)](https://codecov.io/gh/aerokube/selenoid-ui)
