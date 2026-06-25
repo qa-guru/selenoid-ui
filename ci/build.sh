@@ -4,6 +4,7 @@ set -euo pipefail
 set -x
 
 export GO111MODULE="on"
+export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
 
 yarn --cwd ui install --frozen-lockfile
 yarn --cwd ui build

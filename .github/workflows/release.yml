@@ -16,6 +16,8 @@ permissions:
 jobs:
   selenoid-ui:
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --openssl-legacy-provider
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 16.x
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
