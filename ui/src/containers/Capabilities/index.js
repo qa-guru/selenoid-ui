@@ -32,18 +32,23 @@ const manualPlaywrightSelenoidOptions = () => ({
     "labels.manual": "true",
 });
 
-const playwrightWsBase = (browser, version) => {
+const playwrightApiWsBase = (browser, version) => {
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${wsProtocol}//${window.location.host}/playwright/${browser}/${version}`;
 };
 
+const playwrightBrowserWsBase = (browser, version) => {
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${wsProtocol}//${window.location.host}/browser/playwright/${browser}/${version}`;
+};
+
 const playwrightEndpoint = (browser, version) => {
     const params = new URLSearchParams(manualPlaywrightSelenoidOptions());
-    return `${playwrightWsBase(browser, version)}?${params.toString()}`;
+    return `${playwrightBrowserWsBase(browser, version)}?${params.toString()}`;
 };
 
 const playwrightSnippet = (browser, version) => {
-    const base = playwrightWsBase(browser, version);
+    const base = playwrightApiWsBase(browser, version);
     const selenoidOptions = defaultPlaywrightSelenoidOptions();
     const query = new URLSearchParams(selenoidOptions).toString();
     return { base, selenoidOptions, query, full: `${base}?${query}` };
@@ -492,7 +497,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
                     }
 
                     return ajax({
-                        url: "/wd/hub/session",
+                        url: "/browser/wd/hub/session",
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
