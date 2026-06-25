@@ -2,10 +2,8 @@
 
 set -euo pipefail
 
-export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
-
 yarn --cwd ui install
-yarn --cwd ui build
+NODE_OPTIONS=--openssl-legacy-provider yarn --cwd ui build
 yarn --cwd ui test
 
 export GO111MODULE="on"

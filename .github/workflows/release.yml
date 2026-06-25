@@ -16,8 +16,6 @@ permissions:
 jobs:
   selenoid-ui:
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: --openssl-legacy-provider
     steps:
       - uses: actions/checkout@v4
 
