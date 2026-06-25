@@ -6,7 +6,7 @@ set -x
 export GO111MODULE="on"
 
 yarn --cwd ui install --frozen-lockfile
-NODE_OPTIONS=--openssl-legacy-provider yarn --cwd ui build
+yarn --cwd ui build
 go install github.com/rakyll/statik@latest
 go generate .
 
