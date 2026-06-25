@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { ajax } from "rxjs/ajax";
@@ -15,6 +15,90 @@ import BeatLoader from "react-spinners/BeatLoader";
 import { useEventCallback } from "rxjs-hooks";
 
 import Url from "url-parse";
+import { retainPlaywrightSocket } from "../../util/playwrightSessions";
+
+const defaultPlaywrightSelenoidOptions = () => ({
+    name: "Session started using curl command...",
+    sessionTimeout: "1m",
+    enableVNC: "true",
+});
+
+const manualPlaywrightSelenoidOptions = () => ({
+    ...defaultPlaywrightSelenoidOptions(),
+    name: "Manual session",
+    sessionTimeout: "60m",
+    enableVideo: "true",
+    headless: "false",
+    "labels.manual": "true",
+});
+
+const playwrightWsBase = (browser, version) => {
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${wsProtocol}//${window.location.host}/playwright/${browser}/${version}`;
+};
+
+const playwrightEndpoint = (browser, version) => {
+    const params = new URLSearchParams(manualPlaywrightSelenoidOptions());
+    return `${playwrightWsBase(browser, version)}?${params.toString()}`;
+};
+
+const playwrightSnippet = (browser, version) => {
+    const base = playwrightWsBase(browser, version);
+    const selenoidOptions = defaultPlaywrightSelenoidOptions();
+    const query = new URLSearchParams(selenoidOptions).toString();
+    return { base, selenoidOptions, query, full: `${base}?${query}` };
+};
+
+const javaSelenoidOptionsBlock = selenoidOptions => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `    put("${key}", "${value}");`)
+        .join("\n");
+    return `new HashMap<String, String>() {{\n${entries}\n}}`;
+};
+
+const csharpSelenoidOptionsBlock = selenoidOptions => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `    ["${key}"] = "${value}",`)
+        .join("\n");
+    return `new Dictionary<string, string> {\n${entries}\n}`;
+};
+
+const goSelenoidOptionsBlock = selenoidOptions => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `\t\t"${key}": "${value}",`)
+        .join("\n");
+    return `map[string]string{\n${entries}\n\t}`;
+};
+
+const phpSelenoidOptionsBlock = selenoidOptions => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `    '${key}' => '${value}',`)
+        .join("\n");
+    return `[\n${entries}\n]`;
+};
+
+const rubySelenoidOptionsBlock = selenoidOptions => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `  '${key}' => '${value}',`)
+        .join("\n");
+    return `{\n${entries}\n}`;
+};
+
+const PLAYWRIGHT_BROWSER_NAMES = new Set(["chromium", "webkit", "firefox-playwright"]);
+
+const isPlaywrightBrowser = (browserProtocols, name, version) => {
+    if (PLAYWRIGHT_BROWSER_NAMES.has(name)) {
+        return true;
+    }
+    return browserProtocols?.[name]?.[version]?.protocol === "playwright";
+};
+
+const browserProtocol = (browserProtocols, name, version) => {
+    if (isPlaywrightBrowser(browserProtocols, name, version)) {
+        return "playwright";
+    }
+    return browserProtocols?.[name]?.[version]?.protocol || "webdriver";
+};
 
 const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444") => {
     const url = new Url(origin);
@@ -175,11 +259,127 @@ driver = Selenium::WebDriver.for(:remote,
     };
 };
 
+const playwrightClient = browser => {
+    switch (browser) {
+        case "webkit":
+            return { js: "webkit", py: "webkit", cs: "Webkit", go: "WebKit", rb: "webkit", java: "webkit" };
+        case "firefox-playwright":
+            return { js: "firefox", py: "firefox", cs: "Firefox", go: "Firefox", rb: "firefox", java: "firefox" };
+        default:
+            return { js: "chromium", py: "chromium", cs: "Chromium", go: "Chromium", rb: "chromium", java: "chromium" };
+    }
+};
+
+const playwrightCode = (browser, version) => {
+    const { base, selenoidOptions, query } = playwrightSnippet(browser, version);
+    const pw = playwrightClient(browser);
+    const jsSelenoidOptions = JSON.stringify(selenoidOptions, null, 2);
+    const pySelenoidOptions = JSON.stringify(selenoidOptions, null, 4);
+    return {
+        curl: `curl --websocket "${base}\\
+?${query}"
+`,
+        java: `Playwright playwright = Playwright.create();
+Map<String, String> selenoidOptions = ${javaSelenoidOptionsBlock(selenoidOptions)};
+String wsEndpoint = "${base}" + "?${query}";
+Browser browser = playwright.${pw.java}().connect(wsEndpoint);
+Page page = browser.newPage();
+page.navigate("https://example.com");
+browser.close();
+playwright.close();
+`,
+        go: `selenoidOptions := ${goSelenoidOptionsBlock(selenoidOptions)}
+params := url.Values{}
+for key, value := range selenoidOptions {
+\tparams.Set(key, value)
+}
+wsEndpoint := "${base}" + "?" + params.Encode()
+
+browser, err := pw.${pw.go}.Connect(wsEndpoint)
+if err != nil {
+\tlog.Fatalf("connect: %v", err)
+}
+page, err := browser.NewPage()
+defer browser.Close()
+`,
+        "C#": `var selenoidOptions = ${csharpSelenoidOptionsBlock(selenoidOptions)};
+var wsEndpoint = "${base}" + "?${query}";
+var playwright = await Playwright.CreateAsync();
+var browser = await playwright.${pw.cs}.ConnectAsync(wsEndpoint);
+var page = await browser.NewPageAsync();
+await page.GotoAsync("https://example.com");
+await browser.CloseAsync();
+`,
+        python: `from urllib.parse import urlencode
+from playwright.sync_api import sync_playwright
+
+selenoid_options = ${pySelenoidOptions}
+ws_endpoint = "${base}?" + urlencode(selenoid_options)
+
+with sync_playwright() as p:
+    browser = p.${pw.py}.connect(ws_endpoint)
+    page = browser.new_page()
+    page.goto("https://example.com")
+    browser.close()
+`,
+        javascript: `const { ${pw.js} } = require('playwright');
+
+const selenoidOptions = ${jsSelenoidOptions};
+const wsEndpoint = \`${base}?\${new URLSearchParams(selenoidOptions)}\`;
+
+const browser = await ${pw.js}.connect(wsEndpoint);
+const page = await browser.newPage();
+await page.goto('https://example.com');
+await browser.close();
+`,
+        PHP: `$selenoidOptions = ${phpSelenoidOptionsBlock(selenoidOptions)};
+$wsEndpoint = '${base}' . '?' . http_build_query($selenoidOptions);
+
+$browser = Playwright::create()->${pw.py}()->connect($wsEndpoint);
+$page = $browser->newPage();
+$page->goto('https://example.com');
+$browser->close();
+`,
+        ruby: `require 'uri'
+
+selenoid_options = ${rubySelenoidOptionsBlock(selenoidOptions)}
+ws_endpoint = '${base}' + '?' + URI.encode_www_form(selenoid_options)
+
+Playwright.create do |playwright|
+  browser = playwright.${pw.rb}.connect(ws_endpoint)
+  page = browser.new_page
+  page.goto('https://example.com')
+  browser.close
+end
+`,
+    };
+};
+
 export const sessionIdFrom = ({ response }) => {
     return response.sessionId || (response.value && response.value.sessionId) || "";
 };
 
-const Capabilities = ({ browsers = {}, origin, history }) => {
+const findPlaywrightSession = (sessions, existingIds, name, version) => {
+    for (const [id, session] of Object.entries(sessions || {})) {
+        if (existingIds.has(id)) {
+            continue;
+        }
+        const caps = session.caps || {};
+        if (caps.browserName !== name) {
+            continue;
+        }
+        if (caps.version && caps.version !== version) {
+            continue;
+        }
+        if (caps.name && caps.name !== "Manual session") {
+            continue;
+        }
+        return id;
+    }
+    return "";
+};
+
+const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin, history }) => {
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
 
@@ -191,51 +391,69 @@ const Capabilities = ({ browsers = {}, origin, history }) => {
                     label: `${name}: ${version}`,
                     name,
                     version,
+                    protocol: browserProtocol(browserProtocols, name, version),
                 };
             })
         )
     );
 
-    const { name, version, value } = browser || {};
-    const caps = code(name, version, origin);
+    const { name, version, value, protocol } = browser || {};
+    const isPlaywright = protocol === "playwright" || isPlaywrightBrowser(browserProtocols, name, version);
+    const caps = isPlaywright ? playwrightCode(name, version) : code(name, version, origin);
+    const langKeys = Object.keys(caps);
+    const activeLang = langKeys.includes(lang) ? lang : langKeys[0] || "curl";
+
+    useEffect(() => {
+        if (!langKeys.includes(lang)) {
+            onLanguageChange(langKeys[0] || "curl");
+        }
+    }, [name, version, isPlaywright]);
 
     return (
         <StyledCapabilities>
             <div className="section-title">Capabilities</div>
-            <div className="setup">
-                <Select
-                    className="capabilities-browser-select"
-                    name="browsers"
-                    value={available.find(item => item.value === value)}
-                    options={available}
-                    onChange={browser => onBrowserChange(browser)}
-                    placeholder="Select browser..."
-                    isLoading={!origin}
-                    clearable={false}
-                    noResultsText="No information about browsers"
-                />
-                <Launch browser={browser} history={history} />
-            </div>
-            <Highlight className={lang}>{caps[lang]}</Highlight>
-
-            <div className="lang-selector">
-                <div className="capabilities-langs">
-                    {Object.keys(caps).map(next => (
-                        <div
-                            key={next}
-                            className={`capabilities-lang ${next === lang && "capabilities-lang_active"}`}
-                            onClick={() => onLanguageChange(next)}
-                        >
-                            {next}
-                        </div>
-                    ))}
+            <div className="capabilities-body">
+                <div className="setup">
+                    <Select
+                        className="capabilities-browser-select"
+                        name="browsers"
+                        value={available.find(item => item.value === value)}
+                        options={available}
+                        onChange={browser => onBrowserChange(browser)}
+                        placeholder="Select browser..."
+                        isLoading={!origin}
+                        clearable={false}
+                        noResultsText="No information about browsers"
+                    />
+                    <Launch
+                        browser={browser}
+                        history={history}
+                        sessions={sessions}
+                        isPlaywright={isPlaywright}
+                    />
+                </div>
+                <div className="code-panel">
+                    <Highlight className={activeLang}>{caps[activeLang] || ""}</Highlight>
+                </div>
+                <div className="lang-selector">
+                    <div className="capabilities-langs">
+                        {langKeys.map(next => (
+                            <div
+                                key={next}
+                                className={`capabilities-lang ${next === activeLang && "capabilities-lang_active"}`}
+                                onClick={() => onLanguageChange(next)}
+                            >
+                                {next}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </StyledCapabilities>
     );
 };
 
-const Launch = ({ browser: { name, version }, history }) => {
+const Launch = ({ browser: { name, version }, history, sessions, isPlaywright }) => {
     const defaultAdditionalCaps = { operaOptions: { binary: "/usr/bin/opera" } };
 
     const [loading, onLoading] = useState(false);
@@ -243,6 +461,7 @@ const Launch = ({ browser: { name, version }, history }) => {
     const [useMoreCaps, toggleMoreCaps] = useState(false);
     const [moreCapsError, onMoreCapsError] = useState(false);
     const [moreCaps, setMoreCaps] = useState(JSON.stringify(defaultAdditionalCaps));
+    const playwrightSocket = useRef(null);
 
     const [createSession] = useEventCallback(
         (event$, inputs$) =>
@@ -306,6 +525,89 @@ const Launch = ({ browser: { name, version }, history }) => {
         [name, version, history, useMoreCaps, moreCapsError, moreCaps]
     );
 
+    const createPlaywrightSession = () => {
+        if (!name || !version) {
+            return;
+        }
+
+        onError("");
+        onLoading(true);
+
+        const existingIds = new Set(Object.keys(sessions || {}));
+        const wsUrl = playwrightEndpoint(name, version);
+        let navigated = false;
+        let eventSource;
+
+        const finish = (message, closeSocket) => {
+            if (closeSocket && playwrightSocket.current) {
+                playwrightSocket.current.close();
+                playwrightSocket.current = null;
+            }
+            if (eventSource) {
+                eventSource.close();
+            }
+            onLoading(false);
+            if (message) {
+                onError(message);
+            }
+        };
+
+        const tryNavigate = data => {
+            if (navigated) {
+                return;
+            }
+            const sessionId = findPlaywrightSession(data.sessions, existingIds, name, version);
+            if (!sessionId) {
+                return;
+            }
+            navigated = true;
+            retainPlaywrightSocket(sessionId, playwrightSocket.current);
+            history.push(`/sessions/${sessionId}`);
+            onLoading(false);
+        };
+
+        eventSource = new EventSource("/events");
+        eventSource.onmessage = e => {
+            try {
+                tryNavigate(JSON.parse(e.data));
+            } catch (err) {
+                console.error("Can't parse SSE event", err);
+            }
+        };
+        eventSource.onerror = () => {
+            if (!navigated) {
+                finish("Lost connection to events stream", true);
+            }
+        };
+
+        tryNavigate({ sessions });
+
+        const ws = new WebSocket(wsUrl);
+        playwrightSocket.current = ws;
+
+        ws.onopen = () => {
+            onLoading(false);
+        };
+        ws.onerror = () => {
+            if (!navigated) {
+                finish("Failed to start Playwright session", true);
+            }
+        };
+        ws.onclose = () => {
+            if (!navigated) {
+                finish("Playwright session closed before it was ready", true);
+            }
+        };
+    };
+
+    const onCreateSession = () => {
+        if (isPlaywright) {
+            createPlaywrightSession();
+            return;
+        }
+        createSession();
+    };
+
     const onTextareaUpdate = e => {
         setMoreCaps(e.target.value);
         try {
@@ -319,7 +621,7 @@ const Launch = ({ browser: { name, version }, history }) => {
     return (
         <div>
             <button
-                onClick={createSession}
+                onClick={onCreateSession}
                 disabled={!name || loading}
                 className={`new-session disabled-${!name || loading} error-${!!error}`}
                 onMouseLeave={() => onError("")}
@@ -327,12 +629,12 @@ const Launch = ({ browser: { name, version }, history }) => {
             >
                 {loading ? <BeatLoader size={3} color={"#fff"} /> : `Create Session`}
             </button>
-            {!name || loading ? null : (
+            {!isPlaywright && (!name || loading ? null : (
                 <button onClick={() => toggleMoreCaps(!useMoreCaps)} className={"new-session-more-capabilities"}>
                     More capabilities
                 </button>
-            )}
-            {!useMoreCaps ? null : (
+            ))}
+            {!useMoreCaps || isPlaywright ? null : (
                 <textarea
                     spellCheck={false}
                     rows={7}
@@ -347,6 +649,8 @@ const Launch = ({ browser: { name, version }, history }) => {
 
 Capabilities.propTypes = {
     browsers: PropTypes.object,
+    browserProtocols: PropTypes.object,
+    sessions: PropTypes.object,
     origin: PropTypes.string,
 };
 

@@ -30,6 +30,7 @@ var (
 	selenoidUri        string
 	webdriverUriString string
 	statusUriString    string
+	browsersConfPath   string
 	allowedOrigin      string
 	users              string
 	timeout            time.Duration
@@ -37,9 +38,10 @@ var (
 
 	startTime = time.Now()
 
-	statik       http.FileSystem
-	webdriverURI *url.URL
-	statusURI    *url.URL
+	statik            http.FileSystem
+	webdriverURI      *url.URL
+	statusURI         *url.URL
+	browserProtocols  selenoid.BrowserProtocols
 
 	version     bool
 	gitRevision = "HEAD"
@@ -51,8 +53,10 @@ func mux(sse *sse.SseBroker) http.Handler {
 	mux.Handle("/", http.FileServer(statik))
 	mux.Handle("/events", sse)
 	mux.HandleFunc("/ws/", ws)
+	mux.HandleFunc("/playwright/", playwright)
 	mux.HandleFunc("/ping", ping)
 	mux.HandleFunc("/status", status)
+	mux.HandleFunc("/browsers-config", browsersConfig)
 	mux.HandleFunc("/video/", func(w http.ResponseWriter, r *http.Request) {
 		reverseProxy(statusURI).ServeHTTP(w, r)
 	})
@@ -77,6 +81,28 @@ func ws(w http.ResponseWriter, r *http.Request) {
 	}
 	wsProxy.ServeHTTP(w, r)
 	log.Printf("[WS_PROXY] [%s] [CLOSED]", r.URL.Path)
+}
+
+func playwright(w http.ResponseWriter, r *http.Request) {
+	scheme := "ws"
+	if statusURI.Scheme == "https" {
+		scheme = "wss"
+	}
+	target := &url.URL{
+		Scheme:   scheme,
+		Host:     statusURI.Host,
+		Path:     r.URL.Path,
+		RawQuery: r.URL.RawQuery,
+	}
+	log.Printf("[PLAYWRIGHT_PROXY] [%s] [%s]", r.URL.RequestURI(), target)
+	wsProxy := websocketproxy.NewProxy(target)
+
+	if allowedOrigin != "" {
+		upgrader := websocketproxy.DefaultUpgrader
+		upgrader.CheckOrigin = checkOrigin(allowedOrigin)
+	}
+	wsProxy.ServeHTTP(w, r)
+	log.Printf("[PLAYWRIGHT_PROXY] [%s] [CLOSED]", r.URL.Path)
 }
 
 func checkOrigin(allowedOrigins string) func(r *http.Request) bool {
@@ -116,7 +142,7 @@ func status(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 
 	v := gitRevision + "[" + buildStamp + "]"
-	status, err := selenoid.Status(req.Context(), webdriverURI, statusURI, v)
+	status, err := selenoid.Status(req.Context(), webdriverURI, statusURI, v, browserProtocols)
 	if err != nil {
 		log.Printf("[ERROR] [Can't get status: %v]", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -129,6 +155,15 @@ func status(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Write(status)
+}
+
+func browsersConfig(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	if browserProtocols == nil {
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
+		return
+	}
+	_ = json.NewEncoder(w).Encode(browserProtocols)
 }
 
 func reverseProxy(u *url.URL) http.Handler {
@@ -145,11 +180,28 @@ func showVersion() {
 	fmt.Printf("UTC Build Time: %s\n", buildStamp)
 }
 
+func resolveBrowsersConfPath(flagPath string) string {
+	if flagPath != "" {
+		return flagPath
+	}
+	for _, path := range []string{
+		"selenoid-src/config/browsers.json",
+		"config/browsers.json",
+		"browsers.json",
+	} {
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
+}
+
 func init() {
 	flag.StringVar(&listen, "listen", ":8080", "host and port to listen on")
 	flag.StringVar(&selenoidUri, "selenoid-uri", "http://localhost:4444", "selenoid uri to fetch data from")
 	flag.StringVar(&webdriverUriString, "webdriver-uri", "", "webdriver uri used to create new sessions")
 	flag.StringVar(&statusUriString, "status-uri", "", "status uri to fetch data from")
+	flag.StringVar(&browsersConfPath, "browsers-conf", "", "browsers.json path with protocol metadata for the UI")
 	flag.StringVar(&allowedOrigin, "allowed-origin", "", "comma separated list of allowed Origin headers (use * to allow all)")
 	flag.StringVar(&users, "users", "", "htpasswd file path containing users information")
 	flag.DurationVar(&timeout, "timeout", 3*time.Second, "response timeout, e.g. 5s or 1m")
@@ -187,6 +239,17 @@ func init() {
 	}
 	webdriverURI = wu
 
+	browsersConfPath = resolveBrowsersConfPath(browsersConfPath)
+	browserProtocols, err = selenoid.LoadBrowserProtocols(browsersConfPath)
+	if err != nil {
+		log.Fatalf("[INIT] [Invalid browsers config: %v]", err)
+	}
+	if browsersConfPath != "" {
+		log.Printf("[INIT] [Loaded browsers config from %s]", browsersConfPath)
+	} else {
+		log.Printf("[INIT] [No browsers config: Playwright browsers are detected by name in the UI]")
+	}
+
 	if _, err := os.Stat(users); users != "" && err != nil {
 		log.Fatalf("[INIT] [Invalid users file: %v]", err)
 	}
@@ -200,7 +263,7 @@ func main() {
 	go sse.Tick(broker, func(ctx context.Context, br sse.Broker) {
 		timedCtx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
-		status, err := selenoid.Status(timedCtx, webdriverURI, statusURI, gitRevision+"["+buildStamp+"]")
+		status, err := selenoid.Status(timedCtx, webdriverURI, statusURI, gitRevision+"["+buildStamp+"]", browserProtocols)
 		if err != nil {
 			log.Printf("[ERROR] [Can't get status: %v]", err)
 			br.Notify([]byte(`{ "errors": [{"msg": "can't get status"}] }`))

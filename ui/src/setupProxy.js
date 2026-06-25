@@ -19,6 +19,7 @@ module.exports = function (app) {
     app.use(createProxyMiddleware("/status", { target: "http://localhost:8080" }));
     app.use(createProxyMiddleware("/video/", { target: "http://localhost:8080" }));
     app.use(createProxyMiddleware("/wd/hub/", { target: "http://localhost:8080" }));
+    app.use(createProxyMiddleware("/playwright/", { target: "http://localhost:8080/", ws: true }));
     app.use(createProxyMiddleware("/ws", { target: "http://localhost:8080/", ws: true }));
     app.use(
         createProxyMiddleware("/vnc/", {

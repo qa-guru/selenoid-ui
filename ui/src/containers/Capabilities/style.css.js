@@ -11,10 +11,7 @@ const selectBgColor = "#30363C";
 
 export const StyledCapabilities = styled.div`
   width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
+  display: block;
   position: relative;
 
   .section-title {
@@ -30,8 +27,20 @@ export const StyledCapabilities = styled.div`
     line-height: 20px;
   }
 
+  .capabilities-body {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding: 20px 5% 40px;
+    box-sizing: border-box;
+  }
+
   .setup {
     width: 250px;
+    flex: 0 0 250px;
     margin-right: 30px;
 
     button {
@@ -96,9 +105,46 @@ export const StyledCapabilities = styled.div`
   
   }
 
+  .code-panel {
+    flex: 1 1 auto;
+    min-width: 420px;
+    max-width: 720px;
+    margin: 0 10px;
+
+    pre.hljs {
+      min-height: 320px;
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-x: hidden;
+    }
+  }
+
   .lang-selector {
-    margin-left: 50px;
-    margin-top: 20px;
+    flex: 0 0 auto;
+    margin-left: 20px;
+    margin-top: 0;
+  }
+
+  .capabilities-langs {
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+  }
+
+  .capabilities-lang {
+    color: #fff;
+    padding: 10px;
+    text-transform: capitalize;
+    line-height: 20px;
+    border-left: 3px solid ${borderLangsColor};
+    cursor: pointer;
+    transition: border-color 0.2s ease-out 0s;
+    min-width: 80px;
+
+    &_active {
+      border-left-color: ${selectedColor};
+    }
   }
 
   .new-session {
@@ -170,27 +216,5 @@ pre.hljs, code.hljs {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: inherit;
-}
-
-.capabilities-langs {
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-}
-
-.capabilities-lang {
-  color: #fff;
-  padding: 10px;
-  text-transform: capitalize;
-  line-height: 20px;
-  border-left: 3px solid ${borderLangsColor};
-  cursor: pointer;
-  transition: border-color 0.2s ease-out 0s;
-  min-width: 80px;
-
-  &_active {
-    border-left-color: ${selectedColor};
-  }
 }
 `;
