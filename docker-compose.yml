@@ -3,6 +3,8 @@ services:
   selenoid:
     image: "aerokube/selenoid"
     network_mode: bridge
+    environment:
+      DOCKER_API_VERSION: "1.45"
     ports:
       - "4444:4444"
     volumes:
