@@ -84,7 +84,7 @@ const rubySelenoidOptionsBlock = selenoidOptions => {
     return `{\n${entries}\n}`;
 };
 
-const PLAYWRIGHT_BROWSER_NAMES = new Set(["chromium", "webkit", "firefox-playwright"]);
+const PLAYWRIGHT_BROWSER_NAMES = new Set(["playwright-chromium", "playwright-webkit", "playwright-firefox", "playwright-msedge"]);
 
 const primeBasicAuth = () =>
     ajax({
@@ -269,10 +269,12 @@ driver = Selenium::WebDriver.for(:remote,
 
 const playwrightClient = browser => {
     switch (browser) {
-        case "webkit":
+        case "playwright-webkit":
             return { js: "webkit", py: "webkit", cs: "Webkit", go: "WebKit", rb: "webkit", java: "webkit" };
-        case "firefox-playwright":
+        case "playwright-firefox":
             return { js: "firefox", py: "firefox", cs: "Firefox", go: "Firefox", rb: "firefox", java: "firefox" };
+        case "playwright-chromium":
+        case "playwright-msedge":
         default:
             return { js: "chromium", py: "chromium", cs: "Chromium", go: "Chromium", rb: "chromium", java: "chromium" };
     }

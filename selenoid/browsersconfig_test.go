@@ -21,7 +21,7 @@ func TestLoadBrowserProtocols(t *testing.T) {
       }
     }
   },
-  "chromium": {
+  "playwright-chromium": {
     "default": "1.61.1",
     "versions": {
       "1.61.1": {
@@ -36,7 +36,7 @@ func TestLoadBrowserProtocols(t *testing.T) {
 	protocols, err := LoadBrowserProtocols(path)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, protocols.Protocol("chrome", "latest"), EqualTo{"webdriver"})
-	AssertThat(t, protocols.Protocol("chromium", "1.61.1"), EqualTo{"playwright"})
-	AssertThat(t, protocols.IsPlaywright("chromium", "1.61.1"), Is{true})
+	AssertThat(t, protocols.Protocol("playwright-chromium", "1.61.1"), EqualTo{"playwright"})
+	AssertThat(t, protocols.IsPlaywright("playwright-chromium", "1.61.1"), Is{true})
 	AssertThat(t, protocols.IsPlaywright("chrome", "latest"), Is{false})
 }

@@ -25,7 +25,7 @@
 ### Capabilities — Playwright
 
 - Определение протокола по `browsers.json` (`protocol: playwright`)
-- Браузеры: `chromium`, `webkit`, `firefox-playwright`
+- Браузеры: `playwright-chromium`, `playwright-webkit`, `playwright-firefox`
 - Готовые сниппеты: Java, C#, Python, JavaScript, TypeScript, Ruby
 - Кнопка **Create Session** открывает WebSocket-прокси и переходит на экран сессии (SSE `/events`)
 
