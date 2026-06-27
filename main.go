@@ -185,9 +185,9 @@ func resolveBrowsersConfPath(flagPath string) string {
 		return flagPath
 	}
 	for _, path := range []string{
+		"browsers.json",
 		"selenoid-src/config/browsers.json",
 		"config/browsers.json",
-		"browsers.json",
 	} {
 		if _, err := os.Stat(path); err == nil {
 			return path

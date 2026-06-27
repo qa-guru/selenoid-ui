@@ -123,7 +123,7 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
         case "safari":
             optionsClass = "SafariOptions";
             break;
-        case "MicrosoftEdge":
+        case "msedge":
             optionsClass = "EdgeOptions";
             break;
     }
