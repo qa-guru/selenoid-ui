@@ -78,7 +78,7 @@ cm selenoid-ui start -v v2.0.0
 
 1. Использовать в паре с **qa-guru/selenoid** v2.0.0 (stock aerokube hub не знает `/playwright/`).
 2. Передать тот же `browsers.json`, что у hub (`-browsers-conf`).
-3. Для Playwright за reverse proxy — проксировать и `/playwright/` на hub (см. nginx-сниппет в монорепо).
+3. Для Playwright за reverse proxy — проксировать и `/playwright/` на hub (см. [qa-guru/cm deploy/nginx-playwright-snippet.conf](https://github.com/qa-guru/cm/blob/main/deploy/nginx-playwright-snippet.conf)).
 
 ---
 
