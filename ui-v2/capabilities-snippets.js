@@ -449,11 +449,24 @@ export function playwrightEndpoint(name, version, options) {
   return `${playwrightWsBase(name, version)}?${params.toString()}`;
 }
 
+function browserCatalog(stateBrowsers = {}, browserProtocols = {}) {
+  if (Object.keys(stateBrowsers).length > 0) {
+    return stateBrowsers;
+  }
+
+  const fromConfig = {};
+  for (const [name, versions] of Object.entries(browserProtocols || {})) {
+    fromConfig[name] = Object.fromEntries(Object.keys(versions || {}).map((version) => [version, {}]));
+  }
+  return fromConfig;
+}
+
 export function listBrowserOptions(stateBrowsers = {}, browserProtocols = {}) {
-  return Object.keys(stateBrowsers)
+  const catalog = browserCatalog(stateBrowsers, browserProtocols);
+  return Object.keys(catalog)
     .sort()
     .flatMap((name) =>
-      Object.keys(stateBrowsers[name] || {})
+      Object.keys(catalog[name] || {})
         .sort()
         .map((version) => ({
           value: `${name}_${version}`,

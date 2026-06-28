@@ -19,6 +19,7 @@ let state = {
 
 let ctx = null;
 let eventSource = null;
+let lastBrowserOptionsKey = "";
 
 export function mountCapabilities(root, context) {
   ctx = context;
@@ -30,16 +31,30 @@ export function mountCapabilities(root, context) {
       window.clearTimeout(copyResetTimer);
       copyResetTimer = null;
     }
+    lastBrowserOptionsKey = "";
     ctx = null;
   };
 }
 
 export function updateCapabilities(root, context) {
   ctx = context;
-  renderCapabilities(root);
+  renderCapabilities(root, { background: true });
 }
 
 function bindCapabilities(root) {
+  root.addEventListener(
+    "focusout",
+    (event) => {
+      if (!event.target.closest(".capabilities-setup")) return;
+      window.requestAnimationFrame(() => {
+        if (!capabilitiesFormBusy(root)) {
+          renderCapabilities(root, { background: true });
+        }
+      });
+    },
+    true
+  );
+
   root.addEventListener("change", (event) => {
     if (event.target.id === "capabilities-browser") {
       state.browserValue = event.target.value;
@@ -128,7 +143,62 @@ function selectedBrowser() {
   return options.find((item) => item.value === state.browserValue) || options[0] || null;
 }
 
-function renderCapabilities(root) {
+function browserOptionsKey(options) {
+  return options.map((item) => item.value).join("|");
+}
+
+function capabilitiesFormBusy(root) {
+  const setup = root?.querySelector(".capabilities-setup");
+  const active = document.activeElement;
+  if (!setup || !active || !setup.contains(active)) return false;
+  const tag = active.tagName;
+  return tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA";
+}
+
+function syncBrowserSelect(select, options) {
+  const optionsKey = browserOptionsKey(options);
+  const nextDisabled = !options.length || state.loading;
+
+  if (!options.length) {
+    if (optionsKey !== lastBrowserOptionsKey) {
+      select.innerHTML = `<option value="">No browsers available</option>`;
+      lastBrowserOptionsKey = optionsKey;
+    }
+    if (select.disabled !== nextDisabled) {
+      select.disabled = nextDisabled;
+    }
+    return;
+  }
+
+  if (optionsKey !== lastBrowserOptionsKey) {
+    select.innerHTML = options
+      .map(
+        (item) =>
+          `<option value="${escapeAttr(item.value)}"${item.value === state.browserValue ? " selected" : ""}>${escapeHtml(item.label)}</option>`
+      )
+      .join("");
+    lastBrowserOptionsKey = optionsKey;
+  } else if (select.value !== state.browserValue) {
+    select.value = state.browserValue;
+  }
+
+  if (select.disabled !== nextDisabled) {
+    select.disabled = nextDisabled;
+  }
+}
+
+function setFormControlDisabled(root, id, disabled) {
+  const el = root.querySelector(`#${id}`);
+  if (el && el.disabled !== disabled) {
+    el.disabled = disabled;
+  }
+}
+
+function renderCapabilities(root, { background = false } = {}) {
+  if (background && capabilitiesFormBusy(root)) {
+    return;
+  }
+
   const options = listBrowserOptions(ctx?.stateBrowsers, ctx?.browserProtocols);
   if (!state.browserValue && options[0]) {
     state.browserValue = options[0].value;
@@ -154,30 +224,28 @@ function renderCapabilities(root) {
 
   const select = root.querySelector("#capabilities-browser");
   if (select) {
-    select.innerHTML = options.length
-      ? options
-          .map(
-            (item) =>
-              `<option value="${escapeAttr(item.value)}"${item.value === state.browserValue ? " selected" : ""}>${escapeHtml(item.label)}</option>`
-          )
-          .join("")
-      : `<option value="">No browsers available</option>`;
-    select.disabled = !options.length || state.loading;
+    syncBrowserSelect(select, options);
   }
 
   const code = root.querySelector("#capabilities-code");
   if (code) {
-    code.textContent = snippets[state.lang] || "";
+    const nextCode = snippets[state.lang] || "";
+    if (code.textContent !== nextCode) {
+      code.textContent = nextCode;
+    }
   }
 
   const langs = root.querySelector("#capabilities-langs");
   if (langs) {
-    langs.innerHTML = langKeys
+    const langMarkup = langKeys
       .map(
         (lang) =>
           `<button type="button" class="capabilities-lang${lang === state.lang ? " active" : ""}" data-lang="${escapeAttr(lang)}" data-testid="capabilities-lang-${escapeAttr(lang)}">${escapeHtml(lang)}</button>`
       )
       .join("");
+    if (langs.innerHTML !== langMarkup) {
+      langs.innerHTML = langMarkup;
+    }
   }
 
   const formDisabled = !browser || state.loading;
@@ -187,8 +255,7 @@ function renderCapabilities(root) {
     "capabilities-name",
     "capabilities-token",
   ]) {
-    const el = root.querySelector(`#${id}`);
-    if (el) el.disabled = formDisabled;
+    setFormControlDisabled(root, id, formDisabled);
   }
 
   for (const id of [

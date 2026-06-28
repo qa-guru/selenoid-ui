@@ -276,7 +276,9 @@ function renderAll() {
   renderSessions();
   renderVideos();
   renderSessionDetail();
-  updateCapabilities(els.capabilitiesRoot, capabilitiesContext());
+  if (ui.route.name === "capabilities") {
+    updateCapabilities(els.capabilitiesRoot, capabilitiesContext());
+  }
 }
 
 function renderRoute() {
