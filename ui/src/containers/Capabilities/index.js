@@ -21,6 +21,7 @@ const defaultPlaywrightSelenoidOptions = () => ({
     name: "Session started using curl command...",
     sessionTimeout: "1m",
     enableVNC: "true",
+    enableVideo: "true",
 });
 
 const manualPlaywrightSelenoidOptions = () => ({
@@ -135,7 +136,9 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
             ${version == "" ? "" : "\"browserVersion\": \"" + version + "\","}
             "selenoid:options": {
                 "name": "Session started using curl command...",
-                "sessionTimeout": "1m"
+                "sessionTimeout": "1m",
+                "enableVNC": true,
+                "enableVideo": true
             }
         }
     }
@@ -159,6 +162,9 @@ options.setCapability("selenoid:options", new HashMap<String, Object>() {{
     put("labels", new HashMap<String, Object>() {{
         put("manual", "true");
     }});
+
+    /* How to enable VNC */
+    put("enableVNC", true);
 
     /* How to enable video recording */
     put("enableVideo", true);
@@ -186,6 +192,9 @@ caps := selenium.Capabilities{
                 "labels": map[string]interface{}{
                         "manual": "true",
                 },
+
+                /* How to enable VNC */
+                "enableVNC": true,
 
                 /* How to enable video recording */
                 "enableVideo": true,
@@ -217,6 +226,9 @@ options.AddAdditionalOption("selenoid:options", new Dictionary<string, object> {
         ["manual"] = "true"
     },
 
+    /* How to enable VNC */
+    ["enableVNC"] = true,
+
     /* How to enable video recording */
     ["enableVideo"] = true
 });
@@ -228,7 +240,8 @@ capabilities = {
     "browserName": "${browser != "UNKNOWN" ? browser : "chrome"}",
     "browserVersion": "${version}",
     "selenoid:options": {
-        "enableVideo": False
+        "enableVNC": True,
+        "enableVideo": True
     }
 }
 
@@ -246,19 +259,31 @@ var options = {
         browserName: '${browser != "UNKNOWN" ? browser : "chrome"}',
         browserVersion: '${version}',
         'selenoid:options': {
-            enableVideo: false 
+            enableVNC: true,
+            enableVideo: true
         }      
     } 
 };
 var client = webdriverio.remote(options);
 `,
         PHP: `$web_driver = RemoteWebDriver::create("${origin}/wd/hub",
-array("browserName"=>"${browser != "UNKNOWN" ? browser : "chrome"}", "browserVersion"=>"${version}")
+array(
+    "browserName"=>"${browser != "UNKNOWN" ? browser : "chrome"}",
+    "browserVersion"=>"${version}",
+    "selenoid:options"=>array(
+        "enableVNC"=>true,
+        "enableVideo"=>true
+    )
+)
 );
 `,
         ruby: `caps = Selenium::WebDriver::Remote::Capabilities.new
 browserName: '${browser != "UNKNOWN" ? browser : "chrome"}',
 caps["browserVersion"] = "${version}"
+caps["selenoid:options"] = {
+  'enableVNC' => 'true',
+  'enableVideo' => 'true'
+}
 
 driver = Selenium::WebDriver.for(:remote,
   :url => "${origin}/wd/hub",
@@ -286,9 +311,7 @@ const playwrightCode = (browser, version) => {
     const jsSelenoidOptions = JSON.stringify(selenoidOptions, null, 2);
     const pySelenoidOptions = JSON.stringify(selenoidOptions, null, 4);
     return {
-        curl: `curl --websocket "${base}\\
-?${query}"
-`,
+        curl: `curl --websocket "${base}?${query}"`,
         java: `Playwright playwright = Playwright.create();
 Map<String, String> selenoidOptions = ${javaSelenoidOptionsBlock(selenoidOptions)};
 String wsEndpoint = "${base}" + "?${query}";
@@ -485,12 +508,14 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
                         browserName: `${name}`,
                         version: `${version}`,
                         enableVNC: true,
+                        enableVideo: true,
                         labels: { manual: "true" },
                         sessionTimeout: "60m",
                         name: "Manual session",
                     };
                     let selenoidOptions = {
                         enableVNC: true,
+                        enableVideo: true,
                         sessionTimeout: "60m",
                         labels: { manual: "true" },
                     };

@@ -31,7 +31,7 @@ export const StyledCapabilities = styled.div`
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     width: 100%;
     padding: 20px 5% 40px;
@@ -109,19 +109,32 @@ export const StyledCapabilities = styled.div`
     flex: 1 1 auto;
     min-width: 420px;
     max-width: 720px;
-    margin: 0 10px;
+    margin: 0 30px 0 10px;
+    overflow: hidden;
 
-    pre.hljs {
+    pre {
       min-height: 320px;
       margin: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    pre,
+    pre code,
+    pre code.hljs,
+    pre .hljs {
       white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
       overflow-x: hidden;
+      max-width: 100%;
+      box-sizing: border-box;
     }
   }
 
   .lang-selector {
     flex: 0 0 auto;
-    margin-left: 20px;
+    margin-left: auto;
     margin-top: 0;
   }
 
@@ -212,7 +225,7 @@ export const StyledCapabilities = styled.div`
 pre.hljs, code.hljs {
   font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 13px;
-  line-height: 1.2;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: inherit;
