@@ -11,5 +11,3 @@
 |-----------|----------|
 | **`msedge` в UI** | Capabilities snippets используют `msedge` (ключ browsers.json) |
 | **browsers.json lookup** | Приоритет `./browsers.json` для локального dev |
-
-Стек v2.0.8: [cm RELEASE_v2.0.8](https://github.com/qa-guru/cm/blob/main/deploy/RELEASE_v2.0.8.md).

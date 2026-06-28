@@ -81,8 +81,6 @@ go build .
 
 Для полной сборки с UI нужны предварительные `yarn --cwd ui build` и `go generate`.
 
-Production-деплой UI: [qa-guru/cm deploy/README.md](https://github.com/qa-guru/cm/blob/main/deploy/README.md).
-
 ----------------------------------
 ## Оригинальная документация (Aerokube)
 
