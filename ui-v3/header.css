@@ -1,0 +1,218 @@
+.app-header-metrics {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--space-3);
+  margin-left: auto;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.app-header-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 1 180px;
+  min-width: 120px;
+  max-width: 320px;
+}
+
+.app-header-filter[hidden] {
+  display: none;
+}
+
+.app-header-filter input {
+  width: 100%;
+  height: 32px;
+  padding: 0 var(--space-6) 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.app-header-filter input:focus {
+  box-shadow: 0 0 0 2px rgba(65, 149, 211, 0.35);
+}
+
+.app-header-filter-clear {
+  position: absolute;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.app-header-filter-clear:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.header-sep {
+  width: 1px;
+  height: 28px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 52px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.header-metric--status {
+  min-width: 5.5rem;
+}
+
+.header-metric-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.header-metric-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.header-metric-value-compact {
+  display: none;
+}
+
+.header-metric-value--lg {
+  font-size: 1.35rem;
+  font-weight: 300;
+  color: var(--text);
+}
+
+.header-metric--status .header-metric-value {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.header-metric--status[data-state="ok"] .header-metric-value {
+  color: var(--ok);
+}
+
+.header-metric--status[data-state="error"] .header-metric-value {
+  color: var(--error);
+}
+
+.header-metric--status[data-state="stale"] .header-metric-value {
+  color: var(--warn);
+}
+
+.header-metric--status[data-state="unknown"] .header-metric-value {
+  color: var(--muted);
+}
+
+.header-metric--status[data-state="ok"] {
+  box-shadow: inset 0 -3px 0 -1px rgba(87, 255, 118, 0.55);
+}
+
+.header-metric--status[data-state="error"] {
+  box-shadow: inset 0 -3px 0 -1px rgba(255, 87, 87, 0.55);
+}
+
+.header-metric--status[data-state="stale"] {
+  box-shadow: inset 0 -3px 0 -1px rgba(255, 179, 71, 0.55);
+}
+
+@container app-header (max-width: 520px) {
+  .header-content {
+    gap: var(--space-2);
+  }
+
+  .default-logo {
+    max-width: 96px;
+  }
+
+  .app-header-filter {
+    flex: 1 1 64px;
+    min-width: 64px;
+    max-width: 120px;
+  }
+
+  .app-header-metrics {
+    flex: 0 1 auto;
+    gap: var(--space-2);
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-header-metrics::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-metric-label {
+    display: none;
+  }
+
+  .header-metric {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .header-metric--status {
+    min-width: 0;
+  }
+
+  .header-metric--status::before {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-right: var(--space-1);
+  }
+
+  .header-metric--status[data-kind="sse"]::before {
+    content: "SSE";
+  }
+
+  .header-metric--status[data-kind="selenoid"]::before {
+    content: "SEL";
+  }
+
+  .header-metric-value-full {
+    display: none;
+  }
+
+  .header-metric-value-compact {
+    display: inline;
+  }
+
+  .header-sep {
+    height: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header-filter {
+    min-width: 96px;
+    max-width: 200px;
+  }
+}

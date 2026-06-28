@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selenoid UI v3</title>
+    <link rel="stylesheet" href="selenoid.css" />
+    <link rel="stylesheet" href="qa-guru-header.css" />
+    <link rel="stylesheet" href="header.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css"
+    />
+  </head>
+  <body>
+    <header class="header" id="app-header" data-testid="stats-bar"></header>
+
+    <div class="app-shell">
+      <nav class="top-nav" aria-label="Main navigation" data-testid="top-nav">
+        <a class="nav-link" href="#/" data-route="/">STATS</a>
+        <a class="nav-link" href="#/capabilities" data-route="/capabilities">CAPABILITIES</a>
+        <a class="nav-link nav-link-videos" href="#/videos" data-route="/videos" hidden>VIDEOS</a>
+      </nav>
+
+      <main class="main-content" id="main-content" data-testid="main-content">
+        <section class="panel panel-stats" id="panel-stats" hidden>
+          <h2 class="panel-title">Browsers</h2>
+          <div class="browser-grid" id="browser-grid"></div>
+        </section>
+
+        <section class="panel panel-sessions" id="panel-sessions" hidden>
+          <h2 class="panel-title">Sessions</h2>
+          <div class="sessions-grid" id="sessions-grid"></div>
+          <p class="empty-state" id="sessions-empty" hidden>No sessions yet</p>
+        </section>
+
+        <section class="panel panel-capabilities" id="panel-capabilities" hidden>
+          <h2 class="panel-title">Capabilities</h2>
+          <div class="capabilities-body" id="capabilities-root" data-testid="capabilities-root">
+            <div class="capabilities-setup">
+              <div class="capabilities-field">
+                <label class="field-label" for="capabilities-browser">Browser</label>
+                <select id="capabilities-browser" data-testid="capabilities-browser"></select>
+              </div>
+              <div class="capabilities-field">
+                <label class="field-label" for="capabilities-resolution">Resolution</label>
+                <select id="capabilities-resolution" data-testid="capabilities-resolution">
+                  <option value="800x600x24">800×600</option>
+                  <option value="1024x768x24">1024×768</option>
+                  <option value="1280x720x24">1280×720</option>
+                  <option value="1366x768x24">1366×768</option>
+                  <option value="1440x900x24">1440×900</option>
+                  <option value="1920x1080x24" selected>1920×1080</option>
+                </select>
+              </div>
+              <div class="capabilities-field-row">
+                <div class="capabilities-field">
+                  <label class="field-label" for="capabilities-enable-vnc">enableVNC</label>
+                  <div
+                    class="bool-toggle"
+                    id="capabilities-enable-vnc"
+                    data-testid="capabilities-enable-vnc"
+                    data-value="true"
+                    role="group"
+                    aria-label="enableVNC"
+                  >
+                    <button type="button" class="bool-toggle-btn is-active" data-value="true">true</button>
+                    <button type="button" class="bool-toggle-btn" data-value="false">false</button>
+                  </div>
+                </div>
+                <div class="capabilities-field">
+                  <label class="field-label" for="capabilities-enable-video">enableVideo</label>
+                  <div
+                    class="bool-toggle"
+                    id="capabilities-enable-video"
+                    data-testid="capabilities-enable-video"
+                    data-value="true"
+                    role="group"
+                    aria-label="enableVideo"
+                  >
+                    <button type="button" class="bool-toggle-btn is-active" data-value="true">true</button>
+                    <button type="button" class="bool-toggle-btn" data-value="false">false</button>
+                  </div>
+                </div>
+              </div>
+              <div class="capabilities-field-row">
+                <div class="capabilities-field">
+                  <label class="field-label" for="capabilities-enable-har">enableHar</label>
+                  <div
+                    class="bool-toggle"
+                    id="capabilities-enable-har"
+                    data-testid="capabilities-enable-har"
+                    data-value="false"
+                    role="group"
+                    aria-label="enableHar"
+                  >
+                    <button type="button" class="bool-toggle-btn" data-value="true">true</button>
+                    <button type="button" class="bool-toggle-btn is-active" data-value="false">false</button>
+                  </div>
+                </div>
+                <div class="capabilities-field">
+                  <label class="field-label" for="capabilities-headless">headless</label>
+                  <div
+                    class="bool-toggle"
+                    id="capabilities-headless"
+                    data-testid="capabilities-headless"
+                    data-value="false"
+                    role="group"
+                    aria-label="headless"
+                  >
+                    <button type="button" class="bool-toggle-btn" data-value="true">true</button>
+                    <button type="button" class="bool-toggle-btn is-active" data-value="false">false</button>
+                  </div>
+                </div>
+              </div>
+              <div class="capabilities-field">
+                <label class="field-label" for="capabilities-name">name</label>
+                <input
+                  type="text"
+                  id="capabilities-name"
+                  data-testid="capabilities-name"
+                  value="Manual run from ui"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="capabilities-field">
+                <label class="field-label" for="capabilities-token">token</label>
+                <input
+                  type="text"
+                  id="capabilities-token"
+                  data-testid="capabilities-token"
+                  placeholder="Optional"
+                  autocomplete="off"
+                />
+              </div>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="capabilities-create"
+                data-testid="capabilities-create"
+              >
+                Create Session
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="capabilities-more"
+                data-testid="capabilities-more"
+                hidden
+              >
+                More capabilities
+              </button>
+              <textarea
+                id="capabilities-more-json"
+                class="capabilities-more-json"
+                rows="7"
+                spellcheck="false"
+                hidden
+              ></textarea>
+              <p class="capabilities-error" id="capabilities-error" hidden></p>
+            </div>
+            <div class="capabilities-preview">
+            <div class="capabilities-langs" id="capabilities-langs"></div>
+            <div class="capabilities-code-container">
+              <button
+                type="button"
+                class="capabilities-code-copy"
+                id="capabilities-code-copy"
+                aria-label="Copy to clipboard"
+                title="Copy to clipboard"
+                data-testid="capabilities-code-copy"
+              >
+                <svg class="capabilities-code-copy-icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5V6h-1V2.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0-.5.5V11h-1V2.5z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M6 5.5A1.5 1.5 0 0 1 7.5 4h5A1.5 1.5 0 0 1 14 5.5v8a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 6 13.5v-8zM7.5 5a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5h-5z"
+                  />
+                </svg>
+                <svg class="capabilities-code-copy-icon capabilities-code-copy-icon--done" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.008 1.04l-5.7 5.7a.733.733 0 0 1-1.065-.02L3.264 6.284a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.373-5.347z"
+                  />
+                </svg>
+              </button>
+              <pre class="capabilities-code" id="capabilities-code-wrap"><code id="capabilities-code"></code></pre>
+            </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-videos" id="panel-videos" hidden>
+          <h2 class="panel-title">Videos</h2>
+          <ul class="video-list" id="video-list"></ul>
+          <p class="empty-state" id="videos-empty" hidden>No videos recorded</p>
+        </section>
+
+        <section class="panel panel-session" id="panel-session" hidden>
+          <div class="session-header">
+            <a class="back-link" href="#/">← Back to sessions</a>
+            <h2 class="panel-title" id="session-title">Session</h2>
+          </div>
+          <dl class="session-details" id="session-details"></dl>
+          <div class="session-interactive" id="session-interactive" hidden>
+            <div class="session-viewer" id="session-viewer" data-testid="session-viewer"></div>
+            <div class="session-log-panel" id="session-log-panel" data-testid="session-log-panel">
+              <h3 class="session-log-title">Logs</h3>
+              <div class="session-log" id="session-log"></div>
+            </div>
+          </div>
+          <p class="panel-note" id="session-no-vnc" hidden>VNC disabled for this session.</p>
+        </section>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      <span id="version-label">—</span>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <span id="last-update-label">Waiting for data…</span>
+    </footer>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
