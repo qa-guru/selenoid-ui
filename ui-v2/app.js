@@ -180,6 +180,10 @@ function parseRoute() {
   return { name: "home" };
 }
 
+function isUiStatusPayload(payload) {
+  return Boolean(payload && typeof payload === "object" && payload.state);
+}
+
 function applyPayload(payload) {
   if (!payload || typeof payload !== "object") return;
 
@@ -202,6 +206,11 @@ async function loadStatus() {
     const response = await fetch("/status", { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = await response.json();
+    // Prod nginx may expose raw hub /status (no .state wrapper) for monitoring;
+    // ignore it so fallback poll does not overwrite SSE/UI-shaped data.
+    if (!isUiStatusPayload(payload)) {
+      return;
+    }
     applyPayload(payload);
     renderAll();
   } catch (err) {
