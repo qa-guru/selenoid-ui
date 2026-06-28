@@ -17,6 +17,11 @@
 
 .header .header-right {
   flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.app-header-filter:not([hidden]) ~ .header-right {
+  margin-left: 0;
 }
 
 .app-header-filter {
@@ -218,8 +223,8 @@
 
   .header .header-right {
     position: static;
-    width: 0;
-    height: 0;
+    width: auto;
+    height: auto;
     margin: 0;
     padding: 0;
     overflow: visible;
