@@ -84,21 +84,25 @@ func selenoidState() State {
 }
 
 func TestToUI(t *testing.T) {
-	statusURI, _ := url.Parse("http://localhost")
-	ui := toUI(selenoidState(), statusURI, "version", nil)
-	data, err := json.MarshalIndent(ui, "", " ")
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, data, Is{Not{nil}})
-	AssertThat(t, ui.Browsers["firefox"], Is{1})
-	AssertThat(t, ui.Browsers["chrome"], Is{1})
-	AssertThat(t, ui.Browsers["opera"], Is{0})
+	t.Run("To UI", func(t *testing.T) {
+		statusURI, _ := url.Parse("http://localhost")
+		ui := toUI(selenoidState(), statusURI, "version", nil)
+		data, err := json.MarshalIndent(ui, "", " ")
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, data, Is{Not{nil}})
+		AssertThat(t, ui.Browsers["firefox"], Is{1})
+		AssertThat(t, ui.Browsers["chrome"], Is{1})
+		AssertThat(t, ui.Browsers["opera"], Is{0})
+	})
 }
 
 func TestStatus(t *testing.T) {
-	srv := httptest.NewServer(mockStatusApi())
-	statusURI, _ := url.Parse(srv.URL)
-	webdriverURI := statusURI // Any value will work for this test
-	data, err := Status(context.Background(), webdriverURI, statusURI, "version", nil)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, data, Not{nil})
+	t.Run("Status", func(t *testing.T) {
+		srv := httptest.NewServer(mockStatusApi())
+		statusURI, _ := url.Parse(srv.URL)
+		webdriverURI := statusURI // Any value will work for this test
+		data, err := Status(context.Background(), webdriverURI, statusURI, "version", nil)
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, data, Not{nil})
+	})
 }
