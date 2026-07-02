@@ -13,16 +13,16 @@
     />
   </head>
   <body>
-    <header class="header" id="app-header" data-testid="stats-bar"></header>
+    <header class="header" id="app-header"></header>
 
     <div class="app-shell">
-      <nav class="top-nav" aria-label="Main navigation" data-testid="top-nav">
+      <nav class="top-nav" aria-label="Main navigation">
         <a class="nav-link" href="#/" data-route="/">STATS</a>
         <a class="nav-link" href="#/capabilities" data-route="/capabilities">CAPABILITIES</a>
         <a class="nav-link nav-link-videos" href="#/videos" data-route="/videos" hidden>VIDEOS</a>
       </nav>
 
-      <main class="main-content" id="main-content" data-testid="main-content">
+      <main class="main-content" id="main-content">
         <section class="panel panel-stats" id="panel-stats" hidden>
           <h2 class="panel-title">Browsers</h2>
           <div class="browser-grid" id="browser-grid"></div>
@@ -36,15 +36,15 @@
 
         <section class="panel panel-capabilities" id="panel-capabilities" hidden>
           <h2 class="panel-title">Capabilities</h2>
-          <div class="capabilities-body" id="capabilities-root" data-testid="capabilities-root">
+          <div class="capabilities-body" id="capabilities-root">
             <div class="capabilities-setup">
               <div class="capabilities-field">
                 <label class="field-label" for="capabilities-browser">Browser</label>
-                <select id="capabilities-browser" data-testid="capabilities-browser"></select>
+                <select id="capabilities-browser"></select>
               </div>
               <div class="capabilities-field">
                 <label class="field-label" for="capabilities-resolution">Resolution</label>
-                <select id="capabilities-resolution" data-testid="capabilities-resolution">
+                <select id="capabilities-resolution">
                   <option value="800x600x24">800×600</option>
                   <option value="1024x768x24">1024×768</option>
                   <option value="1280x720x24">1280×720</option>
@@ -59,7 +59,7 @@
                   <div
                     class="bool-toggle"
                     id="capabilities-enable-vnc"
-                    data-testid="capabilities-enable-vnc"
+
                     data-value="true"
                     role="group"
                     aria-label="enableVNC"
@@ -73,7 +73,7 @@
                   <div
                     class="bool-toggle"
                     id="capabilities-enable-video"
-                    data-testid="capabilities-enable-video"
+
                     data-value="true"
                     role="group"
                     aria-label="enableVideo"
@@ -89,7 +89,7 @@
                   <div
                     class="bool-toggle"
                     id="capabilities-enable-har"
-                    data-testid="capabilities-enable-har"
+
                     data-value="false"
                     role="group"
                     aria-label="enableHar"
@@ -103,7 +103,7 @@
                   <div
                     class="bool-toggle"
                     id="capabilities-headless"
-                    data-testid="capabilities-headless"
+
                     data-value="false"
                     role="group"
                     aria-label="headless"
@@ -118,7 +118,7 @@
                 <input
                   type="text"
                   id="capabilities-name"
-                  data-testid="capabilities-name"
+
                   value="Manual run from ui"
                   autocomplete="off"
                 />
@@ -128,7 +128,7 @@
                 <input
                   type="text"
                   id="capabilities-token"
-                  data-testid="capabilities-token"
+
                   placeholder="Optional"
                   autocomplete="off"
                 />
@@ -137,7 +137,7 @@
                 type="button"
                 class="btn btn-primary"
                 id="capabilities-create"
-                data-testid="capabilities-create"
+
               >
                 Create Session
               </button>
@@ -145,7 +145,7 @@
                 type="button"
                 class="btn btn-secondary"
                 id="capabilities-more"
-                data-testid="capabilities-more"
+
                 hidden
               >
                 More capabilities
@@ -168,7 +168,7 @@
                 id="capabilities-code-copy"
                 aria-label="Copy to clipboard"
                 title="Copy to clipboard"
-                data-testid="capabilities-code-copy"
+
               >
                 <svg class="capabilities-code-copy-icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
                   <path
@@ -206,8 +206,8 @@
           </div>
           <dl class="session-details" id="session-details"></dl>
           <div class="session-interactive" id="session-interactive" hidden>
-            <div class="session-viewer" id="session-viewer" data-testid="session-viewer"></div>
-            <div class="session-log-panel" id="session-log-panel" data-testid="session-log-panel">
+            <div class="session-viewer" id="session-viewer"></div>
+            <div class="session-log-panel" id="session-log-panel">
               <h3 class="session-log-title">Logs</h3>
               <div class="session-log" id="session-log"></div>
             </div>

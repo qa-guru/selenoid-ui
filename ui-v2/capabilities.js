@@ -240,7 +240,7 @@ function renderCapabilities(root, { background = false } = {}) {
     const langMarkup = langKeys
       .map(
         (lang) =>
-          `<button type="button" class="capabilities-lang${lang === state.lang ? " active" : ""}" data-lang="${escapeAttr(lang)}" data-testid="capabilities-lang-${escapeAttr(lang)}">${escapeHtml(lang)}</button>`
+          `<button type="button" class="capabilities-lang${lang === state.lang ? " active" : ""}" data-lang="${escapeAttr(lang)}">${escapeHtml(lang)}</button>`
       )
       .join("");
     if (langs.innerHTML !== langMarkup) {

@@ -364,7 +364,7 @@
   outline-offset: 2px;
 }
 
-.header a[data-testid="github-io-link"] svg g path:first-child {
+.header a.nav-icon[aria-label="Selenoid docs"] svg g path:first-child {
   fill: var(--header-bg);
 }
 

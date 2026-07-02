@@ -23,13 +23,13 @@ export async function mountVnc(container, { sessionId, viewOnly = true, onStateC
   if (!container || !sessionId) return () => {};
 
   container.innerHTML = `
-    <div class="vnc-shell" data-testid="vnc-shell">
+    <div class="vnc-shell">
       <div class="vnc-toolbar">
-        <span class="vnc-status" id="vnc-status" data-testid="vnc-status">connecting</span>
-        <button type="button" class="vnc-btn" id="vnc-lock" data-testid="vnc-lock" hidden>Unlock</button>
-        <button type="button" class="vnc-btn" id="vnc-fullscreen" data-testid="vnc-fullscreen" hidden>Fullscreen</button>
+        <span class="vnc-status" id="vnc-status">connecting</span>
+        <button type="button" class="vnc-btn" id="vnc-lock" hidden>Unlock</button>
+        <button type="button" class="vnc-btn" id="vnc-fullscreen" hidden>Fullscreen</button>
       </div>
-      <div class="vnc-screen" id="vnc-screen" data-testid="vnc-screen"></div>
+      <div class="vnc-screen" id="vnc-screen"></div>
     </div>
   `;
 

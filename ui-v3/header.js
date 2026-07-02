@@ -27,19 +27,19 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
   root.innerHTML = `
     <div class="header-content">
       <div class="header-left">
-        <div class="brand" data-testid="brand">
-          <a href="https://qa.guru" class="logo" data-testid="logo-link" aria-label="QA.GURU" target="_blank" rel="noopener noreferrer">
+        <div class="brand">
+          <a href="https://qa.guru" class="logo" aria-label="QA.GURU" target="_blank" rel="noopener noreferrer">
             ${QA_GURU_LOGO_SVG}
           </a>
         </div>
         <nav class="form-nav" aria-label="Selenoid">
           <span class="brand-separator" aria-hidden="true">|</span>
-          <a href="#/" class="nav-link selenoid-brand-link" data-testid="selenoid-brand">Selenoid 2.0</a>
+          <a href="#/" class="nav-link selenoid-brand-link">Selenoid 2.0</a>
         </nav>
       </div>
 
-      <div class="app-header-metrics" data-testid="stats-metrics">
-        <div class="header-metric header-metric--status" data-testid="sse-status" data-kind="sse">
+      <div class="app-header-metrics">
+        <div class="header-metric header-metric--status" data-kind="sse">
           <span class="header-metric-label">sse</span>
           <span class="header-metric-value">
             <span class="header-metric-value-full" id="sse-status">UNKNOWN</span>
@@ -47,7 +47,7 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
           </span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric header-metric--status" data-testid="selenoid-status" data-kind="selenoid">
+        <div class="header-metric header-metric--status" data-kind="selenoid">
           <span class="header-metric-label">selenoid</span>
           <span class="header-metric-value">
             <span class="header-metric-value-full" id="selenoid-status">UNKNOWN</span>
@@ -55,30 +55,30 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
           </span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric" data-testid="used-metric">
+        <div class="header-metric">
           <span class="header-metric-label">used</span>
           <span class="header-metric-value header-metric-value--lg" id="used-value">—</span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric" data-testid="queue-metric">
+        <div class="header-metric">
           <span class="header-metric-label">queue</span>
           <span class="header-metric-value header-metric-value--lg" id="queue-value">—</span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric" data-testid="quota-metric">
+        <div class="header-metric">
           <span class="header-metric-label">quota</span>
           <span class="header-metric-value header-metric-value--lg" id="quota-value">—</span>
         </div>
       </div>
 
-      <label class="app-header-filter" data-testid="filter-field">
+      <label class="app-header-filter">
         <span class="visually-hidden">Filter sessions</span>
         <input
           id="session-filter"
           type="search"
           placeholder="Filter..."
           autocomplete="off"
-          data-testid="session-filter"
+
         />
         <button
           type="button"

@@ -9,13 +9,13 @@ const QA_GURU_LOGO_SVG = `<svg class="default-logo" width="140" height="26" view
 
 /* Same nav-tools block as one-page-form/partials/demo-header.html */
 const HEADER_NAV_ACTIONS = `
-          <div class="nav-actions" data-testid="nav-tools">
+          <div class="nav-actions">
             <div class="nav-tool-dropdown">
               <button
                 type="button"
                 class="nav-tool-btn nav-tool-btn--lang"
                 id="lang-toggle"
-                data-testid="lang-toggle"
+
                 aria-haspopup="menu"
                 aria-expanded="false"
                 aria-controls="lang-menu"
@@ -26,21 +26,21 @@ const HEADER_NAV_ACTIONS = `
                 </svg>
               </button>
               <ul class="nav-tool-menu" id="lang-menu" role="menu" aria-hidden="true">
-                <li role="none"><a href="#" role="menuitem" data-lang="en" data-testid="lang-en">Eng</a></li>
-                <li role="none"><a href="#" role="menuitem" data-lang="ru" data-testid="lang-ru">Рус</a></li>
+                <li role="none"><a href="#" role="menuitem" data-lang="en">Eng</a></li>
+                <li role="none"><a href="#" role="menuitem" data-lang="ru">Рус</a></li>
               </ul>
             </div>
-            <button type="button" class="nav-tool-btn nav-tool-icon" id="theme-toggle" data-testid="theme-toggle" aria-label="Toggle theme">
+            <button type="button" class="nav-tool-btn nav-tool-icon" id="theme-toggle" aria-label="Toggle theme">
               <svg class="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path id="theme-icon-path" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
               </svg>
             </button>
-            <a href="https://github.com/aerokube/selenoid-ui" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="GitHub проекта" data-testid="github-link">
+            <a href="https://github.com/aerokube/selenoid-ui" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="GitHub проекта">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
               </svg>
             </a>
-            <a href="https://aerokube.com/selenoid/" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Selenoid docs" data-testid="github-io-link">
+            <a href="https://aerokube.com/selenoid/" target="_blank" rel="noopener noreferrer" class="nav-icon" aria-label="Selenoid docs">
               <svg width="20" height="20" viewBox="0 0 514 495" fill="currentColor" aria-hidden="true">
                 <g clip-path="url(#gh-io-clip)">
                   <path d="M487.2 270.5C487.2 394.488 408.7 495 251.7 495C116.893 495 25.2002 394.488 25.2002 270.5C25.2002 146.512 128.622 46 256.2 46C383.778 46 487.2 146.512 487.2 270.5Z" fill="var(--color-surface)"></path>
@@ -54,9 +54,9 @@ const HEADER_NAV_ACTIONS = `
           </div>`;
 
 const HEADER_NAV_DRAWER = `
-        <nav class="nav" data-testid="main-nav" aria-label="Navigation">
-          <div class="nav-drawer-links" data-testid="nav-drawer-links">
-            <a href="#/" class="nav-link form-nav-home active" data-testid="drawer-selenoid-link" aria-current="page">Selenoid 2.0</a>
+        <nav class="nav" aria-label="Navigation">
+          <div class="nav-drawer-links">
+            <a href="#/" class="nav-link form-nav-home active" aria-current="page">Selenoid 2.0</a>
           </div>
         </nav>`;
 
@@ -82,19 +82,19 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
   root.innerHTML = `
     <div class="header-content">
       <div class="header-left">
-        <div class="brand" data-testid="brand">
-          <a href="https://qa.guru" class="logo" data-testid="logo-link" aria-label="QA.GURU" target="_blank" rel="noopener noreferrer">
+        <div class="brand">
+          <a href="https://qa.guru" class="logo" aria-label="QA.GURU" target="_blank" rel="noopener noreferrer">
             ${QA_GURU_LOGO_SVG}
           </a>
         </div>
         <nav class="form-nav" aria-label="Selenoid">
           <span class="brand-separator" aria-hidden="true">|</span>
-          <a href="#/" class="nav-link form-nav-home active" data-testid="selenoid-brand" aria-current="page">Selenoid 2.0</a>
+          <a href="#/" class="nav-link form-nav-home active" aria-current="page">Selenoid 2.0</a>
         </nav>
       </div>
 
-      <div class="app-header-metrics" data-testid="stats-metrics">
-        <div class="header-metric header-metric--status" data-testid="sse-status" data-kind="sse">
+      <div class="app-header-metrics">
+        <div class="header-metric header-metric--status" data-kind="sse">
           <span class="header-metric-label">sse</span>
           <span class="header-metric-value">
             <span class="header-metric-value-full" id="sse-status">UNKNOWN</span>
@@ -102,7 +102,7 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
           </span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric header-metric--status" data-testid="selenoid-status" data-kind="selenoid">
+        <div class="header-metric header-metric--status" data-kind="selenoid">
           <span class="header-metric-label">selenoid</span>
           <span class="header-metric-value">
             <span class="header-metric-value-full" id="selenoid-status">UNKNOWN</span>
@@ -110,25 +110,25 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
           </span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric" data-testid="used-metric">
+        <div class="header-metric">
           <span class="header-metric-label">used</span>
           <span class="header-metric-value header-metric-value--lg" id="used-value">—</span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric" data-testid="queue-metric">
+        <div class="header-metric">
           <span class="header-metric-label">queue</span>
           <span class="header-metric-value header-metric-value--lg" id="queue-value">—</span>
         </div>
         <span class="header-sep" aria-hidden="true"></span>
-        <div class="header-metric" data-testid="quota-metric">
+        <div class="header-metric">
           <span class="header-metric-label">quota</span>
           <span class="header-metric-value header-metric-value--lg" id="quota-value">—</span>
         </div>
       </div>
 
-      <label class="app-header-filter" data-testid="filter-field">
+      <label class="app-header-filter">
         <span class="visually-hidden">Filter sessions</span>
-        <input id="session-filter" type="search" placeholder="Filter..." autocomplete="off" data-testid="session-filter" />
+        <input id="session-filter" type="search" placeholder="Filter..." autocomplete="off" />
         <button type="button" class="app-header-filter-clear" id="filter-clear" aria-label="Clear filter" hidden>×</button>
       </label>
 
@@ -138,13 +138,13 @@ export function mountHeader(root, { onFilterChange, onFilterClear } = {}) {
 
       ${HEADER_NAV_DRAWER}
 
-      <button class="burger-menu" type="button" aria-label="Menu" aria-expanded="false" data-testid="burger-menu">
-        <div class="burger-line burger-line-1" data-testid="burger-line-1"></div>
-        <div class="burger-line burger-line-2" data-testid="burger-line-2"></div>
-        <div class="burger-line burger-line-3" data-testid="burger-line-3"></div>
+      <button class="burger-menu" type="button" aria-label="Menu" aria-expanded="false">
+        <div class="burger-line burger-line-1"></div>
+        <div class="burger-line burger-line-2"></div>
+        <div class="burger-line burger-line-3"></div>
       </button>
 
-      <div class="nav-overlay" data-testid="nav-overlay"></div>
+      <div class="nav-overlay"></div>
     </div>
   `;
 

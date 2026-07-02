@@ -29,7 +29,7 @@ function wsUrl(sessionId) {
 export async function mountTerminal(container, { sessionId }) {
   if (!container || !sessionId) return () => {};
 
-  container.innerHTML = `<div class="term-host" id="term-host" data-testid="session-log"></div>`;
+  container.innerHTML = `<div class="term-host" id="term-host"></div>`;
 
   const host = container.querySelector("#term-host");
   let terminal = null;
