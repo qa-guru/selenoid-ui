@@ -67,74 +67,88 @@ func withUrl(path string) string {
 }
 
 func TestRootLoads(t *testing.T) {
-	resp, err := http.Get(withUrl("/"))
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, resp, Code{200})
+	t.Run("Root loads", func(t *testing.T) {
+		resp, err := http.Get(withUrl("/"))
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, resp, Code{200})
+	})
 }
 
 func TestPing(t *testing.T) {
-	rsp, err := http.Get(withUrl("/ping"))
+	t.Run("Ping", func(t *testing.T) {
+		rsp, err := http.Get(withUrl("/ping"))
 
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-	AssertThat(t, rsp.Body, Is{Not{nil}})
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, rsp, Code{http.StatusOK})
+		AssertThat(t, rsp.Body, Is{Not{nil}})
 
-	var data map[string]interface{}
-	bt, readErr := io.ReadAll(rsp.Body)
-	AssertThat(t, readErr, Is{nil})
-	jsonErr := json.Unmarshal(bt, &data)
-	AssertThat(t, jsonErr, Is{nil})
-	_, hasUptime := data["uptime"]
-	AssertThat(t, hasUptime, Is{true})
-	version, hasVersion := data["version"]
-	AssertThat(t, hasVersion, Is{true})
-	AssertThat(t, version, EqualTo{"test-revision"})
+		var data map[string]interface{}
+		bt, readErr := io.ReadAll(rsp.Body)
+		AssertThat(t, readErr, Is{nil})
+		jsonErr := json.Unmarshal(bt, &data)
+		AssertThat(t, jsonErr, Is{nil})
+		_, hasUptime := data["uptime"]
+		AssertThat(t, hasUptime, Is{true})
+		version, hasVersion := data["version"]
+		AssertThat(t, hasVersion, Is{true})
+		AssertThat(t, version, EqualTo{"test-revision"})
+	})
 }
 
 func TestStatus(t *testing.T) {
-	selenoid := httptest.NewServer(selenoidApi())
-	statusURI, _ = url.Parse(selenoid.URL)
-	rsp, err := http.Get(withUrl("/status"))
+	t.Run("Status", func(t *testing.T) {
+		selenoid := httptest.NewServer(selenoidApi())
+		statusURI, _ = url.Parse(selenoid.URL)
+		rsp, err := http.Get(withUrl("/status"))
 
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-	AssertThat(t, rsp.Body, Is{Not{nil}})
-	AssertThat(t, rsp.Header.Get("Content-Type"), Is{"application/json"})
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, rsp, Code{http.StatusOK})
+		AssertThat(t, rsp.Body, Is{Not{nil}})
+		AssertThat(t, rsp.Header.Get("Content-Type"), Is{"application/json"})
+	})
 }
 
 func TestVideo(t *testing.T) {
-	video := httptest.NewServer(videoApi())
-	statusURI, _ = url.Parse(video.URL)
-	rsp, err := http.Get(withUrl("/video/test_chrome.mp4"))
+	t.Run("Video", func(t *testing.T) {
+		video := httptest.NewServer(videoApi())
+		statusURI, _ = url.Parse(video.URL)
+		rsp, err := http.Get(withUrl("/video/test_chrome.mp4"))
 
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-	AssertThat(t, rsp.Body, Is{Not{nil}})
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, rsp, Code{http.StatusOK})
+		AssertThat(t, rsp.Body, Is{Not{nil}})
+	})
 }
 
 func TestVideoFail(t *testing.T) {
-	statusURI, _ = url.Parse("http://localhost:1")
-	rsp, err := http.Get(withUrl("/video/test_chrome1.mp4"))
+	t.Run("Video fail", func(t *testing.T) {
+		statusURI, _ = url.Parse("http://localhost:1")
+		rsp, err := http.Get(withUrl("/video/test_chrome1.mp4"))
 
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusBadGateway})
-	AssertThat(t, rsp.Body, Not{Is{nil}})
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, rsp, Code{http.StatusBadGateway})
+		AssertThat(t, rsp.Body, Not{Is{nil}})
+	})
 }
 
 func TestStatusError(t *testing.T) {
-	statusURI, _ = url.Parse("http://localhost:1")
-	rsp, err := http.Get(withUrl("/status"))
+	t.Run("Status error", func(t *testing.T) {
+		statusURI, _ = url.Parse("http://localhost:1")
+		rsp, err := http.Get(withUrl("/status"))
 
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusInternalServerError})
-	AssertThat(t, rsp.Body, Is{Not{nil}})
-	AssertThat(t, rsp.Header.Get("Content-Type"), Is{"application/json"})
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, rsp, Code{http.StatusInternalServerError})
+		AssertThat(t, rsp.Body, Is{Not{nil}})
+		AssertThat(t, rsp.Header.Get("Content-Type"), Is{"application/json"})
+	})
 }
 
 func TestCheckOrigin(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "http://localhost", nil)
-	r.Header.Add("Origin", "some-host.example.com")
-	AssertThat(t, checkOrigin("*")(r), Is{true})
-	AssertThat(t, checkOrigin("some-host.example.com,another-host.example.com")(r), Is{true})
-	AssertThat(t, checkOrigin("missing-host.example.com,another-host.example.com")(r), Is{false})
+	t.Run("Check origin", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "http://localhost", nil)
+		r.Header.Add("Origin", "some-host.example.com")
+		AssertThat(t, checkOrigin("*")(r), Is{true})
+		AssertThat(t, checkOrigin("some-host.example.com,another-host.example.com")(r), Is{true})
+		AssertThat(t, checkOrigin("missing-host.example.com,another-host.example.com")(r), Is{false})
+	})
 }
