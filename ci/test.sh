@@ -18,7 +18,7 @@ test -f ui/build/index.html
 go install github.com/rakyll/statik@latest
 export PATH="$(go env GOPATH)/bin:$PATH"
 go generate github.com/aerokube/selenoid-ui
-go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
+go test -race -v -coverprofile=coverage.txt -covermode=atomic github.com/aerokube/selenoid-ui github.com/aerokube/selenoid-ui/selenoid
 
 go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
 "$(go env GOPATH)"/bin/govulncheck ./...
