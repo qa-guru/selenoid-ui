@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+export GOTOOLCHAIN=go1.26.4+auto
 export GO111MODULE="on"
 
 if [ "$(node -p "parseInt(process.version.slice(1))")" -ge 17 ]; then
@@ -11,14 +12,12 @@ fi
 test -f ui/package.json
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
 yarn --cwd ui test --watchAll=false --testPathPattern='uiFeed|Capabilities|App'
-yarn --cwd ui build
+CI=false yarn --cwd ui build
 test -f ui/build/index.html
 
 go install github.com/rakyll/statik@latest
+export PATH="$(go env GOPATH)/bin:$PATH"
 go generate github.com/aerokube/selenoid-ui
-go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
+go test -race -v -coverprofile=coverage.txt -covermode=atomic github.com/aerokube/selenoid-ui github.com/aerokube/selenoid-ui/selenoid
 
-go install golang.org/x/vuln/cmd/govulncheck@latest
-if ! "$(go env GOPATH)"/bin/govulncheck ./...; then
-	echo "::warning::govulncheck reported vulnerabilities (non-blocking for release)"
-fi
+GOTOOLCHAIN=go1.26.4 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...
