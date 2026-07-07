@@ -20,5 +20,4 @@ export PATH="$(go env GOPATH)/bin:$PATH"
 go generate github.com/aerokube/selenoid-ui
 go test -race -v -coverprofile=coverage.txt -covermode=atomic github.com/aerokube/selenoid-ui github.com/aerokube/selenoid-ui/selenoid
 
-go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
-"$(go env GOPATH)/bin/govulncheck" ./...
+GOTOOLCHAIN=go1.26.4 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...
