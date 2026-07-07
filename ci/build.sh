@@ -4,7 +4,10 @@ set -euo pipefail
 set -x
 
 export GO111MODULE="on"
-export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
+
+if [ "$(node -p "parseInt(process.version.slice(1))")" -ge 17 ]; then
+  export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
+fi
 
 test -f ui/package.json
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
