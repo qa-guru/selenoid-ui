@@ -2,7 +2,7 @@ module github.com/aerokube/selenoid-ui
 
 go 1.26
 
-toolchain go1.26.0
+toolchain go1.26.4
 
 require (
 	github.com/aandryashin/matchers v0.0.0-20161126170413-435295ea180e
