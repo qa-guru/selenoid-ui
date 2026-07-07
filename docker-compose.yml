@@ -1,20 +1,24 @@
 version: '3'
 services:
   selenoid:
-    image: "aerokube/selenoid"
+    image: "qaguru/selenoid:latest-release"
     network_mode: bridge
     environment:
       DOCKER_API_VERSION: "1.45"
     ports:
       - "4444:4444"
     volumes:
-      - "$PWD:/etc/selenoid/" # assumed current dir contains browsers.json
+      - "$PWD:/etc/selenoid/"
       - "/var/run/docker.sock:/var/run/docker.sock"
   selenoid-ui:
-    image: "aerokube/selenoid-ui"
+    image: "qaguru/selenoid-ui:latest-release"
     network_mode: bridge
     links:
       - selenoid
     ports:
       - "8080:8080"
-    command: ["--selenoid-uri", "http://selenoid:4444"]
+    command:
+      - "--selenoid-uri"
+      - "http://selenoid:4444"
+      - "--browsers-conf"
+      - "/etc/selenoid/browsers.json"

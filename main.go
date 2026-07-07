@@ -23,7 +23,7 @@ import (
 	_ "github.com/aerokube/selenoid-ui/statik"
 )
 
-//go:generate statik -src=./ui-v2
+//go:generate statik -src=./ui/build
 
 var (
 	listen             string
@@ -69,16 +69,21 @@ func mux(sse *sse.SseBroker) http.Handler {
 	return mux
 }
 
+func configureWsProxy(wsProxy *websocketproxy.WebsocketProxy) {
+	if allowedOrigin == "" {
+		return
+	}
+	upgrader := *websocketproxy.DefaultUpgrader
+	upgrader.CheckOrigin = checkOrigin(allowedOrigin)
+	wsProxy.Upgrader = &upgrader
+}
+
 func ws(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/ws")
 	ws := &url.URL{Scheme: "ws", Host: statusURI.Host, Path: r.URL.Path}
 	log.Printf("[WS_PROXY] [/ws%s] [%s]", r.URL.Path, ws)
 	wsProxy := websocketproxy.NewProxy(ws)
-
-	if allowedOrigin != "" {
-		upgrader := websocketproxy.DefaultUpgrader
-		upgrader.CheckOrigin = checkOrigin(allowedOrigin)
-	}
+	configureWsProxy(wsProxy)
 	wsProxy.ServeHTTP(w, r)
 	log.Printf("[WS_PROXY] [%s] [CLOSED]", r.URL.Path)
 }
@@ -96,11 +101,7 @@ func playwright(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("[PLAYWRIGHT_PROXY] [%s] [%s]", r.URL.RequestURI(), target)
 	wsProxy := websocketproxy.NewProxy(target)
-
-	if allowedOrigin != "" {
-		upgrader := websocketproxy.DefaultUpgrader
-		upgrader.CheckOrigin = checkOrigin(allowedOrigin)
-	}
+	configureWsProxy(wsProxy)
 	wsProxy.ServeHTTP(w, r)
 	log.Printf("[PLAYWRIGHT_PROXY] [%s] [CLOSED]", r.URL.Path)
 }

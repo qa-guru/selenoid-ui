@@ -13,7 +13,6 @@
 | Изменение | Описание |
 |-----------|----------|
 | **Стек v2.1.5** | Общий semver с `qaguru/selenoid` и `qaguru/cm` |
-| **Vanilla UI** | ui-v2/ui-v3: убраны лишние `data-testid` из production-разметки |
 | **Тесты** | Go unit: readable display names через `t.Run` для Allure/TestOps |
 
 ---

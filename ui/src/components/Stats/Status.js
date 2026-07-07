@@ -3,6 +3,7 @@ import styled from "styled-components/macro";
 import { StatsElement } from "./StatsElement";
 
 const brightGreen = "#57ff76";
+const brightAmber = "#ffb347";
 const brightRed = "#FF5757";
 
 const StyledStatus = styled(StatsElement)`
@@ -24,6 +25,14 @@ const StyledStatus = styled(StatsElement)`
             box-shadow: inset 0px -9px 5px -10px ${brightGreen};
         }
 
+        &_stale {
+            .status {
+                color: ${brightAmber};
+            }
+
+            box-shadow: inset 0px -9px 5px -10px ${brightAmber};
+        }
+
         &_error {
             .status {
                 color: ${brightRed};
@@ -43,6 +52,8 @@ const state = status => {
     switch (status) {
         case "ok":
             return "CONNECTED";
+        case "stale":
+            return "STALE";
         case "error":
             return "ISSUE";
         default:
@@ -50,12 +61,14 @@ const state = status => {
     }
 };
 
-const Status = ({ status = "unknown", header, version = "unknown" }) => {
+const Status = ({ status = "unknown", header, version = "unknown", title }) => {
+    const tooltip = title || `Version: ${version}`;
+
     return (
         <StyledStatus>
             <div className={`indicator indicator_${status}`}>
                 <div className="title">{header}</div>
-                <div className="status" title={`Version: ${version}`}>
+                <div className="status" title={tooltip}>
                     {state(status)}
                 </div>
             </div>

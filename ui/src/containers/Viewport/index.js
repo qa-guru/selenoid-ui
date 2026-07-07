@@ -1,12 +1,7 @@
 import React, { useRef, useState } from "react";
 import { HashRouter as Router, Link, Route } from "react-router-dom";
-import { merge, Observable, of, timer } from "rxjs";
-import { catchError, delayWhen, flatMap, map, pluck, retryWhen, tap } from "rxjs/operators";
-import { ajax } from "rxjs/ajax";
 
 import AutosizeInput from "react-input-autosize";
-
-import { useObservable } from "rxjs-hooks";
 
 import styled from "styled-components/macro";
 import { GlobalStyle, StyledTopBar, StyledViewport } from "./styles.css";
@@ -24,6 +19,7 @@ import Quota from "../../components/Stats/Quota";
 import Queue from "../../components/Stats/Queue";
 import Used from "../../components/Stats/Used";
 import Separator from "../../components/Stats/Separator";
+import { useUiFeed } from "../../hooks/useUiFeed";
 
 const links = videos => {
     return [
@@ -33,90 +29,32 @@ const links = videos => {
     ];
 };
 
+const formatLastUpdateTitle = (version, lastUpdate) => {
+    if (!lastUpdate) {
+        return `Version: ${version}`;
+    }
+
+    const ago = Math.max(0, Math.round((Date.now() - lastUpdate) / 1000));
+    return `Version: ${version}\nUpdated ${ago}s ago`;
+};
+
 const Viewport = () => {
-    const [{ status, sse }, onStatus] = useState({
-        status: "unknown",
-        sse: "unknown",
-    });
-
     const [query, onQuery] = useState("");
-
     const select = useRef(null);
 
-    // can be checked offline with simple
-    // const {origin, sse, status, state, browsers = {}, sessions = {}} = require("../../sse-example.json");
+    const {
+        origin,
+        state,
+        browsers,
+        sessions,
+        browserProtocols,
+        version,
+        sseStatus,
+        selenoidStatus,
+        lastUpdate,
+    } = useUiFeed();
 
-    const { origin, state = {}, browsers = {}, sessions = {}, browserProtocols = {}, version = "unknown" } = useObservable(
-        in$ => {
-            return in$.pipe(
-                flatMap(([pushStatus]) =>
-                    merge(
-                        ajax("/status").pipe(
-                            pluck("response"),
-                            tap(() => pushStatus({ status: "ok" })),
-                            catchError(e => {
-                                pushStatus({ status: "error" });
-                                return of();
-                            })
-                        ),
-
-                        new Observable(observer => {
-                            const sse = new EventSource("/events");
-
-                            sse.onmessage = x => observer.next(x.data);
-                            sse.onerror = x => observer.error(x);
-                            sse.onopen = () => pushStatus({ sse: "ok" });
-
-                            return () => {
-                                sse.close();
-                            };
-                        }).pipe(
-                            map(event => JSON.parse(event)),
-                            map(event => {
-                                if (!event) {
-                                    pushStatus({ status: "error" });
-                                    return {};
-                                }
-
-                                if (event.errors && event.errors.length) {
-                                    pushStatus({ status: "error", sse: "ok" });
-                                    return event;
-                                }
-
-                                if (event.state) {
-                                    pushStatus({ status: "ok", sse: "ok" });
-                                    return event;
-                                } else {
-                                    console.error("Wrong data from backend", event);
-                                    pushStatus({ status: "error" });
-                                    return {
-                                        ...event,
-                                        errors: [],
-                                    };
-                                }
-                            }),
-                            retryWhen(errs =>
-                                errs.pipe(
-                                    tap(err => {
-                                        console.error("Error connecting to SSE", err.target ? err.target.url : err);
-                                        pushStatus({
-                                            sse: "error",
-                                            status: "unknown",
-                                        });
-                                    }),
-                                    delayWhen(() => timer(3000))
-                                )
-                            )
-                        )
-                    )
-                )
-            );
-        },
-        {
-            state: {},
-        },
-        [onStatus]
-    );
+    const statusTitle = formatLastUpdateTitle(version, lastUpdate);
 
     return (
         <>
@@ -129,8 +67,8 @@ const Viewport = () => {
 
                     <PanelFilter {...{ select, query, onQuery }} />
 
-                    <Status status={sse} header="sse" version={version} />
-                    <Status status={status} header="selenoid" />
+                    <Status status={sseStatus} header="sse" version={version} title={statusTitle} />
+                    <Status status={selenoidStatus} header="selenoid" version={version} title={statusTitle} />
 
                     <Separator>&nbsp;</Separator>
 
@@ -224,7 +162,6 @@ const PanelFilter = ({ select, query, onQuery }) => (
                 fontWeight: 100,
             }}
             onChange={function(event) {
-                // event.target.value contains the new value
                 onQuery(event.target.value);
             }}
         />
