@@ -2,6 +2,8 @@ module github.com/aerokube/selenoid-ui
 
 go 1.26
 
+toolchain go1.26.0
+
 require (
 	github.com/aandryashin/matchers v0.0.0-20161126170413-435295ea180e
 	github.com/abbot/go-http-auth v0.4.0

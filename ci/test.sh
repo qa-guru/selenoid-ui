@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export GOTOOLCHAIN=auto
+export GOTOOLCHAIN=go1.26.0+auto
 export GO111MODULE="on"
 
 if [ "$(node -p "parseInt(process.version.slice(1))")" -ge 17 ]; then
@@ -21,4 +21,4 @@ go generate github.com/aerokube/selenoid-ui
 go test -race -v -coverprofile=coverage.txt -covermode=atomic github.com/aerokube/selenoid-ui github.com/aerokube/selenoid-ui/selenoid
 
 go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
-"$(go env GOPATH)"/bin/govulncheck ./...
+"$(go env GOPATH)/bin/govulncheck" ./...
