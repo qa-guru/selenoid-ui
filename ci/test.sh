@@ -15,6 +15,7 @@ CI=false yarn --cwd ui build
 test -f ui/build/index.html
 
 go install github.com/rakyll/statik@latest
+export PATH="$(go env GOPATH)/bin:$PATH"
 go generate github.com/aerokube/selenoid-ui
 go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
 
