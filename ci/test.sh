@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+export GOTOOLCHAIN=auto
 export GO111MODULE="on"
 
 if [ "$(node -p "parseInt(process.version.slice(1))")" -ge 17 ]; then
