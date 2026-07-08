@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export GOTOOLCHAIN=go1.26.4+auto
+export GOTOOLCHAIN=go1.26.5+auto
 export GO111MODULE="on"
 
 if [ "$(node -p "parseInt(process.version.slice(1))")" -ge 17 ]; then
@@ -20,4 +20,4 @@ export PATH="$(go env GOPATH)/bin:$PATH"
 go generate github.com/aerokube/selenoid-ui
 go test -race -v -coverprofile=coverage.txt -covermode=atomic github.com/aerokube/selenoid-ui github.com/aerokube/selenoid-ui/selenoid
 
-GOTOOLCHAIN=go1.26.4 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...
+GOTOOLCHAIN=go1.26.5 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...
