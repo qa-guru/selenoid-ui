@@ -17,23 +17,23 @@ jobs:
   selenoid-ui:
     runs-on: ubuntu-latest
     outputs:
-      release_version: ${{ steps.release_meta.outputs.version }}
+      release_version: ${{ steps.release_meta.outputs.release_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set Golang
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ~1.23.8
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 12.x
 
@@ -41,7 +41,7 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         id: yarn-cache
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -64,10 +64,10 @@ jobs:
           else
             version="${GITHUB_REF#refs/tags/}"
           fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "release_version=${version}" >> "$GITHUB_OUTPUT"
           echo "RELEASE_VERSION=${version}" >> "$GITHUB_ENV"
 
-      - uses: AButler/upload-release-assets@v3.0
+      - uses: AButler/upload-release-assets@v4.0
         if: github.event_name == 'release'
         with:
           files: 'dist/*'
@@ -92,6 +92,9 @@ jobs:
     name: Release smoke → selenoid-tests
     needs: selenoid-ui
     if: success()
+    permissions:
+      actions: read
+      contents: read
     uses: ./.github/workflows/smoke-trigger-callback.yml
     secrets:
       SELENOID_TESTS_DISPATCH_TOKEN: ${{ secrets.SELENOID_TESTS_DISPATCH_TOKEN }}
