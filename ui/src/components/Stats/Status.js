@@ -66,7 +66,7 @@ const Status = ({ status = "unknown", header, version = "unknown", title }) => {
 
     return (
         <StyledStatus>
-            <div className={`indicator indicator_${status}`}>
+            <div id={`${header}-status`} className={`indicator indicator_${status}`}>
                 <div className="title">{header}</div>
                 <div className="status" title={tooltip}>
                     {state(status)}
