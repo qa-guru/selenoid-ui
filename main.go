@@ -8,6 +8,7 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/aerokube/selenoid-ui/selenoid"
 	"github.com/aerokube/util/sse"
+	"github.com/gorilla/websocket"
 	"github.com/koding/websocketproxy"
 	"github.com/rakyll/statik/fs"
 	"log"
@@ -79,6 +80,10 @@ func configureWsProxy(wsProxy *websocketproxy.WebsocketProxy) {
 }
 
 func ws(w http.ResponseWriter, r *http.Request) {
+	if !websocket.IsWebSocketUpgrade(r) {
+		http.Error(w, "websocket protocol required", http.StatusBadRequest)
+		return
+	}
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/ws")
 	ws := &url.URL{Scheme: "ws", Host: statusURI.Host, Path: r.URL.Path}
 	log.Printf("[WS_PROXY] [/ws%s] [%s]", r.URL.Path, ws)
@@ -89,6 +94,10 @@ func ws(w http.ResponseWriter, r *http.Request) {
 }
 
 func playwright(w http.ResponseWriter, r *http.Request) {
+	if !websocket.IsWebSocketUpgrade(r) {
+		http.Error(w, "websocket protocol required", http.StatusBadRequest)
+		return
+	}
 	scheme := "ws"
 	if statusURI.Scheme == "https" {
 		scheme = "wss"

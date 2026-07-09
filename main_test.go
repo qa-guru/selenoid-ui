@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	. "github.com/aandryashin/matchers"
@@ -189,20 +190,49 @@ func TestVideoFail(t *testing.T) {
 func TestPlaywrightProxyHubDown(t *testing.T) {
 	t.Run("Playwright proxy error when hub unreachable", func(t *testing.T) {
 		statusURI, _ = url.Parse("http://127.0.0.1:1")
-		rsp, err := http.Get(withUrl("/playwright/playwright-chromium/1.61.1"))
+		rsp, err := wsUpgradeGet(withUrl("/playwright/playwright-chromium/1.61.1"))
 
 		AssertThat(t, err, Is{nil})
 		AssertThat(t, rsp.StatusCode >= http.StatusBadGateway, Is{true})
 	})
 }
 
+func wsUpgradeGet(url string) (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Connection", "Upgrade")
+	req.Header.Set("Upgrade", "websocket")
+	req.Header.Set("Sec-WebSocket-Version", "13")
+	req.Header.Set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==")
+	return http.DefaultClient.Do(req)
+}
+
 func TestWsProxyHubDown(t *testing.T) {
 	t.Run("VNC ws proxy error when hub unreachable", func(t *testing.T) {
 		statusURI, _ = url.Parse("http://127.0.0.1:1")
-		rsp, err := http.Get(withUrl("/ws/vnc/abc"))
+		rsp, err := wsUpgradeGet(withUrl("/ws/vnc/abc"))
 
 		AssertThat(t, err, Is{nil})
 		AssertThat(t, rsp.StatusCode >= http.StatusBadGateway, Is{true})
+	})
+}
+
+func TestWsProxyRejectsPlainGet(t *testing.T) {
+	t.Run("Plain GET without upgrade returns 400", func(t *testing.T) {
+		selenoidSrv := httptest.NewServer(selenoidApi())
+		defer selenoidSrv.Close()
+		statusURI, _ = url.Parse(selenoidSrv.URL)
+
+		for _, path := range []string{"/ws/vnc/abc", "/ws/logs/abc"} {
+			rsp, err := http.Get(withUrl(path))
+			AssertThat(t, err, Is{nil})
+			AssertThat(t, rsp, Code{http.StatusBadRequest})
+			body, readErr := io.ReadAll(rsp.Body)
+			AssertThat(t, readErr, Is{nil})
+			AssertThat(t, strings.Contains(string(body), "websocket"), Is{true})
+		}
 	})
 }
 
