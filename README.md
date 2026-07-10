@@ -11,7 +11,7 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 |---|---|
 | **GitHub** | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui) |
 | **Docker Hub** | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui) |
-| **Текущий релиз** | **v2.2.0** — [docs/RELEASE_v2.2.0.md](docs/RELEASE_v2.2.0.md) · `qaguru/selenoid-ui:v2.2.0` |
+| **Текущий релиз** | **v2.2.1** — [docs/RELEASE_v2.2.1.md](docs/RELEASE_v2.2.1.md) · `qaguru/selenoid-ui:v2.2.1` |
 
 ## Роль в экосистеме
 
@@ -26,14 +26,16 @@ UI не заменяет hub — он **подключается к уже за�
 Браузер пользователя  ──►  selenoid-ui :8080  ──►  selenoid hub :4444  ──►  browser containers
 ```
 
-## Связанные репозитории
+## Экосистема qa-guru Selenoid
 
-| GitHub | Роль |
-|--------|------|
-| [selenoid](https://github.com/qa-guru/selenoid) | **Hub** — обязательная зависимость |
-| **selenoid-ui** (этот) | Web UI (React) |
-| [cm](https://github.com/qa-guru/cm) | Установщик hub + UI |
-| [browser-image](https://github.com/qa-guru/browser-image) | Playwright + WebDriver browser nodes |
+| Ресурс | Ссылка | Роль |
+|--------|--------|------|
+| selenoid | [github.com/qa-guru/selenoid](https://github.com/qa-guru/selenoid) | Hub |
+| **selenoid-ui** (этот) | [github.com/qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui) | Web UI |
+| cm | [github.com/qa-guru/cm](https://github.com/qa-guru/cm) | Установщик |
+| browser-image | [github.com/qa-guru/browser-image](https://github.com/qa-guru/browser-image) | Docker browser nodes |
+| selenoid-tests | [github.com/qa-guru/selenoid-tests](https://github.com/qa-guru/selenoid-tests) | E2e/integration ethalon |
+| Docker Hub | [hub.docker.com/u/qaguru](https://hub.docker.com/u/qaguru) | Образы `qaguru/*` |
 
 ## Отличия от upstream
 
@@ -79,7 +81,7 @@ Capabilities: [http://127.0.0.1:8080/#/capabilities](http://127.0.0.1:8080/#/cap
 docker run -d --name selenoid-ui \
   -p 8080:8080 \
   -v "$PWD:/etc/selenoid:ro" \
-  qaguru/selenoid-ui:v2.2.0 \
+  qaguru/selenoid-ui:v2.2.1 \
   --selenoid-uri http://host.docker.internal:4444 \
   --browsers-conf /etc/selenoid/browsers.json
 ```
