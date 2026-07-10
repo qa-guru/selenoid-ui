@@ -5,7 +5,7 @@ import { ajax } from "rxjs/ajax";
 import { combineLatest } from "rxjs";
 import { catchError, filter, flatMap, tap } from "rxjs/operators";
 
-import Highlight from "react-highlight";
+import CodeHighlight from "../../components/CodeHighlight";
 import "highlight.js/styles/sunburst.css";
 
 import Select from "react-select";
@@ -466,7 +466,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                     />
                 </div>
                 <div className="code-panel">
-                    <Highlight className={activeLang}>{caps[activeLang] || ""}</Highlight>
+                    <CodeHighlight language={activeLang}>{caps[activeLang] || ""}</CodeHighlight>
                 </div>
                 <div className="lang-selector">
                     <div className="capabilities-langs">

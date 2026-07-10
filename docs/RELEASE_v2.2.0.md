@@ -17,6 +17,7 @@
 | **browsers.json** | sync с hub catalog v2.2.0 (chrome 149 / firefox 151 / msedge 145) |
 | **Go** | **1.26.5** (pin с v2.1.7) |
 | **Docker API** | Engine **26.1.x** / API **1.45** в compose/docs (стек) |
+| **UI console** | `highlight.js` **v11** вместо `react-highlight` / hljs v9 — убирает EOL warning в DevTools |
 
 ---
 
