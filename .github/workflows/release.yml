@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Image tag for manual docker publish (e.g. v2.0.5)'
+        description: 'Release tag for manual publish (e.g. v2.2.0)'
         required: true
-        default: 'v2.0.5'
+        default: 'v2.2.0'
 
 permissions:
   contents: write
@@ -16,6 +16,8 @@ permissions:
 jobs:
   selenoid-ui:
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: auto
     outputs:
       release_version: ${{ steps.release_meta.outputs.release_version }}
     steps:
@@ -24,14 +26,8 @@ jobs:
       - name: Set Golang
         uses: actions/setup-go@v6
         with:
-          go-version: 1.26.5
-
-      - uses: actions/cache@v6
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          go-version-file: go.mod
+          cache: true
 
       - uses: actions/setup-node@v6
         with:
@@ -68,9 +64,10 @@ jobs:
           echo "RELEASE_VERSION=${version}" >> "$GITHUB_ENV"
 
       - uses: AButler/upload-release-assets@v4.0
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         with:
           files: 'dist/*'
+          release-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release image
