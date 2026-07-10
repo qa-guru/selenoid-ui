@@ -17,6 +17,8 @@ services:
       - selenoid
     ports:
       - "8080:8080"
+    volumes:
+      - "$PWD:/etc/selenoid/:ro"
     command:
       - "--selenoid-uri"
       - "http://selenoid:4444"

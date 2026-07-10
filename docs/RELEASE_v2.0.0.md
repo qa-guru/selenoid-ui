@@ -57,12 +57,14 @@ chmod +x selenoid-ui
 ```bash
 docker run -d --name selenoid-ui --network selenoid --restart unless-stopped \
   -p 8080:8080 \
-  -v ~/.aerokube/selenoid:/etc/selenoid:ro \
+  -v "$PWD:/etc/selenoid:ro" \
   qaguru/selenoid-ui:v2.0.0 \
   -listen :8080 \
   -selenoid-uri http://selenoid:4444 \
   -browsers-conf /etc/selenoid/browsers.json
 ```
+
+`$PWD` — каталог с тем же `browsers.json`, что у hub (в monorepo: `projects/selenoid-home/dev/browsers.json`).
 
 ### Через cm
 
@@ -85,4 +87,4 @@ cm selenoid-ui start -v v2.0.0
 ## Связанные релизы
 
 - [qa-guru/selenoid v2.0.0](https://github.com/qa-guru/selenoid/releases/tag/v2.0.0) — hub с Playwright
-- [qa-guru/playwright-image](https://github.com/qa-guru/playwright-image) — browser node
+- [qa-guru/browser-image](https://github.com/qa-guru/browser-image) — Playwright + WebDriver browser nodes

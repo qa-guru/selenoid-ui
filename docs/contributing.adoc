@@ -1,17 +1,20 @@
 == Contributing & Development
 
+WARNING: **Deprecated AsciiDoc.** Сборка и запуск — в корневом link:../README.md[README.md] (Go **1.26.5**, `qaguru/*` images).
+
 1) Ensure you have https://github.com/yarnpkg/yarn[yarn] and https://github.com/rakyll/statik[statik] installed.
 
 2) Generate static resources:
 
 [source,bash]
 ----
+$ export NODE_OPTIONS=--openssl-legacy-provider   # Node.js 17+
 $ yarn --cwd ui install
 $ yarn --cwd ui build
 $ go generate github.com/aerokube/selenoid-ui
 ----
 
-3) Build (requires Golang 1.11 and above):
+3) Build (requires Golang **1.26.5**, see `.go-version` / `go.mod`):
 
 [source,bash]
 ----
@@ -23,13 +26,13 @@ $ go build
 [source,bash]
 ----
 $ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
-$ docker build -t selenoid-ui:latest .
+$ docker build -t qaguru/selenoid-ui:latest .
 ----
 
 5) To run local development with hot reloads:
 [source,bash]
 ----
-$ ./selenoid-ui -allowed-origin="*"
+$ ./selenoid-ui -allowed-origin="*" -browsers-conf ./browsers.json
 $ yarn --cwd ui start
 ----
 NOTE: For some reason development server can't proxy SSE properly and thus realtime updates can get stuck.
@@ -38,7 +41,7 @@ As a workaround you can temporarily change the path in the `Viewport` container 
 
 === Documentation
 
-Locally can be generated with:
+Канон — link:../README.md[README.md]. Локальная генерация этого AsciiDoc (gh-pages):
 
 [source,bash]
 ----

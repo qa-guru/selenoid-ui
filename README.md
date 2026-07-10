@@ -11,6 +11,7 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 |---|---|
 | **GitHub** | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui) |
 | **Docker Hub** | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui) |
+| **Текущий релиз** | **v2.2.0** — [docs/RELEASE_v2.2.0.md](docs/RELEASE_v2.2.0.md) · `qaguru/selenoid-ui:v2.2.0` |
 
 ## Роль в экосистеме
 
@@ -41,7 +42,7 @@ UI не заменяет hub — он **подключается к уже за�
 - Нужен тот же `browsers.json`, что у hub — иначе Playwright-версии в UI не совпадут с hub.
 - **SSE resilience:** immediate `GET /status`, fallback poll каждые 4s, reconnect с backoff, индикатор **STALE** вместо мгновенного сброса в UNKNOWN.
 
-Upstream docs: [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) · [aerokube.com/selenoid-ui](https://aerokube.com/selenoid-ui/latest/)
+Upstream docs: [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) · [aerokube.com/selenoid-ui](https://aerokube.com/selenoid-ui/latest/). AsciiDoc `docs/*.adoc` — **deprecated** (оставлены как upstream history); канон — этот README + `docs/RELEASE_*.md`.
 
 ## Сборка и запуск
 
@@ -72,13 +73,18 @@ Capabilities: [http://127.0.0.1:8080/#/capabilities](http://127.0.0.1:8080/#/cap
 
 ## Docker (qa-guru)
 
+`browsers.json` должен быть смонтирован в UI по пути из `--browsers-conf` (тот же файл, что у hub). Корневой [`browsers.json`](browsers.json) — qaguru/dev-канон.
+
 ```bash
 docker run -d --name selenoid-ui \
   -p 8080:8080 \
-  qaguru/selenoid-ui:latest-release \
+  -v "$PWD:/etc/selenoid:ro" \
+  qaguru/selenoid-ui:v2.2.0 \
   --selenoid-uri http://host.docker.internal:4444 \
   --browsers-conf /etc/selenoid/browsers.json
 ```
+
+Compose: [`docker-compose.yml`](docker-compose.yml) монтирует `$PWD` в `/etc/selenoid/` и для hub, и для UI.
 
 ## Ручная проверка Playwright
 

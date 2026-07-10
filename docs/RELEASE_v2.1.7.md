@@ -12,7 +12,7 @@
 
 | Изменение | Описание |
 |-----------|----------|
-| **Go** | **1.26.5** (`go.mod`, `ci/test.sh`, `GOTOOLCHAIN`) |
+| **Go** | **1.26.5** (`.go-version`, `.tool-versions`, `go.mod`, workflows test/release/docker-publish, `ci/test.sh`, `GOTOOLCHAIN`) |
 | **govulncheck** | blocking в CI — GO-2026-5856 закрыт на go1.26.5 |
 | **CI** | ethalon GitHub Actions (setup-go v6, checkout v6) |
 
