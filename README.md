@@ -1,5 +1,19 @@
 # Selenoid UI (qa-guru fork)
 
+
+[![Selenoid UI](https://qa-guru.github.io/selenoid-tests/readme/badge-selenoid-ui.svg)](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/)
+
+[![Selenoid UI stats](https://qa-guru.github.io/selenoid-tests/readme/stats-selenoid-ui.svg)](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/)
+
+[![Selenoid UI metrics](https://qa-guru.github.io/selenoid-tests/readme/metrics-panel-selenoid-ui.svg)](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/)
+
+| Link | Description |
+|------|-------------|
+| [Dashboard](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/) | Full pyramid — filter epic **selenoid-ui** in awesome |
+| [Awesome](https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/) | UI test details |
+| [selenoid-tests](https://github.com/qa-guru/selenoid-tests) | Orchestrator + merged Allure |
+
+
 Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) — форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) с поддержкой **Playwright-сессий** в Capabilities.
 
 [![Build Status](https://github.com/qa-guru/selenoid-ui/workflows/build/badge.svg)](https://github.com/qa-guru/selenoid-ui/actions?query=workflow%3Abuild)
