@@ -63,7 +63,8 @@ Prod deploy: `SELENOID_UI_VERSION=v2.3.0`.
 
 ## Cut checklist (ручной)
 
-1. Commit UI migration + docs на `main`.
-2. `git tag -a v2.3.0 -m "v2.3.0"` → push tags _(по команде)_.
-3. Release assets `dist/selenoid-ui_*`; Docker `qaguru/selenoid-ui:v2.3.0`.
-4. OUT: `warm-pool-orchestrator/`, `@zero-design-system/react` header (v3).
+1. ~~Commit UI migration + docs на `main`.~~ ✓ `b476fa7` (local; push — по команде).
+2. Push `main` + align hub/cm `v2.3.0` tags (stack cut) — **по команде**.
+3. `git tag -a v2.3.0 -m "v2.3.0"` → push tags — **по команде**.
+4. Release assets `dist/selenoid-ui_*`; Docker `qaguru/selenoid-ui:v2.3.0`.
+5. OUT: `warm-pool-orchestrator/`, `@zero-design-system/react` header (v3).
