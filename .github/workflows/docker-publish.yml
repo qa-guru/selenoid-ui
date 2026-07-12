@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Docker image tag (e.g. v2.0.5 or latest-release)'
+        description: "Docker image tag (e.g. v2.0.5 or latest-release)"
         required: true
-        default: 'v2.0.5'
+        default: "v2.0.5"
 
 permissions:
   contents: read
@@ -29,9 +29,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 12.x
+          node-version: 24
 
       - name: Build
         run: ci/build.sh

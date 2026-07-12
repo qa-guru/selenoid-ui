@@ -8,7 +8,6 @@ WARNING: **Deprecated AsciiDoc.** Сборка и запуск — в корне
 
 [source,bash]
 ----
-$ export NODE_OPTIONS=--openssl-legacy-provider   # Node.js 17+
 $ yarn --cwd ui install
 $ yarn --cwd ui build
 $ go generate github.com/aerokube/selenoid-ui

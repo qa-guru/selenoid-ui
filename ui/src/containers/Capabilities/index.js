@@ -16,6 +16,12 @@ import { useEventCallback } from "rxjs-hooks";
 
 import Url from "url-parse";
 import { retainPlaywrightSocket } from "../../util/playwrightSessions";
+import {
+    browserProtocol,
+    findPlaywrightSession,
+    isPlaywrightBrowser,
+    sessionIdFrom,
+} from "../../util/capabilitiesLogic";
 
 const defaultPlaywrightSelenoidOptions = () => ({
     name: "Session started using curl command...",
@@ -50,42 +56,40 @@ const playwrightSnippet = (browser, version) => {
     return { base, selenoidOptions, query, full: `${base}?${query}` };
 };
 
-const javaSelenoidOptionsBlock = selenoidOptions => {
+const javaSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
         .map(([key, value]) => `    put("${key}", "${value}");`)
         .join("\n");
     return `new HashMap<String, String>() {{\n${entries}\n}}`;
 };
 
-const csharpSelenoidOptionsBlock = selenoidOptions => {
+const csharpSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
         .map(([key, value]) => `    ["${key}"] = "${value}",`)
         .join("\n");
     return `new Dictionary<string, string> {\n${entries}\n}`;
 };
 
-const goSelenoidOptionsBlock = selenoidOptions => {
+const goSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
         .map(([key, value]) => `\t\t"${key}": "${value}",`)
         .join("\n");
     return `map[string]string{\n${entries}\n\t}`;
 };
 
-const phpSelenoidOptionsBlock = selenoidOptions => {
+const phpSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
         .map(([key, value]) => `    '${key}' => '${value}',`)
         .join("\n");
     return `[\n${entries}\n]`;
 };
 
-const rubySelenoidOptionsBlock = selenoidOptions => {
+const rubySelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
         .map(([key, value]) => `  '${key}' => '${value}',`)
         .join("\n");
     return `{\n${entries}\n}`;
 };
-
-const PLAYWRIGHT_BROWSER_NAMES = new Set(["playwright-chromium", "playwright-webkit", "playwright-firefox", "playwright-msedge"]);
 
 const primeBasicAuth = () =>
     ajax({
@@ -93,21 +97,6 @@ const primeBasicAuth = () =>
         method: "GET",
         withCredentials: true,
     });
-
-
-const isPlaywrightBrowser = (browserProtocols, name, version) => {
-    if (PLAYWRIGHT_BROWSER_NAMES.has(name)) {
-        return true;
-    }
-    return browserProtocols?.[name]?.[version]?.protocol === "playwright";
-};
-
-const browserProtocol = (browserProtocols, name, version) => {
-    if (isPlaywrightBrowser(browserProtocols, name, version)) {
-        return "playwright";
-    }
-    return browserProtocols?.[name]?.[version]?.protocol || "webdriver";
-};
 
 const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444") => {
     const url = new Url(origin);
@@ -133,7 +122,7 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
     "capabilities": {
         "alwaysMatch": {
             "browserName": "${browser != "UNKNOWN" ? browser : "chrome"}",
-            ${version == "" ? "" : "\"browserVersion\": \"" + version + "\","}
+            ${version == "" ? "" : '"browserVersion": "' + version + '",'}
             "selenoid:options": {
                 "name": "Session started using curl command...",
                 "sessionTimeout": "1m",
@@ -145,7 +134,7 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
 }'
 `,
         java: `${optionsClass} options = new ${optionsClass}();
-${version != "" ? "options.setCapability(\"browserVersion\", \"" + version + "\");" : ""}
+${version != "" ? 'options.setCapability("browserVersion", "' + version + '");' : ""}
 options.setCapability("selenoid:options", new HashMap<String, Object>() {{
     /* How to add test badge */
     put("name", "Test badge...");
@@ -208,7 +197,7 @@ if err != nil {
 defer driver.Quit()
 `,
         "C#": `${optionsClass} options = new ${optionsClass}();
-${version != "" ? "options.BrowserVersion = \"" + version + "\";" : ""}
+${version != "" ? 'options.BrowserVersion = "' + version + '";' : ""}
 options.AddAdditionalOption("selenoid:options", new Dictionary<string, object> {
     /* How to add test badge */
     ["name"] = "Test badge...",
@@ -292,7 +281,7 @@ driver = Selenium::WebDriver.for(:remote,
     };
 };
 
-const playwrightClient = browser => {
+const playwrightClient = (browser) => {
     switch (browser) {
         case "playwright-webkit":
             return { js: "webkit", py: "webkit", cs: "Webkit", go: "WebKit", rb: "webkit", java: "webkit" };
@@ -388,37 +377,13 @@ end
     };
 };
 
-export const sessionIdFrom = ({ response }) => {
-    return response.sessionId || (response.value && response.value.sessionId) || "";
-};
-
-const findPlaywrightSession = (sessions, existingIds, name, version) => {
-    for (const [id, session] of Object.entries(sessions || {})) {
-        if (existingIds.has(id)) {
-            continue;
-        }
-        const caps = session.caps || {};
-        if (caps.browserName !== name) {
-            continue;
-        }
-        if (caps.version && caps.version !== version) {
-            continue;
-        }
-        if (caps.name && caps.name !== "Manual session") {
-            continue;
-        }
-        return id;
-    }
-    return "";
-};
-
 const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin, history }) => {
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
 
     const available = [].concat(
-        ...Object.keys(browsers).map(name =>
-            Object.keys(browsers[name]).map(version => {
+        ...Object.keys(browsers).map((name) =>
+            Object.keys(browsers[name]).map((version) => {
                 return {
                     value: `${name}_${version}`,
                     label: `${name}: ${version}`,
@@ -450,27 +415,22 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                     <Select
                         className="capabilities-browser-select"
                         name="browsers"
-                        value={available.find(item => item.value === value)}
+                        value={available.find((item) => item.value === value)}
                         options={available}
-                        onChange={browser => onBrowserChange(browser)}
+                        onChange={(browser) => onBrowserChange(browser)}
                         placeholder="Select browser..."
                         isLoading={!origin}
-                        clearable={false}
-                        noResultsText="No information about browsers"
+                        isClearable={false}
+                        noOptionsMessage={() => "No information about browsers"}
                     />
-                    <Launch
-                        browser={browser}
-                        history={history}
-                        sessions={sessions}
-                        isPlaywright={isPlaywright}
-                    />
+                    <Launch browser={browser} history={history} sessions={sessions} isPlaywright={isPlaywright} />
                 </div>
                 <div className="code-panel">
                     <CodeHighlight language={activeLang}>{caps[activeLang] || ""}</CodeHighlight>
                 </div>
                 <div className="lang-selector">
                     <div className="capabilities-langs">
-                        {langKeys.map(next => (
+                        {langKeys.map((next) => (
                             <div
                                 key={next}
                                 className={`capabilities-lang ${next === activeLang && "capabilities-lang_active"}`}
@@ -550,7 +510,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
                             })
                         ),
                         filter(({ status }) => status === 200),
-                        tap(res => history.push(`/sessions/${sessionIdFrom(res)}`))
+                        tap((res) => history.push(`/sessions/${sessionIdFrom(res)}`))
                     );
                 }),
                 catchError((err, caught) => {
@@ -591,7 +551,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
             }
         };
 
-        const tryNavigate = data => {
+        const tryNavigate = (data) => {
             if (navigated) {
                 return;
             }
@@ -606,7 +566,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
         };
 
         eventSource = new EventSource("/events");
-        eventSource.onmessage = e => {
+        eventSource.onmessage = (e) => {
             try {
                 tryNavigate(JSON.parse(e.data));
             } catch (err) {
@@ -639,7 +599,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
 
         primeBasicAuth().subscribe({
             next: () => openWebSocket(),
-            error: err => {
+            error: (err) => {
                 console.error("Playwright auth failed", err);
                 finish("Authentication failed", true);
             },
@@ -654,7 +614,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
         createSession();
     };
 
-    const onTextareaUpdate = e => {
+    const onTextareaUpdate = (e) => {
         setMoreCaps(e.target.value);
         try {
             JSON.parse(e.target.value);
@@ -675,11 +635,12 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
             >
                 {loading ? <BeatLoader size={3} color={"#fff"} /> : `Create Session`}
             </button>
-            {!isPlaywright && (!name || loading ? null : (
-                <button onClick={() => toggleMoreCaps(!useMoreCaps)} className={"new-session-more-capabilities"}>
-                    More capabilities
-                </button>
-            ))}
+            {!isPlaywright &&
+                (!name || loading ? null : (
+                    <button onClick={() => toggleMoreCaps(!useMoreCaps)} className={"new-session-more-capabilities"}>
+                        More capabilities
+                    </button>
+                ))}
             {!useMoreCaps || isPlaywright ? null : (
                 <textarea
                     spellCheck={false}

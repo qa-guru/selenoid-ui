@@ -1,4 +1,4 @@
-import styled from "styled-components/macro";
+import styled from "styled-components";
 
 const termBg = "#151515";
 const lightFont = "#999";

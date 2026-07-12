@@ -1,4 +1,4 @@
-import styled from "styled-components/macro";
+import styled from "styled-components";
 
 const contentBgColor = "#131614";
 const colorBorder = "#555f6a";

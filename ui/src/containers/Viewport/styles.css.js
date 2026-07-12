@@ -1,4 +1,4 @@
-import styled, { createGlobalStyle } from "styled-components/macro";
+import styled, { createGlobalStyle } from "styled-components";
 
 const bgColor = "#30363C";
 

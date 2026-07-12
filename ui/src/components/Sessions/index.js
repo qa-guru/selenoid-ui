@@ -4,39 +4,21 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
-import styled from "styled-components/macro";
+import styled from "styled-components";
 import { useSessionDelete } from "./service";
+import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
 
 const Sessions = ({ sessions = {}, query = "" }) => {
-    function withQuery(query, sessions) {
-        return id => {
-            if (id.includes(query)) {
-                return true;
-            }
-
-            if (sessions[id].caps.name && sessions[id].caps.name.toLowerCase().includes(query.toLowerCase())) {
-                return true;
-            }
-
-            if (sessions[id].caps.browserName.toLowerCase().includes(query.toLowerCase())) {
-                return true;
-            }
-
-            return query === "";
-        };
-    }
-
-    const ids = Object.keys(sessions)
-        .filter(withQuery(query, sessions))
-        // moving manual on top
-        // can be moved to golang actually
-        .sort(a => (sessions[a].caps.labels && sessions[a].caps.labels.manual ? -1 : 1));
+    const ids = sortSessionIds(
+        Object.keys(sessions).filter((id) => matchesSessionQuery(id, sessions, query)),
+        sessions
+    );
 
     return (
         <StyledSessions>
             <div className={`section-title section-title_hidden-${!!query}`}>Sessions</div>
             <TransitionGroup className="sessions__list">
-                {ids.map(id => {
+                {ids.map((id) => {
                     return (
                         <CSSTransition key={id} timeout={500} classNames="session_state" unmountOnExit>
                             <Session id={id} session={sessions[id]} />
@@ -68,7 +50,7 @@ const Session = ({ id, session: { quota, caps } }) => {
             <SessionId>
                 <span className="quota">{quota}</span> /{" "}
                 <Link to={deleting ? `#` : `/sessions/${id}`} className="id">
-                    {id.substring(0, id.indexOf('-') === -1 ? 8 : id.indexOf('-'))}
+                    {sessionIdShort(id)}
                 </Link>
             </SessionId>
             <Link className="identity" to={deleting ? `#` : `/sessions/${id}`}>

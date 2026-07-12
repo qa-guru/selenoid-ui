@@ -36,7 +36,7 @@ function countColor(percentile) {
         color.b = Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper);
     }
 
-    const colors = [color.r, color.g, color.b].map(col => col.toString(16)).join("");
+    const colors = [color.r, color.g, color.b].map((col) => col.toString(16)).join("");
 
     return `#${colors}`;
 }

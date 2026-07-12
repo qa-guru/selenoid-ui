@@ -1,9 +1,8 @@
-/** SSE + /status feed constants for legacy React UI. */
+/** SSE + /status feed constants for Selenoid UI. */
 
 export const FALLBACK_POLL_MS = 4_000;
 export const RECONNECT_BASE_MS = 1_000;
 export const RECONNECT_MAX_MS = 30_000;
-// Backend ticks every ~4–5s (-period); allow one missed tick before STALE.
 export const SSE_OK_MS = 4_000;
 export const SSE_STALE_MS = 16_000;
 export const SSE_WATCHDOG_MS = 2_000;

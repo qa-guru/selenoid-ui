@@ -5,14 +5,11 @@ set -euo pipefail
 export GOTOOLCHAIN=go1.26.5+auto
 export GO111MODULE="on"
 
-if [ "$(node -p "parseInt(process.version.slice(1))")" -ge 17 ]; then
-  export NODE_OPTIONS="${NODE_OPTIONS:---openssl-legacy-provider}"
-fi
-
 test -f ui/package.json
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
-yarn --cwd ui test --watchAll=false --testPathPattern='uiFeed|Capabilities|App'
-CI=false yarn --cwd ui build
+yarn --cwd ui test
+test -d ui/allure-results
+yarn --cwd ui build
 test -f ui/build/index.html
 
 go install github.com/rakyll/statik@latest

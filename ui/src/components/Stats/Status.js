@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components/macro";
+import styled from "styled-components";
 import { StatsElement } from "./StatsElement";
 
 const brightGreen = "#57ff76";
@@ -48,7 +48,7 @@ const StyledStatus = styled(StatsElement)`
     }
 `;
 
-const state = status => {
+const state = (status) => {
     switch (status) {
         case "ok":
             return "CONNECTED";

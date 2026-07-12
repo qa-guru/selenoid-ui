@@ -110,7 +110,7 @@ services:
     image: "qaguru/selenoid:latest-release"
     network_mode: bridge
     environment:
-      DOCKER_API_VERSION: "1.45"
+      DOCKER_API_VERSION: "1.55"
     ports:
       - "4444:4444"
     volumes:

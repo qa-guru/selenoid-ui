@@ -1,4 +1,4 @@
-import styled from "styled-components/macro";
+import styled from "styled-components";
 
 const borderLangsColor = "#3d444c";
 const borderSectionColor = "#353b42";

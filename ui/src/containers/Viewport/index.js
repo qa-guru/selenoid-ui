@@ -3,7 +3,7 @@ import { HashRouter as Router, Link, Route } from "react-router-dom";
 
 import AutosizeInput from "react-input-autosize";
 
-import styled from "styled-components/macro";
+import styled from "styled-components";
 import { GlobalStyle, StyledTopBar, StyledViewport } from "./styles.css";
 
 import "event-source-polyfill";
@@ -21,7 +21,7 @@ import Used from "../../components/Stats/Used";
 import Separator from "../../components/Stats/Separator";
 import { useUiFeed } from "../../hooks/useUiFeed";
 
-const links = videos => {
+const links = (videos) => {
     return [
         { href: "/", title: "STATS", exact: true },
         { href: "/capabilities/", title: "CAPABILITIES", exact: true },
@@ -161,7 +161,7 @@ const PanelFilter = ({ select, query, onQuery }) => (
                 marginLeft: "5px",
                 fontWeight: 100,
             }}
-            onChange={function(event) {
+            onChange={function (event) {
                 onQuery(event.target.value);
             }}
         />

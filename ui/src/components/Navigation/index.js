@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import styled from "styled-components/macro";
+import styled from "styled-components";
 
 const border = "#353b42";
 
@@ -27,7 +27,7 @@ const Nav = styled.div`
 const Navigation = ({ links }) => {
     return (
         <Nav>
-            {links.map(link => {
+            {links.map((link) => {
                 return (
                     <NavLink
                         exact={link.exact}

@@ -1,9 +1,4 @@
-import {
-    deriveSelenoidStatus,
-    isUiStatusPayload,
-    reconnectDelayMs,
-    refreshSseStatus,
-} from "./uiFeed";
+import { deriveSelenoidStatus, isUiStatusPayload, reconnectDelayMs, refreshSseStatus } from "./uiFeed";
 
 describe("uiFeed", () => {
     it("detects UI-shaped /status payload", () => {

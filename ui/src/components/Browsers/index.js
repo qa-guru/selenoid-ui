@@ -7,7 +7,7 @@ import Browser from "./Browser";
 function descendingCount(browsers) {
     return Object.keys(browsers)
         .sort((a, b) => browsers[b] - browsers[a])
-        .map(name => ({
+        .map((name) => ({
             name,
             used: browsers[name],
         }));
@@ -20,7 +20,7 @@ const Browsers = ({ totalUsed, browsers }) => {
 
     return (
         <StyledBrowsers>
-            {descendingCount(browsers).map(browser => (
+            {descendingCount(browsers).map((browser) => (
                 <Browser key={browser.name} totalUsed={totalUsed} {...browser} />
             ))}
         </StyledBrowsers>

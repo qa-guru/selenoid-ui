@@ -30,7 +30,7 @@ export function useUiFeed() {
     const eventSourceRef = useRef(null);
     const reconnectTimerRef = useRef(null);
 
-    const applyPayload = useCallback(payload => {
+    const applyPayload = useCallback((payload) => {
         if (!isUiStatusPayload(payload)) {
             return;
         }
@@ -53,7 +53,7 @@ export function useUiFeed() {
 
         const updateSseFromWatchdog = () => {
             const next = refreshSseStatus(lastSseAtRef.current, Boolean(dataRef.current));
-            setSseStatus(prev => (prev === next ? prev : next));
+            setSseStatus((prev) => (prev === next ? prev : next));
         };
 
         const loadStatus = async () => {
@@ -64,8 +64,6 @@ export function useUiFeed() {
                 }
 
                 const payload = await response.json();
-                // Prod nginx may expose raw hub /status (no .state wrapper) for monitoring;
-                // ignore it so fallback poll does not overwrite SSE/UI-shaped data.
                 if (!isUiStatusPayload(payload)) {
                     return;
                 }
@@ -95,7 +93,7 @@ export function useUiFeed() {
                 markSseActivity();
             };
 
-            es.onmessage = event => {
+            es.onmessage = (event) => {
                 markSseActivity();
                 try {
                     const payload = JSON.parse(event.data);
@@ -108,8 +106,6 @@ export function useUiFeed() {
             };
 
             es.onerror = () => {
-                // Transient EventSource errors are common between backend ticks — keep
-                // showing CONNECTED while lastSseAt is fresh; watchdog updates STALE later.
                 if (eventSourceRef.current) {
                     eventSourceRef.current.close();
                     eventSourceRef.current = null;
@@ -118,7 +114,9 @@ export function useUiFeed() {
                 const delay = reconnectDelayMs(reconnectAttemptRef.current);
                 reconnectAttemptRef.current += 1;
 
-                clearTimeout(reconnectTimerRef.current);
+                if (reconnectTimerRef.current != null) {
+                    window.clearTimeout(reconnectTimerRef.current);
+                }
                 reconnectTimerRef.current = window.setTimeout(() => {
                     if (!cancelled) {
                         connectSSE();
@@ -136,7 +134,9 @@ export function useUiFeed() {
             cancelled = true;
             window.clearInterval(fallbackTimer);
             window.clearInterval(watchdogTimer);
-            window.clearTimeout(reconnectTimerRef.current);
+            if (reconnectTimerRef.current != null) {
+                window.clearTimeout(reconnectTimerRef.current);
+            }
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
                 eventSourceRef.current = null;

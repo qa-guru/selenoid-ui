@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import RFB from "@novnc/novnc/core/rfb";
+import RFB from "@novnc/novnc";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 
@@ -91,7 +91,7 @@ export default class VncScreen extends Component {
         return (
             <div
                 className="vnc-screen"
-                ref={screen => {
+                ref={(screen) => {
                     this.canvas = screen;
                     VncScreen.resizeVnc(this.rfb);
                 }}

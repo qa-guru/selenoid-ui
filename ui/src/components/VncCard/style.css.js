@@ -1,4 +1,4 @@
-import styled from "styled-components/macro";
+import styled from "styled-components";
 
 const colorDisconnected = "#ff6e59";
 const colorConnecting = "#6883d3";

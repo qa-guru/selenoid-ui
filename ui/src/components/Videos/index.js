@@ -4,10 +4,11 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledVideo, StyledVideos } from "./style.css";
 import { useDeleteVideo } from "./service";
 import BeatLoader from "react-spinners/BeatLoader";
+import { filterVideoFiles, videoPreloadMode } from "../../util/sessionsLogic";
 
 const Videos = ({ videos = [], query = "" }) => {
-    const preloadVal = videos.length > 100 ? "none" : "auto";
-    const filtered = videos.filter((fname) => fname.includes(query) && fname.includes(".")).reverse();
+    const preloadVal = videoPreloadMode(videos.length);
+    const filtered = filterVideoFiles(videos, query);
 
     return (
         <StyledVideos>

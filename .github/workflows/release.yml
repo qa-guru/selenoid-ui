@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release tag for manual publish (e.g. v2.2.0)'
+        description: "Release tag for manual publish (e.g. v2.2.0)"
         required: true
-        default: 'v2.2.0'
+        default: "v2.2.0"
 
 permissions:
   contents: write
@@ -31,7 +31,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 12.x
+          node-version: 24
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -66,7 +66,7 @@ jobs:
       - uses: AButler/upload-release-assets@v4.0
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         with:
-          files: 'dist/*'
+          files: "dist/*"
           release-tag: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 

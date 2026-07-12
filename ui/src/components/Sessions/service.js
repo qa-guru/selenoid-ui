@@ -5,7 +5,7 @@ import { useEventCallback } from "rxjs-hooks";
 
 export function useSessionDelete(id) {
     const [deleteSession, deleted] = useEventCallback(
-        event$ =>
+        (event$) =>
             event$.pipe(
                 flatMap(() =>
                     ajax({
@@ -13,7 +13,7 @@ export function useSessionDelete(id) {
                         method: "DELETE",
                     }).pipe(
                         mapTo(true),
-                        catchError(e => {
+                        catchError((e) => {
                             console.error("Can't delete session", id, e);
                             return of(false);
                         }),

@@ -1,4 +1,4 @@
-import styled from "styled-components/macro";
+import styled from "styled-components";
 
 const backgroundColorLighter = "#3d444c";
 const colorSessionName = "#555f6a";

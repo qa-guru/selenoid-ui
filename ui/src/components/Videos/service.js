@@ -5,7 +5,7 @@ import { useEventCallback } from "rxjs-hooks";
 
 export function useDeleteVideo(name) {
     const [deleteVideo, deleted] = useEventCallback(
-        event$ =>
+        (event$) =>
             event$.pipe(
                 flatMap(() =>
                     ajax({
@@ -13,7 +13,7 @@ export function useDeleteVideo(name) {
                         method: "DELETE",
                     }).pipe(
                         mapTo(true),
-                        catchError(e => {
+                        catchError((e) => {
                             console.error("Can't delete video", name, e);
                             return of(false);
                         }),

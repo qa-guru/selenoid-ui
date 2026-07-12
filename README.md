@@ -7,11 +7,11 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 [![Release](https://img.shields.io/github/release/qa-guru/selenoid-ui.svg)](https://github.com/qa-guru/selenoid-ui/releases/latest)
 [![Docker Pulls](https://img.shields.io/docker/pulls/qaguru/selenoid-ui.svg)](https://hub.docker.com/r/qaguru/selenoid-ui)
 
-| | |
-|---|---|
-| **GitHub** | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui) |
-| **Docker Hub** | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui) |
-| **Текущий релиз** | **v2.2.1** — [docs/RELEASE_v2.2.1.md](docs/RELEASE_v2.2.1.md) · `qaguru/selenoid-ui:v2.2.1` |
+|                   |                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------- |
+| **GitHub**        | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)                                             |
+| **Docker Hub**    | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui)                                       |
+| **Текущий релиз** | **v2.3.0** (in progress) — [docs/RELEASE_v2.3.0.md](docs/RELEASE_v2.3.0.md) · `qaguru/selenoid-ui:v2.3.0` |
 
 ## Роль в экосистеме
 
@@ -28,14 +28,14 @@ UI не заменяет hub — он **подключается к уже за�
 
 ## Экосистема qa-guru Selenoid
 
-| Ресурс | Ссылка | Роль |
-|--------|--------|------|
-| selenoid | [github.com/qa-guru/selenoid](https://github.com/qa-guru/selenoid) | Hub |
-| **selenoid-ui** (этот) | [github.com/qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui) | Web UI |
-| cm | [github.com/qa-guru/cm](https://github.com/qa-guru/cm) | Установщик |
-| browser-image | [github.com/qa-guru/browser-image](https://github.com/qa-guru/browser-image) | Docker browser nodes |
-| selenoid-tests | [github.com/qa-guru/selenoid-tests](https://github.com/qa-guru/selenoid-tests) | E2e/integration ethalon |
-| Docker Hub | [hub.docker.com/u/qaguru](https://hub.docker.com/u/qaguru) | Образы `qaguru/*` |
+| Ресурс                 | Ссылка                                                                         | Роль                    |
+| ---------------------- | ------------------------------------------------------------------------------ | ----------------------- |
+| selenoid               | [github.com/qa-guru/selenoid](https://github.com/qa-guru/selenoid)             | Hub                     |
+| **selenoid-ui** (этот) | [github.com/qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)       | Web UI                  |
+| cm                     | [github.com/qa-guru/cm](https://github.com/qa-guru/cm)                         | Установщик              |
+| browser-image          | [github.com/qa-guru/browser-image](https://github.com/qa-guru/browser-image)   | Docker browser nodes    |
+| selenoid-tests         | [github.com/qa-guru/selenoid-tests](https://github.com/qa-guru/selenoid-tests) | E2e/integration ethalon |
+| Docker Hub             | [hub.docker.com/u/qaguru](https://hub.docker.com/u/qaguru)                     | Образы `qaguru/*`       |
 
 ## Отличия от upstream
 
@@ -51,7 +51,6 @@ Upstream docs: [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) �
 Сначала поднимите hub ([qa-guru/selenoid](https://github.com/qa-guru/selenoid)). Затем соберите и запустите UI:
 
 ```bash
-export NODE_OPTIONS=--openssl-legacy-provider   # Node.js 17+ для react-scripts
 yarn --cwd ui install && yarn --cwd ui build
 go generate .
 go build -o selenoid-ui .
@@ -63,6 +62,23 @@ go build -o selenoid-ui .
 ```
 
 Monorepo dev: `projects/selenoid-home/dev/scripts/build-selenoid-ui.sh`.
+
+### Frontend stack (`ui/`)
+
+| Tool      | Version                                  |
+| --------- | ---------------------------------------- |
+| React     | 18.3                                     |
+| Bundler   | Vite 6                                   |
+| Test      | Vitest 3 + React Testing Library (jsdom) |
+| Node (CI) | 24                                       |
+
+```bash
+yarn --cwd ui install
+yarn --cwd ui test    # 22 tests (unit + component)
+yarn --cwd ui build
+```
+
+v1 (CRA) — git tag `v2.2.x` и ранее.
 
 `-browsers-conf` — тот же [`config/browsers.json`](https://github.com/qa-guru/selenoid/blob/main/config/browsers.json), что у hub (в monorepo: `projects/selenoid-home/dev/browsers.json`).
 
