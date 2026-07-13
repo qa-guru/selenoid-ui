@@ -10,8 +10,12 @@ etc
 
 statik
 selenoid-ui
+health-check
 data
 coverage.txt
+
+# yarn is the only package manager for ui/ — never commit an npm lockfile
+ui/package-lock.json
 
 .DS_Store
 dist/**

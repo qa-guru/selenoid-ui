@@ -1,4 +1,25 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## selenoid-ui v2 (React 18 stabilization)
+
+This app is stabilized on **React 18.3.1** with Vite 6 + Vitest 3 + React Testing Library.
+Component tests run via `yarn test` and emit Allure results (`allure-results/`).
+
+### Install note
+
+This package is managed with **yarn** (`yarn.lock`); do not use npm here.
+CI runs `yarn --cwd ui install --frozen-lockfile` (`ci/test.sh`, `ci/build.sh`).
+
+`yarn install` succeeds. It prints a non-fatal peer warning because
+`react-input-autosize@2.2.2` only declares peer `react` up to `^16`, while the app
+runs React 18 — yarn treats this as a warning and installs anyway. See the deferred
+list below to remove the constraint.
+
+### Deferred (v3 / not in this window)
+
+-   Upgrade React 18 → **React 19**.
+-   Migrate `react-router-dom` **v5 → v7**.
+-   Replace **`react-input-autosize`** (source of the React 18 peer conflict).
+-   Replace **`rxjs-hooks`** (unmaintained; pairs with legacy `rxjs@6`).
+-   Adopt the design-system header / **`@zero-design-system/react`** for the v3 UI.
 
 <!-- stack-branches-note:start -->
 
@@ -8,67 +29,30 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
-In the project directory, you can run:
+This app is built with [Vite](https://vitejs.dev/). In the project directory, run:
 
-### `npm start`
+### `yarn start`
 
-Runs the app in the development mode.<br>
+Runs the app in development mode (Vite dev server).<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+The page reloads on edits.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+### `yarn test`
 
-### `npm test`
+Runs the Vitest + React Testing Library component suite once (`vitest run`) and
+writes Allure results to `allure-results/`. Use `yarn test:watch` for watch mode.
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `yarn build`
 
-### `npm run build`
+Builds the app for production into the `build/` folder (minified, hashed assets),
+ready to be embedded by the Go backend / deployed.
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### `yarn preview`
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Serves the production build locally for a quick smoke check.
 
 ## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+-   [Vite documentation](https://vitejs.dev/guide/)
+-   [Vitest documentation](https://vitest.dev/)
+-   [React documentation](https://react.dev/)
