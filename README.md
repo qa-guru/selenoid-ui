@@ -1,5 +1,29 @@
 # Selenoid UI (qa-guru fork)
 
+[![Selenoid UI](https://qa-guru.github.io/selenoid-tests/readme/badge-selenoid-ui.svg)](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/)
+
+[![Selenoid UI stats](https://qa-guru.github.io/selenoid-tests/readme/stats-selenoid-ui.svg)](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/)
+
+[![Selenoid UI metrics](https://qa-guru.github.io/selenoid-tests/readme/metrics-panel-selenoid-ui.svg)](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/)
+
+<a href="https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://qa-guru.github.io/selenoid-tests/readme/dashboard-preview-dark.png">
+    <img
+      src="https://qa-guru.github.io/selenoid-tests/readme/dashboard-preview.png"
+      alt="Allure 3 dashboard — pyramid, stability, success distribution"
+      width="800"
+    />
+  </picture>
+</a>
+> Dashboard PNG updates after each orchestrator run on `main` (Playwright screenshot of Allure 3 dashboard).
+
+| Link                                                                            | Description                                           |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [Dashboard](https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/) | Full pyramid — filter epic **selenoid-ui** in awesome |
+| [Awesome](https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/)     | UI test details                                       |
+| [selenoid-tests](https://github.com/qa-guru/selenoid-tests)                     | Orchestrator + merged Allure                          |
+
 <!-- stack-branches-note:start -->
 
 > ## Стабильные билды — две ветки
@@ -9,11 +33,11 @@
 > | Ветка                                                                                                                              | Стабильный билд                                                                          | Docker API | Engine | Go     | React | UI                      |
 > | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------- | ------ | ------ | ----- | ----------------------- |
 > | [`selenoid2-1.45-engine26.1-go1.26-react16`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.45-engine26.1-go1.26-react16) | **v2.2.1** — прежний prod ([selenoid.autotests.cloud](https://selenoid.autotests.cloud)) | 1.45       | 26.1.x | 1.26.5 | 16    | CRA (react-scripts 3.x) |
-> | [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18) | **v2.3.0** — актуальный, до нового UI (Selenoid 3)                                       | 1.55       | 29.6+  | 1.26.5 | 18    | Vite 6                  |
+> | [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18) | **v2.3.0** — актуальный prod, до нового UI (Selenoid 3)                                  | 1.55       | 29.6+  | 1.26.5 | 18    | Vite 6                  |
 >
-> **Зачем две ветки:** каждая держит воспроизводимый набор версий (Docker API / Engine / Go / React). `main` — активная разработка. Точные версии — в `STACK-PIN.md`.
+> **Зачем две ветки:** каждая держит воспроизводимый набор версий (Docker API / Engine / Go / React). Точные версии — в `STACK-PIN.md`.
 >
-> _Вы на ветке [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18)._
+> _Вы на `main` — активная разработка (следующий рубеж: 3.0.0). Prod-линия зафиксирована тегом **v2.3.0** на [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18)._
 
 <!-- stack-branches-note:end -->
 
