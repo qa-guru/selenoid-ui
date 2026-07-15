@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { ajax } from "rxjs/ajax";
-import { combineLatest } from "rxjs";
-import { catchError, filter, flatMap, tap } from "rxjs/operators";
+import { filter, flatMap, tap } from "rxjs/operators";
 
 import CodeHighlight from "../../components/CodeHighlight";
 import "highlight.js/styles/sunburst.css";
@@ -11,8 +10,6 @@ import "highlight.js/styles/sunburst.css";
 import Select from "react-select";
 
 import { StyledCapabilities } from "./style.css";
-import BeatLoader from "react-spinners/BeatLoader";
-import { useEventCallback } from "rxjs-hooks";
 
 import Url from "url-parse";
 import { retainPlaywrightSocket } from "../../util/playwrightSessions";
@@ -22,16 +19,23 @@ import {
     isPlaywrightBrowser,
     sessionIdFrom,
 } from "../../util/capabilitiesLogic";
+import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
-const defaultPlaywrightSelenoidOptions = () => ({
-    name: "Session started using curl command...",
-    sessionTimeout: "1m",
-    enableVNC: "true",
-    enableVideo: "true",
-});
+const defaultPlaywrightSelenoidOptions = (accessKey = "") => {
+    const options = {
+        name: "Session started using curl command...",
+        sessionTimeout: "1m",
+        enableVNC: "true",
+        enableVideo: "true",
+    };
+    if (accessKey) {
+        options.accessKey = accessKey;
+    }
+    return options;
+};
 
-const manualPlaywrightSelenoidOptions = () => ({
-    ...defaultPlaywrightSelenoidOptions(),
+const manualPlaywrightSelenoidOptions = (accessKey = "") => ({
+    ...defaultPlaywrightSelenoidOptions(accessKey),
     name: "Manual session",
     sessionTimeout: "60m",
     enableVideo: "true",
@@ -44,14 +48,14 @@ const playwrightWsBase = (browser, version) => {
     return `${wsProtocol}//${window.location.host}/playwright/${browser}/${version}`;
 };
 
-const playwrightEndpoint = (browser, version) => {
-    const params = new URLSearchParams(manualPlaywrightSelenoidOptions());
+const playwrightEndpoint = (browser, version, accessKey = "") => {
+    const params = new URLSearchParams(manualPlaywrightSelenoidOptions(accessKey));
     return `${playwrightWsBase(browser, version)}?${params.toString()}`;
 };
 
-const playwrightSnippet = (browser, version) => {
+const playwrightSnippet = (browser, version, accessKey = "") => {
     const base = playwrightWsBase(browser, version);
-    const selenoidOptions = defaultPlaywrightSelenoidOptions();
+    const selenoidOptions = defaultPlaywrightSelenoidOptions(accessKey);
     const query = new URLSearchParams(selenoidOptions).toString();
     return { base, selenoidOptions, query, full: `${base}?${query}` };
 };
@@ -294,8 +298,8 @@ const playwrightClient = (browser) => {
     }
 };
 
-const playwrightCode = (browser, version) => {
-    const { base, selenoidOptions, query } = playwrightSnippet(browser, version);
+const playwrightCode = (browser, version, accessKey = "") => {
+    const { base, selenoidOptions, query } = playwrightSnippet(browser, version, accessKey);
     const pw = playwrightClient(browser);
     const jsSelenoidOptions = JSON.stringify(selenoidOptions, null, 2);
     const pySelenoidOptions = JSON.stringify(selenoidOptions, null, 4);
@@ -377,7 +381,14 @@ end
     };
 };
 
-const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin, history }) => {
+const Capabilities = ({
+    browsers = {},
+    browserProtocols = {},
+    sessions = {},
+    origin,
+    history,
+    playwrightAccessKey = "",
+}) => {
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
 
@@ -397,7 +408,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     const { name, version, value, protocol } = browser || {};
     const isPlaywright = protocol === "playwright" || isPlaywrightBrowser(browserProtocols, name, version);
-    const caps = isPlaywright ? playwrightCode(name, version) : code(name, version, origin);
+    const caps = isPlaywright ? playwrightCode(name, version, playwrightAccessKey) : code(name, version, origin);
     const langKeys = Object.keys(caps);
     const activeLang = langKeys.includes(lang) ? lang : langKeys[0] || "curl";
 
@@ -456,73 +467,67 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
     const [moreCaps, setMoreCaps] = useState(JSON.stringify(defaultAdditionalCaps));
     const playwrightSocket = useRef(null);
 
-    const [createSession] = useEventCallback(
-        (event$, inputs$) =>
-            combineLatest(event$, inputs$).pipe(
-                tap(() => {
-                    onError("");
-                    onLoading(true);
-                }),
-                flatMap(([_, [name, version, history, useMoreCaps, moreCapsError, moreCaps]]) => {
-                    let desiredCapabilities = {
-                        browserName: `${name}`,
-                        version: `${version}`,
-                        enableVNC: true,
-                        enableVideo: true,
-                        labels: { manual: "true" },
-                        sessionTimeout: "60m",
-                        name: "Manual session",
-                    };
-                    let selenoidOptions = {
-                        enableVNC: true,
-                        enableVideo: true,
-                        sessionTimeout: "60m",
-                        labels: { manual: "true" },
-                    };
+    const createSession = useCallback(() => {
+        onError("");
+        onLoading(true);
 
-                    if (useMoreCaps && !moreCapsError) {
-                        const additionalCaps = JSON.parse(moreCaps);
-                        desiredCapabilities = Object.assign(desiredCapabilities, additionalCaps);
-                        selenoidOptions = Object.assign(selenoidOptions, additionalCaps);
-                    }
+        let desiredCapabilities = {
+            browserName: `${name}`,
+            version: `${version}`,
+            enableVNC: true,
+            enableVideo: true,
+            labels: { manual: "true" },
+            sessionTimeout: "60m",
+            name: "Manual session",
+        };
+        let selenoidOptions = {
+            enableVNC: true,
+            enableVideo: true,
+            sessionTimeout: "60m",
+            labels: { manual: "true" },
+        };
 
-                    return primeBasicAuth().pipe(
-                        flatMap(() =>
-                            ajax({
-                                url: "/wd/hub/session",
-                                method: "POST",
-                                withCredentials: true,
-                                headers: {
-                                    "Content-Type": "application/json",
+        if (useMoreCaps && !moreCapsError) {
+            const additionalCaps = JSON.parse(moreCaps);
+            desiredCapabilities = Object.assign(desiredCapabilities, additionalCaps);
+            selenoidOptions = Object.assign(selenoidOptions, additionalCaps);
+        }
+
+        primeBasicAuth()
+            .pipe(
+                flatMap(() =>
+                    ajax({
+                        url: "/wd/hub/session",
+                        method: "POST",
+                        withCredentials: true,
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        timeout: 300000,
+                        body: {
+                            desiredCapabilities,
+                            capabilities: {
+                                alwaysMatch: {
+                                    browserName: `${name}`,
+                                    browserVersion: `${version}`,
+                                    "selenoid:options": selenoidOptions,
                                 },
-                                timeout: 300000,
-                                body: {
-                                    desiredCapabilities,
-                                    capabilities: {
-                                        alwaysMatch: {
-                                            browserName: `${name}`,
-                                            browserVersion: `${version}`,
-                                            "selenoid:options": selenoidOptions,
-                                        },
-                                        firstMatch: [{}],
-                                    },
-                                },
-                            })
-                        ),
-                        filter(({ status }) => status === 200),
-                        tap((res) => history.push(`/sessions/${sessionIdFrom(res)}`))
-                    );
-                }),
-                catchError((err, caught) => {
+                                firstMatch: [{}],
+                            },
+                        },
+                    })
+                ),
+                filter(({ status }) => status === 200),
+                tap((res) => history.push(`/sessions/${sessionIdFrom(res)}`))
+            )
+            .subscribe({
+                error: (err) => {
                     console.error("Can't start session manually", err);
                     onError(err);
                     onLoading(false);
-                    return caught;
-                })
-            ),
-        [name, version, history],
-        [name, version, history, useMoreCaps, moreCapsError, moreCaps]
-    );
+                },
+            });
+    }, [name, version, history, useMoreCaps, moreCapsError, moreCaps]);
 
     const createPlaywrightSession = () => {
         if (!name || !version) {
@@ -533,7 +538,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
         onLoading(true);
 
         const existingIds = new Set(Object.keys(sessions || {}));
-        const wsUrl = playwrightEndpoint(name, version);
+        const wsUrl = playwrightEndpoint(name, version, playwrightAccessKey);
         let navigated = false;
         let eventSource;
 
@@ -626,21 +631,16 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright })
 
     return (
         <div>
-            <button
-                onClick={onCreateSession}
+            <CapabilitiesLaunchActions
+                loading={loading}
                 disabled={!name || loading}
-                className={`new-session disabled-${!name || loading} error-${!!error}`}
-                onMouseLeave={() => onError("")}
-                title={error}
-            >
-                {loading ? <BeatLoader size={3} color={"#fff"} /> : `Create Session`}
-            </button>
-            {!isPlaywright &&
-                (!name || loading ? null : (
-                    <button onClick={() => toggleMoreCaps(!useMoreCaps)} className={"new-session-more-capabilities"}>
-                        More capabilities
-                    </button>
-                ))}
+                error={error}
+                showMoreCapabilities={!isPlaywright && Boolean(name) && !loading}
+                useMoreCaps={useMoreCaps}
+                onCreateSession={onCreateSession}
+                onToggleMoreCaps={() => toggleMoreCaps(!useMoreCaps)}
+                onClearError={() => onError("")}
+            />
             {!useMoreCaps || isPlaywright ? null : (
                 <textarea
                     spellCheck={false}
@@ -659,6 +659,7 @@ Capabilities.propTypes = {
     browserProtocols: PropTypes.object,
     sessions: PropTypes.object,
     origin: PropTypes.string,
+    playwrightAccessKey: PropTypes.string,
 };
 
 export default withRouter(Capabilities);

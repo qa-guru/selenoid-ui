@@ -9,7 +9,8 @@ describe("Status", () => {
         const indicator = document.getElementById("sse-status");
         expect(indicator).toBeInTheDocument();
         expect(indicator).toHaveClass("indicator_ok");
-        expect(screen.getByText("CONNECTED")).toBeInTheDocument();
+        expect(screen.getByTestId("sse-status-badge")).toHaveClass("badge", "badge--primary");
+        expect(screen.getByTestId("sse-status-badge")).toHaveTextContent("CONNECTED");
         expect(screen.getByText("sse")).toBeInTheDocument();
     });
 

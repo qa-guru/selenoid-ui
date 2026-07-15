@@ -1,14 +1,13 @@
 import React, { useRef, useState } from "react";
-import { HashRouter as Router, Link, Route } from "react-router-dom";
-
-import AutosizeInput from "react-input-autosize";
+import { HashRouter as Router, Route } from "react-router-dom";
 
 import styled from "styled-components";
-import { GlobalStyle, StyledTopBar, StyledViewport } from "./styles.css";
+import { GlobalStyle, StyledViewport } from "./styles.css";
 
 import "event-source-polyfill";
 
-import Navigation from "../../components/Navigation";
+import { SelenoidAppHeader } from "../../components/SelenoidAppHeader";
+import { FilterInput } from "../../components/FilterInput";
 import Stats from "../../containers/Stats";
 import Capabilities from "../../containers/Capabilities";
 import Status from "../../components/Stats/Status";
@@ -20,14 +19,6 @@ import Queue from "../../components/Stats/Queue";
 import Used from "../../components/Stats/Used";
 import Separator from "../../components/Stats/Separator";
 import { useUiFeed } from "../../hooks/useUiFeed";
-
-const links = (videos) => {
-    return [
-        { href: "/", title: "STATS", exact: true },
-        { href: "/capabilities/", title: "CAPABILITIES", exact: true },
-        ...(videos ? [{ href: "/videos", title: "VIDEOS", exact: true }] : []),
-    ];
-};
 
 const formatLastUpdateTitle = (version, lastUpdate) => {
     if (!lastUpdate) {
@@ -48,6 +39,7 @@ const Viewport = () => {
         browsers,
         sessions,
         browserProtocols,
+        playwrightAccessKey,
         version,
         sseStatus,
         selenoidStatus,
@@ -58,14 +50,16 @@ const Viewport = () => {
 
     return (
         <>
+            <SelenoidAppHeader videos={state.videos} />
             <GlobalStyle />
             <Router>
                 <StatsBar>
-                    <Link to="/">
-                        <Logo>&nbsp;</Logo>
-                    </Link>
-
-                    <PanelFilter {...{ select, query, onQuery }} />
+                    <FilterInput
+                        ref={select}
+                        value={query}
+                        onChange={(event) => onQuery(event.target.value)}
+                        onClear={() => onQuery("")}
+                    />
 
                     <Status status={sseStatus} header="sse" version={version} title={statusTitle} />
                     <Status status={selenoidStatus} header="selenoid" version={version} title={statusTitle} />
@@ -79,10 +73,6 @@ const Viewport = () => {
                     <Quota total={state.total} used={state.used} pending={state.pending} />
                 </StatsBar>
                 <StyledViewport>
-                    <StyledTopBar>
-                        <Navigation links={links(state.videos)} />
-                    </StyledTopBar>
-
                     <Route
                         exact={true}
                         path="/"
@@ -118,6 +108,7 @@ const Viewport = () => {
                                 browserProtocols={browserProtocols}
                                 sessions={sessions}
                                 origin={origin}
+                                playwrightAccessKey={playwrightAccessKey}
                             />
                         )}
                     />
@@ -138,56 +129,8 @@ const Viewport = () => {
     );
 };
 
-const PanelFilter = ({ select, query, onQuery }) => (
-    <StyledPanelFilter
-        onClick={() => {
-            if (select.current) {
-                select.current.focus();
-            }
-        }}
-    >
-        <AutosizeInput
-            ref={select}
-            placeholder="Filter..."
-            value={query}
-            inputStyle={{
-                height: "30px",
-                outline: "none",
-                backgroundColor: statsBgColor,
-                border: 0,
-                padding: 0,
-                fontSize: "1.2em",
-                color: "#F2F4F3",
-                marginLeft: "5px",
-                fontWeight: 100,
-            }}
-            onChange={function (event) {
-                onQuery(event.target.value);
-            }}
-        />
-        <i
-            title="Clear"
-            className="icon dripicons-cross"
-            style={{ visibility: !query ? "hidden" : "visible" }}
-            onClick={() => onQuery("")}
-        />
-    </StyledPanelFilter>
-);
-
-const StyledPanelFilter = styled.div`
-    flex: 1;
-    display: flex;
-    box-sizing: border-box;
-    min-width: 190px;
-    height: 100%;
-    align-items: center;
-    color: #fff;
-`;
-
 export default Viewport;
 
-const aerokubeColor = "#4195d3";
-const aerokubeColorBright = "#00c6f4";
 const statsBgColor = "#272727";
 
 const StatsBar = styled.div`
@@ -197,28 +140,5 @@ const StatsBar = styled.div`
     display: flex;
     align-items: center;
     overflow: auto;
-`;
-
-const Logo = styled.div`
-    line-height: 30px;
-    transition: color 0.5s ease-out 0s;
-    color: ${aerokubeColorBright};
-    margin-left: 55px;
-    position: relative;
-    font-weight: 400;
-    font-size: 16px;
-    min-width: 40px;
-
-    &:before {
-        content: "";
-        width: 20px;
-        height: 20px;
-        position: absolute;
-        border-radius: 1px;
-        left: -30px;
-        top: 0;
-        box-shadow: 0 0 10px 5px ${aerokubeColor};
-        border: 5px solid #272727;
-        background-color: ${aerokubeColorBright};
-    }
+    padding-left: 16px;
 `;

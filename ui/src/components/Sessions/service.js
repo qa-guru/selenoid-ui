@@ -1,28 +1,30 @@
+import { useCallback, useState } from "react";
 import { of } from "rxjs";
-import { catchError, flatMap, mapTo, startWith } from "rxjs/operators";
+import { catchError, mapTo, startWith } from "rxjs/operators";
 import { ajax } from "rxjs/ajax";
-import { useEventCallback } from "rxjs-hooks";
 
 export function useSessionDelete(id) {
-    const [deleteSession, deleted] = useEventCallback(
-        (event$) =>
-            event$.pipe(
-                flatMap(() =>
-                    ajax({
-                        url: `/wd/hub/session/${id}`,
-                        method: "DELETE",
-                    }).pipe(
-                        mapTo(true),
-                        catchError((e) => {
-                            console.error("Can't delete session", id, e);
-                            return of(false);
-                        }),
-                        startWith(true)
-                    )
-                )
-            ),
-        false
-    );
+    const [deleting, setDeleting] = useState(false);
 
-    return [deleted, () => deleteSession(id)];
+    const deleteSession = useCallback(() => {
+        setDeleting(true);
+        ajax({
+            url: `/wd/hub/session/${id}`,
+            method: "DELETE",
+        })
+            .pipe(
+                mapTo(true),
+                catchError((e) => {
+                    console.error("Can't delete session", id, e);
+                    return of(false);
+                }),
+                startWith(true)
+            )
+            .subscribe({
+                complete: () => setDeleting(false),
+                error: () => setDeleting(false),
+            });
+    }, [id]);
+
+    return [deleting, deleteSession];
 }

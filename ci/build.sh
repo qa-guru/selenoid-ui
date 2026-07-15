@@ -6,6 +6,8 @@ set -x
 export GO111MODULE="on"
 
 test -f ui/package.json
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+"$ROOT/scripts/sync-design-system-static.sh"
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
 CI=false yarn --cwd ui build
 test -f ui/build/index.html

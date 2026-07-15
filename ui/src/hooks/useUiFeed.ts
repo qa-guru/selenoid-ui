@@ -15,6 +15,7 @@ const EMPTY_FEED = {
     browsers: {},
     sessions: {},
     browserProtocols: {},
+    playwrightAccessKey: "",
     version: "unknown",
 };
 
@@ -152,6 +153,7 @@ export function useUiFeed() {
         browsers: feed.browsers || {},
         sessions: feed.sessions || {},
         browserProtocols: feed.browserProtocols || {},
+        playwrightAccessKey: feed.playwrightAccessKey || "",
         version: feed.version || "unknown",
         sseStatus,
         selenoidStatus,

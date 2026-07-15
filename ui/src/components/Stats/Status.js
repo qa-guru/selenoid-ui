@@ -1,4 +1,5 @@
 import React from "react";
+import { Badge } from "@zero-design-system/react";
 import styled from "styled-components";
 import { StatsElement } from "./StatsElement";
 
@@ -44,11 +45,19 @@ const StyledStatus = styled(StatsElement)`
         .status {
             flex: 1;
             font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-badge {
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     }
 `;
 
-const state = (status) => {
+const statusLabel = (status) => {
     switch (status) {
         case "ok":
             return "CONNECTED";
@@ -61,15 +70,24 @@ const state = (status) => {
     }
 };
 
+const badgeVariant = (status) => (status === "ok" ? "primary" : "default");
+
 const Status = ({ status = "unknown", header, version = "unknown", title }) => {
     const tooltip = title || `Version: ${version}`;
+    const label = statusLabel(status);
 
     return (
         <StyledStatus>
             <div id={`${header}-status`} className={`indicator indicator_${status}`}>
                 <div className="title">{header}</div>
                 <div className="status" title={tooltip}>
-                    {state(status)}
+                    <Badge
+                        variant={badgeVariant(status)}
+                        className="status-badge"
+                        data-testid={`${header}-status-badge`}
+                    >
+                        {label}
+                    </Badge>
                 </div>
             </div>
         </StyledStatus>

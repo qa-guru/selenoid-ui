@@ -23,16 +23,20 @@ vi.mock("../../hooks/useUiFeed", () => ({
     }),
 }));
 
+vi.mock("../../components/SelenoidAppHeader", () => ({
+    SelenoidAppHeader: ({ videos }) => <div data-testid="selenoid-app-header" data-videos={String(Boolean(videos))} />,
+}));
+
 describe("Viewport", () => {
-    it("renders top bar status indicators and navigation", () => {
+    it("renders stats bar indicators without legacy navigation", () => {
         render(<Viewport />);
 
+        expect(screen.getByTestId("selenoid-app-header")).toBeInTheDocument();
         expect(document.getElementById("sse-status")).toBeInTheDocument();
         expect(document.getElementById("selenoid-status")).toBeInTheDocument();
         expect(screen.getAllByText("CONNECTED").length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByRole("link", { name: "STATS" })).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "CAPABILITIES" })).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "VIDEOS" })).toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "STATS" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "CAPABILITIES" })).not.toBeInTheDocument();
     });
 
     it("filters sessions via search input", async () => {

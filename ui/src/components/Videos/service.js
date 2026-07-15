@@ -1,28 +1,30 @@
+import { useCallback, useState } from "react";
 import { of } from "rxjs";
-import { catchError, flatMap, mapTo, startWith } from "rxjs/operators";
+import { catchError, mapTo, startWith } from "rxjs/operators";
 import { ajax } from "rxjs/ajax";
-import { useEventCallback } from "rxjs-hooks";
 
 export function useDeleteVideo(name) {
-    const [deleteVideo, deleted] = useEventCallback(
-        (event$) =>
-            event$.pipe(
-                flatMap(() =>
-                    ajax({
-                        url: `/video/${name}`,
-                        method: "DELETE",
-                    }).pipe(
-                        mapTo(true),
-                        catchError((e) => {
-                            console.error("Can't delete video", name, e);
-                            return of(false);
-                        }),
-                        startWith(true)
-                    )
-                )
-            ),
-        false
-    );
+    const [deleting, setDeleting] = useState(false);
 
-    return [deleted, () => deleteVideo(name)];
+    const deleteVideo = useCallback(() => {
+        setDeleting(true);
+        ajax({
+            url: `/video/${name}`,
+            method: "DELETE",
+        })
+            .pipe(
+                mapTo(true),
+                catchError((e) => {
+                    console.error("Can't delete video", name, e);
+                    return of(false);
+                }),
+                startWith(true)
+            )
+            .subscribe({
+                complete: () => setDeleting(false),
+                error: () => setDeleting(false),
+            });
+    }, [name]);
+
+    return [deleting, deleteVideo];
 }

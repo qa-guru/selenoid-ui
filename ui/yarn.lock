@@ -1017,6 +1017,9 @@
     loupe "^3.1.4"
     tinyrainbow "^2.0.0"
 
+"@zero-design-system/react@file:../../../../packages/react-ui":
+  version "0.1.0-pilot"
+
 agent-base@^7.1.0, agent-base@^7.1.2:
   version "7.1.4"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.4.tgz#e3cd76d4c548ee895d3c3fd8dc1f6c5b9032e7a8"
@@ -2127,7 +2130,7 @@ pretty-quick@^2.0.1:
     mri "^1.1.4"
     multimatch "^4.0.0"
 
-prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.2:
+prop-types@^15.6.0, prop-types@^15.6.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -2170,13 +2173,6 @@ react-dom@^18.3.1:
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
-
-react-input-autosize@^2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-2.2.2.tgz#fcaa7020568ec206bc04be36f4eb68e647c4d8c2"
-  integrity sha512-jQJgYCA3S0j+cuOwzuCd1OjmBmnZLdqQdiLKRYrsMMzbjUrVDS5RvJUDwJqA7sKuksDuzFtm6hZGKFu7Mjk5aw==
-  dependencies:
-    prop-types "^15.5.8"
 
 react-is@^16.13.1, react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1:
   version "16.13.1"
@@ -2344,14 +2340,6 @@ rrweb-cssom@^0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/rrweb-cssom/-/rrweb-cssom-0.8.0.tgz#3021d1b4352fbf3b614aaeed0bc0d5739abe0bc2"
   integrity sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==
-
-rxjs-hooks@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/rxjs-hooks/-/rxjs-hooks-0.5.2.tgz#2b4f287d8d0c2b108e7a6f4eee628528c1d974f6"
-  integrity sha512-sm2FMw1CbcYM7x4CRQ9OLiDtwpgQaiG8owURC2rB/iw7txpGSMU3BN25/wm19cMctezZsTM2EeH7jiyBqSfuSw==
-  dependencies:
-    tslib "^1.10.0"
-    use-constant "^1.0.0"
 
 rxjs@^6.6.7:
   version "6.6.7"
@@ -2583,7 +2571,7 @@ tr46@^5.1.0:
   dependencies:
     punycode "^2.3.1"
 
-tslib@^1.10.0, tslib@^1.9.0:
+tslib@^1.9.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==
@@ -2608,11 +2596,6 @@ url-parse@^1.5.10:
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
-
-use-constant@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/use-constant/-/use-constant-1.0.0.tgz#cfab998e6fc19ddc62b056875709f1420e339a10"
-  integrity sha512-HmVrMl3+1tEr64ace4UtP5WTdnLyrvYKwF54JVf7B7lSB76JSERDvvgWkaaxlOM3S0dSl1U3WH1l9PupNnzsvQ==
 
 use-isomorphic-layout-effect@^1.2.0:
   version "1.2.1"

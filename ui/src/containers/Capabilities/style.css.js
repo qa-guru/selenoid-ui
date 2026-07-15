@@ -38,15 +38,30 @@ export const StyledCapabilities = styled.div`
     box-sizing: border-box;
   }
 
-  .setup {
+    .setup {
     width: 250px;
     flex: 0 0 250px;
     margin-right: 30px;
 
-    button {
+    .capabilities-launch-actions {
+      width: 100%;
+    }
+
+    .capabilities-launch-actions .btn {
       width: 100%;
       margin-top: 10px;
       cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .new-session-more-capabilities {
+      width: 100%;
+      margin-top: 8px;
+      text-align: left;
+      justify-content: flex-start;
+      padding-left: 0;
+      color: ${grayColor};
     }
     
     
