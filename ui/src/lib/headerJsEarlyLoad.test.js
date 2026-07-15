@@ -23,6 +23,7 @@ describe("header.js early load (no #app-header yet)", () => {
 
         const mod = await import("../../public/js/header.js");
         expect(typeof mod.remountHeader).toBe("function");
+        expect(window.__designSystemRemountHeader).toBe(mod.remountHeader);
         await expect(mod.remountHeader()).resolves.toBeUndefined();
     });
 

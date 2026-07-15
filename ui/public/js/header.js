@@ -426,6 +426,12 @@ export async function remountHeader() {
     await mountHeader();
 }
 
+// Self-register so SPA remount works even when the bridge races React, or when
+// AppHeader injects this module after #app-header already exists.
+if (typeof window !== "undefined") {
+    window.__designSystemRemountHeader = remountHeader;
+}
+
 /**
  * Keep the active nav item in sync with client-side navigation. Browsers fire
  * `popstate` only for back/forward, not for `history.pushState`/`replaceState`

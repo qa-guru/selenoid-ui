@@ -15,8 +15,10 @@ export function SelenoidAppHeader({ videos }) {
 
         (async () => {
             window.headerConfig = config;
-            await remountDesignSystemHeader();
-            if (!cancelled) {
+            // Poll: bridge / header.js may still be loading; early eval may have
+            // no-oped mountHeader before #app-header existed.
+            const mounted = await remountDesignSystemHeader();
+            if (!cancelled && mounted) {
                 syncHeaderHashNav();
             }
         })();
