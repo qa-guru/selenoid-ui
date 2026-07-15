@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { HashRouter as Router, Route } from "react-router-dom";
+import { HashRouter as Router, Link, Route } from "react-router-dom";
 
 import styled from "styled-components";
 import { GlobalStyle, StyledTopBar, StyledViewport } from "./styles.css";
@@ -59,6 +59,10 @@ const Viewport = () => {
             <GlobalStyle />
             <Router>
                 <StatsBar>
+                    <Link to="/">
+                        <Logo data-testid="selenoid-logo">&nbsp;</Logo>
+                    </Link>
+
                     <FilterInput
                         ref={select}
                         value={query}
@@ -140,6 +144,8 @@ const Viewport = () => {
 
 export default Viewport;
 
+const aerokubeColor = "#4195d3";
+const aerokubeColorBright = "#00c6f4";
 const statsBgColor = "#272727";
 
 const StatsBar = styled.div`
@@ -149,5 +155,28 @@ const StatsBar = styled.div`
     display: flex;
     align-items: center;
     overflow: auto;
-    padding-left: 16px;
+`;
+
+const Logo = styled.div`
+    line-height: 30px;
+    transition: color 0.5s ease-out 0s;
+    color: ${aerokubeColorBright};
+    margin-left: 55px;
+    position: relative;
+    font-weight: 400;
+    font-size: 16px;
+    min-width: 40px;
+
+    &:before {
+        content: "";
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        border-radius: 1px;
+        left: -30px;
+        top: 0;
+        box-shadow: 0 0 10px 5px ${aerokubeColor};
+        border: 5px solid #272727;
+        background-color: ${aerokubeColorBright};
+    }
 `;

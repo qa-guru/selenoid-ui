@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { CapabilitiesLaunchActions } from "./index";
 
 describe("CapabilitiesLaunchActions", () => {
-    it("renders library Button for create session", () => {
+    it("renders native Selenoid buttons for create session", () => {
         render(
             <CapabilitiesLaunchActions
                 loading={false}
@@ -19,7 +19,8 @@ describe("CapabilitiesLaunchActions", () => {
         );
 
         const create = screen.getByTestId("capabilities-create-session");
-        expect(create).toHaveClass("btn", "btn--secondary", "btn--block");
+        expect(create.tagName).toBe("BUTTON");
+        expect(create).toHaveClass("new-session", "disabled-false", "error-false");
         expect(create).toHaveTextContent("Create Session");
     });
 

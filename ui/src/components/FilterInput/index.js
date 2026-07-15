@@ -1,5 +1,4 @@
 import React, { forwardRef } from "react";
-import { Input } from "@zero-design-system/react";
 import styled from "styled-components";
 
 const statsBgColor = "#272727";
@@ -27,10 +26,6 @@ const StyledPanelFilter = styled.div`
     }
 `;
 
-/**
- * Session filter — v3 pilot on @zero-design-system/react Input primitive.
- * Replaces react-input-autosize for the stats-bar search field.
- */
 export const FilterInput = forwardRef(function FilterInput({ value, onChange, onClear }, ref) {
     return (
         <StyledPanelFilter
@@ -40,8 +35,9 @@ export const FilterInput = forwardRef(function FilterInput({ value, onChange, on
                 }
             }}
         >
-            <Input
+            <input
                 ref={ref}
+                className="input"
                 placeholder="Filter..."
                 value={value}
                 data-testid="session-filter-input"

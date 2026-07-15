@@ -1,10 +1,6 @@
 import React from "react";
-import { Button } from "@zero-design-system/react";
 import BeatLoader from "react-spinners/BeatLoader";
 
-/**
- * Capabilities launch actions — v3.2 pilot on @zero-design-system/react Button.
- */
 export function CapabilitiesLaunchActions({
     loading,
     disabled,
@@ -17,10 +13,8 @@ export function CapabilitiesLaunchActions({
 }) {
     return (
         <div className="capabilities-launch-actions">
-            <Button
+            <button
                 type="button"
-                variant="secondary"
-                block
                 className={`new-session disabled-${disabled} error-${Boolean(error)}`}
                 data-testid="capabilities-create-session"
                 disabled={disabled}
@@ -29,17 +23,16 @@ export function CapabilitiesLaunchActions({
                 title={error}
             >
                 {loading ? <BeatLoader size={3} color={"#fff"} /> : "Create Session"}
-            </Button>
+            </button>
             {showMoreCapabilities ? (
-                <Button
+                <button
                     type="button"
-                    variant="ghost"
                     className="new-session-more-capabilities"
                     data-testid="capabilities-more-caps"
                     onClick={onToggleMoreCaps}
                 >
                     {useMoreCaps ? "Hide capabilities" : "More capabilities"}
-                </Button>
+                </button>
             ) : null}
         </div>
     );

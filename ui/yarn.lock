@@ -1017,9 +1017,6 @@
     loupe "^3.1.4"
     tinyrainbow "^2.0.0"
 
-"@zero-design-system/react@file:./vendor/react-ui":
-  version "0.1.0-pilot"
-
 agent-base@^7.1.0, agent-base@^7.1.2:
   version "7.1.4"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.4.tgz#e3cd76d4c548ee895d3c3fd8dc1f6c5b9032e7a8"

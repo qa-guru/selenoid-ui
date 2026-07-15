@@ -10,28 +10,15 @@ CI runs `yarn --cwd ui install --frozen-lockfile` (`ci/test.sh`, `ci/build.sh`).
 
 `yarn install` succeeds. A non-fatal peer warning may appear from legacy transitive deps under yarn.
 
-### v3.3 (Status badges)
+### Selenoid 2.x UI freeze
 
--   **Status** indicators — CONNECTED/STALE/ISSUE on library `Badge` (`components/Stats/Status.js`).
+This React 18/Vite line is maintenance-only for Selenoid 2.x. Keep the native Selenoid header, navigation, filter, buttons, layout, and theme. Functional fixes may touch UI code, but they must preserve the existing visual design.
 
-### v3.1 (layout unification)
+### Deferred to 3.0.0
 
--   **SelenoidAppHeader** — единственный nav-слой (`AppHeader` + conditional Videos + hash active-nav via `syncHeaderHashNav.js`).
--   Legacy **Navigation** / Logo link убраны из stats-bar; stats-bar только метрики + filter.
--   `public/js/selenoid-header-bridge.js` — `window.__designSystemRemountHeader` для dynamic nav updates.
-
-### v3 (design-system + `@zero-design-system/react`)
-
--   **AppHeader** embed (`src/lib/headerConfig.js`) — canonical design-system header via `/js/header.js`.
--   **FilterInput** pilot — stats-bar session filter on library `Input` (`src/components/FilterInput/`).
--   **CapabilitiesLaunchActions** — Create Session / More capabilities on library `Button`.
--   `rxjs-hooks` removed — delete hooks use React `useCallback` + `rxjs/ajax`.
--   Design-system static copied to `ui/public/` by `scripts/sync-design-system-static.sh` (run before `yarn build` / CI).
-
-### Deferred (still v3+ / not in this slice)
-
--   Upgrade React 18 → **React 19**.
--   Migrate `react-router-dom` **v5 → v7**.
+-   Design-system `AppHeader`, `Input`, `Button`, `Badge`, static assets, and bridge scripts.
+-   Header/navigation unification and sessions/layout redesign.
+-   React 18 → React 19 and `react-router-dom` v5 → v7.
 
 <!-- stack-branches-note:start -->
 

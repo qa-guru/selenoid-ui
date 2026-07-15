@@ -39,6 +39,8 @@ Dashboard PNG updates after each orchestrator run on `main` (Playwright screensh
 
 _Вы на `main` — активная разработка (следующий рубеж: 3.0.0). Prod-линия зафиксирована тегом **v2.3.0** на [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18)._
 
+**UI freeze для 2.x:** ветки и теги `v2.2.x` / `v2.3.x` принимают только maintenance-фиксы. Не добавляйте design-system components, новый header/navigation, layout/theme/button refresh или redesign экранов в 2.x. Visual changes идут в **Selenoid 3.0.0**; в 2.x допустимы только restoration-fixes, сохраняющие текущий Selenoid-визуал.
+
 <!-- stack-branches-note:end -->
 
 Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) — форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) с поддержкой **Playwright-сессий** в Capabilities.
