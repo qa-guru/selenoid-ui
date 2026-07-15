@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import RFB from "@novnc/novnc";
+import RFB from "@novnc/novnc/lib/rfb.js";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 

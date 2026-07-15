@@ -34,11 +34,13 @@ Object.defineProperty(window, "WebSocket", {
     writable: true,
 });
 
-vi.mock("@novnc/novnc", () => ({
+const novncMock = {
     default: vi.fn().mockImplementation(() => ({
         disconnect: vi.fn(),
         addEventListener: vi.fn(),
         scaleViewport: true,
         resizeSession: true,
     })),
-}));
+};
+vi.mock("@novnc/novnc", () => novncMock);
+vi.mock("@novnc/novnc/lib/rfb.js", () => novncMock);

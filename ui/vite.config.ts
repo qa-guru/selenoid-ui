@@ -4,11 +4,6 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     plugins: [react()],
-    resolve: {
-        alias: {
-            "@novnc/novnc": resolve(__dirname, "src/test/novncStub.ts"),
-        },
-    },
     esbuild: {
         loader: "jsx",
         include: /src\/.*\.jsx?$/,
@@ -66,7 +61,7 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
-        exclude: ["@novnc/novnc"],
+        include: ["@novnc/novnc/lib/rfb.js"],
         esbuildOptions: {
             loader: {
                 ".js": "jsx",
@@ -79,6 +74,12 @@ export default defineConfig({
         globals: true,
         include: ["src/**/*.test.{ts,tsx,js,jsx}"],
         setupFiles: ["./src/test/setup.ts", "allure-vitest/setup"],
+        // Stub only under Vitest. A global resolve.alias to novncStub.ts was baked into
+        // production (v2.3.0 Vite cut) and left the UI stuck on "VNC CONNECTING".
+        alias: {
+            "@novnc/novnc/lib/rfb.js": resolve(__dirname, "src/test/novncStub.ts"),
+            "@novnc/novnc": resolve(__dirname, "src/test/novncStub.ts"),
+        },
         reporters: [
             "default",
             [
