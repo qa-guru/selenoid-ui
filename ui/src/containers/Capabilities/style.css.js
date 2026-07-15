@@ -65,55 +65,84 @@ export const StyledCapabilities = styled.div`
     }
     
     
-    .Select-control {
+    /* react-select v5 (classNamePrefix="Select") — not v1 .Select-* */
+    .Select__control {
     background-color: inherit;
     border-radius: 0;
     border: none;
     color: #fff;
+    min-height: 30px;
     height: 30px;
+    box-shadow: none;
+    cursor: pointer;
 
     &:hover {
       box-shadow: none;
-    }
-
-    & .Select-input {
-      outline: none;
-
-      input {
-        color: #fff;
-      }
+      border-color: transparent;
     }
   }
 
-    .has-value.Select--single > .Select-control .Select-value .Select-value-label,
-    .has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
+    .Select__value-container {
+      padding: 0 8px;
+      height: 30px;
+    }
+
+    .Select__placeholder {
+      color: #999;
+      margin: 0;
+    }
+
+    .Select__single-value {
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 2px;
+      margin: 0;
     }
-  
-    .Select-menu-outer {
-      border-bottom-right-radius: 0;
-      border-bottom-left-radius: 0;
-      background-color: inherit;
+
+    .Select__input-container {
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .Select__indicator-separator {
+      display: none;
+    }
+
+    .Select__dropdown-indicator {
+      color: #999;
+      padding: 4px;
+    }
+
+    .Select__menu {
+      border-radius: 0;
+      background-color: ${selectBgColor};
       border: 0;
       box-shadow: none;
+      margin-top: 0;
+      z-index: 20;
+    }
+
+    .Select__menu-list {
+      padding: 0;
+      background-color: ${selectBgColor};
     }
   
-    .Select-option {
+    .Select__option {
       background-color: ${selectBgColor};
-      color: #ccc;
+      color: #eee;
       text-transform: uppercase;
+      cursor: pointer;
     }
-    .Select-option:last-child {
+    .Select__option:last-child {
       border-bottom-right-radius: 0;
       border-bottom-left-radius: 0;
     }
-    .Select-option.is-selected {
+    .Select__option--is-selected {
       background-color: ${selectBgColor};
       color: ${selectedColor};
     }
-    .Select-option.is-focused {
+    .Select__option--is-focused {
       background-color: ${selectBgColor};
       color: ${selectedColor};
     }

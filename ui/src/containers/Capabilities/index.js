@@ -425,6 +425,7 @@ const Capabilities = ({
                 <div className="setup">
                     <Select
                         className="capabilities-browser-select"
+                        classNamePrefix="Select"
                         name="browsers"
                         value={available.find((item) => item.value === value)}
                         options={available}
