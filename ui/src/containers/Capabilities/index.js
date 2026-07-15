@@ -422,10 +422,11 @@ const Capabilities = ({
         <StyledCapabilities>
             <div className="section-title">Capabilities</div>
             <div className="capabilities-body">
-                <div className="setup">
+                <div className="setup" data-testid="capabilities-setup">
                     <Select
                         className="capabilities-browser-select"
                         classNamePrefix="Select"
+                        unstyled
                         name="browsers"
                         value={available.find((item) => item.value === value)}
                         options={available}

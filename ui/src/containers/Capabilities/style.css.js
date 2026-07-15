@@ -38,53 +38,55 @@ export const StyledCapabilities = styled.div`
     box-sizing: border-box;
   }
 
-    .setup {
+  .setup {
     width: 250px;
     flex: 0 0 250px;
     margin-right: 30px;
+    position: relative;
 
-    .capabilities-launch-actions {
-      width: 100%;
-    }
-
-    .capabilities-launch-actions .btn {
+    button {
       width: 100%;
       margin-top: 10px;
       cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 1px;
     }
 
-    .new-session-more-capabilities {
-      width: 100%;
-      margin-top: 8px;
-      text-align: left;
-      justify-content: flex-start;
-      padding-left: 0;
-      color: ${grayColor};
-    }
-    
-    
-    /* react-select v5 (classNamePrefix="Select") — not v1 .Select-* */
+    /* react-select v5 unstyled + classNamePrefix="Select" — preserve Selenoid 2 look */
     .Select__control {
-    background-color: inherit;
-    border-radius: 0;
-    border: none;
-    color: #fff;
-    min-height: 30px;
-    height: 30px;
-    box-shadow: none;
-    cursor: pointer;
-
-    &:hover {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: inherit;
+      border-radius: 0;
+      border: none;
+      color: #fff;
+      min-height: 30px;
+      height: 30px;
       box-shadow: none;
-      border-color: transparent;
+      cursor: pointer;
+
+      &:hover {
+        box-shadow: none;
+        border-color: transparent;
+      }
+
+      &--is-focused {
+        box-shadow: none;
+        border-color: transparent;
+      }
     }
-  }
 
     .Select__value-container {
+      display: flex;
+      align-items: center;
+      flex: 1;
       padding: 0 8px;
       height: 30px;
+      overflow: hidden;
+    }
+
+    .Select__indicators {
+      display: flex;
+      align-items: center;
     }
 
     .Select__placeholder {
@@ -112,11 +114,16 @@ export const StyledCapabilities = styled.div`
     .Select__dropdown-indicator {
       color: #999;
       padding: 4px;
+      display: flex;
+      align-items: center;
     }
 
     .Select__menu {
+      position: absolute;
+      left: 0;
+      right: 0;
       border-radius: 0;
-      background-color: ${selectBgColor};
+      background-color: inherit;
       border: 0;
       box-shadow: none;
       margin-top: 0;
@@ -125,14 +132,17 @@ export const StyledCapabilities = styled.div`
 
     .Select__menu-list {
       padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
       background-color: ${selectBgColor};
     }
-  
+
     .Select__option {
       background-color: ${selectBgColor};
-      color: #eee;
+      color: #ccc;
       text-transform: uppercase;
       cursor: pointer;
+      padding: 8px 12px;
     }
     .Select__option:last-child {
       border-bottom-right-radius: 0;
@@ -146,7 +156,6 @@ export const StyledCapabilities = styled.div`
       background-color: ${selectBgColor};
       color: ${selectedColor};
     }
-  
   }
 
   .code-panel {
@@ -213,35 +222,40 @@ export const StyledCapabilities = styled.div`
     text-transform: uppercase;
     font-size: 1.1em;
     outline: none;
+    opacity: 1;
 
     &:hover {
       border-color: ${selectedColor};
       background-color: ${borderLangsColor};
     }
 
+    &:disabled,
     &.disabled-true {
       border-color: ${borderLangsColor};
       background-color: ${borderLangsColor};
       color: ${grayColor};
+      opacity: 1;
+      -webkit-text-fill-color: ${grayColor};
 
       &:hover {
         border-color: ${borderLangsColor};
         cursor: default;
       }
     }
-    
-     &.error-true {
+
+    &.error-true {
       border-color: ${errorColor};
       color: ${errorColor};
     }
   }
-  
+
   .new-session-more-capabilities {
     background: none;
     border: none;
     color: ${grayColor};
     text-align: left;
     padding: 0;
+    margin-top: 8px;
   }
   
   textarea.more-capabilities {
