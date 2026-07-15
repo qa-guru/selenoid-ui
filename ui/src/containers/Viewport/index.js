@@ -2,12 +2,12 @@ import React, { useRef, useState } from "react";
 import { HashRouter as Router, Route } from "react-router-dom";
 
 import styled from "styled-components";
-import { GlobalStyle, StyledViewport } from "./styles.css";
+import { GlobalStyle, StyledTopBar, StyledViewport } from "./styles.css";
 
 import "event-source-polyfill";
 
-import { SelenoidAppHeader } from "../../components/SelenoidAppHeader";
 import { FilterInput } from "../../components/FilterInput";
+import Navigation from "../../components/Navigation";
 import Stats from "../../containers/Stats";
 import Capabilities from "../../containers/Capabilities";
 import Status from "../../components/Stats/Status";
@@ -19,6 +19,12 @@ import Queue from "../../components/Stats/Queue";
 import Used from "../../components/Stats/Used";
 import Separator from "../../components/Stats/Separator";
 import { useUiFeed } from "../../hooks/useUiFeed";
+
+const links = (videos) => [
+    { href: "/", title: "STATS", exact: true },
+    { href: "/capabilities", title: "CAPABILITIES", exact: true },
+    ...(videos ? [{ href: "/videos", title: "VIDEOS", exact: true }] : []),
+];
 
 const formatLastUpdateTitle = (version, lastUpdate) => {
     if (!lastUpdate) {
@@ -50,7 +56,6 @@ const Viewport = () => {
 
     return (
         <>
-            <SelenoidAppHeader videos={state.videos} />
             <GlobalStyle />
             <Router>
                 <StatsBar>
@@ -73,6 +78,10 @@ const Viewport = () => {
                     <Quota total={state.total} used={state.used} pending={state.pending} />
                 </StatsBar>
                 <StyledViewport>
+                    <StyledTopBar>
+                        <Navigation links={links(state.videos)} />
+                    </StyledTopBar>
+
                     <Route
                         exact={true}
                         path="/"
