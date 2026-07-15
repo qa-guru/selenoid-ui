@@ -70,13 +70,14 @@ type sessionInfo struct {
 
 // result - processed selenoid state
 type result struct {
-	State            State                  `json:"state"`
-	Origin           string                 `json:"origin"`
-	Browsers         map[string]int         `json:"browsers"`
-	Sessions         map[string]sessionInfo `json:"sessions"`
-	BrowserProtocols BrowserProtocols       `json:"browserProtocols,omitempty"`
-	Version          string                 `json:"version"`
-	Errors           []interface{}          `json:"errors"`
+	State               State                  `json:"state"`
+	Origin              string                 `json:"origin"`
+	Browsers            map[string]int         `json:"browsers"`
+	Sessions            map[string]sessionInfo `json:"sessions"`
+	BrowserProtocols    BrowserProtocols       `json:"browserProtocols,omitempty"`
+	PlaywrightAccessKey string                 `json:"playwrightAccessKey,omitempty"`
+	Version             string                 `json:"version"`
+	Errors              []interface{}          `json:"errors"`
 }
 
 func httpDo(ctx context.Context, req *http.Request, handle func(*http.Response, error) error) error {
@@ -103,7 +104,7 @@ const (
 	videosPath = "/video"
 )
 
-func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, version string, browserProtocols BrowserProtocols) ([]byte, error) {
+func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, version string, browserProtocols BrowserProtocols, playwrightAccessKey string) ([]byte, error) {
 	req, err := http.NewRequest("GET", statusURI.String()+statusPath, nil)
 	if err != nil {
 		return nil, err
@@ -137,10 +138,10 @@ func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, vers
 
 	state.Videos = videos
 
-	return json.Marshal(toUI(state, webdriverURI, version, browserProtocols))
+	return json.Marshal(toUI(state, webdriverURI, version, browserProtocols, playwrightAccessKey))
 }
 
-func toUI(state State, webdriverURI *url.URL, version string, browserProtocols BrowserProtocols) result {
+func toUI(state State, webdriverURI *url.URL, version string, browserProtocols BrowserProtocols, playwrightAccessKey string) result {
 	browsers := make(map[string]int)
 	sessions := make(map[string]sessionInfo)
 
@@ -163,12 +164,13 @@ func toUI(state State, webdriverURI *url.URL, version string, browserProtocols B
 	}
 
 	return result{
-		State:            state,
-		Origin:           webdriverURI.String(),
-		Browsers:         browsers,
-		Sessions:         sessions,
-		BrowserProtocols: browserProtocols,
-		Version:          version,
-		Errors:           make([]interface{}, 0),
+		State:               state,
+		Origin:              webdriverURI.String(),
+		Browsers:            browsers,
+		Sessions:            sessions,
+		BrowserProtocols:    browserProtocols,
+		PlaywrightAccessKey: playwrightAccessKey,
+		Version:             version,
+		Errors:              make([]interface{}, 0),
 	}
 }

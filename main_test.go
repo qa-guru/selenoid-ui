@@ -110,6 +110,10 @@ func TestPing(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	t.Run("Status", func(t *testing.T) {
+		prevAccessKey := playwrightAccessKey
+		playwrightAccessKey = "qa_engineer:aAb_-4gs53FD"
+		defer func() { playwrightAccessKey = prevAccessKey }()
+
 		selenoidSrv := httptest.NewServer(selenoidApi())
 		defer selenoidSrv.Close()
 		statusURI, _ = url.Parse(selenoidSrv.URL)
@@ -119,6 +123,12 @@ func TestStatus(t *testing.T) {
 		AssertThat(t, rsp, Code{http.StatusOK})
 		AssertThat(t, rsp.Body, Is{Not{nil}})
 		AssertThat(t, rsp.Header.Get("Content-Type"), Is{"application/json"})
+
+		var data map[string]interface{}
+		bt, readErr := io.ReadAll(rsp.Body)
+		AssertThat(t, readErr, Is{nil})
+		AssertThat(t, json.Unmarshal(bt, &data), Is{nil})
+		AssertThat(t, data["playwrightAccessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
 	})
 }
 
