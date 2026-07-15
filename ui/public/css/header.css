@@ -1,5 +1,11 @@
 /* Header — фаза 2 (skill header-layout) */
 
+/* Reserve space: .header is position:fixed and does not contribute height. */
+#app-header {
+    display: block;
+    min-height: var(--header-height);
+}
+
 .header {
     position: fixed;
     top: 0;

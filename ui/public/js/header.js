@@ -1,9 +1,14 @@
 import { syncThemeToggleIcon } from "./theme-icons.js";
 import { fetchTemplateText } from "./dom-utils.js";
 
-const mount = document.getElementById("app-header");
-if (!mount) {
-    throw new Error("header.js: missing #app-header mount point");
+/**
+ * Resolve #app-header lazily. In SPA (Selenoid UI) the mount is created by
+ * React after this module may already be imported via selenoid-header-bridge;
+ * a top-level throw would poison the ES module cache and kill the header for
+ * the whole session (no Stats / Capabilities / Videos links).
+ */
+function getMount() {
+    return document.getElementById("app-header");
 }
 
 const TEMPLATE_URLS = [new URL("../templates/header.html", import.meta.url)];
@@ -374,6 +379,11 @@ async function fetchHeaderTemplate() {
 }
 
 async function mountHeader() {
+    const mount = getMount();
+    if (!mount) {
+        return;
+    }
+
     mount.innerHTML = await fetchHeaderTemplate();
 
     const config = resolveHeaderConfig(window.headerConfig);
@@ -427,7 +437,12 @@ function observeNavigation() {
     if (typeof window === "undefined") {
         return;
     }
-    const resync = () => syncActiveNav(mount);
+    const resync = () => {
+        const mount = getMount();
+        if (mount) {
+            syncActiveNav(mount);
+        }
+    };
     window.addEventListener("popstate", resync);
     window.addEventListener("header:locationchange", resync);
 
