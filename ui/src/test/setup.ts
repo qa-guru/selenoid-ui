@@ -9,7 +9,8 @@ Object.defineProperty(window, "EventSource", {
 });
 
 class MockWebSocket {
-    constructor(_url) {
+    constructor(url) {
+        this.url = url;
         this.readyState = MockWebSocket.OPEN;
         this.onopen = null;
         this.onclose = null;

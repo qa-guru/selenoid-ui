@@ -19,46 +19,8 @@ import {
     isPlaywrightBrowser,
     sessionIdFrom,
 } from "../../util/capabilitiesLogic";
+import { playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
-
-const defaultPlaywrightSelenoidOptions = (accessKey = "") => {
-    const options = {
-        name: "Session started using curl command...",
-        sessionTimeout: "1m",
-        enableVNC: "true",
-        enableVideo: "true",
-    };
-    if (accessKey) {
-        options.accessKey = accessKey;
-    }
-    return options;
-};
-
-const manualPlaywrightSelenoidOptions = (accessKey = "") => ({
-    ...defaultPlaywrightSelenoidOptions(accessKey),
-    name: "Manual session",
-    sessionTimeout: "60m",
-    enableVideo: "true",
-    headless: "false",
-    "labels.manual": "true",
-});
-
-const playwrightWsBase = (browser, version) => {
-    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${wsProtocol}//${window.location.host}/playwright/${browser}/${version}`;
-};
-
-const playwrightEndpoint = (browser, version, accessKey = "") => {
-    const params = new URLSearchParams(manualPlaywrightSelenoidOptions(accessKey));
-    return `${playwrightWsBase(browser, version)}?${params.toString()}`;
-};
-
-const playwrightSnippet = (browser, version, accessKey = "") => {
-    const base = playwrightWsBase(browser, version);
-    const selenoidOptions = defaultPlaywrightSelenoidOptions(accessKey);
-    const query = new URLSearchParams(selenoidOptions).toString();
-    return { base, selenoidOptions, query, full: `${base}?${query}` };
-};
 
 const javaSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
@@ -436,7 +398,13 @@ const Capabilities = ({
                         isClearable={false}
                         noOptionsMessage={() => "No information about browsers"}
                     />
-                    <Launch browser={browser} history={history} sessions={sessions} isPlaywright={isPlaywright} />
+                    <Launch
+                        browser={browser}
+                        history={history}
+                        sessions={sessions}
+                        isPlaywright={isPlaywright}
+                        playwrightAccessKey={playwrightAccessKey}
+                    />
                 </div>
                 <div className="code-panel">
                     <CodeHighlight language={activeLang}>{caps[activeLang] || ""}</CodeHighlight>
@@ -459,7 +427,7 @@ const Capabilities = ({
     );
 };
 
-const Launch = ({ browser: { name, version }, history, sessions, isPlaywright }) => {
+const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, playwrightAccessKey = "" }) => {
     const defaultAdditionalCaps = { operaOptions: { binary: "/usr/bin/opera" } };
 
     const [loading, onLoading] = useState(false);
