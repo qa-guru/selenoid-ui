@@ -24,7 +24,7 @@ export function sortSessionIds(ids, sessions) {
 }
 
 export function filterVideoFiles(videos, query) {
-    return videos.filter((fname) => fname.includes(query) && fname.includes(".")).reverse();
+    return videos.filter((fname) => fname.includes(query) && fname.includes("."));
 }
 
 export function videoPreloadMode(count) {

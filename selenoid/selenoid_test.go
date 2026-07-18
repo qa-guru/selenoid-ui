@@ -107,5 +107,35 @@ func TestStatus(t *testing.T) {
 		var payload map[string]interface{}
 		AssertThat(t, json.Unmarshal(data, &payload), Is{nil})
 		AssertThat(t, payload["playwrightAccessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
+		state, ok := payload["state"].(map[string]interface{})
+		AssertThat(t, ok, Is{true})
+		videos, ok := state["videos"].([]interface{})
+		AssertThat(t, ok, Is{true})
+		AssertThat(t, len(videos), Is{0})
+	})
+}
+
+func TestStatusDoesNotFetchVideoList(t *testing.T) {
+	t.Run("Status does not request /video", func(t *testing.T) {
+		videoHits := 0
+		mux := http.NewServeMux()
+		mux.HandleFunc("/status", mockStatus)
+		mux.HandleFunc("/video", func(w http.ResponseWriter, r *http.Request) {
+			videoHits++
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"videos":["should-not-load.mp4"],"total":1,"limit":10,"offset":0}`))
+		})
+		mux.HandleFunc("/video/", func(w http.ResponseWriter, r *http.Request) {
+			videoHits++
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"videos":["should-not-load.mp4"],"total":1,"limit":10,"offset":0}`))
+		})
+		srv := httptest.NewServer(mux)
+		defer srv.Close()
+		statusURI, _ := url.Parse(srv.URL)
+		data, err := Status(context.Background(), statusURI, statusURI, "version", nil, "")
+		AssertThat(t, err, Is{nil})
+		AssertThat(t, data, Not{nil})
+		AssertThat(t, videoHits, Is{0})
 	})
 }

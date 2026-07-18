@@ -101,7 +101,6 @@ func httpDo(ctx context.Context, req *http.Request, handle func(*http.Response, 
 
 const (
 	statusPath = "/status"
-	videosPath = "/video"
 )
 
 func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, version string, browserProtocols BrowserProtocols, playwrightAccessKey string) ([]byte, error) {
@@ -111,7 +110,6 @@ func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, vers
 	}
 
 	var state State
-	var videos []string
 
 	if err = httpDo(ctx, req.WithContext(ctx), func(resp *http.Response, err error) error {
 		if err != nil {
@@ -123,20 +121,8 @@ func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, vers
 		return nil, err
 	}
 
-	req, err = http.NewRequest("GET", webdriverURI.String()+videosPath+"?json", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	_ = httpDo(ctx, req.WithContext(ctx), func(resp *http.Response, err error) error {
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-		return json.NewDecoder(resp.Body).Decode(&videos)
-	})
-
-	state.Videos = videos
+	// Videos are loaded separately via paginated GET /video/?json — never embed the full list in status.
+	state.Videos = Videos{}
 
 	return json.Marshal(toUI(state, webdriverURI, version, browserProtocols, playwrightAccessKey))
 }

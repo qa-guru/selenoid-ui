@@ -136,4 +136,38 @@ export const StyledVideos = styled.div`
             display: none;
         }
     }
+
+    .videos__pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin: 10px 0 30px;
+        color: #fff;
+        font-size: 0.95em;
+    }
+
+    .videos__pager-btn {
+        background: transparent;
+        border: 1px solid ${colorBorder};
+        color: #fff;
+        padding: 6px 14px;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            border-color: ${colorAccent};
+            color: ${colorAccent};
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+    }
+
+    .videos__pager-status {
+        min-width: 64px;
+        text-align: center;
+        color: #fff;
+    }
 `;
