@@ -191,6 +191,81 @@
     border-top: 1px solid var(--panel-border);
 }
 
+/* Foot as right rail — language tabs top→bottom beside body (Capabilities).
+   ≥769px only; narrow viewports keep the bottom foot so the snippet stays wide. */
+.panel.panel--foot-rail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+        "bar bar"
+        "body foot";
+}
+
+.panel--foot-rail > .panel__bar {
+    grid-area: bar;
+}
+
+.panel--foot-rail > .panel__body {
+    grid-area: body;
+}
+
+.panel--foot-rail > .panel__foot {
+    grid-area: foot;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-3) var(--space-2);
+    border-top: none;
+    border-left: 1px solid var(--panel-border);
+    overflow: auto;
+}
+
+.panel--terminal.panel--foot-rail .panel__foot > .tabs {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+}
+
+.panel--terminal.panel--foot-rail .panel__foot > .tabs .tab {
+    justify-content: center;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .panel.panel--foot-rail {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: unset;
+        grid-template-rows: unset;
+        grid-template-areas: unset;
+    }
+
+    .panel--foot-rail > .panel__bar,
+    .panel--foot-rail > .panel__body,
+    .panel--foot-rail > .panel__foot {
+        grid-area: unset;
+    }
+
+    .panel--foot-rail > .panel__foot {
+        align-self: auto;
+        border-left: none;
+        border-top: 1px solid var(--panel-border);
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .panel--terminal.panel--foot-rail .panel__foot > .tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .panel--terminal.panel--foot-rail .panel__foot > .tabs .tab {
+        width: auto;
+    }
+}
+
 /* Terminal panel — format / language tabs in bar trail or foot */
 .panel--terminal .panel__trail > .tabs,
 .panel--terminal .panel__foot > .tabs {

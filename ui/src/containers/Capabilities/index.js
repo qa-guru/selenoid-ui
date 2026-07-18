@@ -707,6 +707,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         variant="terminal"
                         testId="capabilities-terminal-panel"
                         bodyClassName="capabilities-terminal-body"
+                        footPlacement="rail"
                         foot={
                             <div className="tabs" role="tablist" aria-label="Language">
                                 {langKeys.map((next) => (

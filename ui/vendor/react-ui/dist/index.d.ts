@@ -137,6 +137,8 @@ declare const Input: react.ForwardRefExoticComponent<InputProps & react.RefAttri
 
 type PanelVariant = 'content' | 'terminal';
 type PanelTone = 'dark' | 'light';
+/** `bottom` (default) — foot under body; `rail` — foot as right column (`.panel--foot-rail`). */
+type PanelFootPlacement = 'bottom' | 'rail';
 interface PanelAction {
     /** Icon glyph rendered inside the `icon-btn` (`.icon` slot). */
     icon: ReactNode;
@@ -170,10 +172,15 @@ interface PanelProps {
      */
     trail?: ReactNode;
     /**
-     * Optional footer below the body (`.panel__foot`) — e.g. language tabs under
-     * the terminal snippet.
+     * Optional footer (`.panel__foot`) — e.g. language tabs. Placement via
+     * `footPlacement` (`bottom` under body, or `rail` as a right column).
      */
     foot?: ReactNode;
+    /**
+     * Where to render `foot`. `bottom` (default) → under body; `rail` →
+     * `.panel--foot-rail` (tabs top→bottom on the right, ≥769px).
+     */
+    footPlacement?: PanelFootPlacement;
     /**
      * Optional bar-end meta before actions (canonical `.panel__bar-end` — e.g.
      * vector hash badge). Sibling of `.panel__actions` (not a wrapper around them).
@@ -192,7 +199,7 @@ interface PanelProps {
     hidden?: boolean;
     className?: string;
 }
-declare function Panel({ title, children, variant, tone, trail, foot, barEnd, actions, testId, titleTestId, bodyClassName, hidden, className, }: PanelProps): react.JSX.Element;
+declare function Panel({ title, children, variant, tone, trail, foot, footPlacement, barEnd, actions, testId, titleTestId, bodyClassName, hidden, className, }: PanelProps): react.JSX.Element;
 
 type PlaqueFieldLabelVariant = 'param' | 'caption';
 interface PlaqueFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'className'> {

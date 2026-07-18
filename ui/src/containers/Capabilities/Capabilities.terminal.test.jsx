@@ -32,11 +32,11 @@ function renderCapabilities() {
 }
 
 describe("Capabilities CodeHighlight → Panel terminal", () => {
-    it("wraps the snippet in panel--terminal with lang tabs in the foot", () => {
+    it("wraps the snippet in panel--terminal with lang tabs in the foot rail", () => {
         renderCapabilities();
 
         const panel = screen.getByTestId("capabilities-terminal-panel");
-        expect(panel).toHaveClass("panel", "panel--terminal");
+        expect(panel).toHaveClass("panel", "panel--terminal", "panel--foot-rail");
         expect(panel.querySelector(".panel__code")).toBeTruthy();
         expect(panel.querySelector(".capabilities-lang")).toBeNull();
 

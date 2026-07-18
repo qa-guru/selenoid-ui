@@ -25,19 +25,66 @@ export const StyledCapabilities = styled.div`
     line-height: 20px;
   }
 
-  /* Driver+Remote : terminal — same 2fr:3fr as configurator__layout--terminal. */
+  /*
+   * Driver+Remote : terminal — canon configurator__layout--terminal 6-col ladder
+   * (docs/layout-standard.md § Configurator terminal shell). Full-bleed: no 5% side pad.
+   */
   .capabilities-body {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     align-items: start;
-    gap: 20px 30px;
+    gap: 20px 24px;
     width: 100%;
-    padding: 20px 5% 40px;
+    padding: 20px 16px 40px;
     box-sizing: border-box;
   }
 
-  .setup {
+  .setup,
+  .code-panel {
+    grid-column: auto;
     min-width: 0;
+  }
+
+  /* ≥1600 — cols 2–3 cfg / 4–6 term */
+  @media (min-width: 1600px) {
+    .capabilities-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 3fr);
+      align-items: stretch;
+    }
+    .setup { grid-column: 2; }
+    .code-panel { grid-column: 3; }
+  }
+
+  @media (min-width: 1280px) and (max-width: 1599px) {
+    .capabilities-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 2fr);
+      align-items: stretch;
+    }
+    .setup { grid-column: 2; }
+    .code-panel { grid-column: 3; }
+  }
+
+  @media (min-width: 1100px) and (max-width: 1279px) {
+    .capabilities-body {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 2fr);
+      align-items: stretch;
+    }
+  }
+
+  @media (min-width: 900px) and (max-width: 1099px) {
+    .capabilities-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      align-items: stretch;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 899px) {
+    .capabilities-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: stretch;
+    }
+  }
+
+  .setup {
     position: relative;
     display: flex;
     flex-direction: column;

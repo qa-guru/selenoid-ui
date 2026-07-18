@@ -322,6 +322,7 @@ function Panel({
   tone = "dark",
   trail,
   foot,
+  footPlacement = "bottom",
   barEnd,
   actions,
   testId,
@@ -361,6 +362,7 @@ function Panel({
         "panel",
         `panel--${variant}`,
         variant === "terminal" && tone === "light" && "panel--terminal-light",
+        foot != null && footPlacement === "rail" && "panel--foot-rail",
         className
       ),
       "data-testid": testId,
