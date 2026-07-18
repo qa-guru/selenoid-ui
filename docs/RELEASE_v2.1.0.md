@@ -4,13 +4,13 @@
 **Предыдущий:** [v2.0.9](RELEASE_v2.0.9.md)  
 **GitHub:** https://github.com/qa-guru/selenoid-ui/releases/tag/v2.1.0
 
-Инфраструктурный релиз: **единая версия стека v2.1.0**, prod-деплой в [qa-guru/selenoid.autotests.cloud](https://github.com/qa-guru/selenoid.autotests.cloud). Код UI без изменений относительно v2.0.9.
+Инфраструктурный релиз: **единая версия стека v2.1.0**, prod-деплой в [qa-guru/selenoid.qa.guru](https://github.com/qa-guru/selenoid.qa.guru). Код UI без изменений относительно v2.0.9.
 
 ---
 
 ## Что нового
 
-| Изменение | Описание |
-|-----------|----------|
-| **Prod deploy** | [selenoid.autotests.cloud](https://github.com/qa-guru/selenoid.autotests.cloud) — отдельный репозиторий |
-| **Стек v2.1.0** | cm, hub, UI, deploy — одна версия **v2.1.0** |
+| Изменение       | Описание                                                                                |
+| --------------- | --------------------------------------------------------------------------------------- |
+| **Prod deploy** | [selenoid.qa.guru](https://github.com/qa-guru/selenoid.qa.guru) — отдельный репозиторий |
+| **Стек v2.1.0** | cm, hub, UI, deploy — одна версия **v2.1.0**                                            |

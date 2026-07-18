@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { HashRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import Sessions from "./index";
 
 vi.mock("./service", () => ({
@@ -31,9 +31,9 @@ const sessions = {
 describe("Sessions", () => {
     it("renders session list without filter", () => {
         render(
-            <HashRouter>
+            <MemoryRouter>
                 <Sessions sessions={sessions} query="" />
-            </HashRouter>
+            </MemoryRouter>
         );
 
         expect(screen.getByText("Sessions")).toBeInTheDocument();
@@ -44,9 +44,9 @@ describe("Sessions", () => {
 
     it("filters sessions by browser name", () => {
         render(
-            <HashRouter>
+            <MemoryRouter>
                 <Sessions sessions={sessions} query="firefox" />
-            </HashRouter>
+            </MemoryRouter>
         );
 
         expect(screen.queryByText("chrome")).not.toBeInTheDocument();
@@ -55,9 +55,9 @@ describe("Sessions", () => {
 
     it("shows empty state when no sessions match", () => {
         render(
-            <HashRouter>
+            <MemoryRouter>
                 <Sessions sessions={{}} query="" />
-            </HashRouter>
+            </MemoryRouter>
         );
 
         expect(screen.getByText("NO SESSIONS YET :'(")).toBeInTheDocument();

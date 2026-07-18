@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 
 import VncScreen from "./VncScreen";
 import { StyledVNC } from "./style.css";
-import { ajax } from "rxjs/ajax";
 
 export default class VncCard extends Component {
     state = { connection: "connecting" };
@@ -77,30 +76,24 @@ export default class VncCard extends Component {
     }
 }
 function copyFromDocker(sessionId) {
-    const request = {
-        url: "/clipboard/" + sessionId,
-        method: "GET",
-        async: false,
-        responseType: "text",
-    };
-    ajax(request).subscribe((x) => {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(x.response);
-        }
-    });
+    fetch("/clipboard/" + sessionId, { method: "GET" })
+        .then((response) => response.text())
+        .then((text) => {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+            }
+        })
+        .catch((e) => console.error("Can't copy from Selenoid clipboard", e));
 }
 
 function pasteToDocker(sessionId) {
     if (navigator.clipboard) {
         navigator.clipboard.readText().then((text) => {
-            let request = {
-                url: "/clipboard/" + sessionId,
+            fetch("/clipboard/" + sessionId, {
                 method: "POST",
                 body: text,
-                async: false,
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            };
-            ajax(request).subscribe((msg) => msg);
+            }).catch((e) => console.error("Can't paste to Selenoid clipboard", e));
         });
     }
 }

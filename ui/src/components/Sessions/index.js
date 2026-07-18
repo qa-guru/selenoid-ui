@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledSessions } from "./style.css";
@@ -13,27 +13,46 @@ const Sessions = ({ sessions = {}, query = "" }) => {
         Object.keys(sessions).filter((id) => matchesSessionQuery(id, sessions, query)),
         sessions
     );
+    // React 19 removed findDOMNode; CSSTransition needs an explicit nodeRef per item.
+    const nodeRefs = useRef(new Map());
+    const noAnyRef = useRef(null);
+    const getNodeRef = (key) => {
+        let ref = nodeRefs.current.get(key);
+        if (!ref) {
+            ref = React.createRef();
+            nodeRefs.current.set(key, ref);
+        }
+        return ref;
+    };
 
     return (
         <StyledSessions>
             <div className={`section-title section-title_hidden-${!!query}`}>Sessions</div>
             <TransitionGroup className="sessions__list">
                 {ids.map((id) => {
+                    const nodeRef = getNodeRef(id);
                     return (
-                        <CSSTransition key={id} timeout={500} classNames="session_state" unmountOnExit>
-                            <Session id={id} session={sessions[id]} />
+                        <CSSTransition
+                            key={id}
+                            nodeRef={nodeRef}
+                            timeout={500}
+                            classNames="session_state"
+                            unmountOnExit
+                        >
+                            <Session ref={nodeRef} id={id} session={sessions[id]} />
                         </CSSTransition>
                     );
                 })}
             </TransitionGroup>
             <CSSTransition
                 in={!ids.length}
+                nodeRef={noAnyRef}
                 timeout={500}
                 exit={false}
                 classNames="sessions__no-any_state"
                 unmountOnExit
             >
-                <div className="no-any">
+                <div ref={noAnyRef} className="no-any">
                     <div title="No any" className="icon dripicons-hourglass" />
                     <div className="nosession-any-text">NO SESSIONS YET :'(</div>
                 </div>
@@ -42,11 +61,11 @@ const Sessions = ({ sessions = {}, query = "" }) => {
     );
 };
 
-const Session = ({ id, session: { quota, caps } }) => {
+const Session = ({ id, session: { quota, caps }, ref }) => {
     const [deleting, deleteSession] = useSessionDelete(id);
 
     return (
-        <div className={`session ${(caps.labels && caps.labels.manual && "session_manual") || ""}`}>
+        <div ref={ref} className={`session ${(caps.labels && caps.labels.manual && "session_manual") || ""}`}>
             <SessionId>
                 <span className="quota">{quota}</span> /{" "}
                 <Link to={deleting ? `#` : `/sessions/${id}`} className="id">

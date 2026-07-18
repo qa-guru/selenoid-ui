@@ -43,12 +43,12 @@ const highlightCode = (language, code) => {
     return hljs.highlightAuto(code).value;
 };
 
-const CodeHighlight = ({ language, children }) => {
+const CodeHighlight = ({ language, children, className }) => {
     const code = children || "";
     const html = useMemo(() => highlightCode(language, code), [language, code]);
 
     return (
-        <pre>
+        <pre className={className}>
             <code className="hljs" dangerouslySetInnerHTML={{ __html: html }} />
         </pre>
     );

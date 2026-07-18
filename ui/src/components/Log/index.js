@@ -7,8 +7,8 @@ import isSecure from "../../util/isSecure";
 import "xterm/css/xterm.css";
 import { StyledLog } from "./style.css";
 import colors from "ansi-256-colors";
-import { BehaviorSubject, defer, fromEvent, Observable } from "rxjs";
-import { debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, tap } from "rxjs/operators";
+
+const RESIZE_DEBOUNCE_MS = 100;
 
 export default class Log extends Component {
     constructor(props) {
@@ -29,11 +29,10 @@ export default class Log extends Component {
         terminal.loadAddon(fitAddon);
         this.term = terminal;
         this.fitAddon = fitAddon;
-        this.props$ = new BehaviorSubject(props);
-    }
-
-    UNSAFE_componentWillReceiveProps(nextProps) {
-        this.props$.next(nextProps);
+        this.socket = null;
+        this.currentOrigin = null;
+        this.resizeTimer = null;
+        this.decoder = new TextDecoder("utf8");
     }
 
     componentDidMount() {
@@ -41,61 +40,80 @@ export default class Log extends Component {
         this.fitAddon.fit();
         this.term.writeln(colors.fg.getRgb(2, 3, 4) + "Initialize...\n\r" + colors.reset);
 
-        this.resize = fromEvent(window, "resize")
-            .pipe(
-                debounceTime(100),
-                startWith({}),
-                tap(() => this.fitAddon.fit())
-            )
-            .subscribe();
+        window.addEventListener("resize", this.onResize);
+        this.connect(this.props);
+    }
 
-        this.subscription = this.props$
-            .pipe(
-                filter((it) => it && it.session && it.origin && it.browser),
-                distinctUntilChanged((prev, { origin }) => prev.origin === origin),
-                map(({ session }) => {
-                    const wsProxyUrl = urlTo(window.location.href);
-                    return `${isSecure(wsProxyUrl) ? "wss" : "ws"}://${wsProxyUrl.host}/ws/logs/${session}`;
-                }),
-                switchMap((ws) => {
-                    return defer(() => {
-                        this.term.clear();
-
-                        return new Observable((observer) => {
-                            observer.next(`Connecting to ${ws}...\n\r`);
-
-                            const socket = new WebSocket(ws);
-                            const decoder = new TextDecoder("utf8");
-
-                            socket.binaryType = "arraybuffer";
-                            socket.onmessage = (event) => {
-                                if (event) {
-                                    observer.next(decoder.decode(event.data) + "\r");
-                                }
-                            };
-
-                            socket.onopen = () => {
-                                observer.next(colors.fg.getRgb(0, 2, 0) + "Connected!\n\r" + colors.reset);
-                            };
-
-                            socket.onclose = () => {
-                                observer.next(colors.fg.getRgb(5, 1, 1) + "Disconnected\n\r" + colors.reset);
-                            };
-
-                            return () => {
-                                socket && socket.readyState !== WebSocket.CLOSED && socket.close();
-                            };
-                        });
-                    });
-                })
-            )
-            .subscribe((msg) => this.term.write(msg));
+    UNSAFE_componentWillReceiveProps(nextProps) {
+        this.connect(nextProps);
     }
 
     componentWillUnmount() {
-        this.resize && this.resize.unsubscribe();
-        this.subscription && this.subscription.unsubscribe();
+        window.removeEventListener("resize", this.onResize);
+        if (this.resizeTimer) {
+            clearTimeout(this.resizeTimer);
+            this.resizeTimer = null;
+        }
+        this.closeSocket();
         this.term.dispose();
+    }
+
+    onResize = () => {
+        if (this.resizeTimer) {
+            clearTimeout(this.resizeTimer);
+        }
+        this.resizeTimer = setTimeout(() => {
+            this.resizeTimer = null;
+            this.fitAddon.fit();
+        }, RESIZE_DEBOUNCE_MS);
+    };
+
+    connect(props) {
+        if (!(props && props.session && props.origin && props.browser)) {
+            return;
+        }
+        // Reconnect only when origin changes (was distinctUntilChanged on origin).
+        if (props.origin === this.currentOrigin) {
+            return;
+        }
+        this.currentOrigin = props.origin;
+
+        const wsProxyUrl = urlTo(window.location.href);
+        const wsUrl = `${isSecure(wsProxyUrl) ? "wss" : "ws"}://${wsProxyUrl.host}/ws/logs/${props.session}`;
+        this.openSocket(wsUrl);
+    }
+
+    openSocket(wsUrl) {
+        // switchMap semantics: drop the previous socket before opening a new one.
+        this.closeSocket();
+        this.term.clear();
+        this.term.write(`Connecting to ${wsUrl}...\n\r`);
+
+        const socket = new WebSocket(wsUrl);
+        socket.binaryType = "arraybuffer";
+
+        socket.onmessage = (event) => {
+            if (event) {
+                this.term.write(this.decoder.decode(event.data) + "\r");
+            }
+        };
+
+        socket.onopen = () => {
+            this.term.write(colors.fg.getRgb(0, 2, 0) + "Connected!\n\r" + colors.reset);
+        };
+
+        socket.onclose = () => {
+            this.term.write(colors.fg.getRgb(5, 1, 1) + "Disconnected\n\r" + colors.reset);
+        };
+
+        this.socket = socket;
+    }
+
+    closeSocket() {
+        if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
+            this.socket.close();
+        }
+        this.socket = null;
     }
 
     render() {

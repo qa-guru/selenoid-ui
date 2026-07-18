@@ -1,17 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { withRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import { ajax } from "rxjs/ajax";
-import { filter, flatMap, tap } from "rxjs/operators";
 
 import CodeHighlight from "../../components/CodeHighlight";
 import "highlight.js/styles/sunburst.css";
 
-import Select from "react-select";
-
 import { StyledCapabilities } from "./style.css";
 
-import Url from "url-parse";
 import { retainPlaywrightSocket } from "../../util/playwrightSessions";
 import {
     browserProtocol,
@@ -21,6 +16,120 @@ import {
 } from "../../util/capabilitiesLogic";
 import { playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
+
+import {
+    IconCopy,
+    IconReset,
+    Panel,
+    PlaqueField,
+    PlaqueFieldGrid,
+    PlaqueFieldSeg,
+    PlaqueSelect,
+    PlaqueTagstrip,
+    usePlaqueFieldMagnet,
+} from "@zero-design-system/react";
+import "@zero-design-system/react/styles.css";
+
+/**
+ * Capabilities session options → react-ui wrapper → hub caps key.
+ * remoteUrl is display-only (hub endpoint), not a capability.
+ *
+ * | option           | wrapper      | layout | caps key                          |
+ * |------------------|--------------|--------|-----------------------------------|
+ * | remoteUrl        | PlaqueField  | solo   | — (readonly display)              |
+ * | sessionTimeout   | PlaqueSelect | duo    | selenoid:options.sessionTimeout   |
+ * | name             | PlaqueField  | duo    | selenoid:options.name             |
+ * | screenResolution | PlaqueSelect | solo   | selenoid:options.screenResolution |
+ * | enableVnc        | PlaqueFieldSeg | solo | enableVNC / selenoid:options      |
+ * | enableVideo      | PlaqueFieldSeg | solo | enableVideo                       |
+ * | enableHar        | PlaqueFieldSeg | solo | enableHAR                         |
+ *
+ * Ban: closeBrowser* / gradle* / junit* / allure* / builder fields.
+ *
+ * Terminal bar (canon configurator / autotests-builder): vector# fingerprint +
+ * IconReset (Сброс) + IconCopy (Копировать).
+ */
+const SESSION_TIMEOUT_OPTIONS = [
+    { value: "1m" },
+    { value: "5m" },
+    { value: "15m" },
+    { value: "30m" },
+    { value: "60m" },
+];
+
+const SCREEN_RESOLUTION_OPTIONS = [
+    { value: "1920x1080x24", label: "1920×1080×24" },
+    { value: "1280x1024x24", label: "1280×1024×24" },
+    { value: "1366x768x24", label: "1366×768×24" },
+    { value: "1920x1080", label: "1920×1080" },
+];
+
+const VECTOR_REGISTRY_KEY = "selenoid-capabilities-vector-registry";
+
+/** Same 8-hex fingerprint as autotests-builder / react-ui configurator demo. */
+const vectorHash = (value) => {
+    const str = JSON.stringify(value);
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = (h << 5) - h + str.charCodeAt(i);
+        h |= 0;
+    }
+    return `00000000${(h >>> 0).toString(16)}`.slice(-8);
+};
+
+const normalizeVectorId = (raw) => {
+    let id = String(raw || "").trim();
+    if (!id) return "";
+    id = id
+        .replace(/^vector\s*[:#]?\s*/i, "")
+        .replace(/^#/, "")
+        .trim();
+    if (!id) return "";
+    return `vector#${id}`;
+};
+
+const fingerprint = (snap) => `vector#${vectorHash(snap)}`;
+
+const cloneSessionSnap = (snap) => ({ ...snap });
+
+const loadVectorRegistry = () => {
+    const map = new Map();
+    try {
+        const raw = localStorage.getItem(VECTOR_REGISTRY_KEY);
+        if (!raw) return map;
+        const parsed = JSON.parse(raw);
+        for (const [id, snap] of Object.entries(parsed)) {
+            if (snap && typeof snap === "object") {
+                map.set(id, cloneSessionSnap(snap));
+            }
+        }
+    } catch {
+        /* corrupt / private mode */
+    }
+    return map;
+};
+
+const persistVectorRegistry = (registry) => {
+    try {
+        const obj = {};
+        registry.forEach((snap, id) => {
+            obj[id] = snap;
+        });
+        localStorage.setItem(VECTOR_REGISTRY_KEY, JSON.stringify(obj));
+    } catch {
+        /* private mode / quota */
+    }
+};
+
+const hubRemoteUrl = (origin) => {
+    if (origin) {
+        return `${String(origin).replace(/\/$/, "")}/wd/hub`;
+    }
+    if (typeof window === "undefined") {
+        return "/wd/hub";
+    }
+    return `${window.location.protocol}//${window.location.host}/wd/hub`;
+};
 
 const javaSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
@@ -58,15 +167,35 @@ const rubySelenoidOptionsBlock = (selenoidOptions) => {
 };
 
 const primeBasicAuth = () =>
-    ajax({
-        url: "/wd/hub/status",
+    fetch("/wd/hub/status", {
         method: "GET",
-        withCredentials: true,
+        credentials: "include",
     });
 
-const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444") => {
-    const url = new Url(origin);
+const DEFAULT_SESSION_OPTS = {
+    sessionTimeout: "60m",
+    name: "Manual session",
+    screenResolution: "1920x1080x24",
+    enableVnc: true,
+    enableVideo: true,
+    enableHar: false,
+};
+
+/** Terminal snippets mirror Remote hub session options (createSession SSOT). */
+const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444", session = {}) => {
     origin = window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
+    const {
+        sessionTimeout = DEFAULT_SESSION_OPTS.sessionTimeout,
+        name: sessionName = DEFAULT_SESSION_OPTS.name,
+        screenResolution = DEFAULT_SESSION_OPTS.screenResolution,
+        enableVnc = DEFAULT_SESSION_OPTS.enableVnc,
+        enableVideo = DEFAULT_SESSION_OPTS.enableVideo,
+        enableHar = DEFAULT_SESSION_OPTS.enableHar,
+    } = session;
+    const browserName = browser != "UNKNOWN" ? browser : "chrome";
+    const nameJson = JSON.stringify(sessionName);
+    const timeoutJson = JSON.stringify(sessionTimeout);
+    const resolutionJson = JSON.stringify(screenResolution);
     let optionsClass = "SpecificBrowserOptions";
     switch (browser) {
         case "UNKNOWN":
@@ -87,13 +216,15 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
         curl: `curl -H'Content-Type: application/json' ${origin}/wd/hub/session -d'{
     "capabilities": {
         "alwaysMatch": {
-            "browserName": "${browser != "UNKNOWN" ? browser : "chrome"}",
+            "browserName": "${browserName}",
             ${version == "" ? "" : '"browserVersion": "' + version + '",'}
             "selenoid:options": {
-                "name": "Session started using curl command...",
-                "sessionTimeout": "1m",
-                "enableVNC": true,
-                "enableVideo": true
+                "name": ${nameJson},
+                "sessionTimeout": ${timeoutJson},
+                "screenResolution": ${resolutionJson},
+                "enableVNC": ${enableVnc},
+                "enableVideo": ${enableVideo},
+                "enableHAR": ${enableHar}
             }
         }
     }
@@ -102,57 +233,39 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
         java: `${optionsClass} options = new ${optionsClass}();
 ${version != "" ? 'options.setCapability("browserVersion", "' + version + '");' : ""}
 options.setCapability("selenoid:options", new HashMap<String, Object>() {{
-    /* How to add test badge */
-    put("name", "Test badge...");
-
-    /* How to set session timeout */
-    put("sessionTimeout", "15m");
-
-    /* How to set timezone */
+    put("name", ${nameJson});
+    put("sessionTimeout", ${timeoutJson});
+    put("screenResolution", ${resolutionJson});
     put("env", new ArrayList<String>() {{
         add("TZ=UTC");
     }});
-
-    /* How to add "trash" button */
     put("labels", new HashMap<String, Object>() {{
         put("manual", "true");
     }});
-
-    /* How to enable VNC */
-    put("enableVNC", true);
-
-    /* How to enable video recording */
-    put("enableVideo", true);
+    put("enableVNC", ${enableVnc});
+    put("enableVideo", ${enableVideo});
+    put("enableHAR", ${enableHar});
 }});
 RemoteWebDriver driver = new RemoteWebDriver(new URL("${origin}/wd/hub"), options);
 `,
         go: `// import "github.com/tebeka/selenium"
 
 caps := selenium.Capabilities{
-        "browserName":    "${browser != "UNKNOWN" ? browser : "chrome"}",
+        "browserName":    "${browserName}",
 		"browserVersion": "${version}",
 		"selenoid:options": map[string]interface{}{
-                /* How to add test badge */
-                "name": "Test badge...",
-
-                /* How to set session timeout */
-                "sessionTimeout": "5m",
-
-                /* How to set timezone */
+                "name": ${nameJson},
+                "sessionTimeout": ${timeoutJson},
+                "screenResolution": ${resolutionJson},
                 "env": []string{
                         "TZ=UTC",
                 },
-
-                /* How to add "trash" button */
                 "labels": map[string]interface{}{
                         "manual": "true",
                 },
-
-                /* How to enable VNC */
-                "enableVNC": true,
-
-                /* How to enable video recording */
-                "enableVideo": true,
+                "enableVNC": ${enableVnc},
+                "enableVideo": ${enableVideo},
+                "enableHAR": ${enableHar},
         },
 }
 
@@ -165,38 +278,33 @@ defer driver.Quit()
         "C#": `${optionsClass} options = new ${optionsClass}();
 ${version != "" ? 'options.BrowserVersion = "' + version + '";' : ""}
 options.AddAdditionalOption("selenoid:options", new Dictionary<string, object> {
-    /* How to add test badge */
-    ["name"] = "Test badge...",
-
-    /* How to set session timeout */
-    ["sessionTimeout"] = "15m",
-
-    /* How to set timezone */
+    ["name"] = ${nameJson},
+    ["sessionTimeout"] = ${timeoutJson},
+    ["screenResolution"] = ${resolutionJson},
     ["env"] = new List<string>() {
         "TZ=UTC"
     },
-
-    /* How to add "trash" button */
     ["labels"] = new Dictionary<string, object> {
         ["manual"] = "true"
     },
-
-    /* How to enable VNC */
-    ["enableVNC"] = true,
-
-    /* How to enable video recording */
-    ["enableVideo"] = true
+    ["enableVNC"] = ${enableVnc},
+    ["enableVideo"] = ${enableVideo},
+    ["enableHAR"] = ${enableHar}
 });
 IWebDriver driver = new RemoteWebDriver(new Uri("${origin}/wd/hub"), options);
 `,
         python: `from selenium import webdriver
         
 capabilities = {
-    "browserName": "${browser != "UNKNOWN" ? browser : "chrome"}",
+    "browserName": "${browserName}",
     "browserVersion": "${version}",
     "selenoid:options": {
-        "enableVNC": True,
-        "enableVideo": True
+        "name": ${nameJson},
+        "sessionTimeout": ${timeoutJson},
+        "screenResolution": ${resolutionJson},
+        "enableVNC": ${enableVnc ? "True" : "False"},
+        "enableVideo": ${enableVideo ? "True" : "False"},
+        "enableHAR": ${enableHar ? "True" : "False"}
     }
 }
 
@@ -211,11 +319,15 @@ var options = {
     port: 4444,
     protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
     capabilities: { 
-        browserName: '${browser != "UNKNOWN" ? browser : "chrome"}',
+        browserName: '${browserName}',
         browserVersion: '${version}',
         'selenoid:options': {
-            enableVNC: true,
-            enableVideo: true
+            name: ${nameJson},
+            sessionTimeout: ${timeoutJson},
+            screenResolution: ${resolutionJson},
+            enableVNC: ${enableVnc},
+            enableVideo: ${enableVideo},
+            enableHAR: ${enableHar}
         }      
     } 
 };
@@ -223,21 +335,29 @@ var client = webdriverio.remote(options);
 `,
         PHP: `$web_driver = RemoteWebDriver::create("${origin}/wd/hub",
 array(
-    "browserName"=>"${browser != "UNKNOWN" ? browser : "chrome"}",
+    "browserName"=>"${browserName}",
     "browserVersion"=>"${version}",
     "selenoid:options"=>array(
-        "enableVNC"=>true,
-        "enableVideo"=>true
+        "name"=>${nameJson},
+        "sessionTimeout"=>${timeoutJson},
+        "screenResolution"=>${resolutionJson},
+        "enableVNC"=>${enableVnc ? "true" : "false"},
+        "enableVideo"=>${enableVideo ? "true" : "false"},
+        "enableHAR"=>${enableHar ? "true" : "false"}
     )
 )
 );
 `,
         ruby: `caps = Selenium::WebDriver::Remote::Capabilities.new
-browserName: '${browser != "UNKNOWN" ? browser : "chrome"}',
+browserName: '${browserName}',
 caps["browserVersion"] = "${version}"
 caps["selenoid:options"] = {
-  'enableVNC' => 'true',
-  'enableVideo' => 'true'
+  'name' => ${nameJson},
+  'sessionTimeout' => ${timeoutJson},
+  'screenResolution' => ${resolutionJson},
+  'enableVNC' => ${enableVnc},
+  'enableVideo' => ${enableVideo},
+  'enableHAR' => ${enableHar}
 }
 
 driver = Selenium::WebDriver.for(:remote,
@@ -343,16 +463,23 @@ end
     };
 };
 
-const Capabilities = ({
-    browsers = {},
-    browserProtocols = {},
-    sessions = {},
-    origin,
-    history,
-    playwrightAccessKey = "",
-}) => {
+const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin, playwrightAccessKey = "" }) => {
+    const navigate = useNavigate();
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
+    // Session options live here so Terminal snippets mirror Remote hub (createSession SSOT).
+    const [enableVnc, setEnableVnc] = useState("true");
+    const [enableVideo, setEnableVideo] = useState("true");
+    const [enableHar, setEnableHar] = useState("false");
+    const [sessionTimeout, setSessionTimeout] = useState(DEFAULT_SESSION_OPTS.sessionTimeout);
+    const [sessionName, setSessionName] = useState(DEFAULT_SESSION_OPTS.name);
+    const [screenResolution, setScreenResolution] = useState(DEFAULT_SESSION_OPTS.screenResolution);
+    const [vectorDraft, setVectorDraft] = useState(null);
+    const [vectorMiss, setVectorMiss] = useState(false);
+    const registryRef = useRef(null);
+    if (registryRef.current === null) {
+        registryRef.current = loadVectorRegistry();
+    }
 
     const available = [].concat(
         ...Object.keys(browsers).map((name) =>
@@ -370,9 +497,43 @@ const Capabilities = ({
 
     const { name, version, value, protocol } = browser || {};
     const isPlaywright = protocol === "playwright" || isPlaywrightBrowser(browserProtocols, name, version);
-    const caps = isPlaywright ? playwrightCode(name, version, playwrightAccessKey) : code(name, version, origin);
+    const sessionOpts = {
+        sessionTimeout,
+        name: sessionName,
+        screenResolution,
+        enableVnc: enableVnc === "true",
+        enableVideo: enableVideo === "true",
+        enableHar: enableHar === "true",
+    };
+    const capsSnap = {
+        browserValue: value || "",
+        sessionTimeout,
+        sessionName,
+        screenResolution,
+        enableVnc,
+        enableVideo,
+        enableHar,
+    };
+    const vectorId = fingerprint(capsSnap);
+    const displayVector = vectorDraft ?? vectorId;
+    const caps = isPlaywright
+        ? playwrightCode(name, version, playwrightAccessKey)
+        : code(name, version, origin, sessionOpts);
     const langKeys = Object.keys(caps);
     const activeLang = langKeys.includes(lang) ? lang : langKeys[0] || "curl";
+    const activeSnippet = caps[activeLang] || "";
+
+    const remember = (snap) => {
+        const id = fingerprint(snap);
+        const registry = registryRef.current;
+        registry.set(id, cloneSessionSnap(snap));
+        persistVectorRegistry(registry);
+        return id;
+    };
+
+    useEffect(() => {
+        remember(capsSnap);
+    }, [vectorId]);
 
     useEffect(() => {
         if (!langKeys.includes(lang)) {
@@ -380,54 +541,269 @@ const Capabilities = ({
         }
     }, [name, version, isPlaywright]);
 
+    const applyCapsSnap = (snap) => {
+        const next = cloneSessionSnap(snap);
+        remember(next);
+        setSessionTimeout(next.sessionTimeout);
+        setSessionName(next.sessionName);
+        setScreenResolution(next.screenResolution);
+        setEnableVnc(next.enableVnc);
+        setEnableVideo(next.enableVideo);
+        setEnableHar(next.enableHar);
+        if (next.browserValue) {
+            const found = available.find((item) => item.value === next.browserValue);
+            onBrowserChange(found || {});
+        } else {
+            onBrowserChange({});
+        }
+        setVectorDraft(null);
+        setVectorMiss(false);
+    };
+
+    const resetCaps = () => {
+        applyCapsSnap({
+            browserValue: "",
+            sessionTimeout: DEFAULT_SESSION_OPTS.sessionTimeout,
+            sessionName: DEFAULT_SESSION_OPTS.name,
+            screenResolution: DEFAULT_SESSION_OPTS.screenResolution,
+            enableVnc: "true",
+            enableVideo: "true",
+            enableHar: "false",
+        });
+    };
+
+    const touchOptions = () => setVectorMiss(false);
+
+    const commitVector = (raw) => {
+        const normalized = normalizeVectorId(raw);
+        setVectorDraft(null);
+        if (!normalized || normalized === vectorId) {
+            setVectorMiss(false);
+            return;
+        }
+        const snap = registryRef.current.get(normalized);
+        if (!snap) {
+            setVectorMiss(true);
+            return;
+        }
+        applyCapsSnap(snap);
+    };
+
+    const browserOptions = available.map((item) => ({
+        value: item.value,
+        label: item.label,
+        title: item.label,
+    }));
+
+    const onBrowserToggle = (optionValue) => {
+        touchOptions();
+        if (value === optionValue) {
+            onBrowserChange({});
+            return;
+        }
+        const next = available.find((item) => item.value === optionValue);
+        if (next) {
+            onBrowserChange(next);
+        }
+    };
+
+    const copySnippet = () => {
+        const text = activeSnippet;
+        if (navigator.clipboard?.writeText) {
+            void navigator.clipboard.writeText(text);
+            return;
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+    };
+
     return (
         <StyledCapabilities>
             <div className="section-title">Capabilities</div>
             <div className="capabilities-body">
                 <div className="setup" data-testid="capabilities-setup">
-                    <Select
-                        className="capabilities-browser-select"
-                        classNamePrefix="Select"
-                        unstyled
-                        name="browsers"
-                        value={available.find((item) => item.value === value)}
-                        options={available}
-                        onChange={(browser) => onBrowserChange(browser)}
-                        placeholder="Select browser..."
-                        isLoading={!origin}
-                        isClearable={false}
-                        noOptionsMessage={() => "No information about browsers"}
-                    />
+                    <Panel
+                        title="Driver"
+                        testId="capabilities-driver-panel"
+                        titleTestId="capabilities-driver-title"
+                        className="capabilities-config-panel"
+                    >
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Available browsers"
+                            data-testid="capabilities-driver-browsers"
+                        >
+                            {/*
+                              available → createSession: exclusive Tagstrip (library
+                              PlaqueTagstrip; ≠ react-select). Selection unlocks Launch.
+                              PlaqueSelect is the duo/solo alternative for ≤few options —
+                              Capabilities keeps Tagstrip for the full hub catalog.
+                              Solo without magnet — tagstrip wrap/density (magnet --nowrap
+                              would lock shell 32px and shove pills off-viewport).
+                            */}
+                            <PlaqueTagstrip
+                                label="available"
+                                paramId="available"
+                                className="capabilities-browser-select"
+                                options={browserOptions}
+                                values={value ? [value] : []}
+                                onToggle={onBrowserToggle}
+                                aria-label={
+                                    available.length
+                                        ? "Available browsers"
+                                        : origin
+                                        ? "No information about browsers"
+                                        : "Loading browsers"
+                                }
+                                data-testid="capabilities-browser-select"
+                            />
+                        </PlaqueFieldGrid>
+                    </Panel>
                     <Launch
                         browser={browser}
-                        history={history}
+                        navigate={navigate}
                         sessions={sessions}
                         isPlaywright={isPlaywright}
                         playwrightAccessKey={playwrightAccessKey}
+                        origin={origin}
+                        enableVnc={enableVnc}
+                        setEnableVnc={(v) => {
+                            touchOptions();
+                            setEnableVnc(v);
+                        }}
+                        enableVideo={enableVideo}
+                        setEnableVideo={(v) => {
+                            touchOptions();
+                            setEnableVideo(v);
+                        }}
+                        enableHar={enableHar}
+                        setEnableHar={(v) => {
+                            touchOptions();
+                            setEnableHar(v);
+                        }}
+                        sessionTimeout={sessionTimeout}
+                        setSessionTimeout={(v) => {
+                            touchOptions();
+                            setSessionTimeout(v);
+                        }}
+                        sessionName={sessionName}
+                        setSessionName={(v) => {
+                            touchOptions();
+                            setSessionName(v);
+                        }}
+                        screenResolution={screenResolution}
+                        setScreenResolution={(v) => {
+                            touchOptions();
+                            setScreenResolution(v);
+                        }}
                     />
                 </div>
                 <div className="code-panel">
-                    <CodeHighlight language={activeLang}>{caps[activeLang] || ""}</CodeHighlight>
-                </div>
-                <div className="lang-selector">
-                    <div className="capabilities-langs">
-                        {langKeys.map((next) => (
-                            <div
-                                key={next}
-                                className={`capabilities-lang ${next === activeLang && "capabilities-lang_active"}`}
-                                onClick={() => onLanguageChange(next)}
-                            >
-                                {next}
+                    <Panel
+                        variant="terminal"
+                        testId="capabilities-terminal-panel"
+                        bodyClassName="capabilities-terminal-body"
+                        foot={
+                            <div className="tabs" role="tablist" aria-label="Language">
+                                {langKeys.map((next) => (
+                                    <button
+                                        key={next}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={next === activeLang}
+                                        className={`tab${next === activeLang ? " tab--active" : ""}`}
+                                        onClick={() => onLanguageChange(next)}
+                                    >
+                                        {next}
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        }
+                        barEnd={
+                            <input
+                                type="text"
+                                className={
+                                    "badge badge--primary capabilities-vector-input" +
+                                    (vectorMiss ? " capabilities-vector-input--miss" : "")
+                                }
+                                value={displayVector}
+                                size={Math.max(12, displayVector.length)}
+                                spellCheck={false}
+                                autoComplete="off"
+                                aria-label="Vector id"
+                                aria-invalid={vectorMiss || undefined}
+                                title={
+                                    vectorMiss
+                                        ? "Не найден в localStorage — сначала получи этот vector, меняя опции"
+                                        : "Отпечаток конфига · вставь известный vector# + Enter — подтянуть"
+                                }
+                                data-testid="capabilities-terminal-vector"
+                                onChange={(e) => {
+                                    setVectorDraft(e.target.value);
+                                    setVectorMiss(false);
+                                }}
+                                onBlur={(e) => commitVector(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.currentTarget.blur();
+                                    }
+                                    if (e.key === "Escape") {
+                                        setVectorDraft(null);
+                                        setVectorMiss(false);
+                                        e.currentTarget.blur();
+                                    }
+                                }}
+                            />
+                        }
+                        actions={[
+                            {
+                                icon: <IconReset />,
+                                label: "Сброс",
+                                onClick: resetCaps,
+                                "data-testid": "capabilities-terminal-reset",
+                            },
+                            {
+                                icon: <IconCopy />,
+                                label: "Копировать",
+                                onClick: copySnippet,
+                                "data-testid": "capabilities-terminal-copy",
+                            },
+                        ]}
+                    >
+                        <CodeHighlight className="panel__code" language={activeLang}>
+                            {activeSnippet}
+                        </CodeHighlight>
+                    </Panel>
                 </div>
             </div>
         </StyledCapabilities>
     );
 };
 
-const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, playwrightAccessKey = "" }) => {
+const Launch = ({
+    browser: { name, version },
+    navigate,
+    sessions,
+    isPlaywright,
+    playwrightAccessKey = "",
+    origin,
+    enableVnc,
+    setEnableVnc,
+    enableVideo,
+    setEnableVideo,
+    enableHar,
+    setEnableHar,
+    sessionTimeout,
+    setSessionTimeout,
+    sessionName,
+    setSessionName,
+    screenResolution,
+    setScreenResolution,
+}) => {
     const defaultAdditionalCaps = { operaOptions: { binary: "/usr/bin/opera" } };
 
     const [loading, onLoading] = useState(false);
@@ -435,25 +811,37 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, p
     const [useMoreCaps, toggleMoreCaps] = useState(false);
     const [moreCapsError, onMoreCapsError] = useState(false);
     const [moreCaps, setMoreCaps] = useState(JSON.stringify(defaultAdditionalCaps));
+    const remoteUrl = hubRemoteUrl(origin);
     const playwrightSocket = useRef(null);
+    // Multi-row remote-hub stack (URL, timeout|name, resolution, Vnc|Video, Har) —
+    // presets #remote-hub; magnet skips --pair measurement but still mounts the stack shell + script.
+    usePlaqueFieldMagnet({ enabled: Boolean(name) && !isPlaywright });
 
-    const createSession = useCallback(() => {
+    const createSession = useCallback(async () => {
         onError("");
         onLoading(true);
 
+        const vnc = enableVnc === "true";
+        const video = enableVideo === "true";
+        const har = enableHar === "true";
         let desiredCapabilities = {
             browserName: `${name}`,
             version: `${version}`,
-            enableVNC: true,
-            enableVideo: true,
+            enableVNC: vnc,
+            enableVideo: video,
+            enableHAR: har,
             labels: { manual: "true" },
-            sessionTimeout: "60m",
-            name: "Manual session",
+            sessionTimeout,
+            name: sessionName,
+            screenResolution,
         };
         let selenoidOptions = {
-            enableVNC: true,
-            enableVideo: true,
-            sessionTimeout: "60m",
+            enableVNC: vnc,
+            enableVideo: video,
+            enableHAR: har,
+            sessionTimeout,
+            name: sessionName,
+            screenResolution,
             labels: { manual: "true" },
         };
 
@@ -463,41 +851,56 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, p
             selenoidOptions = Object.assign(selenoidOptions, additionalCaps);
         }
 
-        primeBasicAuth()
-            .pipe(
-                flatMap(() =>
-                    ajax({
-                        url: "/wd/hub/session",
-                        method: "POST",
-                        withCredentials: true,
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        timeout: 300000,
-                        body: {
-                            desiredCapabilities,
-                            capabilities: {
-                                alwaysMatch: {
-                                    browserName: `${name}`,
-                                    browserVersion: `${version}`,
-                                    "selenoid:options": selenoidOptions,
-                                },
-                                firstMatch: [{}],
-                            },
-                        },
-                    })
-                ),
-                filter(({ status }) => status === 200),
-                tap((res) => history.push(`/sessions/${sessionIdFrom(res)}`))
-            )
-            .subscribe({
-                error: (err) => {
-                    console.error("Can't start session manually", err);
-                    onError(err);
-                    onLoading(false);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 300000);
+
+        try {
+            await primeBasicAuth();
+            const response = await fetch("/wd/hub/session", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
                 },
+                signal: controller.signal,
+                body: JSON.stringify({
+                    desiredCapabilities,
+                    capabilities: {
+                        alwaysMatch: {
+                            browserName: `${name}`,
+                            browserVersion: `${version}`,
+                            "selenoid:options": selenoidOptions,
+                        },
+                        firstMatch: [{}],
+                    },
+                }),
             });
-    }, [name, version, history, useMoreCaps, moreCapsError, moreCaps]);
+
+            if (response.status === 200) {
+                const data = await response.json();
+                navigate(`/sessions/${sessionIdFrom({ response: data })}`);
+            }
+        } catch (err) {
+            console.error("Can't start session manually", err);
+            onError(err);
+            onLoading(false);
+        } finally {
+            clearTimeout(timeout);
+        }
+    }, [
+        name,
+        version,
+        navigate,
+        useMoreCaps,
+        moreCapsError,
+        moreCaps,
+        enableVnc,
+        enableVideo,
+        enableHar,
+        sessionTimeout,
+        sessionName,
+        screenResolution,
+    ]);
 
     const createPlaywrightSession = () => {
         if (!name || !version) {
@@ -536,7 +939,7 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, p
             }
             navigated = true;
             retainPlaywrightSocket(sessionId, playwrightSocket.current);
-            history.push(`/sessions/${sessionId}`);
+            navigate(`/sessions/${sessionId}`);
             onLoading(false);
         };
 
@@ -572,13 +975,12 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, p
             };
         };
 
-        primeBasicAuth().subscribe({
-            next: () => openWebSocket(),
-            error: (err) => {
+        primeBasicAuth()
+            .then(() => openWebSocket())
+            .catch((err) => {
                 console.error("Playwright auth failed", err);
                 finish("Authentication failed", true);
-            },
-        });
+            });
     };
 
     const onCreateSession = () => {
@@ -600,7 +1002,111 @@ const Launch = ({ browser: { name, version }, history, sessions, isPlaywright, p
     };
 
     return (
-        <div>
+        <div className="capabilities-launch">
+            {!isPlaywright && name ? (
+                <Panel
+                    title="Remote hub"
+                    testId="capabilities-remote-panel"
+                    titleTestId="capabilities-remote-title"
+                    className="capabilities-config-panel"
+                >
+                    {/*
+                      presets #remote-hub: magnet stack →
+                      solo(remoteUrl) + duo(sessionTimeout|name) + solo(screenResolution) +
+                      solo(enableVnc|enableVideo|enableHar) full-width stretch 50/50.
+                    */}
+                    <div
+                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        data-testid="capabilities-caps"
+                    >
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Remote URL"
+                            data-testid="capabilities-caps-remote-url"
+                        >
+                            <PlaqueField
+                                label="remoteUrl"
+                                paramId="remoteUrl"
+                                labelVariant="param"
+                                type="text"
+                                value={remoteUrl}
+                                readOnly
+                                data-testid="caps-remote-url"
+                            />
+                        </PlaqueFieldGrid>
+
+                        <PlaqueFieldGrid
+                            layout="duo"
+                            aria-label="Session identity"
+                            data-testid="capabilities-caps-session"
+                        >
+                            <PlaqueSelect
+                                label="sessionTimeout"
+                                paramId="sessionTimeout"
+                                value={sessionTimeout}
+                                options={SESSION_TIMEOUT_OPTIONS}
+                                onChange={setSessionTimeout}
+                                data-testid="caps-session-timeout"
+                            />
+                            <PlaqueField
+                                label="name"
+                                paramId="name"
+                                labelVariant="param"
+                                type="text"
+                                value={sessionName}
+                                onChange={(e) => setSessionName(e.target.value)}
+                                data-testid="caps-session-name"
+                            />
+                        </PlaqueFieldGrid>
+
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Screen resolution"
+                            data-testid="capabilities-caps-resolution"
+                        >
+                            <PlaqueSelect
+                                label="screenResolution"
+                                paramId="screenResolution"
+                                value={screenResolution}
+                                options={SCREEN_RESOLUTION_OPTIONS}
+                                onChange={setScreenResolution}
+                                data-testid="caps-screen-resolution"
+                            />
+                        </PlaqueFieldGrid>
+
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Remote hub flags"
+                            data-testid="capabilities-caps-flags"
+                        >
+                            <PlaqueFieldSeg
+                                label="enableVnc"
+                                paramId="enableVnc"
+                                value={enableVnc}
+                                onValueChange={setEnableVnc}
+                                stretch
+                                data-testid="caps-enable-vnc"
+                            />
+                            <PlaqueFieldSeg
+                                label="enableVideo"
+                                paramId="enableVideo"
+                                value={enableVideo}
+                                onValueChange={setEnableVideo}
+                                stretch
+                                data-testid="caps-enable-video"
+                            />
+                            <PlaqueFieldSeg
+                                label="enableHar"
+                                paramId="enableHar"
+                                value={enableHar}
+                                onValueChange={setEnableHar}
+                                stretch
+                                data-testid="caps-enable-har"
+                            />
+                        </PlaqueFieldGrid>
+                    </div>
+                </Panel>
+            ) : null}
             <CapabilitiesLaunchActions
                 loading={loading}
                 disabled={!name || loading}
@@ -632,4 +1138,4 @@ Capabilities.propTypes = {
     playwrightAccessKey: PropTypes.string,
 };
 
-export default withRouter(Capabilities);
+export default Capabilities;

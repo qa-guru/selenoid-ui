@@ -7,8 +7,6 @@ const selectedColor = "#59a781";
 const errorColor = "#ff6e59";
 const grayColor = "#666";
 
-const selectBgColor = "#30363C";
-
 export const StyledCapabilities = styled.div`
   width: 100%;
   display: block;
@@ -27,149 +25,96 @@ export const StyledCapabilities = styled.div`
     line-height: 20px;
   }
 
+  /* Driver+Remote : terminal — same 2fr:3fr as configurator__layout--terminal. */
   .capabilities-body {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-items: start;
+    gap: 20px 30px;
     width: 100%;
     padding: 20px 5% 40px;
     box-sizing: border-box;
   }
 
   .setup {
-    width: 250px;
-    flex: 0 0 250px;
-    margin-right: 30px;
+    min-width: 0;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 
-    button {
+    button.new-session,
+    button.new-session-more-capabilities {
       width: 100%;
       margin-top: 10px;
       cursor: pointer;
     }
+  }
 
-    /* react-select v5 unstyled + classNamePrefix="Select" — preserve Selenoid 2 look */
-    .Select__control {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: inherit;
-      border-radius: 0;
-      border: none;
-      color: #fff;
-      min-height: 30px;
-      height: 30px;
-      box-shadow: none;
-      cursor: pointer;
+  .capabilities-config-panel {
+    width: 100%;
+    min-width: 0;
+  }
 
-      &:hover {
-        box-shadow: none;
-        border-color: transparent;
-      }
-
-      &--is-focused {
-        box-shadow: none;
-        border-color: transparent;
-      }
-    }
-
-    .Select__value-container {
-      display: flex;
-      align-items: center;
-      flex: 1;
-      padding: 0 8px;
-      height: 30px;
-      overflow: hidden;
-    }
-
-    .Select__indicators {
-      display: flex;
-      align-items: center;
-    }
-
-    .Select__placeholder {
-      color: #999;
-      margin: 0;
-    }
-
-    .Select__single-value {
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin: 0;
-    }
-
-    .Select__input-container {
-      color: #fff;
-      margin: 0;
-      padding: 0;
-    }
-
-    .Select__indicator-separator {
-      display: none;
-    }
-
-    .Select__dropdown-indicator {
-      color: #999;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-    }
-
-    .Select__menu {
-      position: absolute;
-      left: 0;
-      right: 0;
-      border-radius: 0;
-      background-color: inherit;
-      border: 0;
-      box-shadow: none;
-      margin-top: 0;
-      z-index: 20;
-    }
-
-    .Select__menu-list {
-      padding: 0;
-      max-height: 300px;
-      overflow-y: auto;
-      background-color: ${selectBgColor};
-    }
-
-    .Select__option {
-      background-color: ${selectBgColor};
-      color: #ccc;
-      text-transform: uppercase;
-      cursor: pointer;
-      padding: 8px 12px;
-    }
-    .Select__option:last-child {
-      border-bottom-right-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    .Select__option--is-selected {
-      background-color: ${selectBgColor};
-      color: ${selectedColor};
-    }
-    .Select__option--is-focused {
-      background-color: ${selectBgColor};
-      color: ${selectedColor};
-    }
+  .capabilities-launch {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .code-panel {
-    flex: 1 1 auto;
-    min-width: 420px;
-    max-width: 720px;
-    margin: 0 30px 0 10px;
+    min-width: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 
-    pre {
+    .capabilities-terminal-body {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 320px;
+    }
+
+    .panel__code {
+      flex: 1 1 auto;
       min-height: 320px;
       margin: 0;
       max-width: 100%;
-      overflow: hidden;
+    }
+
+    .capabilities-vector-input {
+      box-sizing: border-box;
+      width: auto;
+      min-width: 7.5rem;
+      max-width: 14rem;
+      height: 20px;
+      margin: 0;
+      padding: 0 8px;
+      border: 1px solid rgba(89, 167, 129, 0.45);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1;
+      color: inherit;
+      outline: none;
+      cursor: text;
+      field-sizing: content;
+    }
+
+    .capabilities-vector-input:hover,
+    .capabilities-vector-input:focus {
+      border-color: rgba(89, 167, 129, 0.75);
+      background: rgba(89, 167, 129, 0.28);
+    }
+
+    .capabilities-vector-input:focus {
+      box-shadow: 0 0 0 1px rgba(89, 167, 129, 0.4);
+    }
+
+    .capabilities-vector-input--miss {
+      border-color: rgba(255, 110, 89, 0.7);
+      background: rgba(255, 110, 89, 0.22);
+      color: #ffb3a8;
     }
 
     pre,
@@ -185,31 +130,10 @@ export const StyledCapabilities = styled.div`
     }
   }
 
-  .lang-selector {
-    flex: 0 0 auto;
-    margin-left: auto;
-    margin-top: 0;
-  }
-
-  .capabilities-langs {
-    height: 100%;
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: column;
-  }
-
-  .capabilities-lang {
-    color: #fff;
-    padding: 10px;
-    text-transform: capitalize;
-    line-height: 20px;
-    border-left: 3px solid ${borderLangsColor};
-    cursor: pointer;
-    transition: border-color 0.2s ease-out 0s;
-    min-width: 80px;
-
-    &_active {
-      border-left-color: ${selectedColor};
+  @media (max-width: 768px) {
+    .capabilities-body {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
     }
   }
 

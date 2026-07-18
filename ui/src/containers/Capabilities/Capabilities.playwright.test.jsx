@@ -1,6 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
 
@@ -16,54 +16,41 @@ const BROWSER_PROTOCOLS = {
     "playwright-chrome": { "1.61.0": { protocol: "playwright" } },
 };
 
-vi.mock("rxjs/ajax", () => {
-    const makeObservable = () => {
-        const obs = {
-            subscribe: (observer) => {
-                if (typeof observer === "function") {
-                    observer({ status: 200 });
-                } else {
-                    observer.next?.({ status: 200 });
-                    observer.complete?.();
-                }
-                return { unsubscribe() {} };
-            },
-            pipe: () => obs,
-        };
-        return obs;
-    };
-    return { ajax: vi.fn(makeObservable) };
-});
-
 function renderCapabilities(playwrightAccessKey = ACCESS_KEY) {
     return render(
         <MemoryRouter initialEntries={["/capabilities"]}>
-            <Route
-                path="/capabilities"
-                render={() => (
-                    <Capabilities
-                        browsers={BROWSERS}
-                        browserProtocols={BROWSER_PROTOCOLS}
-                        sessions={{}}
-                        origin="https://selenoid.autotests.cloud"
-                        playwrightAccessKey={playwrightAccessKey}
-                    />
-                )}
-            />
+            <Routes>
+                <Route
+                    path="/capabilities"
+                    element={
+                        <Capabilities
+                            browsers={BROWSERS}
+                            browserProtocols={BROWSER_PROTOCOLS}
+                            sessions={{}}
+                            origin="https://selenoid.qa.guru"
+                            playwrightAccessKey={playwrightAccessKey}
+                        />
+                    }
+                />
+            </Routes>
         </MemoryRouter>
     );
 }
 
 async function selectPlaywrightChrome(user) {
-    const select = document.querySelector(".capabilities-browser-select");
-    await user.click(within(select).getByText("Select browser..."));
-    await user.click(await screen.findByText("playwright-chrome: 1.61.0"));
+    await user.click(screen.getByRole("button", { name: "playwright-chrome: 1.61.0" }));
 }
 
 describe("Capabilities Playwright Create Session", () => {
     let openedSockets;
 
     beforeEach(() => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({}),
+        });
+
         openedSockets = [];
         class CapturingWebSocket {
             constructor(url) {
@@ -86,7 +73,7 @@ describe("Capabilities Playwright Create Session", () => {
     });
 
     afterEach(() => {
-        vi.clearAllMocks();
+        vi.restoreAllMocks();
     });
 
     it("shows accessKey in Playwright curl snippet when status provides it", async () => {
@@ -110,7 +97,7 @@ describe("Capabilities Playwright Create Session", () => {
 
         await expect(user.click(create)).resolves.toBeUndefined();
 
-        expect(openedSockets).toHaveLength(1);
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
         const wsUrl = new URL(openedSockets[0].url);
         expect(wsUrl.pathname).toBe("/playwright/playwright-chrome/1.61.0");
         expect(wsUrl.searchParams.get("accessKey")).toBe(ACCESS_KEY);
@@ -124,7 +111,7 @@ describe("Capabilities Playwright Create Session", () => {
 
         await expect(user.click(screen.getByTestId("capabilities-create-session"))).resolves.toBeUndefined();
 
-        expect(openedSockets).toHaveLength(1);
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
         const wsUrl = new URL(openedSockets[0].url);
         expect(wsUrl.searchParams.get("accessKey")).toBeNull();
     });

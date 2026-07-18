@@ -22,15 +22,12 @@ body {
   margin: 0 auto;
   background: ${bgColor};
   font-weight: 100;
+  /* Offset content below the fixed canonical header (#app-header / header.css). */
+  padding-top: var(--header-occupied-height, var(--header-height, 40px));
 }
 `;
 
 export const StyledViewport = styled.div`
     display: flex;
     flex-direction: column;
-`;
-
-export const StyledTopBar = styled.div`
-    display: flex;
-    justify-content: flex-end;
 `;

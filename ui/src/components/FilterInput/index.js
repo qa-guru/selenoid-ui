@@ -1,28 +1,30 @@
 import React, { forwardRef } from "react";
 import styled from "styled-components";
 
-const statsBgColor = "#272727";
-
+/**
+ * Session filter, portaled into the canonical header `.header__search`. The
+ * input keeps the design-system `.input` styling (tokens.css / input.css) so it
+ * matches the header search slot; the wrapper only positions the clear icon and
+ * proxies clicks to focus. Contract preserved: `.input` class, `Filter...`
+ * placeholder, `session-filter-input` testid, and a titled Clear affordance.
+ */
 const StyledPanelFilter = styled.div`
-    flex: 1;
+    position: relative;
     display: flex;
-    box-sizing: border-box;
-    min-width: 190px;
-    height: 100%;
     align-items: center;
-    color: #fff;
+    width: 100%;
+    min-width: 0;
 
     .input {
-        flex: 1;
-        height: 30px;
-        outline: none;
-        background-color: ${statsBgColor};
-        border: 0;
-        padding: 0;
-        font-size: 1.2em;
-        color: #f2f4f3;
-        margin-left: 5px;
-        font-weight: 100;
+        padding-right: var(--space-6, 32px);
+    }
+
+    .filter-clear {
+        position: absolute;
+        right: var(--space-3, 12px);
+        cursor: pointer;
+        color: var(--color-text-muted, #999);
+        line-height: 0;
     }
 `;
 
@@ -45,7 +47,7 @@ export const FilterInput = forwardRef(function FilterInput({ value, onChange, on
             />
             <i
                 title="Clear"
-                className="icon dripicons-cross"
+                className="icon dripicons-cross filter-clear"
                 style={{ visibility: !value ? "hidden" : "visible" }}
                 onClick={onClear}
             />

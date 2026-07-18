@@ -14,7 +14,8 @@ function getMount() {
 const TEMPLATE_URLS = [new URL("../templates/header.html", import.meta.url)];
 
 /**
- * @typedef {{ href?: string }} HeaderBrandConfig
+ * @typedef {{ href?: string, label?: string }} HeaderBrandLeadingConfig
+ * @typedef {{ href?: string, leading?: HeaderBrandLeadingConfig }} HeaderBrandConfig
  * @typedef {{ href: string, label: string, active?: boolean, testid?: string }} HeaderNavItem
  * @typedef {{ default?: 'ru' | 'en' }} HeaderLangConfig
  * @typedef {{ default?: 'dark' | 'light' }} HeaderThemeConfig
@@ -69,6 +70,8 @@ function resolveHeaderConfig(override) {
         brand: {
             ...DEFAULT_HEADER_CONFIG.brand,
             ...override.brand,
+            leading:
+                override.brand?.leading === undefined ? DEFAULT_HEADER_CONFIG.brand?.leading : override.brand.leading,
         },
         lang: {
             ...DEFAULT_HEADER_CONFIG.lang,
@@ -161,6 +164,18 @@ function applyHeaderConfig(root, config) {
         brandLink.href = config.brand.href;
     }
 
+    const leadingLink = root.querySelector('[data-testid="header-brand-leading"]');
+    if (leadingLink instanceof HTMLAnchorElement) {
+        const leading = config.brand?.leading;
+        if (leading) {
+            leadingLink.hidden = false;
+            leadingLink.href = leading.href ?? "#";
+            leadingLink.setAttribute("aria-label", leading.label ?? "Selenoid 3");
+        } else {
+            leadingLink.hidden = true;
+        }
+    }
+
     const nav = root.querySelector('[data-testid="header-nav"]');
     if (!nav || !Array.isArray(config.nav)) {
         return;
@@ -231,6 +246,27 @@ function buildHeaderMenu(root, config) {
     const menuTools = document.createElement("div");
     menuTools.className = "header__menu-tools";
     menuTools.dataset.testid = "header-menu-tools";
+
+    const langToggle = root.querySelector(".header__tools .lang-toggle");
+    if (langToggle) {
+        const menuLang = /** @type {HTMLElement} */ (langToggle.cloneNode(true));
+        const menuLangBtn = menuLang.querySelector('[data-testid="header-lang-toggle"]');
+        const menuLangLabel = menuLang.querySelector('[data-testid="header-lang-label"]');
+        if (menuLangBtn instanceof HTMLElement) {
+            menuLangBtn.dataset.testid = "header-menu-lang-toggle";
+        }
+        if (menuLangLabel instanceof HTMLElement) {
+            menuLangLabel.dataset.testid = "header-menu-lang-label";
+        }
+        menuTools.appendChild(menuLang);
+    }
+
+    const themeSource = root.querySelector('[data-testid="header-theme-toggle"]');
+    if (themeSource instanceof HTMLElement) {
+        const menuTheme = /** @type {HTMLElement} */ (themeSource.cloneNode(true));
+        menuTheme.dataset.testid = "header-menu-theme-toggle";
+        menuTools.appendChild(menuTheme);
+    }
 
     for (const testid of ["header-github", "header-github-pages"]) {
         const source = root.querySelector(`[data-testid="${testid}"]`);
@@ -344,15 +380,21 @@ function setLangState(langBtn, langLabel, lang) {
     langBtn.setAttribute("aria-label", code === "ru" ? "Переключить на English" : "Switch to Russian");
 }
 
+/** @param {ParentNode} root @param {"ru" | "en"} lang */
+function syncAllLangToggles(root, lang) {
+    for (const wrap of root.querySelectorAll(".lang-toggle")) {
+        const btn = wrap.querySelector("button");
+        const label = wrap.querySelector(".lang-toggle__label");
+        if (btn instanceof HTMLElement && label instanceof HTMLElement) {
+            setLangState(btn, label, lang);
+        }
+    }
+}
+
 /** @param {ParentNode} root @param {HeaderLangConfig | undefined} langConfig */
 function applyLangDefault(root, langConfig) {
-    const langBtn = root.querySelector('[data-testid="header-lang-toggle"]');
-    const langLabel = root.querySelector('[data-testid="header-lang-label"]');
-    if (!langBtn || !langLabel) {
-        return;
-    }
     const code = langConfig?.default === "ru" ? "ru" : "en";
-    setLangState(langBtn, langLabel, code);
+    syncAllLangToggles(root, code);
     dispatchLangChange(code);
 }
 
@@ -392,9 +434,12 @@ async function mountHeader() {
     applyLangDefault(mount, config.lang);
     applyThemeDefault(config.theme);
 
-    const themeBtn = mount.querySelector('[data-testid="header-theme-toggle"]');
-    if (themeBtn) {
-        setThemeIcon(themeBtn);
+    for (const themeBtn of mount.querySelectorAll(
+        '[data-testid="header-theme-toggle"], [data-testid="header-menu-theme-toggle"]'
+    )) {
+        if (themeBtn instanceof HTMLElement) {
+            setThemeIcon(themeBtn);
+        }
     }
 
     bindHeaderControls(mount);
@@ -402,21 +447,29 @@ async function mountHeader() {
 }
 
 function bindHeaderControls(root) {
-    const langBtn = root.querySelector('[data-testid="header-lang-toggle"]');
-    const langLabel = root.querySelector('[data-testid="header-lang-label"]');
-    if (langBtn && langLabel) {
+    for (const langBtn of root.querySelectorAll(
+        '[data-testid="header-lang-toggle"], [data-testid="header-menu-lang-toggle"]'
+    )) {
         langBtn.addEventListener("click", () => {
+            if (!(langBtn instanceof HTMLElement)) {
+                return;
+            }
             const next = langBtn.dataset.lang === "ru" ? "en" : "ru";
-            setLangState(langBtn, langLabel, next);
+            syncAllLangToggles(root, next);
             dispatchLangChange(next);
         });
     }
 
-    const themeBtn = root.querySelector('[data-testid="header-theme-toggle"]');
-    if (themeBtn) {
+    const themeBtns = [
+        ...root.querySelectorAll('[data-testid="header-theme-toggle"], [data-testid="header-menu-theme-toggle"]'),
+    ].filter((el) => el instanceof HTMLElement);
+
+    for (const themeBtn of themeBtns) {
         themeBtn.addEventListener("click", () => {
             document.documentElement.classList.toggle("theme-light");
-            setThemeIcon(themeBtn);
+            for (const btn of themeBtns) {
+                setThemeIcon(btn);
+            }
         });
     }
 }

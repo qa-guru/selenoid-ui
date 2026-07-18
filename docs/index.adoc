@@ -202,7 +202,7 @@ image:img/logs.png[logs]
 
 === Videos
 
-You can view recorded videos, accessible on the selenoid, in case there are any on a separate tab.
+You can view recorded videos on a separate tab. The UI loads videos via paginated `GET /video/?json` (10 per page) and does not embed the full video list into status/SSE.
 
 === Restricting Access
 

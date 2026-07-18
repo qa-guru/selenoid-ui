@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { withRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import SessionInfo from "./SessionInfo";
 import VncCard from "../VncCard";
@@ -21,15 +21,16 @@ function usePrevious(value) {
     return ref.current;
 }
 
-const Session = ({ origin, session, browser, history }) => {
+const Session = ({ origin, session, browser }) => {
+    const navigate = useNavigate();
     const prevBrowser = usePrevious(browser);
 
     useEffect(() => {
         if (prevBrowser && !browser) {
             // if browser disappears only
-            history.push("/");
+            navigate("/");
         }
-    }, [browser, history, prevBrowser]);
+    }, [browser, navigate, prevBrowser]);
 
     const [isLogHidden, onVNCFullscreenChange] = useState(false);
 
@@ -68,7 +69,7 @@ const Session = ({ origin, session, browser, history }) => {
     );
 };
 
-export default withRouter(Session);
+export default Session;
 
 function VncContainer({ origin, session, browser = {}, onVNCFullscreenChange }) {
     if (browser.caps && !browser.caps.enableVNC) {

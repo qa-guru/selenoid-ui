@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Capabilities from "./index";
 
@@ -17,18 +17,20 @@ const BROWSERS = {
 function renderCapabilities() {
     return render(
         <MemoryRouter initialEntries={["/capabilities"]}>
-            <Route
-                path="/capabilities"
-                render={() => (
-                    <Capabilities
-                        browsers={BROWSERS}
-                        browserProtocols={{}}
-                        sessions={{}}
-                        origin="https://selenoid.autotests.cloud"
-                        playwrightAccessKey=""
-                    />
-                )}
-            />
+            <Routes>
+                <Route
+                    path="/capabilities"
+                    element={
+                        <Capabilities
+                            browsers={BROWSERS}
+                            browserProtocols={{}}
+                            sessions={{}}
+                            origin="https://selenoid.qa.guru"
+                            playwrightAccessKey=""
+                        />
+                    }
+                />
+            </Routes>
         </MemoryRouter>
     );
 }
@@ -67,21 +69,21 @@ function expectColor(actual, expectedHex) {
     expect(parseColor(actual)).toEqual(parseColor(expectedHex));
 }
 
-describe("Capabilities visual contract (Selenoid 2)", () => {
-    it("keeps closed select as borderless dark control with grey placeholder", () => {
+describe("Capabilities visual contract (Driver + Remote hub panels)", () => {
+    it("renders Driver panel with tagstrip of available browsers", () => {
         renderCapabilities();
 
-        const select = document.querySelector(".capabilities-browser-select");
-        const control = select.querySelector(".Select__control");
-        const placeholder = select.querySelector(".Select__placeholder");
-        const style = window.getComputedStyle(control);
+        const driver = screen.getByTestId("capabilities-driver-panel");
+        expect(driver).toHaveClass("panel", "panel--content");
+        expect(screen.getByTestId("capabilities-driver-title")).toHaveTextContent("Driver");
 
-        expect(control).toBeTruthy();
-        expect(["0px", ""].includes(style.borderTopWidth) || style.borderStyle === "none").toBe(true);
-        expect(style.boxShadow === "none" || style.boxShadow === "").toBe(true);
-        expect(style.minHeight === "30px" || style.height === "30px").toBe(true);
-        expect(placeholder).toHaveTextContent("Select browser...");
-        expectColor(window.getComputedStyle(placeholder).color, "#999999");
+        const tagstrip = screen.getByTestId("capabilities-browser-select");
+        expect(tagstrip).toHaveClass("capabilities-browser-select");
+        expect(tagstrip).toHaveAttribute("data-param-id", "available");
+        expect(within(tagstrip).getByRole("group")).toBeInTheDocument();
+        expect(within(tagstrip).getByRole("button", { name: "chrome: 149.0" })).toBeInTheDocument();
+        expect(within(tagstrip).getByRole("button", { name: "firefox: 151.0" })).toBeInTheDocument();
+        expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
     });
 
     it("keeps disabled Create Session as solid dark grey, not translucent", () => {
@@ -99,29 +101,42 @@ describe("Capabilities visual contract (Selenoid 2)", () => {
         expectColor(style.borderTopColor, "#3d444c");
     });
 
-    it("keeps open select menu options on dark #30363C with Selenoid 2 colors", async () => {
+    it("opens Remote hub pair+magnet panel (URL, timeout|name, resolution, Vnc|Video, Har) after selecting a WebDriver browser", async () => {
         const user = userEvent.setup();
         renderCapabilities();
 
-        const select = document.querySelector(".capabilities-browser-select");
-        await user.click(within(select).getByText("Select browser..."));
+        await user.click(screen.getByRole("button", { name: "chrome: 149.0" }));
 
-        const focused = await screen.findByText("chrome: 149.0");
-        const idle = await screen.findByText("firefox: 151.0");
-        const focusedStyle = window.getComputedStyle(focused);
-        const idleStyle = window.getComputedStyle(idle);
+        const remote = await screen.findByTestId("capabilities-remote-panel");
+        expect(remote).toHaveClass("panel", "panel--content");
+        expect(screen.getByTestId("capabilities-remote-title")).toHaveTextContent("Remote hub");
 
-        expectColor(focusedStyle.backgroundColor, "#30363c");
-        expectColor(focusedStyle.color, "#59a781");
-        expect(focusedStyle.textTransform).toBe("uppercase");
+        // presets #remote-hub: magnet stack → solo/duo/pair rows, not 3-in-one.
+        const caps = within(remote).getByTestId("capabilities-caps");
+        expect(caps).toHaveClass("plaque-field-grid-stack", "plaque-field-grid-stack--magnet");
 
-        expectColor(idleStyle.backgroundColor, "#30363c");
-        expectColor(idleStyle.color, "#cccccc");
-        expect(idleStyle.textTransform).toBe("uppercase");
+        expect(within(caps).getByTestId("capabilities-caps-remote-url")).toHaveClass("plaque-field-grid--solo");
+        expect(within(caps).getByTestId("capabilities-caps-session")).toHaveClass("plaque-field-grid--duo");
+        expect(within(caps).getByTestId("capabilities-caps-resolution")).toHaveClass("plaque-field-grid--solo");
 
-        const menu = document.querySelector(".Select__menu");
-        const menuStyle = window.getComputedStyle(menu);
-        expect(menuStyle.boxShadow === "none" || menuStyle.boxShadow === "").toBe(true);
-        expect(["0px", ""].includes(menuStyle.borderTopWidth) || menuStyle.borderStyle === "none").toBe(true);
+        const flags = within(caps).getByTestId("capabilities-caps-flags");
+        expect(flags).toHaveClass("plaque-field-grid--solo");
+        expect(within(flags).getByTestId("caps-enable-vnc")).toHaveAttribute("data-param-id", "enableVnc");
+        expect(within(flags).getByTestId("caps-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
+        expect(within(flags).getByTestId("caps-enable-har")).toHaveAttribute("data-param-id", "enableHar");
+        expect(within(caps).queryByTestId("capabilities-caps-har")).toBeNull();
+
+        // No builder-only fields.
+        expect(within(remote).queryByText("closeBrowserAfterEach")).toBeNull();
+        expect(within(remote).queryByText("gradleBin")).toBeNull();
+    });
+
+    it("keeps Driver tagstrip in a solo row without magnet nowrap", () => {
+        renderCapabilities();
+
+        const browsers = screen.getByTestId("capabilities-driver-browsers");
+        expect(browsers).toHaveClass("plaque-field-grid--solo");
+        expect(browsers.closest(".plaque-field-grid-stack--magnet")).toBeNull();
+        expect(within(browsers).getByTestId("capabilities-browser-select")).toBeInTheDocument();
     });
 });
