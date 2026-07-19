@@ -1,11 +1,11 @@
 import { syncThemeToggleIcon } from "./theme-icons.js";
 import { fetchTemplateText } from "./dom-utils.js";
+import { observeHeaderMetricsWrap } from "./header-metrics-wrap.js";
 
 /**
- * Resolve #app-header lazily. In SPA (Selenoid UI) the mount is created by
- * React after this module may already be imported via selenoid-header-bridge;
- * a top-level throw would poison the ES module cache and kill the header for
- * the whole session (no Stats / Capabilities / Videos links).
+ * Resolve #app-header lazily. In SPA consumers the mount may appear after this
+ * module is imported (e.g. selenoid-header-bridge in <head> before React);
+ * a top-level throw would poison the ES module cache for the whole session.
  */
 function getMount() {
     return document.getElementById("app-header");
@@ -14,7 +14,8 @@ function getMount() {
 const TEMPLATE_URLS = [new URL("../templates/header.html", import.meta.url)];
 
 /**
- * @typedef {{ href?: string }} HeaderBrandConfig
+ * @typedef {{ href?: string, label?: string }} HeaderBrandLeadingConfig
+ * @typedef {{ href?: string, leading?: HeaderBrandLeadingConfig }} HeaderBrandConfig
  * @typedef {{ href: string, label: string, active?: boolean, testid?: string }} HeaderNavItem
  * @typedef {{ default?: 'ru' | 'en' }} HeaderLangConfig
  * @typedef {{ default?: 'dark' | 'light' }} HeaderThemeConfig
@@ -69,6 +70,8 @@ function resolveHeaderConfig(override) {
         brand: {
             ...DEFAULT_HEADER_CONFIG.brand,
             ...override.brand,
+            leading:
+                override.brand?.leading === undefined ? DEFAULT_HEADER_CONFIG.brand?.leading : override.brand.leading,
         },
         lang: {
             ...DEFAULT_HEADER_CONFIG.lang,
@@ -161,13 +164,29 @@ function applyHeaderConfig(root, config) {
         brandLink.href = config.brand.href;
     }
 
+    const leadingLink = root.querySelector('[data-testid="header-brand-leading"]');
+    if (leadingLink instanceof HTMLAnchorElement) {
+        const leading = config.brand?.leading;
+        if (leading) {
+            leadingLink.hidden = false;
+            leadingLink.href = leading.href ?? "#";
+            leadingLink.setAttribute("aria-label", leading.label ?? "Selenoid 3");
+        } else {
+            leadingLink.hidden = true;
+        }
+    }
+
     const nav = root.querySelector('[data-testid="header-nav"]');
     if (!nav || !Array.isArray(config.nav)) {
         return;
     }
 
     nav.replaceChildren(
-        ...config.nav.map((item, index) => {
+        ...config.nav.flatMap((item, index) => {
+            const divider = document.createElement("span");
+            divider.className = "plaque-divider";
+            divider.setAttribute("aria-hidden", "true");
+
             const link = document.createElement("a");
             link.href = item.href;
             link.textContent = item.label;
@@ -176,7 +195,7 @@ function applyHeaderConfig(root, config) {
             if (item.active) {
                 link.dataset.headerActive = "true";
             }
-            return link;
+            return [divider, link];
         })
     );
 
@@ -232,6 +251,27 @@ function buildHeaderMenu(root, config) {
     menuTools.className = "header__menu-tools";
     menuTools.dataset.testid = "header-menu-tools";
 
+    const langToggle = root.querySelector(".header__tools .lang-toggle");
+    if (langToggle) {
+        const menuLang = /** @type {HTMLElement} */ (langToggle.cloneNode(true));
+        const menuLangBtn = menuLang.querySelector('[data-testid="header-lang-toggle"]');
+        const menuLangLabel = menuLang.querySelector('[data-testid="header-lang-label"]');
+        if (menuLangBtn instanceof HTMLElement) {
+            menuLangBtn.dataset.testid = "header-menu-lang-toggle";
+        }
+        if (menuLangLabel instanceof HTMLElement) {
+            menuLangLabel.dataset.testid = "header-menu-lang-label";
+        }
+        menuTools.appendChild(menuLang);
+    }
+
+    const themeSource = root.querySelector('[data-testid="header-theme-toggle"]');
+    if (themeSource instanceof HTMLElement) {
+        const menuTheme = /** @type {HTMLElement} */ (themeSource.cloneNode(true));
+        menuTheme.dataset.testid = "header-menu-theme-toggle";
+        menuTools.appendChild(menuTheme);
+    }
+
     for (const testid of ["header-github", "header-github-pages"]) {
         const source = root.querySelector(`[data-testid="${testid}"]`);
         if (!source || !(source instanceof HTMLAnchorElement)) {
@@ -281,14 +321,17 @@ function bindHeaderMenu(root) {
         return;
     }
 
-    if (typeof window.matchMedia !== "function") {
+    if (typeof window.getComputedStyle !== "function") {
         return;
     }
 
-    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    // The burger drives the menu whenever it is visible. Its breakpoint lives in
+    // CSS (≤768 on the default header, ≤1120 on the metrics/selenoid header), so
+    // we read the computed display here instead of hardcoding a matchMedia width.
+    const isBurgerVisible = () => window.getComputedStyle(burger).display !== "none";
 
     burger.addEventListener("click", () => {
-        if (!mobileQuery.matches) {
+        if (!isBurgerVisible()) {
             return;
         }
         const open = menu.hidden;
@@ -323,11 +366,10 @@ function bindHeaderMenu(root) {
     });
 
     const onViewportChange = () => {
-        if (!mobileQuery.matches) {
+        if (!isBurgerVisible()) {
             closeHeaderMenu(root);
         }
     };
-    mobileQuery.addEventListener("change", onViewportChange);
     window.addEventListener("resize", onViewportChange);
 }
 
@@ -344,15 +386,21 @@ function setLangState(langBtn, langLabel, lang) {
     langBtn.setAttribute("aria-label", code === "ru" ? "Переключить на English" : "Switch to Russian");
 }
 
+/** @param {ParentNode} root @param {'ru' | 'en'} lang */
+function syncAllLangToggles(root, lang) {
+    for (const wrap of root.querySelectorAll(".lang-toggle")) {
+        const btn = wrap.querySelector("button");
+        const label = wrap.querySelector(".lang-toggle__label");
+        if (btn instanceof HTMLElement && label instanceof HTMLElement) {
+            setLangState(btn, label, lang);
+        }
+    }
+}
+
 /** @param {ParentNode} root @param {HeaderLangConfig | undefined} langConfig */
 function applyLangDefault(root, langConfig) {
-    const langBtn = root.querySelector('[data-testid="header-lang-toggle"]');
-    const langLabel = root.querySelector('[data-testid="header-lang-label"]');
-    if (!langBtn || !langLabel) {
-        return;
-    }
     const code = langConfig?.default === "ru" ? "ru" : "en";
-    setLangState(langBtn, langLabel, code);
+    syncAllLangToggles(root, code);
     dispatchLangChange(code);
 }
 
@@ -392,31 +440,47 @@ async function mountHeader() {
     applyLangDefault(mount, config.lang);
     applyThemeDefault(config.theme);
 
-    const themeBtn = mount.querySelector('[data-testid="header-theme-toggle"]');
-    if (themeBtn) {
-        setThemeIcon(themeBtn);
+    for (const themeBtn of mount.querySelectorAll(
+        '[data-testid="header-theme-toggle"], [data-testid="header-menu-theme-toggle"]'
+    )) {
+        if (themeBtn instanceof HTMLElement) {
+            setThemeIcon(themeBtn);
+        }
     }
 
     bindHeaderControls(mount);
     bindHeaderMenu(mount);
+
+    const headerEl = mount.querySelector(".header");
+    if (headerEl instanceof HTMLElement) {
+        observeHeaderMetricsWrap(headerEl);
+    }
 }
 
 function bindHeaderControls(root) {
-    const langBtn = root.querySelector('[data-testid="header-lang-toggle"]');
-    const langLabel = root.querySelector('[data-testid="header-lang-label"]');
-    if (langBtn && langLabel) {
+    for (const langBtn of root.querySelectorAll(
+        '[data-testid="header-lang-toggle"], [data-testid="header-menu-lang-toggle"]'
+    )) {
         langBtn.addEventListener("click", () => {
+            if (!(langBtn instanceof HTMLElement)) {
+                return;
+            }
             const next = langBtn.dataset.lang === "ru" ? "en" : "ru";
-            setLangState(langBtn, langLabel, next);
+            syncAllLangToggles(root, next);
             dispatchLangChange(next);
         });
     }
 
-    const themeBtn = root.querySelector('[data-testid="header-theme-toggle"]');
-    if (themeBtn) {
+    const themeBtns = [
+        ...root.querySelectorAll('[data-testid="header-theme-toggle"], [data-testid="header-menu-theme-toggle"]'),
+    ].filter((el) => el instanceof HTMLElement);
+
+    for (const themeBtn of themeBtns) {
         themeBtn.addEventListener("click", () => {
             document.documentElement.classList.toggle("theme-light");
-            setThemeIcon(themeBtn);
+            for (const btn of themeBtns) {
+                setThemeIcon(btn);
+            }
         });
     }
 }
@@ -426,7 +490,7 @@ export async function remountHeader() {
     await mountHeader();
 }
 
-// Self-register so SPA remount works even when the bridge races React, or when
+// Self-register so SPA remount works when the bridge races React, or when
 // AppHeader injects this module after #app-header already exists.
 if (typeof window !== "undefined") {
     window.__designSystemRemountHeader = remountHeader;

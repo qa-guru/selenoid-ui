@@ -1,8 +1,5 @@
 import styled from "styled-components";
 
-const termBg = "#151515";
-const lightFont = "#999";
-
 export const StyledLog = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -16,33 +13,33 @@ export const StyledLog = styled.div`
     .log-card {
         height: 450px;
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        flex-wrap: wrap;
 
-        &__content {
+        .log-card__body {
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
-            background-color: ${termBg};
+            min-height: 0;
+            background-color: var(--panel-bg, #1a1917);
+            padding: 0;
+        }
 
-            .term {
-                height: calc(100% - 30px);
-                padding: 20px 20px 10px;
+        .term {
+            flex: 1;
+            min-height: 0;
+            padding: var(--space-6, 20px) var(--space-6, 20px) var(--space-3, 10px);
 
-                .terminal {
-                    color: #fff;
-                    font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
-                    font-size: 13px;
-                    line-height: 20px;
+            .terminal {
+                color: var(--panel-code-color, var(--color-text, #fff));
+                font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+                font-size: 13px;
+                line-height: 20px;
 
-                    -webkit-font-smoothing: antialiased;
-                    -moz-osx-font-smoothing: grayscale;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
 
-                    .xterm-viewport {
-                        background-color: ${termBg};
-                    }
+                .xterm-viewport {
+                    background-color: var(--panel-bg, #1a1917);
                 }
             }
         }
@@ -54,19 +51,19 @@ export const StyledLog = styled.div`
         justify-content: center;
         line-height: 20px;
         width: 200px;
-        color: ${lightFont};
+        color: var(--color-text-muted, #999);
 
         &__version-separator {
-            margin-right: 4px;
-            margin-left: 4px;
+            margin-right: var(--space-1, 4px);
+            margin-left: var(--space-1, 4px);
             font-size: 0.6em;
-            color: #fff;
+            color: var(--color-text, #fff);
         }
 
         &__session {
             line-height: 20px;
             font-size: 0.8em;
-            color: ${lightFont};
+            color: var(--color-text-muted, #999);
             text-align: center;
         }
     }

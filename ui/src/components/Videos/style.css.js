@@ -1,16 +1,11 @@
 import styled from "styled-components";
 
-const contentBgColor = "#131614";
-const colorBorder = "#555f6a";
-const colorAccent = "#59a781";
-const colorDelete = "#ff6e59";
-
 export const StyledVideo = styled.div`
     display: flex;
     flex-direction: column;
     flex: 1 1 45%;
-    padding: 10px 20px;
-    margin-bottom: 30px;
+    padding: var(--space-3, 10px) var(--space-6, 20px);
+    margin-bottom: var(--space-8, 30px);
     max-width: 70%;
 
     &:hover {
@@ -22,11 +17,11 @@ export const StyledVideo = styled.div`
     }
 
     .name {
-        color: #fff;
+        color: var(--color-text, #fff);
         font-size: 1.3em;
         font-weight: 300;
-        padding: 0 5px 10px 0;
-        border-bottom: 1px dashed ${colorBorder};
+        padding: 0 var(--space-1, 5px) var(--space-3, 10px) 0;
+        border-bottom: 1px dashed var(--color-border-strong, #555f6a);
         overflow-y: scroll;
         line-height: 30px;
         height: 30px;
@@ -43,8 +38,8 @@ export const StyledVideo = styled.div`
             flex-direction: column;
             align-items: center;
             flex: 0;
-            flex-basis: 40px;
-            color: #fff;
+            flex-basis: calc(var(--control-height-md, 36px) + var(--space-2, 8px));
+            color: var(--color-text, #fff);
             visibility: hidden;
 
             .control {
@@ -53,22 +48,19 @@ export const StyledVideo = styled.div`
                 justify-content: center;
                 align-items: center;
                 width: 100%;
-                border-bottom: 1px dashed ${colorBorder};
+                border-bottom: 1px dashed var(--color-border-strong, #555f6a);
 
-                a {
+                .icon-btn {
+                    color: var(--color-text, #fff);
                     text-decoration: none;
-                    color: #fff;
 
                     &:hover {
-                        color: ${colorAccent};
+                        color: var(--color-success, #59a781);
                     }
                 }
 
-                .delete {
-                    cursor: pointer;
-                    &:hover {
-                        color: ${colorDelete};
-                    }
+                .video-delete:hover {
+                    color: var(--color-danger, #ff6e59);
                 }
             }
         }
@@ -76,9 +68,9 @@ export const StyledVideo = styled.div`
         .content {
             display: flex;
             flex: 1;
-            padding: 5px;
+            padding: var(--space-1, 5px);
             flex-basis: 300px;
-            background-color: ${contentBgColor};
+            background-color: var(--color-surface-deep, #131614);
             justify-content: center;
             align-items: center;
 
@@ -119,7 +111,7 @@ export const StyledVideos = styled.div`
     }
 
     .no-any {
-        color: #fff;
+        color: var(--color-text, #fff);
         display: flex;
         flex-wrap: wrap;
         flex-direction: column;
@@ -128,12 +120,46 @@ export const StyledVideos = styled.div`
         justify-content: center;
 
         .nosession-any-text {
-            margin: 10px;
+            margin: var(--space-3, 10px);
         }
 
         // don't show until all videos are gone
         &_state-enter-active {
             display: none;
         }
+    }
+
+    .videos__pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--space-5, 16px);
+        margin: var(--space-3, 10px) 0 var(--space-8, 30px);
+        color: var(--color-text, #fff);
+        font-size: 0.95em;
+    }
+
+    .videos__pager-btn {
+        background: transparent;
+        border: 1px solid var(--color-border-strong, #555f6a);
+        color: var(--color-text, #fff);
+        padding: 6px 14px;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            border-color: var(--color-success, #59a781);
+            color: var(--color-success, #59a781);
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+    }
+
+    .videos__pager-status {
+        min-width: 64px;
+        text-align: center;
+        color: var(--color-text, #fff);
     }
 `;

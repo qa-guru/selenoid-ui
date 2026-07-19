@@ -1,8 +1,5 @@
 import styled from "styled-components";
 
-const backgroundColorLighter = "#3d444c";
-const colorSessionName = "#555f6a";
-
 export const StyledSession = styled.div`
     flex: 1;
     width: 100%;
@@ -23,18 +20,18 @@ export const StyledSession = styled.div`
         flex: 1;
         flex-basis: 45%;
         min-width: 450px;
-        margin: 20px 0 0;
+        margin: var(--space-6, 20px) 0 0;
     }
 
     .session-info {
-        color: #fff;
-        padding: 0 30px;
+        color: var(--color-text, #fff);
+        padding: 0 var(--space-8, 30px);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 80px;
-        margin-bottom: 30px;
+        margin-bottom: var(--space-8, 30px);
 
         &__main {
             height: 40px;
@@ -42,13 +39,16 @@ export const StyledSession = styled.div`
             align-items: center;
             justify-content: space-between;
             min-width: 350px;
-            border-bottom: 1px dashed ${backgroundColorLighter};
-            margin: 15px 0;
+            border-bottom: 1px dashed var(--color-border, #3d444c);
+            margin: var(--space-4, 15px) 0;
             flex-shrink: 0;
+            gap: var(--space-3, 12px);
 
             .session-browser {
                 line-height: 40px;
                 display: inline-flex;
+                align-items: center;
+                gap: var(--space-1, 4px);
 
                 &__name {
                     text-transform: uppercase;
@@ -59,7 +59,7 @@ export const StyledSession = styled.div`
                     margin-right: 3px;
                     margin-left: 3px;
                     font-size: 1.5em;
-                    color: ${backgroundColorLighter};
+                    color: var(--color-border, #3d444c);
                 }
 
                 &__version {
@@ -68,32 +68,17 @@ export const StyledSession = styled.div`
 
                 &__quota {
                     font-size: 0.8em;
-                    color: #999;
-                }
-
-                &__resolution {
-                    font-size: 0.8em;
-                    color: #999;
+                    color: var(--color-text-muted, #999);
                 }
             }
         }
 
         &__additional {
             .custom-capabilities {
-                &__name {
-                    height: 25px;
-                    line-height: 25px;
-                    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.12);
-                    margin: -3px 5px 0;
-                    padding: 0 5px;
-
-                    background-color: ${colorSessionName};
-                    font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
-
-                    -webkit-font-smoothing: antialiased;
-                    -moz-osx-font-smoothing: grayscale;
-                    font-size: 13px;
-                }
+                display: flex;
+                align-items: center;
+                gap: var(--space-2, 8px);
+                flex-wrap: wrap;
             }
         }
     }

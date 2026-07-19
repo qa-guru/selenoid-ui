@@ -1,30 +1,20 @@
 import React, { useRef, useState } from "react";
-import { HashRouter as Router, Link, Route } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 
-import styled from "styled-components";
-import { GlobalStyle, StyledTopBar, StyledViewport } from "./styles.css";
+import { GlobalStyle, StyledViewport } from "./styles.css";
 
 import "event-source-polyfill";
 
 import { FilterInput } from "../../components/FilterInput";
-import Navigation from "../../components/Navigation";
+import HeaderStats from "../../components/HeaderStats";
 import Stats from "../../containers/Stats";
 import Capabilities from "../../containers/Capabilities";
-import Status from "../../components/Stats/Status";
 import Sessions from "../../components/Sessions";
 import Session from "../../components/Session";
 import Videos from "../../components/Videos";
-import Quota from "../../components/Stats/Quota";
-import Queue from "../../components/Stats/Queue";
-import Used from "../../components/Stats/Used";
-import Separator from "../../components/Stats/Separator";
 import { useUiFeed } from "../../hooks/useUiFeed";
-
-const links = (videos) => [
-    { href: "/", title: "STATS", exact: true },
-    { href: "/capabilities", title: "CAPABILITIES", exact: true },
-    ...(videos ? [{ href: "/videos", title: "VIDEOS", exact: true }] : []),
-];
+import { useHeaderSlot } from "../../hooks/useHeaderSlot";
 
 const formatLastUpdateTitle = (version, lastUpdate) => {
     if (!lastUpdate) {
@@ -33,6 +23,11 @@ const formatLastUpdateTitle = (version, lastUpdate) => {
 
     const ago = Math.max(0, Math.round((Date.now() - lastUpdate) / 1000));
     return `Version: ${version}\nUpdated ${ago}s ago`;
+};
+
+const SessionRoute = ({ origin, sessions }) => {
+    const { session } = useParams();
+    return <Session session={session} origin={origin} browser={sessions[session]} />;
 };
 
 const Viewport = () => {
@@ -54,68 +49,62 @@ const Viewport = () => {
 
     const statusTitle = formatLastUpdateTitle(version, lastUpdate);
 
+    // Single-row header: the filter lives in the canonical `.header__search`
+    // slot and the live stats in `.header__slot`, both rendered by js/header.js.
+    const searchSlot = useHeaderSlot(".header__search", { clear: true });
+    const statsSlot = useHeaderSlot(".header__slot", { clear: true });
+
     return (
         <>
             <GlobalStyle />
-            <Router>
-                <StatsBar>
-                    <Link to="/">
-                        <Logo data-testid="selenoid-logo">&nbsp;</Logo>
-                    </Link>
 
+            {searchSlot &&
+                createPortal(
                     <FilterInput
                         ref={select}
                         value={query}
                         onChange={(event) => onQuery(event.target.value)}
                         onClear={() => onQuery("")}
-                    />
+                    />,
+                    searchSlot
+                )}
 
-                    <Status status={sseStatus} header="sse" version={version} title={statusTitle} />
-                    <Status status={selenoidStatus} header="selenoid" version={version} title={statusTitle} />
+            {statsSlot &&
+                createPortal(
+                    <HeaderStats
+                        state={state}
+                        sseStatus={sseStatus}
+                        selenoidStatus={selenoidStatus}
+                        version={version}
+                        statusTitle={statusTitle}
+                    />,
+                    statsSlot
+                )}
 
-                    <Separator>&nbsp;</Separator>
-
-                    <Used total={state.total} used={state.used} pending={state.pending} />
-                    <Separator>&nbsp;</Separator>
-                    <Queue queued={state.queued} />
-                    <Separator>&nbsp;</Separator>
-                    <Quota total={state.total} used={state.used} pending={state.pending} />
-                </StatsBar>
-                <StyledViewport>
-                    <StyledTopBar>
-                        <Navigation links={links(state.videos)} />
-                    </StyledTopBar>
-
+            <StyledViewport>
+                <Routes>
                     <Route
-                        exact={true}
                         path="/"
-                        render={() => {
-                            if (query) {
-                                return null;
-                            }
-                            return (
-                                <Stats
-                                    {...{
-                                        state,
-                                        browsers,
-                                    }}
-                                />
-                            );
-                        }}
+                        element={
+                            <>
+                                {query ? null : (
+                                    <Stats
+                                        {...{
+                                            state,
+                                            browsers,
+                                        }}
+                                    />
+                                )}
+                                <Sessions sessions={sessions} query={query} />
+                            </>
+                        }
                     />
 
-                    <Route exact={true} path="/" render={() => <Sessions sessions={sessions} query={query} />} />
+                    <Route path="/videos" element={<Videos query={query} />} />
 
                     <Route
-                        exact={true}
-                        path="/videos"
-                        render={() => <Videos videos={state.videos || []} query={query} />}
-                    />
-
-                    <Route
-                        exact={true}
                         path="/capabilities"
-                        render={() => (
+                        element={
                             <Capabilities
                                 browsers={state.browsers}
                                 browserProtocols={browserProtocols}
@@ -123,60 +112,14 @@ const Viewport = () => {
                                 origin={origin}
                                 playwrightAccessKey={playwrightAccessKey}
                             />
-                        )}
+                        }
                     />
 
-                    <Route
-                        path="/sessions/:session"
-                        render={({ match }) => (
-                            <Session
-                                session={match.params.session}
-                                origin={origin}
-                                browser={sessions[match.params.session]}
-                            />
-                        )}
-                    />
-                </StyledViewport>
-            </Router>
+                    <Route path="/sessions/:session" element={<SessionRoute origin={origin} sessions={sessions} />} />
+                </Routes>
+            </StyledViewport>
         </>
     );
 };
 
 export default Viewport;
-
-const aerokubeColor = "#4195d3";
-const aerokubeColorBright = "#00c6f4";
-const statsBgColor = "#272727";
-
-const StatsBar = styled.div`
-    height: 80px;
-    background-color: ${statsBgColor};
-    box-shadow: inset 0 -5px 5px 0 rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    overflow: auto;
-`;
-
-const Logo = styled.div`
-    line-height: 30px;
-    transition: color 0.5s ease-out 0s;
-    color: ${aerokubeColorBright};
-    margin-left: 55px;
-    position: relative;
-    font-weight: 400;
-    font-size: 16px;
-    min-width: 40px;
-
-    &:before {
-        content: "";
-        width: 20px;
-        height: 20px;
-        position: absolute;
-        border-radius: 1px;
-        left: -30px;
-        top: 0;
-        box-shadow: 0 0 10px 5px ${aerokubeColor};
-        border: 5px solid #272727;
-        background-color: ${aerokubeColorBright};
-    }
-`;

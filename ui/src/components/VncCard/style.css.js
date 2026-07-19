@@ -1,12 +1,5 @@
 import styled from "styled-components";
 
-const colorDisconnected = "#ff6e59";
-const colorConnecting = "#6883d3";
-const colorDisconnecting = " #ca9eff";
-const colorFullscreen = "#59a781";
-const backgroundColorLighter = "#3d444c";
-const copyAndPaste = "#405048";
-
 export const StyledVNC = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -23,7 +16,7 @@ export const StyledVNC = styled.div`
     }
 
     .vnc-connection-status {
-        color: #fff;
+        color: var(--color-text, #fff);
         text-transform: uppercase;
         margin-left: 55px;
         transition: color 0.5s ease-out 0s;
@@ -34,22 +27,22 @@ export const StyledVNC = styled.div`
             display: block;
             width: 35px;
             margin-left: -45px;
-            border-bottom: 1px solid #fff;
+            border-bottom: 1px solid var(--color-text, #fff);
             position: relative;
             top: 11px;
         }
 
         &_disconnected {
-            color: ${colorDisconnected};
+            color: var(--color-danger, #ff6e59);
             &:before {
-                border-bottom-color: ${colorDisconnected};
+                border-bottom-color: var(--color-danger, #ff6e59);
             }
         }
 
         &_connecting {
-            color: ${colorConnecting};
+            color: var(--color-info, #6883d3);
             &:before {
-                border-bottom-color: ${colorConnecting};
+                border-bottom-color: var(--color-info, #6883d3);
             }
         }
     }
@@ -68,76 +61,53 @@ export const StyledVNC = styled.div`
         }
 
         &_small {
-            height: 30px;
-            width: 65px;
+            height: var(--control-height-md, 36px);
+            width: auto;
+            min-width: calc(var(--control-height-md, 36px) * 2);
         }
 
         &__controls {
-            height: 30px;
+            height: var(--control-height-md, 36px);
             width: 100%;
             display: flex;
             align-items: center;
-            background-color: ${backgroundColorLighter};
+            gap: var(--space-1, 4px);
+            padding: 0 var(--space-2, 8px);
+            background-color: var(--color-surface-soft, #3d444c);
+            box-sizing: border-box;
 
             .control {
-                width: 15px;
-                height: 15px;
-                line-height: 15px;
-                border-radius: 50%;
-                background-color: ${colorDisconnected};
-                text-align: center;
-                text-decoration: none;
-                margin-left: 10px;
-                font-size: 10px;
-                color: #fff;
-                transition: background-color 0.5s ease-out 0s;
+                flex-shrink: 0;
+                color: var(--color-text, #fff);
 
                 &_fullscreen {
-                    cursor: pointer;
-                    background-color: ${colorFullscreen};
-                    color: ${colorFullscreen};
-
-                    &:hover {
-                        color: #fff;
-                    }
+                    color: var(--color-success, #59a781);
                 }
 
                 &_back {
-                    cursor: pointer;
-                    background-color: ${colorDisconnected};
-                    color: ${colorDisconnected};
-
-                    &:hover {
-                        color: #fff;
-                    }
+                    color: var(--color-danger, #ff6e59);
                 }
 
                 &_lock {
-                    cursor: pointer;
-                    background-color: ${colorConnecting};
-                    color: ${colorConnecting};
+                    color: var(--color-info, #6883d3);
+                }
 
-                    &:hover {
-                        color: #fff;
-                    }
+                &_disconnected,
+                &_connecting,
+                &_disconnecting {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: var(--control-height-md, 36px);
+                    height: var(--control-height-md, 36px);
                 }
 
                 &_disconnected {
-                    background-color: ${colorDisconnected};
-                    height: 30px;
-                    width: 30px;
-                    line-height: 30px;
-                    font-size: 1em;
-                    border-radius: 0;
+                    color: var(--color-danger, #ff6e59);
                 }
 
                 &_connecting {
-                    background-color: ${colorConnecting};
-                    height: 30px;
-                    width: 30px;
-                    line-height: 30px;
-                    font-size: 1em;
-                    border-radius: 0;
+                    color: var(--color-info, #6883d3);
                 }
 
                 &_connected {
@@ -145,36 +115,23 @@ export const StyledVNC = styled.div`
                 }
 
                 &_disconnecting {
-                    background-color: ${colorDisconnecting};
+                    color: var(--color-warning, #ca9eff);
                 }
 
                 &_copy {
-                    cursor: pointer;
-                    background-color: ${copyAndPaste};
-                    color: ${colorFullscreen};
+                    color: var(--color-success, #59a781);
                     margin-left: auto;
-
-                    &:hover {
-                        color: #fff;
-                    }
                 }
 
                 &_upload {
-                    cursor: pointer;
-                    background-color: ${copyAndPaste};
-                    color: ${colorFullscreen};
-                    margin-right: 10px;
-
-                    &:hover {
-                        color: #fff;
-                    }
+                    color: var(--color-success, #59a781);
                 }
             }
         }
 
         &__content {
             width: 100%;
-            height: calc(100% - 30px);
+            height: calc(100% - var(--control-height-md, 36px));
             display: flex;
             flex-direction: column;
             background-color: #000;
