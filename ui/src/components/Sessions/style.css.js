@@ -1,6 +1,5 @@
 import styled from "styled-components";
 
-const colorAccent = "#59a781";
 const colorBorder = "#555f6a";
 const borderSectionColor = "#353b42";
 const secondaryColor = "#aaa";
@@ -88,8 +87,6 @@ export const StyledSessions = styled.div`
     .identity {
       display: flex;
       flex-direction: column;
-      text-decoration: none;
-      color: #fff;
       max-width: 50%;
       flex: 0 0 50%;
       padding-right: 15px;
@@ -132,36 +129,9 @@ export const StyledSessions = styled.div`
       }
     }
 
-    
-
-    .capability {
-      font-family: open sans,helvetica neue,Helvetica,Arial,sans-serif;
-      background-color: ${colorAccent};
-      margin: 0 .5em;
-      padding: .3em .4em .4em;
-      display: inline-block;
-      vertical-align: middle;
-      border-radius: 2px;
-      font-weight: 500;
-      font-size: 11px;
-      line-height: 1;
-      letter-spacing: .1px;
-      
-      &__manual {
-        background-color: ${manualColor};
-        color: ${borderSectionColor};
-      }
-      
-      &__resolution {
-        background: none;
-        color: ${secondaryColor};
-        font-weight: 400;
-      }
-
-      &__session-delete {
-        background: none;
-        cursor: pointer;
-      }
+    .session-delete {
+      color: #fff;
+      flex-shrink: 0;
     }
   }
 `;
