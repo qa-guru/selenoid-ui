@@ -108,12 +108,15 @@ Monorepo dev: `projects/selenoid-home/dev/scripts/build-selenoid-ui.sh`.
 
 ### Frontend stack (`ui/`)
 
-| Tool      | Version                                  |
-| --------- | ---------------------------------------- |
-| React     | 18.3                                     |
-| Bundler   | Vite 6                                   |
-| Test      | Vitest 3 + React Testing Library (jsdom) |
-| Node (CI) | 24                                       |
+Current `main` / v3-dev toolchain (see `ui/package.json`). Prod **v2.3.0** stays on the React 18 pin branch — see `STACK-PIN.md`.
+
+| Tool      | Version                                                      |
+| --------- | ------------------------------------------------------------ |
+| React     | 19.x (`^19.2.7`)                                             |
+| Router    | react-router-dom 7 (`HashRouter` / `Routes` / `useNavigate`) |
+| Bundler   | Vite 6                                                       |
+| Test      | Vitest 3 + React Testing Library (jsdom)                     |
+| Node (CI) | 24                                                           |
 
 ```bash
 yarn --cwd ui install

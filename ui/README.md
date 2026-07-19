@@ -1,6 +1,6 @@
-## selenoid-ui v2 (React 18 stabilization)
+## selenoid-ui (React 19 + react-router 7)
 
-This app is stabilized on **React 18.3.1** with Vite 6 + Vitest 3 + React Testing Library.
+Current toolchain on `main` / v3-dev: **React 19.x** + **react-router-dom 7** (`HashRouter` / `Routes` / `useNavigate`) with Vite 6 + Vitest 3 + React Testing Library.
 Component tests run via `yarn test` and emit Allure results (`allure-results/`).
 
 ### Install note
@@ -12,13 +12,12 @@ CI runs `yarn --cwd ui install --frozen-lockfile` (`ci/test.sh`, `ci/build.sh`).
 
 ### Selenoid 2.x UI freeze
 
-This React 18/Vite line is maintenance-only for Selenoid 2.x. Keep the native Selenoid header, navigation, filter, buttons, layout, and theme. Functional fixes may touch UI code, but they must preserve the existing visual design.
+Prod **v2.x** pin branches (`selenoid2-…-react16` / `selenoid2-…-react18`) stay maintenance-only: keep the native Selenoid header, navigation, filter, buttons, layout, and theme. Functional fixes may touch UI code on those pins, but they must preserve the existing visual design. Visual refresh and design-system work land on the Selenoid 3 line (this tree).
 
 ### Deferred to 3.0.0
 
 -   Design-system `AppHeader`, `Input`, `Button`, `Badge`, static assets, and bridge scripts.
 -   Header/navigation unification and sessions/layout redesign.
--   React 18 → React 19 and `react-router-dom` v5 → v7.
 
 <!-- stack-branches-note:start -->
 
