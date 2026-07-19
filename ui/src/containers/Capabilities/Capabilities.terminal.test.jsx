@@ -129,6 +129,33 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         expect(panel.textContent).toContain('"screenResolution": "1280x1024x24"');
     });
 
+    it("switches Agent / Terminal / JSON output tabs in the trail", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+
+        const panel = screen.getByTestId("capabilities-terminal-panel");
+        const formatTabs = within(panel).getByTestId("capabilities-terminal-tabs");
+        expect(within(formatTabs).getByRole("tab", { name: "Terminal" })).toHaveClass("tab--active");
+        expect(panel).toHaveClass("panel--foot-rail");
+        expect(within(panel).getByRole("tablist", { name: "Language" })).toBeTruthy();
+
+        await user.click(within(formatTabs).getByRole("tab", { name: "Agent" }));
+        expect(within(formatTabs).getByRole("tab", { name: "Agent" })).toHaveClass("tab--active");
+        expect(panel).not.toHaveClass("panel--foot-rail");
+        expect(within(panel).queryByRole("tablist", { name: "Language" })).toBeNull();
+        expect(panel.textContent).toContain("Настрой Selenoid Capabilities");
+        expect(panel.textContent).toContain("## Vector");
+
+        await user.click(within(formatTabs).getByRole("tab", { name: "JSON" }));
+        expect(within(formatTabs).getByRole("tab", { name: "JSON" })).toHaveClass("tab--active");
+        expect(panel.textContent).toContain('"vector"');
+        expect(panel.textContent).toContain('"sessionTimeout"');
+
+        await user.click(within(formatTabs).getByRole("tab", { name: "Terminal" }));
+        expect(panel).toHaveClass("panel--foot-rail");
+        expect(within(panel).getByRole("tablist", { name: "Language" })).toBeTruthy();
+    });
+
     it("renders vector fingerprint and Сброс / Копировать panel actions", async () => {
         const user = userEvent.setup();
         renderCapabilities();

@@ -26,6 +26,7 @@ import {
     PlaqueFieldSeg,
     PlaqueSelect,
     PlaqueTagstrip,
+    highlightOutput,
     usePlaqueFieldMagnet,
 } from "@zero-design-system/react";
 import "@zero-design-system/react/styles.css";
@@ -46,7 +47,8 @@ import "@zero-design-system/react/styles.css";
  *
  * Ban: closeBrowser* / gradle* / junit* / allure* / builder fields.
  *
- * Terminal bar (canon configurator / autotests-builder): vector# fingerprint +
+ * Terminal bar (canon configurator / autotests-builder): Agent | Terminal | JSON
+ * trail tabs, language foot rail on Terminal, vector# fingerprint +
  * IconReset (Сброс) + IconCopy (Копировать).
  */
 const SESSION_TIMEOUT_OPTIONS = [
@@ -247,6 +249,13 @@ const TERMINAL_LANG_LABELS = {
     ruby: "Ruby",
 };
 
+/** Same ids / barLabels as autotests-builder / configurator demo `OUTPUT_TABS`. */
+const OUTPUT_TABS = [
+    { id: "prompt", label: "Agent prompt", barLabel: "Agent" },
+    { id: "gradle", label: "Terminal", barLabel: "Terminal" },
+    { id: "json", label: "JSON vector", barLabel: "JSON" },
+];
+
 const langLabel = (key) => TERMINAL_LANG_LABELS[key] || key;
 
 const orderedLangKeys = (caps) => {
@@ -255,6 +264,51 @@ const orderedLangKeys = (caps) => {
     const rest = keys.filter((k) => !TERMINAL_LANG_ORDER.includes(k));
     return ranked.concat(rest);
 };
+
+/** Hub origin for prompts/snippets (same host, port 4444). */
+const hubOrigin = () =>
+    window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
+
+/** Agent prompt — markdown vector + Driver / Remote hub (configurator SSOT). */
+const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, remoteUrl }) => {
+    const browserLabel = name ? `${name}${version ? ` ${version}` : ""}` : "—";
+    const payload = {
+        vector: vectorId,
+        browser: name || "",
+        browserVersion: version || "",
+        protocol: isPlaywright ? "playwright" : "webdriver",
+        remoteUrl,
+        sessionTimeout: sessionOpts.sessionTimeout,
+        name: sessionOpts.name,
+        screenResolution: sessionOpts.screenResolution,
+        enableVnc: String(sessionOpts.enableVnc),
+        enableVideo: String(sessionOpts.enableVideo),
+        enableHar: String(sessionOpts.enableHar),
+    };
+    return [
+        "Настрой Selenoid Capabilities со следующим вектором.",
+        "",
+        `## Vector \`${vectorId}\``,
+        "```json",
+        JSON.stringify(payload, null, 2),
+        "```",
+        "",
+        "## Driver",
+        `- browser: **${browserLabel}**`,
+        `- protocol: **${payload.protocol}**`,
+        "",
+        "## Remote hub",
+        `- remoteUrl: \`${remoteUrl}\``,
+        `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
+        `- name: **${sessionOpts.name}**`,
+        `- screenResolution: **${sessionOpts.screenResolution}**`,
+        `- enableVnc / enableVideo / enableHar: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableHar}**`,
+    ].join("\n");
+};
+
+/** JSON vector tab — fingerprint + caps snapshot. */
+const buildCapsJson = (capsSnap, vectorId, meta = {}) =>
+    JSON.stringify({ ...capsSnap, vector: vectorId, ...meta }, null, 2);
 
 /** Terminal snippets mirror Remote hub session options (createSession SSOT). */
 const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444", session = {}) => {
@@ -288,7 +342,7 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
             break;
     }
     return {
-        curl: `curl -H'Content-Type: application/json' ${origin}/wd/hub/session -d'{
+        curl: `curl -H 'Content-Type: application/json' ${origin}/wd/hub/session -d '{
     "capabilities": {
         "alwaysMatch": {
             "browserName": "${browserName}",
@@ -667,6 +721,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const navigate = useNavigate();
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
+    const [outputTab, setOutputTab] = useState("gradle");
     // Session options live here so Terminal snippets mirror Remote hub (createSession SSOT).
     const [enableVnc, setEnableVnc] = useState("true");
     const [enableVideo, setEnableVideo] = useState("true");
@@ -716,12 +771,37 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     };
     const vectorId = fingerprint(capsSnap);
     const displayVector = vectorDraft ?? vectorId;
+    const remoteUrl = hubOrigin();
     const caps = isPlaywright
         ? playwrightCode(name, version, playwrightAccessKey)
         : code(name, version, origin, sessionOpts);
     const langKeys = orderedLangKeys(caps);
     const activeLang = langKeys.includes(lang) ? lang : langKeys[0] || "curl";
     const activeSnippet = caps[activeLang] || "";
+    const capsJson = buildCapsJson(capsSnap, vectorId, {
+        browser: name || "",
+        browserVersion: version || "",
+        protocol: isPlaywright ? "playwright" : "webdriver",
+        remoteUrl,
+    });
+    const agentPrompt = buildAgentPrompt({
+        vectorId,
+        name,
+        version,
+        isPlaywright,
+        sessionOpts,
+        remoteUrl,
+    });
+    const outputs = {
+        prompt: agentPrompt,
+        gradle: activeSnippet,
+        json: capsJson,
+    };
+    const activeOutput = outputs[outputTab] || activeSnippet;
+    const isTerminalTab = outputTab === "gradle";
+    /** Agent/JSON + curl → library tokens (vscode); other Terminal langs → hljs. */
+    const useLibraryHighlight = !isTerminalTab || activeLang === "curl";
+    const highlightKind = isTerminalTab ? "curl" : outputTab === "json" ? "json" : "markdown";
 
     const remember = (snap) => {
         const id = fingerprint(snap);
@@ -808,7 +888,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     };
 
     const copySnippet = () => {
-        const text = activeSnippet;
+        const text = activeOutput;
         if (navigator.clipboard?.writeText) {
             void navigator.clipboard.writeText(text);
             return;
@@ -906,22 +986,48 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         variant="terminal"
                         testId="capabilities-terminal-panel"
                         bodyClassName="capabilities-terminal-body"
-                        footPlacement="rail"
-                        foot={
-                            <div className="tabs" role="tablist" aria-label="Language">
-                                {langKeys.map((next) => (
+                        className={useLibraryHighlight ? "ch-theme--vscode" : undefined}
+                        trail={
+                            <div
+                                className="tabs"
+                                role="tablist"
+                                aria-label="Формат вывода"
+                                data-testid="capabilities-terminal-tabs"
+                            >
+                                {OUTPUT_TABS.map((tab) => (
                                     <button
-                                        key={next}
+                                        key={tab.id}
                                         type="button"
+                                        className={"tab" + (outputTab === tab.id ? " tab--active" : "")}
                                         role="tab"
-                                        aria-selected={next === activeLang}
-                                        className={`tab${next === activeLang ? " tab--active" : ""}`}
-                                        onClick={() => onLanguageChange(next)}
+                                        aria-selected={outputTab === tab.id}
+                                        data-tab={tab.id}
+                                        data-testid={`capabilities-terminal-tab-${tab.id}`}
+                                        onClick={() => setOutputTab(tab.id)}
                                     >
-                                        {langLabel(next)}
+                                        {tab.barLabel}
                                     </button>
                                 ))}
                             </div>
+                        }
+                        footPlacement={isTerminalTab ? "rail" : "bottom"}
+                        foot={
+                            isTerminalTab ? (
+                                <div className="tabs" role="tablist" aria-label="Language">
+                                    {langKeys.map((next) => (
+                                        <button
+                                            key={next}
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={next === activeLang}
+                                            className={`tab${next === activeLang ? " tab--active" : ""}`}
+                                            onClick={() => onLanguageChange(next)}
+                                        >
+                                            {langLabel(next)}
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null
                         }
                         barEnd={
                             <input
@@ -974,9 +1080,19 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                             },
                         ]}
                     >
-                        <CodeHighlight className="panel__code" language={activeLang}>
-                            {activeSnippet}
-                        </CodeHighlight>
+                        {useLibraryHighlight ? (
+                            <pre
+                                className="panel__code ch-code"
+                                data-testid="capabilities-terminal-output"
+                                dangerouslySetInnerHTML={{
+                                    __html: highlightOutput(activeOutput, highlightKind),
+                                }}
+                            />
+                        ) : (
+                            <CodeHighlight className="panel__code" language={activeLang}>
+                                {activeSnippet}
+                            </CodeHighlight>
+                        )}
                     </Panel>
                 </div>
             </div>
