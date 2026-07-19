@@ -7,6 +7,64 @@ import BeatLoader from "react-spinners/BeatLoader";
 import { videoPreloadMode } from "../../util/sessionsLogic";
 import { fetchVideoPage, VIDEO_PAGE_SIZE } from "./api";
 
+/** Local trash glyph for Videos delete (no IconTrash in react-ui exports). */
+function IconTrash() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M2.5 4.5h11" />
+            <path d="M6 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" />
+            <path d="M4.5 4.5l.7 8a1.5 1.5 0 0 0 1.5 1.3h3.6a1.5 1.5 0 0 0 1.5-1.3l.7-8" />
+            <path d="M6.5 7v4M9.5 7v4" />
+        </svg>
+    );
+}
+
+/** Empty-state hourglass — composition only; dripicons off. */
+function IconHourglass() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M3.5 2.5h9M3.5 13.5h9" />
+            <path d="M4.5 2.5c0 3 3.5 4 3.5 5.5S4.5 11 4.5 13.5" />
+            <path d="M11.5 2.5c0 3-3.5 4-3.5 5.5s3.5 3 3.5 5.5" />
+        </svg>
+    );
+}
+
+/** Link glyph for video download/open — dripicons off. */
+function IconLink() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M6.5 9.5l3-3" />
+            <path d="M7 11.5l-.7.7a3 3 0 0 1-4.2-4.2l.7-.7" />
+            <path d="M9 4.5l.7-.7a3 3 0 0 1 4.2 4.2l-.7.7" />
+        </svg>
+    );
+}
+
 const Videos = ({ query = "" }) => {
     const [page, setPage] = useState(0);
     const [videos, setVideos] = useState([]);
@@ -132,7 +190,9 @@ const Videos = ({ query = "" }) => {
                 unmountOnExit
             >
                 <div ref={noAnyRef} className="no-any">
-                    <div title="No any" className="icon dripicons-hourglass" />
+                    <span className="icon" title="No any" aria-hidden="true">
+                        <IconHourglass />
+                    </span>
                     <div className="nosession-any-text">NO VIDEOS YET :'(</div>
                 </div>
             </CSSTransition>
@@ -151,18 +211,29 @@ const RecordedVideo = ({ src, session, file, preload, onDeleted, ref }) => {
             <div className="video">
                 <div className="controls">
                     <div className="control">
-                        <a href={src}>
-                            <i title="Link" className="icon dripicons-link" />
+                        <a href={src} className="icon-btn" title="Link" aria-label="Link">
+                            <span className="icon" aria-hidden="true">
+                                <IconLink />
+                            </span>
                         </a>
                     </div>
                     <div className="control">
-                        {deleting ? (
-                            <BeatLoader size={2} color={"#fff"} />
-                        ) : (
-                            <span className="delete" onClick={deleteVideo}>
-                                <i title="Delete" className="icon dripicons-trash" />
-                            </span>
-                        )}
+                        <button
+                            type="button"
+                            className="icon-btn video-delete"
+                            title="Delete"
+                            aria-label="Delete"
+                            disabled={deleting}
+                            onClick={deleteVideo}
+                        >
+                            {deleting ? (
+                                <BeatLoader size={2} color={"#fff"} />
+                            ) : (
+                                <span className="icon" aria-hidden="true">
+                                    <IconTrash />
+                                </span>
+                            )}
+                        </button>
                     </div>
                 </div>
                 <div className="content">

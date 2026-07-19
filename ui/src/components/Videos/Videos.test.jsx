@@ -59,4 +59,51 @@ describe("Videos", () => {
         });
         expect(screen.getByTestId("videos-pager-status")).toHaveTextContent("2 / 2");
     });
+
+    it("renders icon-btn chrome without dripicons", async () => {
+        fetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                videos: ["sess-1.mp4"],
+                total: 1,
+                limit: 10,
+                offset: 0,
+            }),
+        });
+
+        render(<Videos />);
+
+        // Controls stay visibility:hidden until hover; query DOM directly.
+        await waitFor(() => {
+            expect(document.querySelector('a.icon-btn[aria-label="Link"]')).toBeTruthy();
+        });
+
+        const link = document.querySelector('a.icon-btn[aria-label="Link"]');
+        expect(link).toHaveAttribute("href", "/video/sess-1.mp4");
+        expect(link.querySelector("svg")).toBeTruthy();
+
+        const deleteBtn = document.querySelector("button.icon-btn.video-delete");
+        expect(deleteBtn).toHaveAttribute("aria-label", "Delete");
+        expect(deleteBtn.querySelector("svg")).toBeTruthy();
+
+        expect(document.querySelector("[class*='dripicons']")).toBeNull();
+    });
+
+    it("shows empty state with local SVG hourglass", async () => {
+        fetch.mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ videos: [], total: 0, limit: 10, offset: 0 }),
+        });
+
+        render(<Videos />);
+
+        await waitFor(() => {
+            expect(screen.getByText("NO VIDEOS YET :'(")).toBeInTheDocument();
+        });
+
+        const empty = screen.getByText("NO VIDEOS YET :'(").closest(".no-any");
+        expect(empty).toBeTruthy();
+        expect(empty.querySelector(".dripicons-hourglass")).toBeNull();
+        expect(empty.querySelector("svg")).toBeTruthy();
+    });
 });
