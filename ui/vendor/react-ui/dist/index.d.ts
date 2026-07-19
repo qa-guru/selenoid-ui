@@ -281,20 +281,18 @@ interface PlaqueFieldSegProps {
     onValueChange?: (value: string) => void;
     /** `data-param-id` for wiring / e2e (`syncControlButtons`). */
     paramId?: string;
-    /** Stretch the seg 50/50 across the row instead of the content-hug default (`--2`). */
-    stretch?: boolean;
     /** Accessible group name; defaults to `label`. */
     'aria-label'?: string;
     className?: string;
     'data-testid'?: string;
 }
 /**
- * 2-opt segmented control inside a divided plaque (`plaque-field-seg-track--2`).
+ * 2-opt segmented control inside a divided plaque (`plaque-field-seg-track--many`).
  * Canon for any two-value field, including boolean `true` / `false`
  * (skill `configurator-boolean`) — buttons are a `radiogroup`, never a native
- * checkbox. Content-hug by default; opt into 50/50 with `stretch`.
+ * checkbox. Always content-hug, right-aligned — no stretch path (select/input only).
  */
-declare function PlaqueFieldSeg({ label, options, value, defaultValue, onValueChange, paramId, stretch, 'aria-label': ariaLabel, className, 'data-testid': testId, }: PlaqueFieldSegProps): react.JSX.Element;
+declare function PlaqueFieldSeg({ label, options, value, defaultValue, onValueChange, paramId, 'aria-label': ariaLabel, className, 'data-testid': testId, }: PlaqueFieldSegProps): react.JSX.Element;
 
 interface PlaqueTagstripOption {
     /** Wire value (mapped to `data-value`); membership compares against this. */

@@ -498,7 +498,6 @@ function PlaqueFieldSeg({
   defaultValue,
   onValueChange,
   paramId,
-  stretch = false,
   "aria-label": ariaLabel,
   className,
   "data-testid": testId
@@ -517,18 +516,13 @@ function PlaqueFieldSeg({
   return /* @__PURE__ */ jsxs7(
     "div",
     {
-      className: cn(
-        "plaque-field",
-        "plaque-field--divided",
-        stretch && "plaque-field--stretch",
-        className
-      ),
+      className: cn("plaque-field", "plaque-field--divided", className),
       "data-param-id": paramId,
       "data-testid": testId,
       children: [
         /* @__PURE__ */ jsx12("span", { className: "plaque-field__label", title: label, children: label }),
         /* @__PURE__ */ jsx12("span", { className: "plaque-divider", "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx12("div", { className: "plaque-field-seg-track plaque-field-seg-track--2 plaque-field__control", children: /* @__PURE__ */ jsx12("div", { className: "plaque-field-seg", role: "radiogroup", "aria-label": ariaLabel ?? label, children: options.map((option) => {
+        /* @__PURE__ */ jsx12("div", { className: "plaque-field-seg-track plaque-field-seg-track--many plaque-field__control", children: /* @__PURE__ */ jsx12("div", { className: "plaque-field-seg", role: "radiogroup", "aria-label": ariaLabel ?? label, children: options.map((option) => {
           const on = option.value === selected;
           return /* @__PURE__ */ jsx12(
             "button",
@@ -564,12 +558,7 @@ function PlaqueTagstrip({
   return /* @__PURE__ */ jsxs8(
     "div",
     {
-      className: cn(
-        "plaque-field",
-        "plaque-field--divided",
-        "plaque-field--stretch",
-        className
-      ),
+      className: cn("plaque-field", "plaque-field--divided", className),
       "data-param-id": paramId,
       "data-testid": testId,
       children: [
@@ -898,12 +887,12 @@ function highlightShell(text, options) {
 function tryHighlightCurlQuotedData(text, options) {
   const prefix = options?.prefix ?? "ch-tok";
   const lines = String(text).split("\n");
-  const openIdx = lines.findIndex((line) => /(?:^|\s)-d\s+'/.test(line));
+  const openIdx = lines.findIndex((line) => /(?:^|\s)-d\s*'/.test(line));
   if (openIdx < 0) return null;
   const openLine = lines[openIdx];
-  const m = openLine.match(/^(.*-d\s+')(.*)$/);
+  const m = openLine.match(/^(.*-d\s*)'(.*)$/);
   if (!m) return null;
-  const openWithoutQuote = m[1].slice(0, -1);
+  const openWithoutQuote = m[1];
   const afterOpen = m[2];
   let jsonText;
   let closeIdx;

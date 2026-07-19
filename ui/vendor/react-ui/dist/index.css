@@ -38,11 +38,12 @@
   --plaque-label-width-wide: 10rem;
   --plaque-mixed-label-cqi: 44cqi;
   --plaque-seg-gap: 5px;
+  --plaque-seg-band-height: calc(var(--plaque-control-height) - 2px);
+  --plaque-seg-row-gap: 1px;
   --plaque-seg-inset: var(--space-1);
   --plaque-shell-pad-x: var(--space-2);
   --plaque-seg-shell-end: calc(var(--plaque-seg-inset) + 1px);
   --plaque-seg-track-end: var(--plaque-seg-gap);
-  --plaque-seg-track-end-2: 0;
   --plaque-seg-end-inset-2: var(--plaque-seg-shell-end);
   --plaque-seg-end-inset-many: calc(var(--plaque-seg-shell-end) + var(--plaque-seg-track-end));
   --plaque-seg-inset-end: var(--plaque-seg-track-end);
@@ -52,6 +53,7 @@
   --plaque-select-trail: calc(var(--plaque-chevron-inset) + var(--plaque-select-text-gap));
   --plaque-chevron-edge: var(--plaque-shell-pad-x);
   --plaque-divider-height: calc(var(--font-size-sm) * 1.35);
+  --plaque-divider-inset: calc( (var(--plaque-control-height) - 2px - var(--plaque-divider-height)) / 2 );
   --plaque-chevron-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23f1f5f9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --icon-size-md: 18px;
   --input-min-width: 200px;
@@ -272,39 +274,53 @@ html.theme-light {
 }
 .plaque-field--divided:has(> .plaque-field-seg-track--many),
 .plaque-field--divided.plaque-field--stretch:has(> .plaque-field-seg-track--many) {
-  display: block;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  column-gap: 0;
+  row-gap: 0;
   height: auto;
   min-height: var(--plaque-control-height);
-  align-items: unset;
   grid-template-columns: unset;
-  padding-top: var(--plaque-seg-shell-end);
-  padding-bottom: var(--plaque-seg-shell-end);
+  padding-top: 0;
+  padding-bottom: 0;
   overflow: visible;
-  text-align: right;
+  background-color: var(--color-surface);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent var(--plaque-seg-band-height),
+      var(--color-border) var(--plaque-seg-band-height),
+      var(--color-border) calc(var(--plaque-seg-band-height) + var(--plaque-seg-row-gap)));
+  background-origin: padding-box;
+  background-clip: padding-box;
+  background-size: calc(100% - 2 * var(--plaque-divider-inset)) 100%;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
-.plaque-field--divided:has(> .plaque-field-seg-track--many)::after {
-  content: "";
-  display: block;
-  clear: both;
-}
-.plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label {
-  float: left;
-  align-self: unset;
+.plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label,
+.plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__text {
+  float: none;
+  flex: 0 0 auto;
+  align-self: flex-start;
   box-sizing: border-box;
   width: var(--plaque-mixed-label-col, max-content);
   max-width: 100%;
-  height: calc(var(--plaque-control-height) - 2px - 2 * var(--plaque-seg-shell-end));
+  height: var(--plaque-seg-band-height);
   display: inline-flex;
   align-items: center;
   padding-right: var(--space-2);
   text-align: left;
 }
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-divider {
-  float: left;
-  align-self: unset;
+  float: none;
+  flex: 0 0 auto;
+  align-self: flex-start;
   height: var(--plaque-divider-height, calc(var(--font-size-sm) * 1.35));
   min-height: var(--plaque-divider-height, calc(var(--font-size-sm) * 1.35));
-  margin-block-start: calc((var(--plaque-control-height) - 2px - 2 * var(--plaque-seg-shell-end) - var(--plaque-divider-height, calc(var(--font-size-sm) * 1.35))) / 2);
+  margin-block-start: calc((var(--plaque-seg-band-height) - var(--plaque-divider-height, calc(var(--font-size-sm) * 1.35))) / 2);
   margin-right: var(--plaque-seg-gap);
 }
 .plaque-field--divided.plaque-field--nowrap {
@@ -315,17 +331,19 @@ html.theme-light {
   min-height: var(--plaque-control-height) !important;
 }
 .plaque-field--divided.plaque-field--nowrap:has(> .plaque-field-seg-track--many) {
-  display: block !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
   grid-template-columns: unset !important;
   height: auto !important;
   min-height: var(--plaque-control-height) !important;
   overflow: visible !important;
-  align-items: unset;
+  align-items: flex-start;
 }
 .plaque-field--nowrap > .plaque-field-seg-track--many {
-  display: contents !important;
+  display: flex !important;
+  flex: 1 1 auto !important;
   justify-self: unset !important;
-  align-self: unset !important;
+  align-self: flex-start !important;
   width: auto !important;
   max-width: none !important;
   min-width: 0 !important;
@@ -552,9 +570,9 @@ select.plaque-field__control option {
   background: var(--color-surface);
   color: var(--color-text-muted);
   font-family: inherit;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  line-height: 1.35;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
   white-space: nowrap;
   transition:
@@ -576,52 +594,47 @@ select.plaque-field__control option {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
-.plaque-field-seg-track--2 {
-  padding-right: var(--plaque-seg-track-end-2);
-}
 .plaque-field-seg-track--many {
   padding-right: var(--plaque-seg-track-end);
 }
 .plaque-field--divided > .plaque-field-seg-track--many.plaque-field__control {
-  display: contents;
+  display: flex;
+  flex: 1 1 auto;
   width: auto;
   max-width: none;
   min-width: 0;
   height: auto;
-  min-height: 0;
-  flex: unset;
-  align-self: unset;
+  min-height: var(--plaque-seg-band-height);
+  align-self: flex-start;
+  align-items: stretch;
   margin-block: 0;
   padding-block: 0;
+  box-sizing: border-box;
 }
 .plaque-field--divided > .plaque-field-seg-track--many .plaque-field-seg {
-  display: contents;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-content: flex-start;
+  align-items: center;
+  column-gap: var(--plaque-seg-gap);
+  row-gap: var(--plaque-seg-row-gap);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .plaque-field--divided > .plaque-field-seg-track--many .plaque-field-seg__btn {
   display: inline-flex;
-  vertical-align: middle;
   flex: 0 0 auto;
+  align-items: center;
+  align-self: center;
   min-width: min-content;
-  margin: 0 0 var(--plaque-seg-gap) var(--plaque-seg-gap);
-}
-.plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2 {
-  justify-self: stretch;
-  width: 100%;
-}
-.plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2 .plaque-field-seg {
-  width: 100%;
-}
-.plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2 .plaque-field-seg__btn {
-  flex: 1 1 50%;
-  min-width: 0;
-}
-.plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--many {
-  justify-self: unset;
-  width: auto;
-  max-width: none;
-  min-width: 0;
+  min-height: calc(var(--plaque-control-height) - 12px);
   height: auto;
-  min-height: 0;
+  box-sizing: border-box;
+  margin-block: calc((var(--plaque-seg-band-height) - (var(--plaque-control-height) - 12px)) / 2);
+  margin-inline: 0;
 }
 .plaque-field-grid {
   container-type: inline-size;
@@ -663,15 +676,15 @@ select.plaque-field__control option {
   overflow: hidden;
 }
 .plaque-field-grid .plaque-field--divided:has(> .plaque-field-seg-track--many) {
-  display: block;
+  display: flex;
   height: auto;
   min-height: var(--plaque-control-height);
   overflow: visible;
-  align-items: unset;
+  align-items: flex-start;
   grid-template-columns: unset;
 }
 .plaque-field-grid .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-divider {
-  align-self: unset;
+  align-self: flex-start;
 }
 .plaque-field-grid .plaque-field--divided .plaque-field__label,
 .plaque-field-grid .plaque-field--divided .plaque-field__text {
@@ -693,26 +706,9 @@ select.plaque-field__control option {
   min-width: min-content;
   flex-shrink: 0;
 }
-.plaque-field-grid .plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2,
-.plaque-field-grid-stack .plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2,
-.plaque-field-grid--mixed .plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2 {
-  justify-self: stretch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-.plaque-field-grid .plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2 .plaque-field-seg {
-  width: 100%;
-  min-width: 0;
-  flex-shrink: 1;
-}
-.plaque-field-grid .plaque-field--divided.plaque-field--stretch > .plaque-field-seg-track--2 .plaque-field-seg__btn {
-  flex: 1 1 50%;
-  flex-shrink: 1;
-  min-width: 0;
-}
 .plaque-field-grid .plaque-field--divided > .plaque-field-seg-track--many {
   justify-self: unset;
+  flex: 1 1 auto;
   width: auto;
   max-width: none;
   min-width: 0;
@@ -761,7 +757,7 @@ select.plaque-field__control option {
   column-gap: 0;
 }
 .plaque-field-grid--mixed .plaque-field-grid__cell .plaque-field--divided:has(> .plaque-field-seg-track--many) {
-  display: block;
+  display: flex;
   grid-template-columns: unset;
 }
 .plaque-field-grid--mixed .plaque-field-grid__cell--lg .plaque-field--divided,
@@ -809,11 +805,12 @@ select.plaque-field__control option {
   column-gap: 0;
 }
 .plaque-field-grid-stack--magnet .plaque-field-grid--mixed .plaque-field-grid__cell .plaque-field--divided:has(> .plaque-field-seg-track--many) {
-  display: block;
+  display: flex;
   grid-template-columns: unset;
   column-gap: unset;
 }
-.plaque-field-grid-stack--magnet .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label {
+.plaque-field-grid-stack--magnet .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label,
+.plaque-field-grid-stack--magnet .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__text {
   width: var(--plaque-mixed-label-col, max-content);
   max-width: 100%;
 }
@@ -1459,6 +1456,14 @@ select.plaque-field__control option {
   padding: 0;
   border: 0;
   background: var(--color-border);
+}
+.plaque-divider--horizontal {
+  align-self: center;
+  width: calc(100% - 2 * var(--plaque-divider-inset));
+  max-width: calc(100% - 2 * var(--plaque-divider-inset));
+  height: 1px;
+  min-height: 1px;
+  margin-inline: var(--plaque-divider-inset);
 }
 
 /* src/styles/status-tile.css */
