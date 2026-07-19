@@ -14,7 +14,7 @@ const StyledQuota = styled(StatsElement)`
 
         .pending {
             font-size: 0.7em;
-            color: #ccc;
+            color: var(--color-text-muted, #ccc);
         }
     }
 `;

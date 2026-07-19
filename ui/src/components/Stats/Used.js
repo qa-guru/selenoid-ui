@@ -12,7 +12,7 @@ const StyledQueue = styled(StatsElement)`
 
         .small {
             font-size: 0.5em;
-            padding-left: 3px;
+            padding-left: var(--space-1, 3px);
         }
     }
 `;
