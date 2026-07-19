@@ -42,11 +42,13 @@
   --plaque-seg-row-gap: 1px;
   --plaque-seg-inset: var(--space-1);
   --plaque-shell-pad-x: var(--space-2);
-  --plaque-seg-shell-end: calc(var(--plaque-seg-inset) + 1px);
-  --plaque-seg-track-end: var(--plaque-seg-gap);
+  --plaque-seg-chip-height: calc(var(--plaque-control-height) - 12px);
+  --plaque-seg-chip-air: calc( (var(--plaque-seg-band-height) - var(--plaque-seg-chip-height)) / 2 );
+  --plaque-seg-shell-end: var(--plaque-seg-chip-air);
+  --plaque-seg-track-end: 0px;
   --plaque-seg-end-inset-2: var(--plaque-seg-shell-end);
-  --plaque-seg-end-inset-many: calc(var(--plaque-seg-shell-end) + var(--plaque-seg-track-end));
-  --plaque-seg-inset-end: var(--plaque-seg-track-end);
+  --plaque-seg-end-inset-many: var(--plaque-seg-shell-end);
+  --plaque-seg-inset-end: var(--plaque-seg-shell-end);
   --plaque-chevron-size: 10px;
   --plaque-select-text-gap: 17px;
   --plaque-chevron-inset: calc(var(--plaque-shell-pad-x) + var(--plaque-seg-gap));
@@ -563,7 +565,7 @@ select.plaque-field__control option {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: calc(var(--plaque-control-height) - 12px);
+  min-height: var(--plaque-seg-chip-height);
   padding: 0 var(--space-1);
   border: 1px solid var(--color-border);
   border-radius: calc(var(--radius-sm) - 2px);
@@ -595,7 +597,7 @@ select.plaque-field__control option {
   outline-offset: 2px;
 }
 .plaque-field-seg-track--many {
-  padding-right: var(--plaque-seg-track-end);
+  padding-right: 0;
 }
 .plaque-field--divided > .plaque-field-seg-track--many.plaque-field__control {
   display: flex;
@@ -630,10 +632,10 @@ select.plaque-field__control option {
   align-items: center;
   align-self: center;
   min-width: min-content;
-  min-height: calc(var(--plaque-control-height) - 12px);
+  min-height: var(--plaque-seg-chip-height);
   height: auto;
   box-sizing: border-box;
-  margin-block: calc((var(--plaque-seg-band-height) - (var(--plaque-control-height) - 12px)) / 2);
+  margin-block: var(--plaque-seg-chip-air);
   margin-inline: 0;
 }
 .plaque-field-grid {
@@ -662,7 +664,13 @@ select.plaque-field__control option {
   overflow: hidden;
   row-gap: 0;
   column-gap: var(--space-1);
-  padding: 0 var(--space-1);
+}
+.plaque-field-grid .plaque-field:not(:has(> .plaque-field-seg-track)) {
+  padding: 0 var(--plaque-shell-pad-x);
+}
+.plaque-field-grid .plaque-field--divided:has(> .plaque-field-seg-track) {
+  padding-left: var(--plaque-shell-pad-x);
+  padding-right: var(--plaque-seg-shell-end);
 }
 .plaque-field-grid .plaque-field--divided {
   display: grid;
