@@ -35,9 +35,9 @@ Dashboard PNG updates after each orchestrator run on `main` (Playwright screensh
 | [`selenoid2-1.45-engine26.1-go1.26-react16`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.45-engine26.1-go1.26-react16) | **v2.2.1** — прежний prod ([selenoid.qa.guru](https://selenoid.qa.guru)) | 1.45       | 26.1.x | 1.26.5 | 16    | CRA (react-scripts 3.x) |
 | [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18) | **v2.3.0** — актуальный prod, до нового UI (Selenoid 3)                  | 1.55       | 29.6+  | 1.26.5 | 18    | Vite 6                  |
 
-**Зачем две ветки:** каждая держит воспроизводимый набор версий (Docker API / Engine / Go / React). Точные версии — в `STACK-PIN.md`.
+**Зачем две ветки:** каждая держит воспроизводимый набор версий (Docker API / Engine / Go / React). На **каждой** ветке свой `STACK-PIN.md`: на pin-ветках — v2.x; на `main` / v3-dev — Selenoid 3 / React 19 (этот checkout).
 
-_Вы на `main` — активная разработка (следующий рубеж: 3.0.0). Prod-линия зафиксирована тегом **v2.3.0** на [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18)._
+_Вы на `main` / v3-dev — активная разработка (рубеж **3.0.0**). Prod **v2.3.0** зафиксирован на [`selenoid2-1.55-engine29.6-go1.26-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18) (там React 18 `STACK-PIN.md`)._
 
 **UI freeze для 2.x:** ветки и теги `v2.2.x` / `v2.3.x` принимают только maintenance-фиксы. Не добавляйте design-system components, новый header/navigation, layout/theme/button refresh или redesign экранов в 2.x. Visual changes идут в **Selenoid 3.0.0**; в 2.x допустимы только restoration-fixes, сохраняющие текущий Selenoid-визуал.
 
@@ -108,7 +108,7 @@ Monorepo dev: `projects/selenoid-home/dev/scripts/build-selenoid-ui.sh`.
 
 ### Frontend stack (`ui/`)
 
-Current `main` / v3-dev toolchain (see `ui/package.json`). Prod **v2.3.0** stays on the React 18 pin branch — see `STACK-PIN.md`.
+Current `main` / v3-dev toolchain — [`STACK-PIN.md`](STACK-PIN.md) + [`ui/package.json`](ui/package.json) (React 19 / react-router 7). Prod **v2.3.0** / React 18 — только pin-ветка [`selenoid2-…-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18) (её `STACK-PIN.md`).
 
 | Tool      | Version                                                      |
 | --------- | ------------------------------------------------------------ |
