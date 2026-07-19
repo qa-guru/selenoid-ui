@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copy minimal design-system embed into ui/public/ for AppHeader (v3)
+# Copy design-system embed into ui/public/ for AppHeader (v3)
 # and re-vendor @zero-design-system/react into ui/vendor/react-ui.
 set -euo pipefail
 
@@ -15,28 +15,33 @@ if [[ ! -d "$DS/css" ]]; then
   exit 0
 fi
 
-# Invariant: this script only (re)generates UNTRACKED embed assets (public/css/*,
-# public/js/plaque-field-magnet.js) and re-vendors react-ui. It never overwrites
-# committed consumer runtime, so a clean-state run is idempotent (zero git churn).
-mkdir -p "$UI_PUBLIC/css" "$UI_PUBLIC/js"
+# SSOT → public: CSS + header runtime (lazy getMount lives in DS header.js).
+# Consumer-only: selenoid-header-bridge.js (not synced).
+mkdir -p "$UI_PUBLIC/css" "$UI_PUBLIC/js" "$UI_PUBLIC/templates"
 
 for f in tokens header link input icon icon-btn lang-toggle button badge status-tile selenoid-metrics plaque-divider panel sticky tab; do
   cp "$DS/css/${f}.css" "$UI_PUBLIC/css/"
 done
 
-# Only plaque-field-magnet.js is synced from the design-system SSOT: it publishes
-# window.syncPlaqueMagnetStacks, is NOT committed (untracked in public/js), and must be
-# re-created on a clean sync.
-#
-# header.js / dom-utils.js / theme-icons.js / templates/header.html are intentionally NOT
-# synced: they are committed, consumer-owned runtime. header.js in particular carries a
-# Selenoid-UI regression fix (lazy getMount + self-registration of
-# window.__designSystemRemountHeader for selenoid-header-bridge; asserted by
-# src/lib/headerJsEarlyLoad.test.js) that the current DS SSOT lacks. Copying the stale DS
-# versions would regress header.js and reformat the rest on every run.
-for f in plaque-field-magnet; do
+for f in header header-metrics-wrap dom-utils theme-icons plaque-field-magnet; do
   cp "$DS/js/${f}.js" "$UI_PUBLIC/js/"
 done
+
+cp "$DS/templates/header.html" "$UI_PUBLIC/templates/header.html"
+
+# Wiring guard: metrics adaptive must stay hooked in the synced header.js.
+# Prevents the CSS-without-observe drift that killed wrap on narrow viewports.
+HEADER_JS="$UI_PUBLIC/js/header.js"
+for needle in "header-metrics-wrap.js" "observeHeaderMetricsWrap" "getMount" "__designSystemRemountHeader"; do
+  if ! grep -qF "$needle" "$HEADER_JS"; then
+    echo "sync-design-system-static: ERROR — $HEADER_JS missing required wiring: $needle" >&2
+    exit 1
+  fi
+done
+if [[ ! -f "$UI_PUBLIC/js/header-metrics-wrap.js" ]]; then
+  echo "sync-design-system-static: ERROR — header-metrics-wrap.js was not copied" >&2
+  exit 1
+fi
 
 echo "sync-design-system-static: design-system → $UI_PUBLIC"
 

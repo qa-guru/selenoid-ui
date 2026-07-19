@@ -1,11 +1,11 @@
 import { syncThemeToggleIcon } from "./theme-icons.js";
 import { fetchTemplateText } from "./dom-utils.js";
+import { observeHeaderMetricsWrap } from "./header-metrics-wrap.js";
 
 /**
- * Resolve #app-header lazily. In SPA (Selenoid UI) the mount is created by
- * React after this module may already be imported via selenoid-header-bridge;
- * a top-level throw would poison the ES module cache and kill the header for
- * the whole session (no Stats / Capabilities / Videos links).
+ * Resolve #app-header lazily. In SPA consumers the mount may appear after this
+ * module is imported (e.g. selenoid-header-bridge in <head> before React);
+ * a top-level throw would poison the ES module cache for the whole session.
  */
 function getMount() {
     return document.getElementById("app-header");
@@ -321,14 +321,17 @@ function bindHeaderMenu(root) {
         return;
     }
 
-    if (typeof window.matchMedia !== "function") {
+    if (typeof window.getComputedStyle !== "function") {
         return;
     }
 
-    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    // The burger drives the menu whenever it is visible. Its breakpoint lives in
+    // CSS (≤768 on the default header, ≤1120 on the metrics/selenoid header), so
+    // we read the computed display here instead of hardcoding a matchMedia width.
+    const isBurgerVisible = () => window.getComputedStyle(burger).display !== "none";
 
     burger.addEventListener("click", () => {
-        if (!mobileQuery.matches) {
+        if (!isBurgerVisible()) {
             return;
         }
         const open = menu.hidden;
@@ -363,11 +366,10 @@ function bindHeaderMenu(root) {
     });
 
     const onViewportChange = () => {
-        if (!mobileQuery.matches) {
+        if (!isBurgerVisible()) {
             closeHeaderMenu(root);
         }
     };
-    mobileQuery.addEventListener("change", onViewportChange);
     window.addEventListener("resize", onViewportChange);
 }
 
@@ -384,7 +386,7 @@ function setLangState(langBtn, langLabel, lang) {
     langBtn.setAttribute("aria-label", code === "ru" ? "Переключить на English" : "Switch to Russian");
 }
 
-/** @param {ParentNode} root @param {"ru" | "en"} lang */
+/** @param {ParentNode} root @param {'ru' | 'en'} lang */
 function syncAllLangToggles(root, lang) {
     for (const wrap of root.querySelectorAll(".lang-toggle")) {
         const btn = wrap.querySelector("button");
@@ -448,6 +450,11 @@ async function mountHeader() {
 
     bindHeaderControls(mount);
     bindHeaderMenu(mount);
+
+    const headerEl = mount.querySelector(".header");
+    if (headerEl instanceof HTMLElement) {
+        observeHeaderMetricsWrap(headerEl);
+    }
 }
 
 function bindHeaderControls(root) {
@@ -483,7 +490,7 @@ export async function remountHeader() {
     await mountHeader();
 }
 
-// Self-register so SPA remount works even when the bridge races React, or when
+// Self-register so SPA remount works when the bridge races React, or when
 // AppHeader injects this module after #app-header already exists.
 if (typeof window !== "undefined") {
     window.__designSystemRemountHeader = remountHeader;

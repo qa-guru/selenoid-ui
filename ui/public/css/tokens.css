@@ -53,13 +53,17 @@
      CSS var() is not valid inside a media condition; this block is the SSOT.
      Shell edge (header default / sticky / configurator):
        ≤768 mobile · ≥769 desktop
-     768  : default header → burger (nav + tools); widget-mosaic → 1 col
-     769  : sticky panel/section; configurator terminal 1∶1 (then ≤768 stack)
+     768  : default header → burger (nav + tools); widget-mosaic → 1 col;
+            configurator terminal stack (cfg → 3–4, term under)
+     769  : sticky panel/section; configurator continuous shed (≥769 formula)
      900  : metrics header hides secondary tools (lang/theme/GitHub)
      1023 : default header hides search
-     1024 : configurator terminal 1∶2 (params 1-col)
-     1280 : configurator terminal rest — mid≈50vw, 1∶1.5, params 2-up
+     1100 : soft mid (same continuous formula; no track rebuild)
+     1280 : soft mid
      1360 : metrics header hides search
+     1600 : configurator rest / params 2-up
+            ≥769: gutter|cfg|term clamp — shed 6→5→col1→cfg→term→stack
+            **no** grid-template jump at 1100/900
      metrics nav-fold + wrap → content-driven
        `.header--metrics-nav-fold` / `.header--metrics-wrap`
        (js/header-metrics-wrap.js), not fixed px */
@@ -71,13 +75,18 @@
     --plaque-label-width-wide: 10rem;
     --plaque-mixed-label-cqi: 44cqi;
     --plaque-seg-gap: 5px;
+    /* Wrap band inside shell border (= control − 2×1px). --many flex lines
+     are this tall (chip margin-block). Outer: n×band + (n−1)×row-gap + 2 border.
+     Label/divider optically center in band 1 only (rule plaque-many-first-row). */
+    --plaque-seg-band-height: calc(var(--plaque-control-height) - 2px);
+    /* 1px rule between wrapped --many bands (= flex row-gap; gradient origin padding-box). */
+    --plaque-seg-row-gap: 1px;
     /* Shell ↔ seg btn inset. Track uses inset; shell-end is +1px so end air
      matches vertical air around the 20px btn (centered in 24px track). */
     --plaque-seg-inset: var(--space-1);
     --plaque-shell-pad-x: var(--space-2);
     --plaque-seg-shell-end: calc(var(--plaque-seg-inset) + 1px);
     --plaque-seg-track-end: var(--plaque-seg-gap);
-    --plaque-seg-track-end-2: 0;
     --plaque-chevron-size: 10px;
     --plaque-select-text-gap: 17px;
     --plaque-chevron-inset: calc(var(--plaque-shell-pad-x) + var(--plaque-seg-gap));
@@ -86,6 +95,8 @@
      stays constant in every container (grid cell / stack / solo). */
     --plaque-chevron-edge: var(--plaque-shell-pad-x);
     --plaque-divider-height: calc(var(--font-size-sm) * 1.35);
+    /* Air around vertical rule in a 32px shell (= inset of horizontal rule from sides). */
+    --plaque-divider-inset: calc((var(--plaque-control-height) - 2px - var(--plaque-divider-height)) / 2);
     --plaque-chevron-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23f1f5f9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --icon-size-md: 18px;
     --input-min-width: 200px;
