@@ -18,7 +18,7 @@
 | Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL |
 | Node CI         | 24                                                                        |
 | Git anchor      | `main` / `feat/selenoid-3-*`                                              |
-| PWA             | не landed                                                                 |
+| PWA             | landed (`vite-plugin-pwa`: shell precache, live API/SSE online-only)      |
 
 ## Selenoid 2 maintenance pin (не путать)
 

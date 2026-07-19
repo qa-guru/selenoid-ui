@@ -43,7 +43,9 @@ writes Allure results to `allure-results/`. Use `yarn test:watch` for watch mode
 ### `yarn build`
 
 Builds the app for production into the `build/` folder (minified, hashed assets),
-ready to be embedded by the Go backend / deployed.
+ready to be embedded by the Go backend / deployed. Also emits the PWA baseline
+(`manifest.webmanifest`, `sw.js`) — app-shell precache only; live API/SSE/video/ws
+stay online-only (see `vite.config.ts`).
 
 ### `yarn preview`
 
