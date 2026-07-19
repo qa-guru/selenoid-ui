@@ -48,7 +48,52 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         const curl = within(tabs).getByRole("tab", { name: "curl" });
         expect(curl).toHaveClass("tab", "tab--active");
         expect(curl).toHaveAttribute("aria-selected", "true");
-        expect(within(tabs).getByRole("tab", { name: "java" })).toHaveClass("tab");
+        expect(within(tabs).getByRole("tab", { name: "Java" })).toHaveClass("tab");
+        expect(within(tabs).getByRole("tab", { name: "Kotlin" })).toHaveClass("tab");
+        expect(within(tabs).getByRole("tab", { name: "Swift" })).toHaveClass("tab");
+        expect(within(tabs).getByRole("tab", { name: "Rust" })).toHaveClass("tab");
+        expect(within(tabs).getByRole("tab", { name: "Typescript" })).toHaveClass("tab");
+        const labels = within(tabs)
+            .getAllByRole("tab")
+            .map((el) => el.textContent);
+        expect(labels).toEqual([
+            "curl",
+            "Java",
+            "Kotlin",
+            "Swift",
+            "Python",
+            "Javascript",
+            "Typescript",
+            "Go",
+            "Rust",
+            "C#",
+            "PHP",
+            "Ruby",
+        ]);
+    });
+
+    it("switches to kotlin / typescript / swift / rust snippets", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+
+        const panel = screen.getByTestId("capabilities-terminal-panel");
+        const tabs = within(panel).getByRole("tablist", { name: "Language" });
+
+        await user.click(within(tabs).getByRole("tab", { name: "Kotlin" }));
+        expect(panel.textContent).toContain("val options = ChromeOptions()");
+        expect(panel.textContent).toContain("RemoteWebDriver");
+
+        await user.click(within(tabs).getByRole("tab", { name: "Typescript" }));
+        expect(panel.textContent).toContain("import { remote, type RemoteOptions }");
+        expect(panel.textContent).toContain("await remote(options)");
+
+        await user.click(within(tabs).getByRole("tab", { name: "Swift" }));
+        expect(panel.textContent).toContain("import Selenium");
+        expect(panel.textContent).toContain("RemoteWebDriver");
+
+        await user.click(within(tabs).getByRole("tab", { name: "Rust" }));
+        expect(panel.textContent).toContain("use thirtyfour::prelude::*");
+        expect(panel.textContent).toContain("WebDriver::new");
     });
 
     it("switches the active lang tab and updates the highlighted snippet", async () => {
@@ -58,9 +103,9 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         const panel = screen.getByTestId("capabilities-terminal-panel");
         const tabs = within(panel).getByRole("tablist", { name: "Language" });
 
-        await user.click(within(tabs).getByRole("tab", { name: "java" }));
+        await user.click(within(tabs).getByRole("tab", { name: "Java" }));
 
-        expect(within(tabs).getByRole("tab", { name: "java" })).toHaveClass("tab--active");
+        expect(within(tabs).getByRole("tab", { name: "Java" })).toHaveClass("tab--active");
         expect(within(tabs).getByRole("tab", { name: "curl" })).not.toHaveClass("tab--active");
         expect(panel.textContent).toContain("RemoteWebDriver");
         expect(panel.textContent).toContain("ChromeOptions");

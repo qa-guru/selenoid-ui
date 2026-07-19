@@ -1,12 +1,11 @@
 import React, { forwardRef } from "react";
 import styled from "styled-components";
+import { IconReset, Input } from "@zero-design-system/react";
 
 /**
- * Session filter, portaled into the canonical header `.header__search`. The
- * input keeps the design-system `.input` styling (tokens.css / input.css) so it
- * matches the header search slot; the wrapper only positions the clear icon and
- * proxies clicks to focus. Contract preserved: `.input` class, `Filter...`
- * placeholder, `session-filter-input` testid, and a titled Clear affordance.
+ * Session filter, portaled into the canonical header `.header__search`.
+ * Library `Input` (`.input`) + DS `icon-btn` clear (`IconReset`). Contract:
+ * `Filter...` placeholder, `session-filter-input` testid, titled Clear affordance.
  */
 const StyledPanelFilter = styled.div`
     position: relative;
@@ -16,15 +15,15 @@ const StyledPanelFilter = styled.div`
     min-width: 0;
 
     .input {
-        padding-right: var(--space-6, 32px);
+        padding-right: calc(var(--control-height-md) + var(--space-1, 4px));
     }
 
     .filter-clear {
         position: absolute;
-        right: var(--space-3, 12px);
-        cursor: pointer;
+        right: var(--space-1, 4px);
+        width: calc(var(--control-height-md) - 2 * var(--space-1, 4px));
+        height: calc(var(--control-height-md) - 2 * var(--space-1, 4px));
         color: var(--color-text-muted, #999);
-        line-height: 0;
     }
 `;
 
@@ -37,20 +36,25 @@ export const FilterInput = forwardRef(function FilterInput({ value, onChange, on
                 }
             }}
         >
-            <input
+            <Input
                 ref={ref}
-                className="input"
                 placeholder="Filter..."
                 value={value}
                 data-testid="session-filter-input"
                 onChange={onChange}
             />
-            <i
+            <button
+                type="button"
+                className="icon-btn filter-clear"
                 title="Clear"
-                className="icon dripicons-cross filter-clear"
+                aria-label="Clear"
                 style={{ visibility: !value ? "hidden" : "visible" }}
                 onClick={onClear}
-            />
+            >
+                <span className="icon" aria-hidden="true">
+                    <IconReset />
+                </span>
+            </button>
         </StyledPanelFilter>
     );
 });

@@ -166,6 +166,40 @@ const rubySelenoidOptionsBlock = (selenoidOptions) => {
     return `{\n${entries}\n}`;
 };
 
+const kotlinSelenoidOptionsBlock = (selenoidOptions) => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `    "${key}" to "${value}",`)
+        .join("\n");
+    return `mapOf(\n${entries}\n)`;
+};
+
+const swiftSelenoidOptionsBlock = (selenoidOptions) => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `    "${key}": "${value}",`)
+        .join("\n");
+    return `[\n${entries}\n]`;
+};
+
+const rustDesiredCapabilities = (browser) => {
+    switch (browser) {
+        case "firefox":
+            return "DesiredCapabilities::firefox()";
+        case "safari":
+            return "DesiredCapabilities::safari()";
+        case "msedge":
+            return "DesiredCapabilities::edge()";
+        default:
+            return "DesiredCapabilities::chrome()";
+    }
+};
+
+const rustSelenoidOptionsBlock = (selenoidOptions) => {
+    const entries = Object.entries(selenoidOptions)
+        .map(([key, value]) => `        ("${key}".to_string(), "${value}".to_string()),`)
+        .join("\n");
+    return `[\n${entries}\n    ]`;
+};
+
 const primeBasicAuth = () =>
     fetch("/wd/hub/status", {
         method: "GET",
@@ -179,6 +213,47 @@ const DEFAULT_SESSION_OPTS = {
     enableVnc: true,
     enableVideo: true,
     enableHar: false,
+};
+
+/** Tab order in the terminal language rail (Object.keys order is not the UI SSOT). */
+const TERMINAL_LANG_ORDER = [
+    "curl",
+    "java",
+    "kotlin",
+    "swift",
+    "python",
+    "javascript",
+    "typescript",
+    "go",
+    "rust",
+    "C#",
+    "PHP",
+    "ruby",
+];
+
+/** Display labels for language tabs (snippet keys stay lowercase / legacy). */
+const TERMINAL_LANG_LABELS = {
+    curl: "curl",
+    java: "Java",
+    kotlin: "Kotlin",
+    swift: "Swift",
+    python: "Python",
+    javascript: "Javascript",
+    typescript: "Typescript",
+    go: "Go",
+    rust: "Rust",
+    "C#": "C#",
+    PHP: "PHP",
+    ruby: "Ruby",
+};
+
+const langLabel = (key) => TERMINAL_LANG_LABELS[key] || key;
+
+const orderedLangKeys = (caps) => {
+    const keys = Object.keys(caps);
+    const ranked = TERMINAL_LANG_ORDER.filter((k) => keys.includes(k));
+    const rest = keys.filter((k) => !TERMINAL_LANG_ORDER.includes(k));
+    return ranked.concat(rest);
 };
 
 /** Terminal snippets mirror Remote hub session options (createSession SSOT). */
@@ -248,6 +323,23 @@ options.setCapability("selenoid:options", new HashMap<String, Object>() {{
 }});
 RemoteWebDriver driver = new RemoteWebDriver(new URL("${origin}/wd/hub"), options);
 `,
+        kotlin: `val options = ${optionsClass}()
+${version != "" ? 'options.setCapability("browserVersion", "' + version + '")' : ""}
+options.setCapability(
+    "selenoid:options",
+    mapOf(
+        "name" to ${nameJson},
+        "sessionTimeout" to ${timeoutJson},
+        "screenResolution" to ${resolutionJson},
+        "env" to listOf("TZ=UTC"),
+        "labels" to mapOf("manual" to "true"),
+        "enableVNC" to ${enableVnc},
+        "enableVideo" to ${enableVideo},
+        "enableHAR" to ${enableHar}
+    )
+)
+val driver = RemoteWebDriver(URL("${origin}/wd/hub"), options)
+`,
         go: `// import "github.com/tebeka/selenium"
 
 caps := selenium.Capabilities{
@@ -274,6 +366,32 @@ if err != nil {
         t.Errorf("starting browser: %v", err)
 }
 defer driver.Quit()
+`,
+        rust: `// cargo add thirtyfour tokio serde_json --features thirtyfour/rustls-tls,tokio/macros,tokio/rt-multi-thread
+use serde_json::json;
+use thirtyfour::prelude::*;
+
+#[tokio::main]
+async fn main() -> WebDriverResult<()> {
+    let mut caps = ${rustDesiredCapabilities(browser)};
+${version != "" ? '    caps.set_browser_version("' + version + '")?;\n' : ""}    caps.add(
+        "selenoid:options",
+        json!({
+            "name": ${nameJson},
+            "sessionTimeout": ${timeoutJson},
+            "screenResolution": ${resolutionJson},
+            "env": ["TZ=UTC"],
+            "labels": { "manual": "true" },
+            "enableVNC": ${enableVnc},
+            "enableVideo": ${enableVideo},
+            "enableHAR": ${enableHar}
+        }),
+    )?;
+
+    let driver = WebDriver::new("${origin}/wd/hub", caps).await?;
+    driver.quit().await?;
+    Ok(())
+}
 `,
         "C#": `${optionsClass} options = new ${optionsClass}();
 ${version != "" ? 'options.BrowserVersion = "' + version + '";' : ""}
@@ -333,6 +451,27 @@ var options = {
 };
 var client = webdriverio.remote(options);
 `,
+        typescript: `import { remote, type RemoteOptions } from 'webdriverio';
+
+const options: RemoteOptions = {
+    hostname: '${window.location.hostname}',
+    port: 4444,
+    protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
+    capabilities: {
+        browserName: '${browserName}',
+        browserVersion: '${version}',
+        'selenoid:options': {
+            name: ${nameJson},
+            sessionTimeout: ${timeoutJson},
+            screenResolution: ${resolutionJson},
+            enableVNC: ${enableVnc},
+            enableVideo: ${enableVideo},
+            enableHAR: ${enableHar}
+        }
+    }
+};
+const client = await remote(options);
+`,
         PHP: `$web_driver = RemoteWebDriver::create("${origin}/wd/hub",
 array(
     "browserName"=>"${browserName}",
@@ -363,6 +502,27 @@ caps["selenoid:options"] = {
 driver = Selenium::WebDriver.for(:remote,
   :url => "${origin}/wd/hub",
   :desired_capabilities => caps)
+`,
+        swift: `import Foundation
+import Selenium
+
+var caps: [String: Any] = [
+    "browserName": "${browserName}",
+    "browserVersion": "${version}",
+    "selenoid:options": [
+        "name": ${nameJson},
+        "sessionTimeout": ${timeoutJson},
+        "screenResolution": ${resolutionJson},
+        "enableVNC": ${enableVnc},
+        "enableVideo": ${enableVideo},
+        "enableHAR": ${enableHar}
+    ]
+]
+
+let driver = try RemoteWebDriver(
+    with: URL(string: "${origin}/wd/hub")!,
+    desiredCapabilities: caps
+)
 `,
     };
 };
@@ -396,6 +556,15 @@ page.navigate("https://example.com");
 browser.close();
 playwright.close();
 `,
+        kotlin: `val playwright = Playwright.create()
+val selenoidOptions = ${kotlinSelenoidOptionsBlock(selenoidOptions)}
+val wsEndpoint = "${base}?${query}"
+val browser = playwright.${pw.java}().connect(wsEndpoint)
+val page = browser.newPage()
+page.navigate("https://example.com")
+browser.close()
+playwright.close()
+`,
         go: `selenoidOptions := ${goSelenoidOptionsBlock(selenoidOptions)}
 params := url.Values{}
 for key, value := range selenoidOptions {
@@ -409,6 +578,16 @@ if err != nil {
 }
 page, err := browser.NewPage()
 defer browser.Close()
+`,
+        rust: `use std::collections::HashMap;
+use url::Url;
+
+let selenoid_options: HashMap<String, String> = HashMap::from(${rustSelenoidOptionsBlock(selenoidOptions)});
+let mut endpoint = Url::parse("${base}").expect("ws endpoint");
+endpoint.query_pairs_mut().extend_pairs(selenoid_options.iter());
+
+// Playwright has no official Rust client — connect over the CDP WebSocket:
+println!("{}", endpoint);
 `,
         "C#": `var selenoidOptions = ${csharpSelenoidOptionsBlock(selenoidOptions)};
 var wsEndpoint = "${base}" + "?${query}";
@@ -440,6 +619,16 @@ const page = await browser.newPage();
 await page.goto('https://example.com');
 await browser.close();
 `,
+        typescript: `import { ${pw.js} } from 'playwright';
+
+const selenoidOptions: Record<string, string> = ${jsSelenoidOptions};
+const wsEndpoint = \`${base}?\${new URLSearchParams(selenoidOptions)}\`;
+
+const browser = await ${pw.js}.connect(wsEndpoint);
+const page = await browser.newPage();
+await page.goto('https://example.com');
+await browser.close();
+`,
         PHP: `$selenoidOptions = ${phpSelenoidOptionsBlock(selenoidOptions)};
 $wsEndpoint = '${base}' . '?' . http_build_query($selenoidOptions);
 
@@ -459,6 +648,17 @@ Playwright.create do |playwright|
   page.goto('https://example.com')
   browser.close
 end
+`,
+        swift: `import Foundation
+
+let selenoidOptions: [String: String] = ${swiftSelenoidOptionsBlock(selenoidOptions)}
+let query = selenoidOptions
+    .map { "\\($0.key)=\\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? $0.value)" }
+    .joined(separator: "&")
+let wsEndpoint = "${base}?" + query
+
+// Playwright has no official Swift client — connect over the CDP WebSocket:
+print(wsEndpoint)
 `,
     };
 };
@@ -519,7 +719,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const caps = isPlaywright
         ? playwrightCode(name, version, playwrightAccessKey)
         : code(name, version, origin, sessionOpts);
-    const langKeys = Object.keys(caps);
+    const langKeys = orderedLangKeys(caps);
     const activeLang = langKeys.includes(lang) ? lang : langKeys[0] || "curl";
     const activeSnippet = caps[activeLang] || "";
 
@@ -623,7 +823,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     return (
         <StyledCapabilities>
-            <div className="section-title">Capabilities</div>
             <div className="capabilities-body">
                 <div className="setup" data-testid="capabilities-setup">
                     <Panel
@@ -719,7 +918,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                                         className={`tab${next === activeLang ? " tab--active" : ""}`}
                                         onClick={() => onLanguageChange(next)}
                                     >
-                                        {next}
+                                        {langLabel(next)}
                                     </button>
                                 ))}
                             </div>

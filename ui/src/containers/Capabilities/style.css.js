@@ -12,19 +12,6 @@ export const StyledCapabilities = styled.div`
   display: block;
   position: relative;
 
-  .section-title {
-    color: ${grayColor};
-    position: relative;
-    top: 0;
-    left: 0;
-    padding-left: 5%;
-    border-bottom: 1px solid ${borderSectionColor};
-    width: 95%;
-    letter-spacing: 1px;
-    font-size: 10px;
-    line-height: 20px;
-  }
-
   /*
    * Driver+Remote : terminal — canon configurator__layout--terminal 6-col ladder
    * (docs/layout-standard.md § Configurator terminal shell). Full-bleed: no 5% side pad.
