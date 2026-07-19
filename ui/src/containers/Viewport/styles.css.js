@@ -1,10 +1,8 @@
 import styled, { createGlobalStyle } from "styled-components";
 
-const bgColor = "#30363C";
-
 export const GlobalStyle = createGlobalStyle`
 html,
-  body {
+body {
   margin: 0;
   padding: 0;
   width: 100%; //fallback
@@ -17,11 +15,11 @@ html,
 }
 
 body {
-  font-size: 14px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: var(--font-size-base, 14px);
+  font-family: var(--font-sans, "Helvetica Neue", Helvetica, Arial, sans-serif);
   margin: 0 auto;
-  background: ${bgColor};
-  font-weight: 100;
+  background: var(--color-surface, #30363c);
+  color: var(--color-text, #fff);
   /* Offset content below the fixed canonical header (#app-header / header.css). */
   padding-top: var(--header-occupied-height, var(--header-height, 40px));
 }
