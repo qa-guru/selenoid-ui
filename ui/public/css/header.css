@@ -181,6 +181,8 @@ html:not(.theme-light) .header__brand:has(.header__brand-link--leading:not([hidd
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 10rem;
+    /* room for underline inside the ellipsis box (10px + offset) */
+    padding-block-end: 3px;
 }
 
 /* Step 4: search */

@@ -54,9 +54,11 @@
      Shell edge (header default / sticky / configurator):
        ≤768 mobile · ≥769 desktop
      768  : default header → burger (nav + tools); widget-mosaic → 1 col
-     769  : sticky panel/section; configurator terminal columns
+     769  : sticky panel/section; configurator terminal 1∶1 (then ≤768 stack)
      900  : metrics header hides secondary tools (lang/theme/GitHub)
      1023 : default header hides search
+     1024 : configurator terminal 1∶2 (params 1-col)
+     1280 : configurator terminal rest — mid≈50vw, 1∶1.5, params 2-up
      1360 : metrics header hides search
      metrics nav-fold + wrap → content-driven
        `.header--metrics-nav-fold` / `.header--metrics-wrap`

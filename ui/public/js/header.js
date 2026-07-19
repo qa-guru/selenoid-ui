@@ -182,7 +182,11 @@ function applyHeaderConfig(root, config) {
     }
 
     nav.replaceChildren(
-        ...config.nav.map((item, index) => {
+        ...config.nav.flatMap((item, index) => {
+            const divider = document.createElement("span");
+            divider.className = "plaque-divider";
+            divider.setAttribute("aria-hidden", "true");
+
             const link = document.createElement("a");
             link.href = item.href;
             link.textContent = item.label;
@@ -191,7 +195,7 @@ function applyHeaderConfig(root, config) {
             if (item.active) {
                 link.dataset.headerActive = "true";
             }
-            return link;
+            return [divider, link];
         })
     );
 
