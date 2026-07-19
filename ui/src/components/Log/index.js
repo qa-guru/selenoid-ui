@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
+import { Panel } from "@zero-design-system/react";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 
@@ -121,16 +122,21 @@ export default class Log extends Component {
 
         return (
             <StyledLog className={`${className} hidden-${hidden}`}>
-                <div className="log-card">
-                    <div className="log-card__content">
-                        <div
-                            className="term"
-                            ref={(term) => {
-                                this.termel = term;
-                            }}
-                        />
-                    </div>
-                </div>
+                <Panel
+                    variant="terminal"
+                    title="Log"
+                    testId="session-log-panel"
+                    titleTestId="session-log-title"
+                    className="log-card"
+                    bodyClassName="log-card__body"
+                >
+                    <div
+                        className="term"
+                        ref={(term) => {
+                            this.termel = term;
+                        }}
+                    />
+                </Panel>
             </StyledLog>
         );
     }
