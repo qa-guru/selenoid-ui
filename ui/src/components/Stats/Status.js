@@ -1,80 +1,50 @@
 import React from "react";
-import styled from "styled-components";
-import { StatsElement } from "./StatsElement";
+import PropTypes from "prop-types";
+import { StatusTile } from "@zero-design-system/react";
 
-const brightGreen = "#57ff76";
-const brightAmber = "#ffb347";
-const brightRed = "#FF5757";
+/**
+ * Dashboard status cell on DS StatusTile (variant=tile).
+ * Preserves `#${header}-status` and `${header}-status-badge` for e2e / RTL.
+ * Feed statuses ok/stale/error map to StatusTile; unknown → disconnected.
+ */
 
-const StyledStatus = styled(StatsElement)`
-    .indicator {
-        height: 80px;
-        transition: all 0.5s ease-out 0.2s;
-        text-transform: uppercase;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-
-        box-shadow: inset 0px -8px 5px -10px #ffffff;
-
-        &_ok {
-            .status {
-                color: ${brightGreen};
-            }
-
-            box-shadow: inset 0px -9px 5px -10px ${brightGreen};
-        }
-
-        &_stale {
-            .status {
-                color: ${brightAmber};
-            }
-
-            box-shadow: inset 0px -9px 5px -10px ${brightAmber};
-        }
-
-        &_error {
-            .status {
-                color: ${brightRed};
-            }
-
-            box-shadow: inset 0px -10px 5px -10px ${brightRed};
-        }
-
-        .status {
-            flex: 1;
-            font-weight: 300;
-        }
-    }
-`;
-
-const statusLabel = (status) => {
+/** @param {string | undefined} status */
+function mapStatus(status) {
     switch (status) {
         case "ok":
-            return "CONNECTED";
+            return { status: "ok", state: "Connected" };
         case "stale":
-            return "STALE";
+            return { status: "stale", state: "Stale" };
         case "error":
-            return "ISSUE";
+            return { status: "error", state: "Issue" };
         default:
-            return "UNKNOWN";
+            return { status: "disconnected", state: "Unknown" };
     }
-};
+}
 
 const Status = ({ status = "unknown", header, version = "unknown", title }) => {
     const tooltip = title || `Version: ${version}`;
-    const label = statusLabel(status);
+    const mapped = mapStatus(status);
 
     return (
-        <StyledStatus>
-            <div id={`${header}-status`} className={`indicator indicator_${status}`}>
-                <div className="title">{header}</div>
-                <div className="status" title={tooltip} data-testid={`${header}-status-badge`}>
-                    {label}
-                </div>
-            </div>
-        </StyledStatus>
+        <StatusTile
+            id={`${header}-status`}
+            label={header}
+            state={mapped.state}
+            status={mapped.status}
+            variant="tile"
+            title={tooltip}
+            data-testid={`${header}-status-badge`}
+            aria-label={`${header} ${mapped.state}`}
+        />
     );
+};
+
+Status.propTypes = {
+    status: PropTypes.string,
+    header: PropTypes.string.isRequired,
+    version: PropTypes.string,
+    title: PropTypes.string,
 };
 
 export default Status;
