@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const StyledBrowsers = styled.div`
-    color: #fff;
+    color: var(--color-text, #fff);
     display: flex;
     flex-direction: column;
     flex-basis: 30%;
@@ -31,7 +31,7 @@ export const StyledBrowser = styled.div`
             font-size: 0.8em;
             line-height: 20px;
             width: 30px;
-            padding-left: 5px;
+            padding-left: var(--space-1, 5px);
         }
     }
 

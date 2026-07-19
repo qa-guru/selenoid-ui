@@ -3,49 +3,26 @@ import { StyledBrowser } from "./style.css";
 import PropTypes from "prop-types";
 
 /**
- * Color depending on percentage
- * @param percentile unsigned integer
- * @returns {string} HEX color
+ * Usage-bar accent from DS semantic tokens (cool → warm by load).
+ * @param {number|string} percentile
+ * @returns {string} CSS color using var(--color-*)
  */
-function countColor(percentile) {
-    const pct = (percentile > 100 ? 100 : percentile) / 100;
-    const percentColors = [
-        { pct: 0.0, color: { r: 0x41, g: 0x59, b: 0xd3 } }, //#4159D3
-        { pct: 0.3, color: { r: 0x66, g: 0x9d, b: 0x9e } }, //#F09876
-        { pct: 0.5, color: { r: 0x66, g: 0x9d, b: 0x9e } }, //#A44057
-        { pct: 0.7, color: { r: 0xeb, g: 0xa8, b: 0x98 } }, //#EBA898
-        { pct: 1.0, color: { r: 0xe8, g: 0x78, b: 0x6f } }, //#E8786F
-    ];
-
-    const color = {};
-
-    for (let i = 1; i <= percentColors.length - 1; i++) {
-        if (pct < percentColors[i - 1].pct) {
-            break;
-        }
-        const lower = percentColors[i - 1];
-        const upper = percentColors[i];
-
-        const range = upper.pct - lower.pct;
-        const rangePct = (pct - lower.pct) / range;
-        const pctLower = 1 - rangePct;
-        const pctUpper = rangePct;
-
-        color.r = Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper);
-        color.g = Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper);
-        color.b = Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper);
+export function usageBarColor(percentile) {
+    const pct = Math.min(100, Math.max(0, Number(percentile) || 0));
+    if (pct < 30) {
+        return "var(--color-info)";
     }
-
-    const colors = [color.r, color.g, color.b].map((col) => col.toString(16)).join("");
-
-    return `#${colors}`;
+    if (pct < 70) {
+        return "var(--color-warning)";
+    }
+    return "var(--color-danger)";
 }
 
 const Browser = ({ name, used, totalUsed }) => {
     const perc = totalUsed > 0 ? ((used / totalUsed) * 100).toFixed() : 0;
 
     return (
-        <StyledBrowser>
+        <StyledBrowser data-testid="browser-row">
             <div className="stats">
                 <div className="percent">{perc}%</div>
                 <div className="count">{used}</div>
@@ -53,9 +30,10 @@ const Browser = ({ name, used, totalUsed }) => {
             </div>
             <div
                 className="usage-bar"
+                data-testid="browser-usage-bar"
                 style={{
                     width: `${perc}%`,
-                    borderBottomColor: countColor(perc),
+                    borderBottomColor: usageBarColor(perc),
                 }}
             />
         </StyledBrowser>

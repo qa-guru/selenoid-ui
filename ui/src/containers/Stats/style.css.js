@@ -1,8 +1,5 @@
 import styled from "styled-components";
 
-const borderStatsColor = "#3d444c";
-const borderSectionColor = "#353b42";
-
 export const StyledStats = styled.div`
     min-height: 100px;
     min-width: 350px;
@@ -13,12 +10,12 @@ export const StyledStats = styled.div`
     overflow: auto;
 
     .section-title {
-        color: #666;
+        color: var(--color-text-muted, #666);
         position: absolute;
         top: 0;
         left: 0;
         padding-left: 5%;
-        border-bottom: 1px solid ${borderSectionColor};
+        border-bottom: 1px solid var(--color-border, #353b42);
         width: 95%;
         letter-spacing: 1px;
         font-size: 10px;
@@ -26,7 +23,7 @@ export const StyledStats = styled.div`
     }
 
     .quota {
-        border-right: 1px dashed ${borderStatsColor};
-        margin-right: 10px;
+        border-right: 1px dashed var(--color-border, #3d444c);
+        margin-right: var(--space-3, 10px);
     }
 `;
