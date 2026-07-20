@@ -15,6 +15,7 @@ export const StyledCapabilities = styled.div`
   /*
    * Driver+Remote : terminal — canon configurator__layout--terminal 6-col ladder
    * (docs/layout-standard.md § Configurator terminal shell). Full-bleed: no 5% side pad.
+   * Column heights independent — no align-items:stretch magnet between setup & terminal.
    */
   .capabilities-body {
     display: grid;
@@ -29,13 +30,13 @@ export const StyledCapabilities = styled.div`
   .code-panel {
     grid-column: auto;
     min-width: 0;
+    align-self: start;
   }
 
   /* ≥1600 — cols 2–3 cfg / 4–6 term */
   @media (min-width: 1600px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 3fr);
-      align-items: stretch;
     }
     .setup { grid-column: 2; }
     .code-panel { grid-column: 3; }
@@ -44,7 +45,6 @@ export const StyledCapabilities = styled.div`
   @media (min-width: 1280px) and (max-width: 1599px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 2fr);
-      align-items: stretch;
     }
     .setup { grid-column: 2; }
     .code-panel { grid-column: 3; }
@@ -53,21 +53,18 @@ export const StyledCapabilities = styled.div`
   @media (min-width: 1100px) and (max-width: 1279px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 2fr) minmax(0, 2fr);
-      align-items: stretch;
     }
   }
 
   @media (min-width: 900px) and (max-width: 1099px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-      align-items: stretch;
     }
   }
 
   @media (min-width: 769px) and (max-width: 899px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: stretch;
     }
   }
 
@@ -76,6 +73,11 @@ export const StyledCapabilities = styled.div`
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    /* Content height only — do not flex-grow panel chrome to match terminal. */
+    .panel {
+      flex: 0 1 auto;
+    }
 
     button.new-session,
     button.new-session-more-capabilities {
@@ -103,6 +105,10 @@ export const StyledCapabilities = styled.div`
     flex-direction: column;
     min-height: 0;
 
+    .panel {
+      flex: 0 1 auto;
+    }
+
     .capabilities-terminal-body {
       padding: 0;
       display: flex;
@@ -111,7 +117,7 @@ export const StyledCapabilities = styled.div`
     }
 
     .panel__code {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-height: 320px;
       margin: 0;
       max-width: 100%;
@@ -167,7 +173,6 @@ export const StyledCapabilities = styled.div`
   @media (max-width: 768px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr);
-      align-items: stretch;
     }
   }
 
