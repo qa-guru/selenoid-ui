@@ -22,16 +22,18 @@ export const StyledCapabilities = styled.div`
     display: grid;
     align-items: start;
     justify-content: start;
-    column-gap: var(--space-6, 24px);
-    row-gap: 20px;
+    /* Same gap cfg↔term as Driver↔Remote hub (.setup gap) */
+    --capabilities-gap: var(--space-3, 12px);
+    column-gap: var(--capabilities-gap);
+    row-gap: var(--capabilities-gap);
     width: 100%;
     box-sizing: border-box;
     padding: 20px var(--page-padding-x, 16px) 40px;
     --capabilities-col-rest: calc(
-      (1600px - 2 * var(--page-padding-x, 16px) - 5 * var(--space-6, 24px)) / 6
+      (1600px - 2 * var(--page-padding-x, 16px) - 5 * var(--capabilities-gap)) / 6
     );
     --capabilities-span-2: calc(
-      2 * var(--capabilities-col-rest) + var(--space-6, 24px)
+      2 * var(--capabilities-col-rest) + var(--capabilities-gap)
     );
   }
 
@@ -53,12 +55,12 @@ export const StyledCapabilities = styled.div`
         0px,
         calc(
           100% - 2 * var(--page-padding-x, 16px) - 2 * var(--capabilities-span-2) -
-            2 * var(--space-6, 24px)
+            2 * var(--capabilities-gap)
         ),
         var(--capabilities-col-rest)
       );
       --capabilities-gutter-gap: min(
-        var(--space-6, 24px),
+        var(--capabilities-gap),
         var(--capabilities-gutter)
       );
       padding-left: calc(
@@ -67,11 +69,11 @@ export const StyledCapabilities = styled.div`
       );
       --capabilities-cfg: clamp(
         var(--capabilities-col-rest),
-        calc(100% - var(--capabilities-span-2) - var(--space-6, 24px)),
+        calc(100% - var(--capabilities-span-2) - var(--capabilities-gap)),
         var(--capabilities-span-2)
       );
       --capabilities-term: calc(
-        100% - var(--capabilities-cfg) - var(--space-6, 24px)
+        100% - var(--capabilities-cfg) - var(--capabilities-gap)
       );
       grid-template-columns: var(--capabilities-cfg) var(--capabilities-term);
     }
@@ -89,7 +91,7 @@ export const StyledCapabilities = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--capabilities-gap, var(--space-3, 12px));
 
     /* Content height only — do not flex-grow panel chrome to match terminal. */
     .panel {
@@ -111,7 +113,7 @@ export const StyledCapabilities = styled.div`
   .capabilities-launch {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--capabilities-gap, var(--space-3, 12px));
   }
 
   .code-panel {
