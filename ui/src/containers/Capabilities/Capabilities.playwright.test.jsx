@@ -85,12 +85,22 @@ describe("Capabilities Playwright Create Session", () => {
         expect(panel.textContent).toContain("curl --websocket");
         expect(panel.textContent).toContain(`accessKey=${encodeURIComponent(ACCESS_KEY)}`);
         expect(panel.textContent).toContain("/playwright/playwright-chrome/1.61.0");
+        expect(panel.querySelector(".ch-tok-key").textContent).toBe("--websocket");
+        expect([...panel.querySelectorAll(".ch-tok-cmd")].map(({ textContent }) => textContent)).toEqual([
+            "curl",
+            "localhost:3000",
+        ]);
+        expect([...panel.querySelectorAll(".ch-tok-key")].map(({ textContent }) => textContent)).toContain("accessKey");
     });
 
     it("opens Playwright WebSocket with accessKey and does not throw ReferenceError", async () => {
         const user = userEvent.setup();
         renderCapabilities(ACCESS_KEY);
         await selectPlaywrightChrome(user);
+
+        // Browser capabilities (proxy) is WebDriver-only — hidden for Playwright.
+        expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
+        expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
 
         const create = screen.getByTestId("capabilities-create-session");
         expect(create).toBeEnabled();

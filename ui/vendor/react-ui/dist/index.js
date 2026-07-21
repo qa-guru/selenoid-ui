@@ -838,9 +838,24 @@ function highlightShellValue(value, prefix) {
   }
   return wrapToken(prefix, "str", value);
 }
+function highlightUrlToken(token, prefix) {
+  const match = token.match(/^(["'])([a-z][\w+.-]*:\/\/)([^/?#]+)([^?#]*)(?:\?([^#]*))?(#.*)?\1$/i);
+  if (!match) return null;
+  const [, quote, protocol, host, path, query, hash = ""] = match;
+  const queryHtml = query ? wrapToken(prefix, "punct", "?") + query.split("&").map((parameter) => {
+    const separator = parameter.indexOf("=");
+    if (separator < 0) return wrapToken(prefix, "key", parameter);
+    return wrapToken(prefix, "key", parameter.slice(0, separator)) + wrapToken(prefix, "punct", "=") + wrapToken(prefix, "str", parameter.slice(separator + 1));
+  }).join(wrapToken(prefix, "punct", "&")) : "";
+  return wrapToken(prefix, "punct", quote) + wrapToken(prefix, "comment", protocol) + wrapToken(prefix, "cmd", host) + wrapToken(prefix, "str", path) + queryHtml + wrapToken(prefix, "comment", hash) + wrapToken(prefix, "punct", quote);
+}
 function highlightShellToken(token, prefix) {
   if (/^\s*#/.test(token)) {
     return wrapToken(prefix, "comment", token);
+  }
+  const highlightedUrl = highlightUrlToken(token, prefix);
+  if (highlightedUrl) {
+    return highlightedUrl;
   }
   if (/^'/.test(token)) {
     return wrapToken(prefix, "str", token);
@@ -863,7 +878,7 @@ function highlightShellToken(token, prefix) {
   }
   return escapeHtml(token);
 }
-var SHELL_TOKEN = /'[^']*'|-D[\w.]+(?:=[^\s\\']*)?|--[\w-]+|\bcurl\b|\.\/gradlew|allurectl|\bgradle\b|\bexport\b|\btest\b|\b(?:POST|GET|PUT|DELETE|PATCH|HEAD)\b|\b(?:ALLURE_[A-Z_]+|TEST_CASE_ID)\b|-[a-zA-Z]+\b|\\\s*$|\s+#.*$/g;
+var SHELL_TOKEN = /["'](?:wss?|https?):\/\/[^"']*["']|'[^']*'|-D[\w.]+(?:=[^\s\\']*)?|--[\w-]+|\bcurl\b|\.\/gradlew|allurectl|\bgradle\b|\bexport\b|\btest\b|\b(?:POST|GET|PUT|DELETE|PATCH|HEAD)\b|\b(?:ALLURE_[A-Z_]+|TEST_CASE_ID)\b|-[a-zA-Z]+\b|\\\s*$|\s+#.*$/g;
 function highlightShellLine(line, prefix) {
   if (/^\s*#/.test(line)) {
     return wrapToken(prefix, "comment", line);
