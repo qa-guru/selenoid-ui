@@ -1,16 +1,7 @@
 import React from "react";
 import BeatLoader from "react-spinners/BeatLoader";
 
-export function CapabilitiesLaunchActions({
-    loading,
-    disabled,
-    error,
-    showMoreCapabilities,
-    useMoreCaps,
-    onCreateSession,
-    onToggleMoreCaps,
-    onClearError,
-}) {
+export function CapabilitiesLaunchActions({ loading, disabled, error, onCreateSession, onClearError }) {
     return (
         <div className="capabilities-launch-actions">
             <button
@@ -24,16 +15,6 @@ export function CapabilitiesLaunchActions({
             >
                 {loading ? <BeatLoader size={3} color={"#fff"} /> : "Create Session"}
             </button>
-            {showMoreCapabilities ? (
-                <button
-                    type="button"
-                    className="new-session-more-capabilities"
-                    data-testid="capabilities-more-caps"
-                    onClick={onToggleMoreCaps}
-                >
-                    {useMoreCaps ? "Hide capabilities" : "More capabilities"}
-                </button>
-            ) : null}
         </div>
     );
 }

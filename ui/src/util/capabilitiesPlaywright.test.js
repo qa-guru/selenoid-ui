@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { defaultPlaywrightSelenoidOptions, playwrightEndpoint, playwrightSnippet } from "./capabilitiesPlaywright";
+import { playwrightSelenoidOptions, playwrightEndpoint, playwrightSnippet } from "./capabilitiesPlaywright";
 
 describe("capabilitiesPlaywright", () => {
     it("omits accessKey from options when empty", () => {
-        expect(defaultPlaywrightSelenoidOptions("")).not.toHaveProperty("accessKey");
-        expect(defaultPlaywrightSelenoidOptions()).not.toHaveProperty("accessKey");
+        expect(playwrightSelenoidOptions("")).not.toHaveProperty("accessKey");
+        expect(playwrightSelenoidOptions()).not.toHaveProperty("accessKey");
     });
 
     it("includes accessKey in options and snippet query when provided", () => {
         const key = "qa_engineer:aAb_-4gs53FD";
-        const options = defaultPlaywrightSelenoidOptions(key);
+        const options = playwrightSelenoidOptions(key);
         expect(options.accessKey).toBe(key);
 
         const { query, full } = playwrightSnippet("playwright-chrome", "1.61.0", key);
@@ -35,5 +35,23 @@ describe("capabilitiesPlaywright", () => {
 
         expect(parsed.searchParams.get("accessKey")).toBeNull();
         expect(parsed.searchParams.get("labels.manual")).toBe("true");
+        expect(parsed.searchParams.get("headless")).toBe("false");
+    });
+
+    it("mirrors panel session options into the WebSocket query", () => {
+        const url = playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+            name: "PW manual",
+            sessionTimeout: "15m",
+            enableVnc: false,
+            enableVideo: false,
+            headless: true,
+        });
+        const parsed = new URL(url);
+
+        expect(parsed.searchParams.get("name")).toBe("PW manual");
+        expect(parsed.searchParams.get("sessionTimeout")).toBe("15m");
+        expect(parsed.searchParams.get("enableVNC")).toBe("false");
+        expect(parsed.searchParams.get("enableVideo")).toBe("false");
+        expect(parsed.searchParams.get("headless")).toBe("true");
     });
 });

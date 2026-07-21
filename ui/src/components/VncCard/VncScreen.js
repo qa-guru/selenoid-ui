@@ -91,6 +91,7 @@ export default class VncScreen extends Component {
         return (
             <div
                 className="vnc-screen"
+                style={{ width: "100%", height: "100%" }}
                 ref={(screen) => {
                     this.canvas = screen;
                     VncScreen.resizeVnc(this.rfb);

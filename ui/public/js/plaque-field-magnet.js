@@ -12,10 +12,10 @@
  *   1. measure the real label width and the control's minimum width;
  *   2. if the label + control fit the cell → keep the row horizontal and set
  *      `--plaque-mixed-label-col` so dividers line up (never clipping a label);
- *   3. if they cannot fit → add `.plaque-field--nowrap` and cap the label column
- *      to the field's own px budget so the label ellipsises on one line while the
- *      control keeps its minimum. Tagstrips (`--many`) may still grow vertically
- *      as chips wrap — that is CSS (`height: auto`), not a magnet stack.
+ *   3. if they cannot fit → for plain selects/segs add `.plaque-field--nowrap`
+ *      and cap the label column to the field's own px budget (ellipsis); for
+ *      tagstrips (`--many`) keep the shared/intrinsic label and let chips wrap
+ *      — never crush protocol labels to a single letter.
  *
  * A ResizeObserver keeps the result correct across any layout change (window,
  * Cursor panel, terminal aside), not just window resize — this is what stops
@@ -31,6 +31,9 @@
     var SELECT_MIN_PX = 68;
     var DIVIDER_PX = 1;
     var FUDGE_PX = 6; /* borders + sub-pixel rounding */
+    /* Shell pad-x + seg-shell-end + divider margin — budget is field content, not
+     border-box cell width. Without this, label px eats the controlMin we reserved. */
+    var SHELL_CHROME_PX = 24;
     /* scrollWidth is integer-rounded; the real glyph box can be a fraction wider,
      which makes text-overflow:ellipsis fire right at the boundary. Pad the
      measured label so a full label never shows a stray "…". */
@@ -50,10 +53,10 @@
 
     /**
      * Intrinsic inline width of a segmented control.
-     * `--many` tagstrips wrap chips to extra rows — do NOT sum all buttons (that
-     * made the magnet treat the one-line width as required, crush the label to
-     * "i…", and fight wrapping). Floor = widest chip so the label column can
-     * stay readable; CSS flex-wrap handles overflow onto rows 2–3.
+     * `--many` tagstrips wrap chips to extra rows — do NOT sum every button (that
+     * made the magnet treat the full one-line width as required, crush the label
+     * to "i…", and fight wrapping). Floor = room for two chips on one band so a
+     * true|false pair never stacks; longer rows still wrap via max-width:100%.
      * @param {Element} field
      * @returns {number}
      */
@@ -64,14 +67,22 @@
         if (!seg) return Math.ceil(track.scrollWidth);
         if (track.classList.contains("plaque-field-seg-track--many")) {
             var widest = 0;
+            var gap = 0;
             var kids = seg.children;
             var i;
             for (i = 0; i < kids.length; i++) {
                 if (kids[i].offsetWidth > widest) widest = kids[i].offsetWidth;
             }
             if (!widest) return SELECT_MIN_PX;
-            /* one chip + track/seg padding + shell inset */
-            return Math.max(SELECT_MIN_PX, Math.ceil(widest) + 18);
+            try {
+                var cs = global.getComputedStyle(seg);
+                gap = parseFloat(cs.columnGap || cs.gap || "0") || 0;
+            } catch (e) {
+                gap = 5;
+            }
+            /* one band floor: two chips + gap + track/seg padding + shell inset */
+            var bandFloor = Math.ceil(widest * 2 + gap) + 18;
+            return Math.max(SELECT_MIN_PX, bandFloor);
         }
         return Math.ceil(seg.scrollWidth);
     }
@@ -108,7 +119,7 @@
         for (i = 0; i < items.length; i++) {
             items[i].field.style.removeProperty("--plaque-mixed-label-col");
             /* Budget = space left for the label once the control keeps its minimum. */
-            items[i].budget = items[i].cellW - items[i].controlMin - DIVIDER_PX - FUDGE_PX;
+            items[i].budget = items[i].cellW - items[i].controlMin - DIVIDER_PX - FUDGE_PX - SHELL_CHROME_PX;
         }
     }
 
@@ -120,6 +131,11 @@
      * label column (ellipsis) — it is NEVER stacked into a second vertical row.
      * @param {{ field: Element, label: Element, cell: Element }[]} items
      */
+    function isManyTagstrip(field) {
+        var track = getSegTrack(field);
+        return !!(track && track.classList.contains("plaque-field-seg-track--many"));
+    }
+
     function resolveColumn(items) {
         if (!items || !items.length) return;
         var target = 0;
@@ -131,6 +147,14 @@
         for (i = 0; i < items.length; i++) {
             var it = items[i];
             if (it.budget < target) {
+                /* Tagstrips (`--many`) wrap chips vertically — never crush the protocol
+           label to "W"/"P". Keep the shared (or intrinsic) column; controlMin
+           already floors at two chips so wrapping is the pressure valve. */
+                if (isManyTagstrip(it.field)) {
+                    it.field.classList.remove("plaque-field--nowrap");
+                    it.field.style.setProperty("--plaque-mixed-label-col", Math.max(it.labelW, target) + "px");
+                    continue;
+                }
                 /* Cannot align on the shared column without wrapping — cap this field's
            label to its own budget so it ellipsises on one line while the control
            keeps its minimum. Never stack vertically. */

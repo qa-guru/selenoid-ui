@@ -10,10 +10,7 @@ describe("CapabilitiesLaunchActions", () => {
                 loading={false}
                 disabled={false}
                 error=""
-                showMoreCapabilities={true}
-                useMoreCaps={false}
                 onCreateSession={vi.fn()}
-                onToggleMoreCaps={vi.fn()}
                 onClearError={vi.fn()}
             />
         );
@@ -22,30 +19,26 @@ describe("CapabilitiesLaunchActions", () => {
         expect(create.tagName).toBe("BUTTON");
         expect(create).toHaveClass("new-session", "disabled-false", "error-false");
         expect(create).toHaveTextContent("Create Session");
+        expect(screen.queryByTestId("capabilities-more-caps")).toBeNull();
+        expect(screen.queryByText("More capabilities")).toBeNull();
     });
 
-    it("invokes create and more-capabilities handlers", async () => {
+    it("invokes create session handler", async () => {
         const user = userEvent.setup();
         const onCreateSession = vi.fn();
-        const onToggleMoreCaps = vi.fn();
 
         render(
             <CapabilitiesLaunchActions
                 loading={false}
                 disabled={false}
                 error=""
-                showMoreCapabilities={true}
-                useMoreCaps={false}
                 onCreateSession={onCreateSession}
-                onToggleMoreCaps={onToggleMoreCaps}
                 onClearError={vi.fn()}
             />
         );
 
         await user.click(screen.getByTestId("capabilities-create-session"));
-        await user.click(screen.getByTestId("capabilities-more-caps"));
 
         expect(onCreateSession).toHaveBeenCalledTimes(1);
-        expect(onToggleMoreCaps).toHaveBeenCalledTimes(1);
     });
 });

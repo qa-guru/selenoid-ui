@@ -13,61 +13,77 @@ export const StyledCapabilities = styled.div`
   position: relative;
 
   /*
-   * Driver+Remote : terminal — canon configurator__layout--terminal 6-col ladder
-   * (docs/layout-standard.md § Configurator terminal shell). Full-bleed: no 5% side pad.
+   * SSOT copy of configurator__layout--terminal (docs/layout-standard.md).
+   * Mental 6-col: 1░ + cfg 2–3 + term 4–6. ░ = padding-left, NOT a track.
+   * Tracks ALWAYS cfg | term — one formula ≥769 via clamp. No 1100/1280/1600
+   * track rebuilds. No 1fr 2fr 2fr. No discrete ratio stages.
    */
   .capabilities-body {
     display: grid;
     align-items: start;
-    gap: 20px 24px;
+    justify-content: start;
+    /* Same gap cfg↔term as Driver↔Remote hub (.setup gap) */
+    --capabilities-gap: var(--space-3, 12px);
+    column-gap: var(--capabilities-gap);
+    row-gap: var(--capabilities-gap);
     width: 100%;
-    padding: 20px 16px 40px;
     box-sizing: border-box;
+    padding: 20px var(--page-padding-x, 16px) 40px;
+    --capabilities-col-rest: calc(
+      (1600px - 2 * var(--page-padding-x, 16px) - 5 * var(--capabilities-gap)) / 6
+    );
+    --capabilities-span-2: calc(
+      2 * var(--capabilities-col-rest) + var(--capabilities-gap)
+    );
   }
 
   .setup,
   .code-panel {
     grid-column: auto;
     min-width: 0;
+    align-self: start;
   }
 
-  /* ≥1600 — cols 2–3 cfg / 4–6 term */
-  @media (min-width: 1600px) {
+  @media (min-width: 769px) {
     .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 3fr);
-      align-items: stretch;
+      /*
+       * Body sits full-bleed (page-pad is our own padding). Configurator's
+       * layout 100% is already inside page-shell pad — subtract pads here so
+       * the 6-col math matches SSOT.
+       */
+      --capabilities-gutter: clamp(
+        0px,
+        calc(
+          100% - 2 * var(--page-padding-x, 16px) - 2 * var(--capabilities-span-2) -
+            2 * var(--capabilities-gap)
+        ),
+        var(--capabilities-col-rest)
+      );
+      --capabilities-gutter-gap: min(
+        var(--capabilities-gap),
+        var(--capabilities-gutter)
+      );
+      padding-left: calc(
+        var(--page-padding-x, 16px) + var(--capabilities-gutter) +
+          var(--capabilities-gutter-gap)
+      );
+      --capabilities-cfg: clamp(
+        var(--capabilities-col-rest),
+        calc(100% - var(--capabilities-span-2) - var(--capabilities-gap)),
+        var(--capabilities-span-2)
+      );
+      --capabilities-term: calc(
+        100% - var(--capabilities-cfg) - var(--capabilities-gap)
+      );
+      grid-template-columns: var(--capabilities-cfg) var(--capabilities-term);
     }
-    .setup { grid-column: 2; }
-    .code-panel { grid-column: 3; }
-  }
 
-  @media (min-width: 1280px) and (max-width: 1599px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 2fr);
-      align-items: stretch;
+    .setup {
+      grid-column: 1 / 2;
     }
-    .setup { grid-column: 2; }
-    .code-panel { grid-column: 3; }
-  }
 
-  @media (min-width: 1100px) and (max-width: 1279px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 2fr);
-      align-items: stretch;
-    }
-  }
-
-  @media (min-width: 900px) and (max-width: 1099px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-      align-items: stretch;
-    }
-  }
-
-  @media (min-width: 769px) and (max-width: 899px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: stretch;
+    .code-panel {
+      grid-column: 2 / 3;
     }
   }
 
@@ -75,10 +91,14 @@ export const StyledCapabilities = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--capabilities-gap, var(--space-3, 12px));
 
-    button.new-session,
-    button.new-session-more-capabilities {
+    /* Content height only — do not flex-grow panel chrome to match terminal. */
+    .panel {
+      flex: 0 1 auto;
+    }
+
+    button.new-session {
       width: 100%;
       margin-top: 10px;
       cursor: pointer;
@@ -90,10 +110,37 @@ export const StyledCapabilities = styled.div`
     min-width: 0;
   }
 
+  .capabilities-config-panel--placeholder {
+    opacity: 0.75;
+  }
+
+  .capabilities-ios-placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 2px;
+  }
+
+  .capabilities-ios-placeholder__title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: ${selectedColor};
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .capabilities-ios-placeholder__hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: ${grayColor};
+  }
+
   .capabilities-launch {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--capabilities-gap, var(--space-3, 12px));
   }
 
   .code-panel {
@@ -103,6 +150,10 @@ export const StyledCapabilities = styled.div`
     flex-direction: column;
     min-height: 0;
 
+    .panel {
+      flex: 0 1 auto;
+    }
+
     .capabilities-terminal-body {
       padding: 0;
       display: flex;
@@ -111,7 +162,7 @@ export const StyledCapabilities = styled.div`
     }
 
     .panel__code {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-height: 320px;
       margin: 0;
       max-width: 100%;
@@ -167,7 +218,6 @@ export const StyledCapabilities = styled.div`
   @media (max-width: 768px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr);
-      align-items: stretch;
     }
   }
 
@@ -201,35 +251,6 @@ export const StyledCapabilities = styled.div`
       }
     }
 
-    &.error-true {
-      border-color: ${errorColor};
-      color: ${errorColor};
-    }
-  }
-
-  .new-session-more-capabilities {
-    background: none;
-    border: none;
-    color: ${grayColor};
-    text-align: left;
-    padding: 0;
-    margin-top: 8px;
-  }
-  
-  textarea.more-capabilities {
-    border: 1px solid ${unselectedColor};
-    border-radius: 3px;
-    background-color: ${borderSectionColor};
-    color: ${selectedColor};
-    font-size: 13px;
-    font-family: "Source Code Pro",Menlo,Monaco,Consolas,"Courier New",monospace;
-    outline: none;
-    padding: 5px;
-    resize: vertical;
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 10px;
-    
     &.error-true {
       border-color: ${errorColor};
       color: ${errorColor};

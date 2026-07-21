@@ -10,9 +10,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "149.0-min": {
         "image": "qaguru/webdriver-chrome:149-min",
@@ -22,9 +20,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "148.0": {
         "image": "qaguru/webdriver-chrome:148",
@@ -34,9 +30,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "148.0-min": {
         "image": "qaguru/webdriver-chrome:148-min",
@@ -46,9 +40,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       }
     }
   },
@@ -63,9 +55,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "151.0-min": {
         "image": "qaguru/webdriver-firefox:151-min",
@@ -75,9 +65,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "150.0": {
         "image": "qaguru/webdriver-firefox:150",
@@ -87,9 +75,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "150.0-min": {
         "image": "qaguru/webdriver-firefox:150-min",
@@ -99,9 +85,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       }
     }
   },
@@ -116,9 +100,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "145.0-min": {
         "image": "qaguru/webdriver-msedge:145-min",
@@ -128,9 +110,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "144.0": {
         "image": "qaguru/webdriver-msedge:144",
@@ -140,9 +120,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "144.0-min": {
         "image": "qaguru/webdriver-msedge:144-min",
@@ -152,9 +130,7 @@
         "tmpfs": {
           "/tmp": "size=512m"
         },
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       }
     }
   },
@@ -170,9 +146,7 @@
         "user": "pwuser",
         "workDir": "/home/pwuser",
         "shmSize": 2147483648,
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       },
       "1.61.1-min": {
         "image": "qaguru/playwright-chromium:1.61.1-min",
@@ -183,9 +157,7 @@
         "user": "pwuser",
         "workDir": "/home/pwuser",
         "shmSize": 2147483648,
-        "hosts": [
-          "host.docker.internal:host-gateway"
-        ]
+        "hosts": ["host.docker.internal:host-gateway"]
       }
     }
   },
@@ -246,6 +218,21 @@
         "user": "pwuser",
         "workDir": "/home/pwuser",
         "shmSize": 2147483648
+      }
+    }
+  },
+  "android": {
+    "default": "16.0",
+    "versions": {
+      "16.0": {
+        "image": "qaguru/android:16",
+        "port": "4444",
+        "path": "/wd/hub",
+        "shmSize": 2147483648,
+        "mem": "4g",
+        "cpu": "2.0",
+        "env": ["SCREEN_RESOLUTION=2100x2100x24"],
+        "hosts": ["host.docker.internal:host-gateway"]
       }
     }
   }

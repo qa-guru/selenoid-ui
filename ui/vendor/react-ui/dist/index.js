@@ -792,6 +792,277 @@ function IconCopy() {
     )
   ] });
 }
+function IconDownload() {
+  return /* @__PURE__ */ jsxs10(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      xmlns: "http://www.w3.org/2000/svg",
+      children: [
+        /* @__PURE__ */ jsx18("path", { d: "M8 2.5v7" }),
+        /* @__PURE__ */ jsx18("path", { d: "m5.25 7 2.75 2.75L10.75 7" }),
+        /* @__PURE__ */ jsx18("path", { d: "M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" })
+      ]
+    }
+  );
+}
+
+// src/WindowControl.tsx
+import { jsx as jsx19 } from "react/jsx-runtime";
+function WindowControl({
+  as,
+  tone = "neutral",
+  sessionControl,
+  className,
+  children,
+  ...rest
+}) {
+  const Component = as ?? "button";
+  const buttonType = Component === "button" ? { type: "button" } : {};
+  return /* @__PURE__ */ jsx19(
+    Component,
+    {
+      ...buttonType,
+      className: cn(
+        "window-control",
+        `window-control--${tone}`,
+        sessionControl && "vnc-window__session-control",
+        className
+      ),
+      ...rest,
+      children: /* @__PURE__ */ jsx19("span", { className: "icon", "aria-hidden": "true", children })
+    }
+  );
+}
+
+// src/vnc-icons.tsx
+import { jsx as jsx20, jsxs as jsxs11 } from "react/jsx-runtime";
+function IconClose() {
+  return /* @__PURE__ */ jsx20("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx20("path", { d: "m4 4 8 8M12 4l-8 8" }) });
+}
+function IconDocumentRemove() {
+  return /* @__PURE__ */ jsxs11(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx20("path", { d: "M4 2.5h5l3 3v8H4z" }),
+        /* @__PURE__ */ jsx20("path", { d: "M9 2.5v3h3M6 10h4" })
+      ]
+    }
+  );
+}
+function IconDotsHorizontal() {
+  return /* @__PURE__ */ jsx20("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx20("path", { d: "M3 8h.01M8 8h.01M13 8h.01" }) });
+}
+function IconLock() {
+  return /* @__PURE__ */ jsxs11(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx20("rect", { x: "3.5", y: "7", width: "9", height: "6.5", rx: "1.5" }),
+        /* @__PURE__ */ jsx20("path", { d: "M5.5 7V5a2.5 2.5 0 0 1 5 0v2" })
+      ]
+    }
+  );
+}
+function IconUnlock() {
+  return /* @__PURE__ */ jsxs11(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx20("rect", { x: "3.5", y: "7", width: "9", height: "6.5", rx: "1.5" }),
+        /* @__PURE__ */ jsx20("path", { d: "M10.5 7V5a2.5 2.5 0 0 0-4.75-1.1" })
+      ]
+    }
+  );
+}
+function IconChevronUp() {
+  return /* @__PURE__ */ jsx20(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: /* @__PURE__ */ jsx20("path", { d: "m4 10 4-4 4 4" })
+    }
+  );
+}
+function IconChevronDown() {
+  return /* @__PURE__ */ jsx20(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: /* @__PURE__ */ jsx20("path", { d: "m4 6 4 4 4-4" })
+    }
+  );
+}
+function IconVncCopy() {
+  return /* @__PURE__ */ jsxs11("svg", { viewBox: "0 0 16 16", fill: "none", children: [
+    /* @__PURE__ */ jsx20("rect", { x: "5", y: "5", width: "8", height: "9", rx: "1.5", stroke: "currentColor", strokeWidth: "1.5" }),
+    /* @__PURE__ */ jsx20(
+      "path",
+      {
+        d: "M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1",
+        stroke: "currentColor",
+        strokeWidth: "1.5"
+      }
+    )
+  ] });
+}
+function IconUpload() {
+  return /* @__PURE__ */ jsxs11(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx20("path", { d: "M8 10V3m0 0L5.25 5.75M8 3l2.75 2.75" }),
+        /* @__PURE__ */ jsx20("path", { d: "M3 10v2.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V10" })
+      ]
+    }
+  );
+}
+
+// src/ConnectionStatus.tsx
+import { jsx as jsx21 } from "react/jsx-runtime";
+function ConnectionStatus({
+  state,
+  className,
+  role = "status",
+  "aria-label": ariaLabel,
+  ...rest
+}) {
+  const glyph = state === "connected" ? null : state === "disconnected" ? /* @__PURE__ */ jsx21(IconDocumentRemove, {}) : /* @__PURE__ */ jsx21(IconDotsHorizontal, {});
+  return /* @__PURE__ */ jsx21(
+    "span",
+    {
+      role,
+      "aria-label": ariaLabel ?? `VNC ${state}`,
+      className: cn("connection-status", `connection-status--${state}`, className),
+      ...rest,
+      children: glyph && /* @__PURE__ */ jsx21("span", { className: "icon", "aria-hidden": "true", children: glyph })
+    }
+  );
+}
+
+// src/VncWindow.tsx
+import { jsx as jsx22, jsxs as jsxs12 } from "react/jsx-runtime";
+var defaultLabels = {
+  back: "Back",
+  lock: "Lock screen",
+  unlock: "Unlock screen",
+  enterFullscreen: "Enter fullscreen",
+  exitFullscreen: "Exit fullscreen",
+  copy: "Copy from Selenoid",
+  paste: "Paste to Selenoid"
+};
+function VncWindow({
+  state,
+  fullscreen = false,
+  unlocked = false,
+  back,
+  onBack,
+  onToggleLock,
+  onToggleFullscreen,
+  onCopy,
+  onPaste,
+  children,
+  labels,
+  className,
+  "data-testid": dataTestId = "vnc-window"
+}) {
+  const l = { ...defaultLabels, ...labels };
+  const external = state === "connected" ? "" : `VNC ${state}`;
+  const backControl = back ?? /* @__PURE__ */ jsx22(WindowControl, { tone: "danger", "aria-label": l.back, title: l.back, onClick: onBack, children: /* @__PURE__ */ jsx22(IconClose, {}) });
+  return /* @__PURE__ */ jsxs12("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: [
+    /* @__PURE__ */ jsxs12(
+      "div",
+      {
+        className: cn(
+          "panel",
+          "panel--vnc",
+          "vnc-window",
+          `vnc-window--${state}`,
+          fullscreen && "vnc-window--fullscreen",
+          className
+        ),
+        "data-state": state,
+        "data-testid": dataTestId,
+        children: [
+          /* @__PURE__ */ jsxs12("div", { className: "panel__bar", children: [
+            /* @__PURE__ */ jsxs12("div", { className: "vnc-window__controls", children: [
+              backControl,
+              /* @__PURE__ */ jsx22(ConnectionStatus, { state }),
+              /* @__PURE__ */ jsx22(
+                WindowControl,
+                {
+                  tone: "info",
+                  sessionControl: true,
+                  "aria-label": unlocked ? l.lock : l.unlock,
+                  title: unlocked ? l.lock : l.unlock,
+                  onClick: onToggleLock,
+                  children: unlocked ? /* @__PURE__ */ jsx22(IconUnlock, {}) : /* @__PURE__ */ jsx22(IconLock, {})
+                }
+              ),
+              /* @__PURE__ */ jsx22(
+                WindowControl,
+                {
+                  tone: "success",
+                  sessionControl: true,
+                  "aria-label": fullscreen ? l.exitFullscreen : l.enterFullscreen,
+                  title: fullscreen ? l.exitFullscreen : l.enterFullscreen,
+                  onClick: onToggleFullscreen,
+                  children: fullscreen ? /* @__PURE__ */ jsx22(IconChevronDown, {}) : /* @__PURE__ */ jsx22(IconChevronUp, {})
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxs12("div", { className: "vnc-window__actions", children: [
+              /* @__PURE__ */ jsx22(WindowControl, { tone: "neutral", "aria-label": l.copy, title: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx22(IconVncCopy, {}) }),
+              /* @__PURE__ */ jsx22(WindowControl, { tone: "neutral", "aria-label": l.paste, title: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx22(IconUpload, {}) })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx22("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx22("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx22("div", { className: "vnc-window__external-status", role: "status", "aria-live": "polite", children: external })
+  ] });
+}
 
 // src/code-highlight.ts
 var JSON_TOKEN = /("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g;
@@ -838,9 +1109,24 @@ function highlightShellValue(value, prefix) {
   }
   return wrapToken(prefix, "str", value);
 }
+function highlightUrlToken(token, prefix) {
+  const match = token.match(/^(["'])([a-z][\w+.-]*:\/\/)([^/?#]+)([^?#]*)(?:\?([^#]*))?(#.*)?\1$/i);
+  if (!match) return null;
+  const [, quote, protocol, host, path, query, hash = ""] = match;
+  const queryHtml = query ? wrapToken(prefix, "punct", "?") + query.split("&").map((parameter) => {
+    const separator = parameter.indexOf("=");
+    if (separator < 0) return wrapToken(prefix, "key", parameter);
+    return wrapToken(prefix, "key", parameter.slice(0, separator)) + wrapToken(prefix, "punct", "=") + wrapToken(prefix, "str", parameter.slice(separator + 1));
+  }).join(wrapToken(prefix, "punct", "&")) : "";
+  return wrapToken(prefix, "punct", quote) + wrapToken(prefix, "comment", protocol) + wrapToken(prefix, "cmd", host) + wrapToken(prefix, "str", path) + queryHtml + wrapToken(prefix, "comment", hash) + wrapToken(prefix, "punct", quote);
+}
 function highlightShellToken(token, prefix) {
   if (/^\s*#/.test(token)) {
     return wrapToken(prefix, "comment", token);
+  }
+  const highlightedUrl = highlightUrlToken(token, prefix);
+  if (highlightedUrl) {
+    return highlightedUrl;
   }
   if (/^'/.test(token)) {
     return wrapToken(prefix, "str", token);
@@ -863,7 +1149,7 @@ function highlightShellToken(token, prefix) {
   }
   return escapeHtml(token);
 }
-var SHELL_TOKEN = /'[^']*'|-D[\w.]+(?:=[^\s\\']*)?|--[\w-]+|\bcurl\b|\.\/gradlew|allurectl|\bgradle\b|\bexport\b|\btest\b|\b(?:POST|GET|PUT|DELETE|PATCH|HEAD)\b|\b(?:ALLURE_[A-Z_]+|TEST_CASE_ID)\b|-[a-zA-Z]+\b|\\\s*$|\s+#.*$/g;
+var SHELL_TOKEN = /["'](?:wss?|https?):\/\/[^"']*["']|'[^']*'|-D[\w.]+(?:=[^\s\\']*)?|--[\w-]+|\bcurl\b|\.\/gradlew|allurectl|\bgradle\b|\bexport\b|\btest\b|\b(?:POST|GET|PUT|DELETE|PATCH|HEAD)\b|\b(?:ALLURE_[A-Z_]+|TEST_CASE_ID)\b|-[a-zA-Z]+\b|\\\s*$|\s+#.*$/g;
 function highlightShellLine(line, prefix) {
   if (/^\s*#/.test(line)) {
     return wrapToken(prefix, "comment", line);
@@ -1015,8 +1301,19 @@ export {
   AppHeader,
   Badge,
   Button,
+  ConnectionStatus,
+  IconChevronDown,
+  IconChevronUp,
+  IconClose,
   IconCopy,
+  IconDocumentRemove,
+  IconDotsHorizontal,
+  IconDownload,
+  IconLock,
   IconReset,
+  IconUnlock,
+  IconUpload,
+  IconVncCopy,
   Input,
   LangIcon,
   LangToggle,
@@ -1033,6 +1330,8 @@ export {
   ThemeIconMoon,
   ThemeIconSun,
   ThemeToggle,
+  VncWindow,
+  WindowControl,
   escapeHtml,
   highlightCurlHeredoc,
   highlightJson,

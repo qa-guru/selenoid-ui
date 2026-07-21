@@ -56,8 +56,14 @@ echo "sync-design-system-static: building @zero-design-system/react …"
 ( cd "$MONOREPO_ROOT" && npm run build -w @zero-design-system/react )
 
 mkdir -p "$VENDOR/dist"
-rm -f "$VENDOR/dist"/*
-cp "$REACT_UI/dist/"* "$VENDOR/dist/"
+# Prefer rsync so we never wipe a live symlink target before copy
+# (yarn file: dep often links node_modules → vendor).
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --delete "$REACT_UI/dist/" "$VENDOR/dist/"
+else
+  find "$VENDOR/dist" -mindepth 1 -delete
+  cp "$REACT_UI/dist/"* "$VENDOR/dist/"
+fi
 
 # Vendor manifest: derive name/version/peerDeps from source, but pin the css subpath
 # export to the real tsup artifact (dist/index.css) — the source package.json points
@@ -86,12 +92,18 @@ node -e '
 # Refresh yarn's file: copy under node_modules (yarn does not re-copy on
 # "Already up-to-date" when only vendor/dist contents change).
 NM_REACT="$ROOT/ui/node_modules/@zero-design-system/react"
-if [[ -d "$NM_REACT" ]]; then
+if [[ -d "$NM_REACT" && ! -L "$NM_REACT" ]]; then
   mkdir -p "$NM_REACT/dist"
-  rm -f "$NM_REACT/dist"/*
-  cp "$VENDOR/dist/"* "$NM_REACT/dist/"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --delete "$VENDOR/dist/" "$NM_REACT/dist/"
+  else
+    find "$NM_REACT/dist" -mindepth 1 -delete
+    cp "$VENDOR/dist/"* "$NM_REACT/dist/"
+  fi
   cp "$VENDOR/package.json" "$NM_REACT/package.json"
   echo "sync-design-system-static: refreshed node_modules/@zero-design-system/react"
+elif [[ -L "$NM_REACT" ]]; then
+  echo "sync-design-system-static: node_modules/@zero-design-system/react is symlink → vendor (skip copy)"
 fi
 
 echo "sync-design-system-static: react-ui → $VENDOR"

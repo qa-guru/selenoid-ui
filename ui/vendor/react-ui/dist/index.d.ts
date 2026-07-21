@@ -1,5 +1,5 @@
 import * as react from 'react';
-import { HTMLAttributes, ReactNode, AnchorHTMLAttributes, ButtonHTMLAttributes, InputHTMLAttributes } from 'react';
+import { HTMLAttributes, ReactNode, AnchorHTMLAttributes, ButtonHTMLAttributes, InputHTMLAttributes, ElementType, ComponentPropsWithoutRef } from 'react';
 
 type BadgeVariant = 'default' | 'primary';
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -139,10 +139,16 @@ type PanelVariant = 'content' | 'terminal';
 type PanelTone = 'dark' | 'light';
 /** `bottom` (default) — foot under body; `rail` — foot as right column (`.panel--foot-rail`). */
 type PanelFootPlacement = 'bottom' | 'rail';
+/**
+ * Terminal / panel bar action — **icon-only** canon.
+ * Renders as `.icon-btn.panel__action` (no visible text, no bordered `.btn`).
+ * `label` is a11y-only (`aria-label` + `title`). Glyphs: `IconReset` /
+ * `IconDownload` / `IconCopy` (`panel-icons.tsx` ↔ `templates/icon-*.html`).
+ */
 interface PanelAction {
     /** Icon glyph rendered inside the `icon-btn` (`.icon` slot). */
     icon: ReactNode;
-    /** Accessible name for the icon-only button (`aria-label`). */
+    /** Accessible name for the icon-only button (`aria-label` + `title`). Not rendered as text. */
     label: string;
     onClick?: () => void;
     disabled?: boolean;
@@ -182,15 +188,19 @@ interface PanelProps {
      */
     footPlacement?: PanelFootPlacement;
     /**
-     * Optional bar-end meta before actions (canonical `.panel__bar-end` — e.g.
-     * vector hash badge). Sibling of `.panel__actions` (not a wrapper around them).
+     * Optional bar-end meta before actions (canonical `.panel__bar-end` —
+     * editable `vector#` fingerprint). Sibling of `.panel__actions` (not a
+     * wrapper around them).
      */
     barEnd?: ReactNode;
     /**
-     * Optional bar actions (canonical `panel__action icon-btn` cluster). Direct
-     * child of `.panel__bar`. Content-driven wrap: `.panel__bar--wrap` keeps
-     * dots + hash + actions on band 1 when tabs move to band 2;
-     * `.panel__bar--wrap-meta` drops hash only when it bumps into dots.
+     * Optional bar actions — **icon-only** `panel__action icon-btn` cluster
+     * in order **Reset → Download → Copy** (no text labels, no bordered `.btn`).
+     * Direct child of `.panel__bar`. Prefer `IconReset` / `IconDownload` /
+     * `IconCopy` (`panel-icons.tsx` ↔ `templates/icon-*.html`).
+     * Content-driven wrap: `.panel__bar--wrap` keeps dots + hash + actions on
+     * band 1 when tabs move to band 2; `.panel__bar--wrap-meta` drops hash only
+     * when it bumps into dots.
      */
     actions?: PanelAction[];
     testId?: string;
@@ -290,7 +300,8 @@ interface PlaqueFieldSegProps {
  * 2-opt segmented control inside a divided plaque (`plaque-field-seg-track--many`).
  * Canon for any two-value field, including boolean `true` / `false`
  * (skill `configurator-boolean`) — buttons are a `radiogroup`, never a native
- * checkbox. Always content-hug, right-aligned — no stretch path (select/input only).
+ * checkbox. Shell full-width; chips content-hug + flex-end — no `--stretch`
+ * class (that class stretches select/input controls only).
  */
 declare function PlaqueFieldSeg({ label, options, value, defaultValue, onValueChange, paramId, 'aria-label': ariaLabel, className, 'data-testid': testId, }: PlaqueFieldSegProps): react.JSX.Element;
 
@@ -437,10 +448,92 @@ declare function ThemeToggle({ className, testId, storageKey, }: ThemeToggleProp
 declare function ThemeIconSun(): react.JSX.Element;
 declare function ThemeIconMoon(): react.JSX.Element;
 
-/** Panel bar reset — 16×16, stroke 1.5 (pair with IconCopy; templates/icon-reset.html). */
+/** Panel bar reset — 16×16, stroke 1.5 (pair with copy/download; templates/icon-reset.html). */
 declare function IconReset(): react.JSX.Element;
-/** Panel bar copy — 16×16, stroke 1.5 (pair with IconReset; templates/icon-copy.html). */
+/** Panel bar copy — 16×16, stroke 1.5 (pair with reset/download; templates/icon-copy.html). */
 declare function IconCopy(): react.JSX.Element;
+/** Panel bar download — tray A, 16×16, stroke 1.5 (templates/icon-download.html). */
+declare function IconDownload(): react.JSX.Element;
+
+type WindowControlTone = 'danger' | 'info' | 'success' | 'neutral';
+type WindowControlOwnProps = {
+    /** Signal-circle colour. Defaults to `neutral`. */
+    tone?: WindowControlTone;
+    /** Adds `vnc-window__session-control` (CSS-hidden until VNC is connected). */
+    sessionControl?: boolean;
+    /** Glyph node (rendered inside `.icon`). */
+    children: ReactNode;
+};
+type WindowControlProps<C extends ElementType = 'button'> = WindowControlOwnProps & Omit<ComponentPropsWithoutRef<C>, keyof WindowControlOwnProps | 'as'> & {
+    /** Render as another element — e.g. a router `Link` for Back. Defaults to `button`. */
+    as?: C;
+};
+/**
+ * Interactive VNC chrome control: 30×30 hit area, 15×15 signal circle, glyph
+ * revealed on hover/focus. Composes the `window-control` primitive.
+ */
+declare function WindowControl<C extends ElementType = 'button'>({ as, tone, sessionControl, className, children, ...rest }: WindowControlProps<C>): react.JSX.Element;
+
+type ConnectionState = 'connecting' | 'disconnecting' | 'disconnected' | 'connected';
+interface ConnectionStatusProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+    /** VNC lifecycle state. `connected` renders hidden (CSS). */
+    state: ConnectionState;
+}
+/**
+ * Non-interactive square lifecycle indicator for the VNC window.
+ * Composes the `connection-status` primitive.
+ */
+declare function ConnectionStatus({ state, className, role, 'aria-label': ariaLabel, ...rest }: ConnectionStatusProps): react.JSX.Element;
+
+type VncWindowState = ConnectionState;
+interface VncWindowLabels {
+    back: string;
+    lock: string;
+    unlock: string;
+    enterFullscreen: string;
+    exitFullscreen: string;
+    copy: string;
+    paste: string;
+}
+interface VncWindowProps {
+    /** VNC lifecycle state driving chrome + width collapse. */
+    state: VncWindowState;
+    /** Expands the frame + panel to fill the positioned parent. */
+    fullscreen?: boolean;
+    /** Screen is interactive (lock open) — swaps the lock glyph. */
+    unlocked?: boolean;
+    /**
+     * Custom Back control — e.g. a router `Link`. When omitted a `button` firing
+     * `onBack` is rendered. Compose with `WindowControl as={Link} tone="danger"`.
+     */
+    back?: ReactNode;
+    onBack?: () => void;
+    onToggleLock?: () => void;
+    onToggleFullscreen?: () => void;
+    onCopy?: () => void;
+    onPaste?: () => void;
+    /** noVNC mount slot (rendered inside `.vnc-window__screen-mount`). */
+    children?: ReactNode;
+    labels?: Partial<VncWindowLabels>;
+    className?: string;
+    'data-testid'?: string;
+}
+/**
+ * Selenoid VNC window: base panel + chrome (back, connection status, lock,
+ * fullscreen, clipboard) over a black noVNC screen. Composes the `vnc-window`
+ * primitive with `WindowControl` / `ConnectionStatus`.
+ */
+declare function VncWindow({ state, fullscreen, unlocked, back, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, children, labels, className, 'data-testid': dataTestId, }: VncWindowProps): react.JSX.Element;
+
+declare function IconClose(): react.JSX.Element;
+declare function IconDocumentRemove(): react.JSX.Element;
+declare function IconDotsHorizontal(): react.JSX.Element;
+declare function IconLock(): react.JSX.Element;
+declare function IconUnlock(): react.JSX.Element;
+declare function IconChevronUp(): react.JSX.Element;
+declare function IconChevronDown(): react.JSX.Element;
+declare function IconVncCopy(): react.JSX.Element;
+declare function IconUpload(): react.JSX.Element;
 
 type HighlightKind = 'shell' | 'json' | 'plain' | 'curl' | 'markdown';
 type HighlightOptions = {
@@ -461,4 +554,4 @@ declare function highlightCurlHeredoc(text: string, options?: HighlightOptions):
 declare function highlightMarkdown(text: string, options?: HighlightOptions): string;
 declare function highlightOutput(text: string, kind: HighlightKind): string;
 
-export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconCopy, IconReset, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, usePlaqueFieldMagnet };
+export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type ConnectionState, ConnectionStatus, type ConnectionStatusProps, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconChevronDown, IconChevronUp, IconClose, IconCopy, IconDocumentRemove, IconDotsHorizontal, IconDownload, IconLock, IconReset, IconUnlock, IconUpload, IconVncCopy, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, VncWindow, type VncWindowLabels, type VncWindowProps, type VncWindowState, WindowControl, type WindowControlProps, type WindowControlTone, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, usePlaqueFieldMagnet };

@@ -15,7 +15,7 @@
     --color-brand-logo: #ffffff;
 
     /* Testing pyramid @Layer — palette A (cool → warm) */
-    --layer-unit: #31bd58;
+    --layer-unit: #94ca66;
     --layer-component: #ffa833;
     --layer-integration: #a65ac4;
     --layer-api: #ffd833;
@@ -81,12 +81,15 @@
     --plaque-seg-band-height: calc(var(--plaque-control-height) - 2px);
     /* 1px rule between wrapped --many bands (= flex row-gap; gradient origin padding-box). */
     --plaque-seg-row-gap: 1px;
-    /* Shell ↔ seg btn inset. Track uses inset; shell-end is +1px so end air
-     matches vertical air around the 20px btn (centered in 24px track). */
+    /* Shell ↔ seg btn. chip-air = vertical margin of ~20px glyph in band;
+     shell-end uses the same token so top/bottom/right air match (no hardcode). */
     --plaque-seg-inset: var(--space-1);
     --plaque-shell-pad-x: var(--space-2);
-    --plaque-seg-shell-end: calc(var(--plaque-seg-inset) + 1px);
-    --plaque-seg-track-end: var(--plaque-seg-gap);
+    --plaque-seg-chip-height: calc(var(--plaque-control-height) - 12px);
+    --plaque-seg-chip-air: calc((var(--plaque-seg-band-height) - var(--plaque-seg-chip-height)) / 2);
+    --plaque-seg-shell-end: var(--plaque-seg-chip-air);
+    /* Track no longer adds end pad — --many uses shell-end only (= chip-air). */
+    --plaque-seg-track-end: 0px;
     --plaque-chevron-size: 10px;
     --plaque-select-text-gap: 17px;
     --plaque-chevron-inset: calc(var(--plaque-shell-pad-x) + var(--plaque-seg-gap));
@@ -104,7 +107,17 @@
     --panel-dot-size: 8px;
     --panel-action-size: 28px;
     --panel-action-gap: 2px;
-    /* Indicators — signal dots; see css/indicator.css. Window controls reuse the
+    /* Interactive window chrome — 30px hit area around a 15px signal circle.
+     Colors preserve the original Selenoid VNC semantics. */
+    --window-control-size: 30px;
+    --window-control-dot-size: 15px;
+    --window-control-glyph-size: 11px;
+    --window-control-danger: #ff6e59;
+    --window-control-info: #6883d3;
+    --window-control-success: #59a781;
+    --window-control-neutral: #405048;
+    --connection-status-disconnecting: #ca9eff;
+    /* Indicators — signal dots; see css/indicator.css. Decorative panel dots use
      macOS traffic-light hex (theme-independent); semantic/status dots read the
      --color-* tokens above. */
     --indicator-size: var(--panel-dot-size);
@@ -158,7 +171,7 @@ html.theme-light {
     --color-warning: #b45309;
     --color-info: #2f7fc4;
     --color-brand-logo: #1c1917;
-    --layer-unit: #15803d;
+    --layer-unit: #94ca66;
     --layer-component: #ff8200;
     --layer-integration: #7e22ce;
     --layer-api: #e8bd00;

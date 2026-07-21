@@ -1,9 +1,29 @@
-export const defaultPlaywrightSelenoidOptions = (accessKey = "") => {
+/** Playwright session defaults — mirrored by the Playwright session panel. */
+export const DEFAULT_PLAYWRIGHT_SESSION = {
+    name: "Manual session",
+    sessionTimeout: "60m",
+    enableVnc: true,
+    enableVideo: true,
+    headless: false,
+};
+
+/** Accept "true"/"false" strings or real booleans → query string value. */
+const boolStr = (value) => (typeof value === "string" ? value : value ? "true" : "false");
+
+/**
+ * selenoid:options as a query-param map for a Playwright WebSocket session.
+ * The panel state is the single source of truth — snippet and Create Session
+ * both flow through here so the terminal mirrors what gets launched.
+ */
+export const playwrightSelenoidOptions = (accessKey = "", session = {}) => {
+    const s = { ...DEFAULT_PLAYWRIGHT_SESSION, ...session };
     const options = {
-        name: "Session started using curl command...",
-        sessionTimeout: "1m",
-        enableVNC: "true",
-        enableVideo: "true",
+        name: s.name,
+        sessionTimeout: s.sessionTimeout,
+        enableVNC: boolStr(s.enableVnc),
+        enableVideo: boolStr(s.enableVideo),
+        headless: boolStr(s.headless),
+        "labels.manual": "true",
     };
     if (accessKey) {
         options.accessKey = accessKey;
@@ -11,28 +31,19 @@ export const defaultPlaywrightSelenoidOptions = (accessKey = "") => {
     return options;
 };
 
-export const manualPlaywrightSelenoidOptions = (accessKey = "") => ({
-    ...defaultPlaywrightSelenoidOptions(accessKey),
-    name: "Manual session",
-    sessionTimeout: "60m",
-    enableVideo: "true",
-    headless: "false",
-    "labels.manual": "true",
-});
-
 export const playwrightWsBase = (browser, version) => {
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${wsProtocol}//${window.location.host}/playwright/${browser}/${version}`;
 };
 
-export const playwrightEndpoint = (browser, version, accessKey = "") => {
-    const params = new URLSearchParams(manualPlaywrightSelenoidOptions(accessKey));
+export const playwrightEndpoint = (browser, version, accessKey = "", session = {}) => {
+    const params = new URLSearchParams(playwrightSelenoidOptions(accessKey, session));
     return `${playwrightWsBase(browser, version)}?${params.toString()}`;
 };
 
-export const playwrightSnippet = (browser, version, accessKey = "") => {
+export const playwrightSnippet = (browser, version, accessKey = "", session = {}) => {
     const base = playwrightWsBase(browser, version);
-    const selenoidOptions = defaultPlaywrightSelenoidOptions(accessKey);
+    const selenoidOptions = playwrightSelenoidOptions(accessKey, session);
     const query = new URLSearchParams(selenoidOptions).toString();
     return { base, selenoidOptions, query, full: `${base}?${query}` };
 };
