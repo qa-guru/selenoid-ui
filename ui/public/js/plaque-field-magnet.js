@@ -12,10 +12,10 @@
  *   1. measure the real label width and the control's minimum width;
  *   2. if the label + control fit the cell → keep the row horizontal and set
  *      `--plaque-mixed-label-col` so dividers line up (never clipping a label);
- *   3. if they cannot fit → add `.plaque-field--nowrap` and cap the label column
- *      to the field's own px budget so the label ellipsises on one line while the
- *      control keeps its minimum. Tagstrips (`--many`) may still grow vertically
- *      as chips wrap — that is CSS (`height: auto`), not a magnet stack.
+ *   3. if they cannot fit → for plain selects/segs add `.plaque-field--nowrap`
+ *      and cap the label column to the field's own px budget (ellipsis); for
+ *      tagstrips (`--many`) keep the shared/intrinsic label and let chips wrap
+ *      — never crush protocol labels to a single letter.
  *
  * A ResizeObserver keeps the result correct across any layout change (window,
  * Cursor panel, terminal aside), not just window resize — this is what stops
@@ -131,6 +131,11 @@
      * label column (ellipsis) — it is NEVER stacked into a second vertical row.
      * @param {{ field: Element, label: Element, cell: Element }[]} items
      */
+    function isManyTagstrip(field) {
+        var track = getSegTrack(field);
+        return !!(track && track.classList.contains("plaque-field-seg-track--many"));
+    }
+
     function resolveColumn(items) {
         if (!items || !items.length) return;
         var target = 0;
@@ -142,6 +147,14 @@
         for (i = 0; i < items.length; i++) {
             var it = items[i];
             if (it.budget < target) {
+                /* Tagstrips (`--many`) wrap chips vertically — never crush the protocol
+           label to "W"/"P". Keep the shared (or intrinsic) column; controlMin
+           already floors at two chips so wrapping is the pressure valve. */
+                if (isManyTagstrip(it.field)) {
+                    it.field.classList.remove("plaque-field--nowrap");
+                    it.field.style.setProperty("--plaque-mixed-label-col", Math.max(it.labelW, target) + "px");
+                    continue;
+                }
                 /* Cannot align on the shared column without wrapping — cap this field's
            label to its own budget so it ellipsises on one line while the control
            keeps its minimum. Never stack vertically. */

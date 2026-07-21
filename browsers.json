@@ -231,7 +231,7 @@
         "shmSize": 2147483648,
         "mem": "4g",
         "cpu": "2.0",
-        "env": ["SCREEN_RESOLUTION=1080x1920x24"],
+        "env": ["SCREEN_RESOLUTION=2100x2100x24"],
         "hosts": ["host.docker.internal:host-gateway"]
       }
     }

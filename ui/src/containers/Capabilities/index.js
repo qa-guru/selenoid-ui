@@ -14,7 +14,7 @@ import {
     isPlaywrightBrowser,
     sessionIdFrom,
 } from "../../util/capabilitiesLogic";
-import { playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
+import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -83,6 +83,33 @@ const TIME_ZONE_OPTIONS = [
     { value: "America/New_York" },
     { value: "Asia/Tokyo" },
 ];
+
+const ORIENTATION_OPTIONS = [
+    { value: "PORTRAIT", label: "PORTRAIT" },
+    { value: "LANDSCAPE", label: "LANDSCAPE" },
+];
+
+/** Android device caps beyond image DEFAULT_CAPABILITIES — mirrored by the Android panel. */
+const DEFAULT_ANDROID_OPTS = {
+    app: "",
+    noReset: "false",
+    autoGrantPermissions: "true",
+    orientation: "PORTRAIT",
+};
+
+/**
+ * Synthetic iOS entry — no image in browsers.json yet. Selecting it surfaces
+ * the disabled "coming soon" placeholder panel (Create Session stays locked).
+ * When an iOS image lands, the real versions replace this and the panel can
+ * mirror Android.
+ */
+const IOS_PLACEHOLDER = {
+    value: "ios__coming-soon",
+    label: "iOS (coming soon)",
+    name: "ios",
+    version: "",
+    protocol: "ios",
+};
 
 const PROXY_PRESET_OFF = "off";
 const PROXY_PRESET_QA_GURU = "proxy.qaguru.school";
@@ -215,6 +242,40 @@ const buildSelenoidOptions = ({
         opts.logName = log;
     }
     return opts;
+};
+
+/** Coerce "true"/"false" strings or booleans → boolean. */
+const asBool = (value) => value === true || value === "true";
+
+/** Minimal selenoid:options for a mobile (Android) session — no proxy/har/log/env. */
+const buildAndroidSelenoidOptions = ({ name, sessionTimeout, enableVnc, enableVideo }) => ({
+    enableVNC: asBool(enableVnc),
+    enableVideo: asBool(enableVideo),
+    name,
+    sessionTimeout,
+});
+
+/**
+ * W3C alwaysMatch for Selenoid Android (appium:* caps). Image entrypoint sets
+ * platformName / automationName / udid defaults; here we surface only the
+ * caps the panel exposes. SSOT for createSession + androidCode snippets.
+ */
+const buildAndroidCapabilities = ({ version, app, noReset, autoGrantPermissions, orientation, selenoidOptions }) => {
+    const caps = {
+        browserName: "android",
+        browserVersion: String(version || ""),
+        platformName: "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:noReset": asBool(noReset),
+        "appium:autoGrantPermissions": asBool(autoGrantPermissions),
+        "appium:orientation": orientation || DEFAULT_ANDROID_OPTS.orientation,
+        "selenoid:options": selenoidOptions,
+    };
+    const appUrl = String(app || "").trim();
+    if (appUrl) {
+        caps["appium:app"] = appUrl;
+    }
+    return caps;
 };
 
 const VECTOR_REGISTRY_KEY = "selenoid-capabilities-vector-registry";
@@ -375,6 +436,11 @@ const DEFAULT_SESSION_OPTS = {
     proxyPreset: PROXY_PRESET_OFF,
     proxyServer: "",
     proxyPort: "",
+    headless: DEFAULT_PLAYWRIGHT_SESSION.headless ? "true" : "false",
+    androidApp: DEFAULT_ANDROID_OPTS.app,
+    androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
+    androidAutoGrantPermissions: DEFAULT_ANDROID_OPTS.autoGrantPermissions,
+    androidOrientation: DEFAULT_ANDROID_OPTS.orientation,
 };
 
 /** Tab order in the terminal language rail (Object.keys order is not the UI SSOT). */
@@ -429,34 +495,48 @@ const orderedLangKeys = (caps) => {
 const hubOrigin = () =>
     window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
 
-/** Agent prompt — markdown vector + Driver / Remote hub (configurator SSOT). */
-const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, remoteUrl }) => {
+/** Agent prompt — markdown vector + Driver + per-family config (configurator SSOT). */
+const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessionOpts, remoteUrl }) => {
     const browserLabel = name ? `${name}${version ? ` ${version}` : ""}` : "—";
     const proxyEndpoint = resolveProxyServer(sessionOpts.proxyPreset, sessionOpts.proxyServer, sessionOpts.proxyPort);
     const payload = {
         vector: vectorId,
         browser: name || "",
         browserVersion: version || "",
-        protocol: isPlaywright ? "playwright" : "webdriver",
+        protocol: family,
         remoteUrl,
         sessionTimeout: sessionOpts.sessionTimeout,
         name: sessionOpts.name,
-        screenResolution: sessionOpts.screenResolution,
         enableVnc: String(sessionOpts.enableVnc),
         enableVideo: String(sessionOpts.enableVideo),
-        enableHar: String(sessionOpts.enableHar),
-        enableLog: String(sessionOpts.enableLog),
-        timeZone: sessionOpts.timeZone || "UTC",
-        env: sessionOpts.env || "",
-        labels: sessionOpts.labels || DEFAULT_LABELS_CSV,
-        videoName: sessionOpts.videoName || "",
-        logName: sessionOpts.logName || "",
-        proxyPreset: sessionOpts.proxyPreset || PROXY_PRESET_OFF,
-        proxyServer: sessionOpts.proxyServer || "",
-        proxyPort: sessionOpts.proxyPort || "",
-        proxyEndpoint: proxyEndpoint || "",
     };
-    return [
+    if (family === "webdriver") {
+        Object.assign(payload, {
+            screenResolution: sessionOpts.screenResolution,
+            enableHar: String(sessionOpts.enableHar),
+            enableLog: String(sessionOpts.enableLog),
+            timeZone: sessionOpts.timeZone || "UTC",
+            env: sessionOpts.env || "",
+            labels: sessionOpts.labels || DEFAULT_LABELS_CSV,
+            videoName: sessionOpts.videoName || "",
+            logName: sessionOpts.logName || "",
+            proxyPreset: sessionOpts.proxyPreset || PROXY_PRESET_OFF,
+            proxyServer: sessionOpts.proxyServer || "",
+            proxyPort: sessionOpts.proxyPort || "",
+            proxyEndpoint: proxyEndpoint || "",
+        });
+    } else if (family === "playwright") {
+        payload.headless = String(sessionOpts.headless);
+    } else if (family === "android") {
+        Object.assign(payload, {
+            app: sessionOpts.androidApp || "",
+            noReset: String(sessionOpts.androidNoReset),
+            autoGrantPermissions: String(sessionOpts.androidAutoGrantPermissions),
+            orientation: sessionOpts.androidOrientation,
+        });
+    }
+
+    const head = [
         "Настрой Selenoid Capabilities со следующим вектором.",
         "",
         `## Vector \`${vectorId}\``,
@@ -468,22 +548,56 @@ const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, 
         `- browser: **${browserLabel}**`,
         `- protocol: **${payload.protocol}**`,
         "",
-        "## Remote hub",
-        `- remoteUrl: \`${remoteUrl}\``,
-        `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
-        `- name: **${sessionOpts.name}**`,
-        `- screenResolution: **${sessionOpts.screenResolution}**`,
-        `- timeZone: **${payload.timeZone}**`,
-        `- enableVnc / enableVideo / enableHar / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableHar}** / **${payload.enableLog}**`,
-        `- env: **${payload.env || "—"}**`,
-        `- labels: **${payload.labels || "—"}**`,
-        `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
-        "",
-        "## Browser capabilities",
-        `- proxyPreset: **${payload.proxyPreset}**`,
-        `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
-        `- socksProxy: **${payload.proxyEndpoint || "—"}**`,
-    ].join("\n");
+    ];
+
+    if (family === "playwright") {
+        return head
+            .concat([
+                "## Playwright session",
+                `- remoteUrl: \`${remoteUrl}\``,
+                `- name: **${sessionOpts.name}**`,
+                `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
+                `- enableVnc / enableVideo: **${payload.enableVnc}** / **${payload.enableVideo}**`,
+                `- headless: **${payload.headless}**`,
+            ])
+            .join("\n");
+    }
+    if (family === "android") {
+        return head
+            .concat([
+                "## Android device",
+                `- remoteUrl: \`${remoteUrl}\``,
+                `- name: **${sessionOpts.name}**`,
+                `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
+                `- enableVnc / enableVideo: **${payload.enableVnc}** / **${payload.enableVideo}**`,
+                `- app: **${payload.app || "—"}**`,
+                `- noReset / autoGrantPermissions: **${payload.noReset}** / **${payload.autoGrantPermissions}**`,
+                `- orientation: **${payload.orientation}**`,
+            ])
+            .join("\n");
+    }
+    if (family === "ios") {
+        return head.concat(["## iOS session", "- статус: **coming soon** (образ iOS ещё не поднят)"]).join("\n");
+    }
+    return head
+        .concat([
+            "## Remote hub",
+            `- remoteUrl: \`${remoteUrl}\``,
+            `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
+            `- name: **${sessionOpts.name}**`,
+            `- screenResolution: **${sessionOpts.screenResolution}**`,
+            `- timeZone: **${payload.timeZone}**`,
+            `- enableVnc / enableVideo / enableHar / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableHar}** / **${payload.enableLog}**`,
+            `- env: **${payload.env || "—"}**`,
+            `- labels: **${payload.labels || "—"}**`,
+            `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
+            "",
+            "## Browser capabilities",
+            `- proxyPreset: **${payload.proxyPreset}**`,
+            `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
+            `- socksProxy: **${payload.proxyEndpoint || "—"}**`,
+        ])
+        .join("\n");
 };
 
 /** JSON vector tab — fingerprint + caps snapshot. */
@@ -1058,8 +1172,8 @@ const playwrightClient = (browser) => {
     }
 };
 
-const playwrightCode = (browser, version, accessKey = "") => {
-    const { base, selenoidOptions, query } = playwrightSnippet(browser, version, accessKey);
+const playwrightCode = (browser, version, accessKey = "", session = {}) => {
+    const { base, selenoidOptions, query } = playwrightSnippet(browser, version, accessKey, session);
     const pw = playwrightClient(browser);
     const jsSelenoidOptions = JSON.stringify(selenoidOptions, null, 2);
     const pySelenoidOptions = JSON.stringify(selenoidOptions, null, 4);
@@ -1181,6 +1295,100 @@ print(wsEndpoint)
     };
 };
 
+/** Terminal snippets for Selenoid Android (appium:* caps → /wd/hub). */
+const androidCode = (version = "", origin = "http://selenoid-uri:4444", session = {}, android = {}) => {
+    origin = window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
+    const {
+        name: sessionName = DEFAULT_SESSION_OPTS.name,
+        sessionTimeout = DEFAULT_SESSION_OPTS.sessionTimeout,
+        enableVnc = DEFAULT_SESSION_OPTS.enableVnc,
+        enableVideo = DEFAULT_SESSION_OPTS.enableVideo,
+    } = session;
+    const {
+        app = DEFAULT_ANDROID_OPTS.app,
+        noReset = DEFAULT_ANDROID_OPTS.noReset,
+        autoGrantPermissions = DEFAULT_ANDROID_OPTS.autoGrantPermissions,
+        orientation = DEFAULT_ANDROID_OPTS.orientation,
+    } = android;
+
+    const selenoidOptions = buildAndroidSelenoidOptions({ name: sessionName, sessionTimeout, enableVnc, enableVideo });
+    const alwaysMatch = buildAndroidCapabilities({
+        version,
+        app,
+        noReset,
+        autoGrantPermissions,
+        orientation,
+        selenoidOptions,
+    });
+    const alwaysMatchJson = JSON.stringify(alwaysMatch, null, 4);
+    const appUrl = alwaysMatch["appium:app"];
+    const noResetBool = asBool(noReset);
+    const autoGrantBool = asBool(autoGrantPermissions);
+    const vnc = asBool(enableVnc);
+    const video = asBool(enableVideo);
+    const nameJson = JSON.stringify(sessionName);
+    const timeoutJson = JSON.stringify(sessionTimeout);
+    const orientationJson = JSON.stringify(orientation || DEFAULT_ANDROID_OPTS.orientation);
+    const appJson = appUrl ? JSON.stringify(appUrl) : null;
+
+    const javaSelenoid = `caps.setCapability("selenoid:options", new HashMap<String, Object>() {{
+    put("enableVNC", ${vnc});
+    put("enableVideo", ${video});
+    put("name", ${nameJson});
+    put("sessionTimeout", ${timeoutJson});
+}});`;
+
+    return {
+        curl: `curl -H 'Content-Type: application/json' ${origin}/wd/hub/session -d '{
+    "capabilities": {
+        "alwaysMatch": ${indentJsonLines(alwaysMatchJson, 8)}
+    }
+}'
+`,
+        java: `DesiredCapabilities caps = new DesiredCapabilities();
+caps.setCapability("browserName", "android");
+caps.setCapability("browserVersion", "${version}");
+caps.setCapability("platformName", "Android");
+caps.setCapability("appium:automationName", "UiAutomator2");
+${appJson ? `caps.setCapability("appium:app", ${appJson});\n` : ""}caps.setCapability("appium:noReset", ${noResetBool});
+caps.setCapability("appium:autoGrantPermissions", ${autoGrantBool});
+caps.setCapability("appium:orientation", ${orientationJson});
+${javaSelenoid}
+RemoteWebDriver driver = new RemoteWebDriver(new URL("${origin}/wd/hub"), caps);
+`,
+        python: `from selenium import webdriver
+
+capabilities = ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 0)}
+
+driver = webdriver.Remote(
+    command_executor="${origin}/wd/hub",
+    desired_capabilities=capabilities)
+`,
+        javascript: `var webdriverio = require('webdriverio');
+
+var options = {
+    hostname: '${window.location.hostname}',
+    port: 4444,
+    protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
+    path: '/wd/hub',
+    capabilities: ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 4)}
+};
+var client = webdriverio.remote(options);
+`,
+        typescript: `import { remote, type RemoteOptions } from 'webdriverio';
+
+const options: RemoteOptions = {
+    hostname: '${window.location.hostname}',
+    port: 4444,
+    protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
+    path: '/wd/hub',
+    capabilities: ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 4)}
+};
+const client = await remote(options);
+`,
+    };
+};
+
 const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin, playwrightAccessKey = "" }) => {
     const navigate = useNavigate();
     const [browser, onBrowserChange] = useState({});
@@ -1202,6 +1410,14 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const [proxyPreset, setProxyPreset] = useState(DEFAULT_SESSION_OPTS.proxyPreset);
     const [proxyServer, setProxyServer] = useState(DEFAULT_SESSION_OPTS.proxyServer);
     const [proxyPort, setProxyPort] = useState(DEFAULT_SESSION_OPTS.proxyPort);
+    // Playwright-only headless; Android-only appium caps. name/timeout/vnc/video are shared.
+    const [headless, setHeadless] = useState(DEFAULT_SESSION_OPTS.headless);
+    const [androidApp, setAndroidApp] = useState(DEFAULT_SESSION_OPTS.androidApp);
+    const [androidNoReset, setAndroidNoReset] = useState(DEFAULT_SESSION_OPTS.androidNoReset);
+    const [androidAutoGrantPermissions, setAndroidAutoGrantPermissions] = useState(
+        DEFAULT_SESSION_OPTS.androidAutoGrantPermissions
+    );
+    const [androidOrientation, setAndroidOrientation] = useState(DEFAULT_SESSION_OPTS.androidOrientation);
     const [vectorDraft, setVectorDraft] = useState(null);
     const [vectorMiss, setVectorMiss] = useState(false);
     const registryRef = useRef(null);
@@ -1212,9 +1428,12 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const available = [].concat(
         ...Object.keys(browsers).map((name) =>
             Object.keys(browsers[name]).map((version) => {
+                // Playwright strip already says "Playwright" — drop the redundant prefix
+                // so chips stay short enough for several per wrap row.
+                const chipName = name.startsWith("playwright-") ? name.slice("playwright-".length) : name;
                 return {
                     value: `${name}_${version}`,
-                    label: `${name}: ${version}`,
+                    label: `${chipName}: ${version}`,
                     name,
                     version,
                     protocol: browserProtocol(browserProtocols, name, version),
@@ -1225,6 +1444,29 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     const { name, version, value, protocol } = browser || {};
     const isPlaywright = protocol === "playwright" || isPlaywrightBrowser(browserProtocols, name, version);
+    const isAndroid = name === "android";
+    const isIos = name === "ios";
+    const isWebdriver = Boolean(name) && !isPlaywright && !isAndroid && !isIos;
+    const family = isPlaywright ? "playwright" : isAndroid ? "android" : isIos ? "ios" : "webdriver";
+    const pwSession = {
+        name: sessionName,
+        sessionTimeout,
+        enableVnc: enableVnc === "true",
+        enableVideo: enableVideo === "true",
+        headless: headless === "true",
+    };
+    const androidSession = {
+        name: sessionName,
+        sessionTimeout,
+        enableVnc,
+        enableVideo,
+    };
+    const androidOpts = {
+        app: androidApp,
+        noReset: androidNoReset,
+        autoGrantPermissions: androidAutoGrantPermissions,
+        orientation: androidOrientation,
+    };
     const sessionOpts = {
         sessionTimeout,
         name: sessionName,
@@ -1241,6 +1483,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         proxyPreset,
         proxyServer,
         proxyPort,
+        headless: headless === "true",
+        androidApp,
+        androidNoReset: androidNoReset === "true",
+        androidAutoGrantPermissions: androidAutoGrantPermissions === "true",
+        androidOrientation,
     };
     const capsSnap = {
         browserValue: value || "",
@@ -1259,12 +1506,19 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         proxyPreset,
         proxyServer,
         proxyPort,
+        headless,
+        androidApp,
+        androidNoReset,
+        androidAutoGrantPermissions,
+        androidOrientation,
     };
     const vectorId = fingerprint(capsSnap);
     const displayVector = vectorDraft ?? vectorId;
     const remoteUrl = hubOrigin();
     const caps = isPlaywright
-        ? playwrightCode(name, version, playwrightAccessKey)
+        ? playwrightCode(name, version, playwrightAccessKey, pwSession)
+        : isAndroid
+        ? androidCode(version, origin, androidSession, androidOpts)
         : code(name, version, origin, sessionOpts);
     const langKeys = orderedLangKeys(caps);
     const activeLang = langKeys.includes(lang) ? lang : langKeys[0] || "curl";
@@ -1272,14 +1526,14 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const capsJson = buildCapsJson(capsSnap, vectorId, {
         browser: name || "",
         browserVersion: version || "",
-        protocol: isPlaywright ? "playwright" : "webdriver",
+        protocol: family,
         remoteUrl,
     });
     const agentPrompt = buildAgentPrompt({
         vectorId,
         name,
         version,
-        isPlaywright,
+        family,
         sessionOpts,
         remoteUrl,
     });
@@ -1310,7 +1564,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         if (!langKeys.includes(lang)) {
             onLanguageChange(langKeys[0] || "curl");
         }
-    }, [name, version, isPlaywright]);
+    }, [name, version, family]);
 
     const applyCapsSnap = (snap) => {
         const next = cloneSessionSnap(snap);
@@ -1338,8 +1592,13 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         }
         setProxyServer(nextHost);
         setProxyPort(nextPort);
+        setHeadless(next.headless || DEFAULT_SESSION_OPTS.headless);
+        setAndroidApp(next.androidApp || DEFAULT_ANDROID_OPTS.app);
+        setAndroidNoReset(next.androidNoReset || DEFAULT_ANDROID_OPTS.noReset);
+        setAndroidAutoGrantPermissions(next.androidAutoGrantPermissions || DEFAULT_ANDROID_OPTS.autoGrantPermissions);
+        setAndroidOrientation(next.androidOrientation || DEFAULT_ANDROID_OPTS.orientation);
         if (next.browserValue) {
-            const found = available.find((item) => item.value === next.browserValue);
+            const found = selectableBrowsers.find((item) => item.value === next.browserValue);
             onBrowserChange(found || {});
         } else {
             onBrowserChange({});
@@ -1366,6 +1625,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             proxyPreset: PROXY_PRESET_OFF,
             proxyServer: "",
             proxyPort: "",
+            headless: DEFAULT_SESSION_OPTS.headless,
+            androidApp: DEFAULT_ANDROID_OPTS.app,
+            androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
+            androidAutoGrantPermissions: DEFAULT_ANDROID_OPTS.autoGrantPermissions,
+            androidOrientation: DEFAULT_ANDROID_OPTS.orientation,
         });
     };
 
@@ -1407,7 +1671,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const webdriverOptions = toBrowserOptions(webdriverAvailable);
     const playwrightOptions = toBrowserOptions(playwrightAvailable);
     const androidOptions = toBrowserOptions(androidAvailable);
-    const iosOptions = toBrowserOptions(iosAvailable);
+    // No real iOS image yet → show one selectable "coming soon" chip → placeholder panel.
+    const iosOptions = iosAvailable.length
+        ? toBrowserOptions(iosAvailable)
+        : [{ value: IOS_PLACEHOLDER.value, label: IOS_PLACEHOLDER.label, title: IOS_PLACEHOLDER.label }];
+    const selectableBrowsers = iosAvailable.length ? available : available.concat(IOS_PLACEHOLDER);
 
     const onBrowserToggle = (optionValue) => {
         touchOptions();
@@ -1415,7 +1683,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             onBrowserChange({});
             return;
         }
-        const next = available.find((item) => item.value === optionValue);
+        const next = selectableBrowsers.find((item) => item.value === optionValue);
         if (next) {
             onBrowserChange(next);
         }
@@ -1554,8 +1822,38 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         navigate={navigate}
                         sessions={sessions}
                         isPlaywright={isPlaywright}
+                        isAndroid={isAndroid}
+                        isIos={isIos}
+                        isWebdriver={isWebdriver}
                         playwrightAccessKey={playwrightAccessKey}
+                        pwSession={pwSession}
+                        androidCaps={androidOpts}
                         origin={origin}
+                        headless={headless}
+                        setHeadless={(v) => {
+                            touchOptions();
+                            setHeadless(v);
+                        }}
+                        androidApp={androidApp}
+                        setAndroidApp={(v) => {
+                            touchOptions();
+                            setAndroidApp(v);
+                        }}
+                        androidNoReset={androidNoReset}
+                        setAndroidNoReset={(v) => {
+                            touchOptions();
+                            setAndroidNoReset(v);
+                        }}
+                        androidAutoGrantPermissions={androidAutoGrantPermissions}
+                        setAndroidAutoGrantPermissions={(v) => {
+                            touchOptions();
+                            setAndroidAutoGrantPermissions(v);
+                        }}
+                        androidOrientation={androidOrientation}
+                        setAndroidOrientation={(v) => {
+                            touchOptions();
+                            setAndroidOrientation(v);
+                        }}
                         enableVnc={enableVnc}
                         setEnableVnc={(v) => {
                             touchOptions();
@@ -1770,8 +2068,23 @@ const Launch = ({
     navigate,
     sessions,
     isPlaywright,
+    isAndroid,
+    isIos,
+    isWebdriver,
     playwrightAccessKey = "",
+    pwSession = {},
+    androidCaps = {},
     origin,
+    headless,
+    setHeadless,
+    androidApp,
+    setAndroidApp,
+    androidNoReset,
+    setAndroidNoReset,
+    androidAutoGrantPermissions,
+    setAndroidAutoGrantPermissions,
+    androidOrientation,
+    setAndroidOrientation,
     enableVnc,
     setEnableVnc,
     enableVideo,
@@ -1807,9 +2120,8 @@ const Launch = ({
     const [error, onError] = useState("");
     const remoteUrl = hubRemoteUrl(origin);
     const playwrightSocket = useRef(null);
-    // Multi-row remote-hub stack (URL, timeout|name, resolution, flags, tz/env/labels, names) —
-    // presets #remote-hub; magnet skips --pair measurement but still mounts the stack shell + script.
-    usePlaqueFieldMagnet({ enabled: Boolean(name) && !isPlaywright });
+    // Config stacks (Remote hub / Playwright / Android) share the magnet; iOS placeholder has no fields.
+    usePlaqueFieldMagnet({ enabled: Boolean(name) && !isIos });
 
     const createSession = useCallback(async () => {
         onError("");
@@ -1817,6 +2129,52 @@ const Launch = ({
 
         const vnc = enableVnc === "true";
         const video = enableVideo === "true";
+
+        if (isAndroid) {
+            const androidSelenoidOptions = buildAndroidSelenoidOptions({
+                name: sessionName,
+                sessionTimeout,
+                enableVnc: vnc,
+                enableVideo: video,
+            });
+            const androidAlwaysMatch = buildAndroidCapabilities({
+                version,
+                app: androidApp,
+                noReset: androidNoReset,
+                autoGrantPermissions: androidAutoGrantPermissions,
+                orientation: androidOrientation,
+                selenoidOptions: androidSelenoidOptions,
+            });
+            const androidController = new AbortController();
+            const androidTimeout = setTimeout(() => androidController.abort(), 300000);
+            try {
+                await primeBasicAuth();
+                const response = await fetch("/wd/hub/session", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    signal: androidController.signal,
+                    body: JSON.stringify({
+                        capabilities: {
+                            alwaysMatch: androidAlwaysMatch,
+                            firstMatch: [{}],
+                        },
+                    }),
+                });
+                if (response.status === 200) {
+                    const data = await response.json();
+                    navigate(`/sessions/${sessionIdFrom({ response: data })}`);
+                }
+            } catch (err) {
+                console.error("Can't start Android session manually", err);
+                onError(err);
+                onLoading(false);
+            } finally {
+                clearTimeout(androidTimeout);
+            }
+            return;
+        }
+
         const har = enableHar === "true";
         const log = enableLog === "true";
         const resolvedProxy = resolveProxyServer(proxyPreset, proxyServer, proxyPort);
@@ -1907,6 +2265,11 @@ const Launch = ({
         name,
         version,
         navigate,
+        isAndroid,
+        androidApp,
+        androidNoReset,
+        androidAutoGrantPermissions,
+        androidOrientation,
         enableVnc,
         enableVideo,
         enableHar,
@@ -1933,7 +2296,7 @@ const Launch = ({
         onLoading(true);
 
         const existingIds = new Set(Object.keys(sessions || {}));
-        const wsUrl = playwrightEndpoint(name, version, playwrightAccessKey);
+        const wsUrl = playwrightEndpoint(name, version, playwrightAccessKey, pwSession);
         let navigated = false;
         let eventSource;
 
@@ -2006,6 +2369,9 @@ const Launch = ({
     };
 
     const onCreateSession = () => {
+        if (isIos) {
+            return;
+        }
         if (isPlaywright) {
             createPlaywrightSession();
             return;
@@ -2018,7 +2384,7 @@ const Launch = ({
 
     return (
         <div className="capabilities-launch">
-            {!isPlaywright && name ? (
+            {isWebdriver ? (
                 <Panel
                     title="Remote hub"
                     testId="capabilities-remote-panel"
@@ -2205,7 +2571,7 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
-            {!isPlaywright && name ? (
+            {isWebdriver ? (
                 <Panel
                     title="Browser capabilities"
                     testId="capabilities-browser-panel"
@@ -2263,9 +2629,231 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
+            {isPlaywright && name ? (
+                <Panel
+                    title="Playwright session"
+                    testId="capabilities-playwright-panel"
+                    titleTestId="capabilities-playwright-title"
+                    className="capabilities-config-panel"
+                >
+                    {/* selenoid:options → WS query params (name, sessionTimeout, enableVNC/Video, headless). */}
+                    <div
+                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        data-testid="capabilities-playwright-caps"
+                    >
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Remote URL"
+                            data-testid="capabilities-playwright-remote-url"
+                        >
+                            <PlaqueField
+                                label="remoteUrl"
+                                paramId="remoteUrl"
+                                labelVariant="param"
+                                type="text"
+                                value={remoteUrl}
+                                readOnly
+                                data-testid="caps-playwright-remote-url"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="duo"
+                            aria-label="Session identity"
+                            data-testid="capabilities-playwright-session"
+                        >
+                            <PlaqueSelect
+                                label="sessionTimeout"
+                                paramId="sessionTimeout"
+                                value={sessionTimeout}
+                                options={SESSION_TIMEOUT_OPTIONS}
+                                onChange={setSessionTimeout}
+                                data-testid="caps-playwright-session-timeout"
+                            />
+                            <PlaqueField
+                                label="name"
+                                paramId="name"
+                                labelVariant="param"
+                                type="text"
+                                value={sessionName}
+                                onChange={(e) => setSessionName(e.target.value)}
+                                data-testid="caps-playwright-session-name"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Playwright flags"
+                            data-testid="capabilities-playwright-flags"
+                        >
+                            <PlaqueFieldSeg
+                                label="enableVnc"
+                                paramId="enableVnc"
+                                value={enableVnc}
+                                onValueChange={setEnableVnc}
+                                stretch
+                                data-testid="caps-playwright-enable-vnc"
+                            />
+                            <PlaqueFieldSeg
+                                label="enableVideo"
+                                paramId="enableVideo"
+                                value={enableVideo}
+                                onValueChange={setEnableVideo}
+                                stretch
+                                data-testid="caps-playwright-enable-video"
+                            />
+                            <PlaqueFieldSeg
+                                label="headless"
+                                paramId="headless"
+                                value={headless}
+                                onValueChange={setHeadless}
+                                stretch
+                                data-testid="caps-playwright-headless"
+                            />
+                        </PlaqueFieldGrid>
+                    </div>
+                </Panel>
+            ) : null}
+            {isAndroid ? (
+                <Panel
+                    title="Android device"
+                    testId="capabilities-android-panel"
+                    titleTestId="capabilities-android-title"
+                    className="capabilities-config-panel"
+                >
+                    {/* appium:* caps beyond image defaults + minimal selenoid:options. */}
+                    <div
+                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        data-testid="capabilities-android-caps"
+                    >
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Remote URL"
+                            data-testid="capabilities-android-remote-url"
+                        >
+                            <PlaqueField
+                                label="remoteUrl"
+                                paramId="remoteUrl"
+                                labelVariant="param"
+                                type="text"
+                                value={remoteUrl}
+                                readOnly
+                                data-testid="caps-android-remote-url"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="duo"
+                            aria-label="Session identity"
+                            data-testid="capabilities-android-session"
+                        >
+                            <PlaqueSelect
+                                label="sessionTimeout"
+                                paramId="sessionTimeout"
+                                value={sessionTimeout}
+                                options={SESSION_TIMEOUT_OPTIONS}
+                                onChange={setSessionTimeout}
+                                data-testid="caps-android-session-timeout"
+                            />
+                            <PlaqueField
+                                label="name"
+                                paramId="name"
+                                labelVariant="param"
+                                type="text"
+                                value={sessionName}
+                                onChange={(e) => setSessionName(e.target.value)}
+                                data-testid="caps-android-session-name"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Android flags"
+                            data-testid="capabilities-android-flags"
+                        >
+                            <PlaqueFieldSeg
+                                label="enableVnc"
+                                paramId="enableVnc"
+                                value={enableVnc}
+                                onValueChange={setEnableVnc}
+                                stretch
+                                data-testid="caps-android-enable-vnc"
+                            />
+                            <PlaqueFieldSeg
+                                label="enableVideo"
+                                paramId="enableVideo"
+                                value={enableVideo}
+                                onValueChange={setEnableVideo}
+                                stretch
+                                data-testid="caps-android-enable-video"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid layout="solo" aria-label="App" data-testid="capabilities-android-app">
+                            <PlaqueField
+                                label="app"
+                                paramId="app"
+                                labelVariant="param"
+                                type="text"
+                                value={androidApp}
+                                placeholder="https://…/app-debug.apk"
+                                onChange={(e) => setAndroidApp(e.target.value)}
+                                data-testid="caps-android-app"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Android reset flags"
+                            data-testid="capabilities-android-reset"
+                        >
+                            <PlaqueFieldSeg
+                                label="noReset"
+                                paramId="noReset"
+                                value={androidNoReset}
+                                onValueChange={setAndroidNoReset}
+                                stretch
+                                data-testid="caps-android-no-reset"
+                            />
+                            <PlaqueFieldSeg
+                                label="autoGrantPermissions"
+                                paramId="autoGrantPermissions"
+                                value={androidAutoGrantPermissions}
+                                onValueChange={setAndroidAutoGrantPermissions}
+                                stretch
+                                data-testid="caps-android-auto-grant"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Orientation"
+                            data-testid="capabilities-android-orientation"
+                        >
+                            <PlaqueSelect
+                                label="orientation"
+                                paramId="orientation"
+                                value={androidOrientation}
+                                options={ORIENTATION_OPTIONS}
+                                onChange={setAndroidOrientation}
+                                data-testid="caps-android-orientation"
+                            />
+                        </PlaqueFieldGrid>
+                    </div>
+                </Panel>
+            ) : null}
+            {isIos ? (
+                <Panel
+                    title="iOS session"
+                    testId="capabilities-ios-panel"
+                    titleTestId="capabilities-ios-title"
+                    className="capabilities-config-panel capabilities-config-panel--placeholder"
+                >
+                    {/* Placeholder — no iOS image yet. Mirror Android panel once it lands. */}
+                    <div className="capabilities-ios-placeholder" data-testid="capabilities-ios-placeholder">
+                        <p className="capabilities-ios-placeholder__title">iOS — coming soon</p>
+                        <p className="capabilities-ios-placeholder__hint">
+                            Образ iOS ещё не поднят. Конфигурация появится здесь, когда устройство станет доступно.
+                        </p>
+                    </div>
+                </Panel>
+            ) : null}
             <CapabilitiesLaunchActions
                 loading={loading}
-                disabled={!name || loading}
+                disabled={!name || loading || isIos}
                 error={error}
                 onCreateSession={onCreateSession}
                 onClearError={() => onError("")}

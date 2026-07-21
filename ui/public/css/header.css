@@ -115,8 +115,8 @@ html:not(.theme-light) .header__brand:has(.header__brand-link--leading:not([hidd
     grid-row: 1;
     font-family: var(--font-sans);
     font-size: 15px;
-    font-weight: 400;
-    letter-spacing: 0.005em;
+    font-weight: 500;
+    letter-spacing: -0.018em;
     line-height: 1;
     color: var(--color-brand-logo);
     white-space: nowrap;
@@ -125,8 +125,12 @@ html:not(.theme-light) .header__brand:has(.header__brand-link--leading:not([hidd
 }
 
 .header__brand-ver {
+    display: inline-block;
     margin-left: 0.18em;
+    font-family: "Arial Rounded MT Bold", "Trebuchet MS", var(--font-sans);
+    font-size: 1.06em;
     font-weight: 700;
+    line-height: 0.8;
     color: var(--color-info);
 }
 
@@ -138,7 +142,7 @@ html:not(.theme-light) .header__brand:has(.header__brand-link--leading:not([hidd
 .header__brand:has(.header__brand-link--leading:not([hidden])) .header__brand-byline {
     display: inline;
     font-family: var(--font-sans);
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 500;
     letter-spacing: 0.06em;
     line-height: 1;
@@ -149,8 +153,9 @@ html:not(.theme-light) .header__brand:has(.header__brand-link--leading:not([hidd
 
 /* Mini logo beside “by” — scaled with the 8px byline. */
 .header__brand:has(.header__brand-link--leading:not([hidden])) .header__brand-logo {
-    height: 6px;
-    max-height: 6px;
+    height: 7px;
+    max-height: 7px;
+    opacity: 0.55;
 }
 
 .header__brand-logo {

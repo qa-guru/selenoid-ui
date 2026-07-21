@@ -93,6 +93,9 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         );
         expect(screen.getByTestId("capabilities-browser-select-android")).toHaveAttribute("data-param-id", "android");
         expect(screen.getByTestId("capabilities-browser-select-ios")).toHaveAttribute("data-param-id", "ios");
+        // No iOS image yet → a single selectable "coming soon" chip surfaces the placeholder.
+        const ios = screen.getByTestId("capabilities-browser-select-ios");
+        expect(within(ios).getByRole("button", { name: "iOS (coming soon)" })).toBeInTheDocument();
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
     });
 

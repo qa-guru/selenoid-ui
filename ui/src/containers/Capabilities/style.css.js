@@ -110,6 +110,33 @@ export const StyledCapabilities = styled.div`
     min-width: 0;
   }
 
+  .capabilities-config-panel--placeholder {
+    opacity: 0.75;
+  }
+
+  .capabilities-ios-placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 2px;
+  }
+
+  .capabilities-ios-placeholder__title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: ${selectedColor};
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .capabilities-ios-placeholder__hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: ${grayColor};
+  }
+
   .capabilities-launch {
     display: flex;
     flex-direction: column;

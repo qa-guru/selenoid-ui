@@ -15,7 +15,7 @@
     --color-brand-logo: #ffffff;
 
     /* Testing pyramid @Layer — palette A (cool → warm) */
-    --layer-unit: #31bd58;
+    --layer-unit: #94ca66;
     --layer-component: #ffa833;
     --layer-integration: #a65ac4;
     --layer-api: #ffd833;
@@ -107,7 +107,17 @@
     --panel-dot-size: 8px;
     --panel-action-size: 28px;
     --panel-action-gap: 2px;
-    /* Indicators — signal dots; see css/indicator.css. Window controls reuse the
+    /* Interactive window chrome — 30px hit area around a 15px signal circle.
+     Colors preserve the original Selenoid VNC semantics. */
+    --window-control-size: 30px;
+    --window-control-dot-size: 15px;
+    --window-control-glyph-size: 11px;
+    --window-control-danger: #ff6e59;
+    --window-control-info: #6883d3;
+    --window-control-success: #59a781;
+    --window-control-neutral: #405048;
+    --connection-status-disconnecting: #ca9eff;
+    /* Indicators — signal dots; see css/indicator.css. Decorative panel dots use
      macOS traffic-light hex (theme-independent); semantic/status dots read the
      --color-* tokens above. */
     --indicator-size: var(--panel-dot-size);
@@ -161,7 +171,7 @@ html.theme-light {
     --color-warning: #b45309;
     --color-info: #2f7fc4;
     --color-brand-logo: #1c1917;
-    --layer-unit: #15803d;
+    --layer-unit: #94ca66;
     --layer-component: #ff8200;
     --layer-integration: #7e22ce;
     --layer-api: #e8bd00;

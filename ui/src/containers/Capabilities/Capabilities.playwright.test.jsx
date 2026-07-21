@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -38,7 +38,7 @@ function renderCapabilities(playwrightAccessKey = ACCESS_KEY) {
 }
 
 async function selectPlaywrightChrome(user) {
-    await user.click(screen.getByRole("button", { name: "playwright-chrome: 1.61.0" }));
+    await user.click(screen.getByRole("button", { name: "chrome: 1.61.0" }));
 }
 
 describe("Capabilities Playwright Create Session", () => {
@@ -124,5 +124,45 @@ describe("Capabilities Playwright Create Session", () => {
         await waitFor(() => expect(openedSockets).toHaveLength(1));
         const wsUrl = new URL(openedSockets[0].url);
         expect(wsUrl.searchParams.get("accessKey")).toBeNull();
+    });
+
+    it("shows Playwright session panel (name/timeout/vnc/video/headless), not WebDriver panels", async () => {
+        const user = userEvent.setup();
+        renderCapabilities(ACCESS_KEY);
+        await selectPlaywrightChrome(user);
+
+        const panel = screen.getByTestId("capabilities-playwright-panel");
+        expect(within(panel).getByTestId("capabilities-playwright-title")).toHaveTextContent("Playwright session");
+        expect(screen.getByTestId("caps-playwright-session-timeout")).toHaveAttribute(
+            "data-param-id",
+            "sessionTimeout"
+        );
+        expect(screen.getByTestId("caps-playwright-session-name")).toHaveValue("Manual session");
+        expect(screen.getByTestId("caps-playwright-enable-vnc")).toHaveAttribute("data-param-id", "enableVnc");
+        expect(screen.getByTestId("caps-playwright-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
+        expect(screen.getByTestId("caps-playwright-headless")).toHaveAttribute("data-param-id", "headless");
+
+        // WebDriver-only panels are hidden for Playwright.
+        expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
+        expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
+        expect(screen.queryByTestId("capabilities-android-panel")).toBeNull();
+    });
+
+    it("mirrors Playwright panel options (name, headless) into the Create Session WebSocket query", async () => {
+        const user = userEvent.setup();
+        renderCapabilities(ACCESS_KEY);
+        await selectPlaywrightChrome(user);
+
+        await user.clear(screen.getByTestId("caps-playwright-session-name"));
+        await user.type(screen.getByTestId("caps-playwright-session-name"), "PW panel");
+        const headless = screen.getByTestId("caps-playwright-headless");
+        await user.click(within(headless).getByRole("button", { name: "true" }));
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("name")).toBe("PW panel");
+        expect(wsUrl.searchParams.get("headless")).toBe("true");
     });
 });
