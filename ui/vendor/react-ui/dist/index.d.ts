@@ -290,7 +290,8 @@ interface PlaqueFieldSegProps {
  * 2-opt segmented control inside a divided plaque (`plaque-field-seg-track--many`).
  * Canon for any two-value field, including boolean `true` / `false`
  * (skill `configurator-boolean`) — buttons are a `radiogroup`, never a native
- * checkbox. Always content-hug, right-aligned — no stretch path (select/input only).
+ * checkbox. Shell full-width; chips content-hug + flex-end — no `--stretch`
+ * class (that class stretches select/input controls only).
  */
 declare function PlaqueFieldSeg({ label, options, value, defaultValue, onValueChange, paramId, 'aria-label': ariaLabel, className, 'data-testid': testId, }: PlaqueFieldSegProps): react.JSX.Element;
 
@@ -437,10 +438,12 @@ declare function ThemeToggle({ className, testId, storageKey, }: ThemeToggleProp
 declare function ThemeIconSun(): react.JSX.Element;
 declare function ThemeIconMoon(): react.JSX.Element;
 
-/** Panel bar reset — 16×16, stroke 1.5 (pair with IconCopy; templates/icon-reset.html). */
+/** Panel bar reset — 16×16, stroke 1.5 (pair with copy/download; templates/icon-reset.html). */
 declare function IconReset(): react.JSX.Element;
-/** Panel bar copy — 16×16, stroke 1.5 (pair with IconReset; templates/icon-copy.html). */
+/** Panel bar copy — 16×16, stroke 1.5 (pair with reset/download; templates/icon-copy.html). */
 declare function IconCopy(): react.JSX.Element;
+/** Panel bar download — tray A, 16×16, stroke 1.5 (templates/icon-download.html). */
+declare function IconDownload(): react.JSX.Element;
 
 type HighlightKind = 'shell' | 'json' | 'plain' | 'curl' | 'markdown';
 type HighlightOptions = {
@@ -461,4 +464,4 @@ declare function highlightCurlHeredoc(text: string, options?: HighlightOptions):
 declare function highlightMarkdown(text: string, options?: HighlightOptions): string;
 declare function highlightOutput(text: string, kind: HighlightKind): string;
 
-export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconCopy, IconReset, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, usePlaqueFieldMagnet };
+export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconCopy, IconDownload, IconReset, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, usePlaqueFieldMagnet };

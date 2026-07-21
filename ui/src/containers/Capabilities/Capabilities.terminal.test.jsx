@@ -122,11 +122,60 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         await user.clear(screen.getByTestId("caps-session-name"));
         await user.type(screen.getByTestId("caps-session-name"), "Terminal mirror");
         await user.selectOptions(screen.getByRole("combobox", { name: "screenResolution" }), "1280x1024x24");
+        await user.selectOptions(screen.getByRole("combobox", { name: "timeZone" }), "Europe/Moscow");
 
         const panel = screen.getByTestId("capabilities-terminal-panel");
         expect(panel.textContent).toContain('"sessionTimeout": "15m"');
         expect(panel.textContent).toContain('"name": "Terminal mirror"');
         expect(panel.textContent).toContain('"screenResolution": "1280x1024x24"');
+        expect(panel.textContent).toContain('"timeZone": "Europe/Moscow"');
+        expect(panel.textContent).toContain('"enableLog": false');
+        expect(panel.textContent).toContain('"manual": "true"');
+        // No hardcoded TZ=UTC env without UI — default env is empty.
+        expect(panel.textContent).not.toContain("TZ=UTC");
+    });
+
+    it("does not hardcode TZ=UTC or labels-only in Java without UI fields", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+
+        await user.click(screen.getByRole("button", { name: "chrome: 149.0" }));
+        await screen.findByTestId("capabilities-remote-panel");
+
+        const panel = screen.getByTestId("capabilities-terminal-panel");
+        const tabs = within(panel).getByRole("tablist", { name: "Language" });
+        await user.click(within(tabs).getByRole("tab", { name: "Java" }));
+
+        expect(panel.textContent).toContain('put("timeZone", "UTC")');
+        expect(panel.textContent).toContain('put("manual", "true")');
+        expect(panel.textContent).not.toContain('add("TZ=UTC")');
+        expect(panel.textContent).toContain('put("enableLog", false)');
+
+        await user.clear(screen.getByTestId("caps-env"));
+        await user.type(screen.getByTestId("caps-env"), "TZ=Europe/Berlin");
+        expect(panel.textContent).toContain('add("TZ=Europe/Berlin")');
+    });
+
+    it("includes alwaysMatch.proxy in the curl snippet when proxy preset is on", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+
+        await user.click(screen.getByRole("button", { name: "chrome: 149.0" }));
+        await screen.findByTestId("capabilities-browser-panel");
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "proxyPreset" }), "proxy.qaguru.school");
+
+        const panel = screen.getByTestId("capabilities-terminal-panel");
+        expect(panel.textContent).toContain('"proxyType": "manual"');
+        expect(panel.textContent).toContain('"socksProxy": "proxy.qaguru.school:7777"');
+        expect(panel.textContent).toContain('"socksVersion": 5');
+        // Proxy is alwaysMatch root — not nested under selenoid:options in the curl JSON.
+        const text = panel.textContent;
+        const proxyIdx = text.indexOf('"proxy"');
+        const selenoidIdx = text.indexOf('"selenoid:options"');
+        expect(proxyIdx).toBeGreaterThan(-1);
+        expect(selenoidIdx).toBeGreaterThan(-1);
+        expect(proxyIdx).toBeLessThan(selenoidIdx);
     });
 
     it("switches Agent / Terminal / JSON output tabs in the trail", async () => {
@@ -156,7 +205,7 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         expect(within(panel).getByRole("tablist", { name: "Language" })).toBeTruthy();
     });
 
-    it("renders vector fingerprint and Сброс / Копировать panel actions", async () => {
+    it("renders vector fingerprint and Сброс / Скачать / Копировать panel actions", async () => {
         const user = userEvent.setup();
         renderCapabilities();
 
@@ -168,6 +217,10 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         expect(within(panel).getByRole("button", { name: "Сброс" })).toHaveAttribute(
             "data-testid",
             "capabilities-terminal-reset"
+        );
+        expect(within(panel).getByRole("button", { name: "Скачать" })).toHaveAttribute(
+            "data-testid",
+            "capabilities-terminal-download"
         );
         expect(within(panel).getByRole("button", { name: "Копировать" })).toHaveAttribute(
             "data-testid",

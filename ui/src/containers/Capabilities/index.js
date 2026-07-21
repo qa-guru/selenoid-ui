@@ -19,6 +19,7 @@ import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchAc
 
 import {
     IconCopy,
+    IconDownload,
     IconReset,
     Panel,
     PlaqueField,
@@ -44,12 +45,21 @@ import "@zero-design-system/react/styles.css";
  * | enableVnc        | PlaqueFieldSeg | solo | enableVNC / selenoid:options      |
  * | enableVideo      | PlaqueFieldSeg | solo | enableVideo                       |
  * | enableHar        | PlaqueFieldSeg | solo | enableHAR                         |
+ * | enableLog        | PlaqueFieldSeg | solo | enableLog                         |
+ * | timeZone         | PlaqueSelect | solo   | selenoid:options.timeZone         |
+ * | env              | PlaqueField  | solo   | selenoid:options.env              |
+ * | labels           | PlaqueField  | solo   | selenoid:options.labels           |
+ * | videoName        | PlaqueField  | duo    | selenoid:options.videoName (cond) |
+ * | logName          | PlaqueField  | duo    | selenoid:options.logName (cond)   |
+ * | proxyPreset      | PlaqueSelect | solo   | alwaysMatch.proxy (via server)    |
+ * | proxyServer      | PlaqueField  | duo    | host half of socksProxy           |
+ * | proxyPort        | PlaqueField  | duo    | port half of socksProxy           |
  *
  * Ban: closeBrowser* / gradle* / junit* / allure* / builder fields.
  *
  * Terminal bar (canon configurator / autotests-builder): Agent | Terminal | JSON
  * trail tabs, language foot rail on Terminal, vector# fingerprint +
- * IconReset (Сброс) + IconCopy (Копировать).
+ * IconReset (Сброс) + IconDownload (Скачать) + IconCopy (Копировать).
  */
 const SESSION_TIMEOUT_OPTIONS = [
     { value: "1m" },
@@ -65,6 +75,147 @@ const SCREEN_RESOLUTION_OPTIONS = [
     { value: "1366x768x24", label: "1366×768×24" },
     { value: "1920x1080", label: "1920×1080" },
 ];
+
+const TIME_ZONE_OPTIONS = [
+    { value: "UTC" },
+    { value: "Europe/Moscow" },
+    { value: "Europe/Berlin" },
+    { value: "America/New_York" },
+    { value: "Asia/Tokyo" },
+];
+
+const PROXY_PRESET_OFF = "off";
+const PROXY_PRESET_QA_GURU = "proxy.qaguru.school";
+const PROXY_PRESET_CUSTOM = "custom";
+/** Live EU open SOCKS5 (no auth) — P2. */
+const PROXY_QA_GURU_HOST = "proxy.qaguru.school";
+const PROXY_QA_GURU_PORT = "7777";
+const PROXY_QA_GURU_SERVER = `${PROXY_QA_GURU_HOST}:${PROXY_QA_GURU_PORT}`;
+/** Default labels CSV — editable in Remote hub (no snippet hardcode). */
+const DEFAULT_LABELS_CSV = "manual=true";
+
+const PROXY_PRESET_OPTIONS = [
+    { value: PROXY_PRESET_OFF, label: "off" },
+    { value: PROXY_PRESET_QA_GURU, label: "proxy.qaguru.school (EU)" },
+    { value: PROXY_PRESET_CUSTOM, label: "custom" },
+];
+
+/** Join host + port → `host:port` for socksProxy (port optional). */
+const joinProxyEndpoint = (host, port = "") => {
+    const h = String(host || "").trim();
+    if (!h) {
+        return "";
+    }
+    const p = String(port || "").trim();
+    return p ? `${h}:${p}` : h;
+};
+
+/** Split legacy `host:port` snap into fields (port = trailing digits after last `:`). */
+const splitProxyEndpoint = (raw) => {
+    const s = String(raw || "").trim();
+    if (!s) {
+        return { host: "", port: "" };
+    }
+    const idx = s.lastIndexOf(":");
+    if (idx <= 0) {
+        return { host: s, port: "" };
+    }
+    const port = s.slice(idx + 1);
+    if (!/^\d+$/.test(port)) {
+        return { host: s, port: "" };
+    }
+    return { host: s.slice(0, idx), port };
+};
+
+const resolveProxyServer = (preset, customHost = "", customPort = "") => {
+    if (preset === PROXY_PRESET_QA_GURU) {
+        return PROXY_QA_GURU_SERVER;
+    }
+    if (preset === PROXY_PRESET_CUSTOM) {
+        return joinProxyEndpoint(customHost, customPort);
+    }
+    return "";
+};
+
+const buildProxyCapability = (proxyServer) => {
+    if (!proxyServer) {
+        return null;
+    }
+    return {
+        proxyType: "manual",
+        socksProxy: proxyServer,
+        socksVersion: 5,
+    };
+};
+
+/** CSV / newline `KEY=value` → env string[]. */
+const parseEnvList = (raw) =>
+    String(raw || "")
+        .split(/[\n,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+/** CSV / newline `key=value` → labels map. */
+const parseLabelsMap = (raw) => {
+    const out = {};
+    for (const part of String(raw || "").split(/[\n,]+/)) {
+        const trimmed = part.trim();
+        if (!trimmed) {
+            continue;
+        }
+        const eq = trimmed.indexOf("=");
+        if (eq === -1) {
+            out[trimmed] = "true";
+        } else {
+            const key = trimmed.slice(0, eq).trim();
+            if (key) {
+                out[key] = trimmed.slice(eq + 1).trim();
+            }
+        }
+    }
+    return out;
+};
+
+/** SSOT for createSession + snippets — all keys go to selenoid:options. */
+const buildSelenoidOptions = ({
+    sessionTimeout,
+    name,
+    screenResolution,
+    enableVnc,
+    enableVideo,
+    enableHar,
+    enableLog,
+    timeZone,
+    env,
+    labels,
+    videoName,
+    logName,
+}) => {
+    const opts = {
+        enableVNC: Boolean(enableVnc),
+        enableVideo: Boolean(enableVideo),
+        enableHAR: Boolean(enableHar),
+        enableLog: Boolean(enableLog),
+        sessionTimeout,
+        name,
+        screenResolution,
+        timeZone: timeZone || "UTC",
+        labels: typeof labels === "string" ? parseLabelsMap(labels) : labels || {},
+    };
+    const envList = typeof env === "string" ? parseEnvList(env) : Array.isArray(env) ? env : [];
+    if (envList.length) {
+        opts.env = envList;
+    }
+    const video = String(videoName || "").trim();
+    const log = String(logName || "").trim();
+    if (opts.enableVideo && video) {
+        opts.videoName = video;
+    }
+    if (opts.enableLog && log) {
+        opts.logName = log;
+    }
+    return opts;
+};
 
 const VECTOR_REGISTRY_KEY = "selenoid-capabilities-vector-registry";
 
@@ -215,6 +366,15 @@ const DEFAULT_SESSION_OPTS = {
     enableVnc: true,
     enableVideo: true,
     enableHar: false,
+    enableLog: false,
+    timeZone: "UTC",
+    env: "",
+    labels: DEFAULT_LABELS_CSV,
+    videoName: "",
+    logName: "",
+    proxyPreset: PROXY_PRESET_OFF,
+    proxyServer: "",
+    proxyPort: "",
 };
 
 /** Tab order in the terminal language rail (Object.keys order is not the UI SSOT). */
@@ -272,6 +432,7 @@ const hubOrigin = () =>
 /** Agent prompt — markdown vector + Driver / Remote hub (configurator SSOT). */
 const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, remoteUrl }) => {
     const browserLabel = name ? `${name}${version ? ` ${version}` : ""}` : "—";
+    const proxyEndpoint = resolveProxyServer(sessionOpts.proxyPreset, sessionOpts.proxyServer, sessionOpts.proxyPort);
     const payload = {
         vector: vectorId,
         browser: name || "",
@@ -284,6 +445,16 @@ const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, 
         enableVnc: String(sessionOpts.enableVnc),
         enableVideo: String(sessionOpts.enableVideo),
         enableHar: String(sessionOpts.enableHar),
+        enableLog: String(sessionOpts.enableLog),
+        timeZone: sessionOpts.timeZone || "UTC",
+        env: sessionOpts.env || "",
+        labels: sessionOpts.labels || DEFAULT_LABELS_CSV,
+        videoName: sessionOpts.videoName || "",
+        logName: sessionOpts.logName || "",
+        proxyPreset: sessionOpts.proxyPreset || PROXY_PRESET_OFF,
+        proxyServer: sessionOpts.proxyServer || "",
+        proxyPort: sessionOpts.proxyPort || "",
+        proxyEndpoint: proxyEndpoint || "",
     };
     return [
         "Настрой Selenoid Capabilities со следующим вектором.",
@@ -302,7 +473,16 @@ const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, 
         `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
         `- name: **${sessionOpts.name}**`,
         `- screenResolution: **${sessionOpts.screenResolution}**`,
-        `- enableVnc / enableVideo / enableHar: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableHar}**`,
+        `- timeZone: **${payload.timeZone}**`,
+        `- enableVnc / enableVideo / enableHar / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableHar}** / **${payload.enableLog}**`,
+        `- env: **${payload.env || "—"}**`,
+        `- labels: **${payload.labels || "—"}**`,
+        `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
+        "",
+        "## Browser capabilities",
+        `- proxyPreset: **${payload.proxyPreset}**`,
+        `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
+        `- socksProxy: **${payload.proxyEndpoint || "—"}**`,
     ].join("\n");
 };
 
@@ -310,7 +490,123 @@ const buildAgentPrompt = ({ vectorId, name, version, isPlaywright, sessionOpts, 
 const buildCapsJson = (capsSnap, vectorId, meta = {}) =>
     JSON.stringify({ ...capsSnap, vector: vectorId, ...meta }, null, 2);
 
-/** Terminal snippets mirror Remote hub session options (createSession SSOT). */
+/** Indent a multi-line JSON fragment for curl alwaysMatch nesting. */
+const indentJsonLines = (json, spaces) => {
+    const pad = " ".repeat(spaces);
+    return json
+        .split("\n")
+        .map((line, i) => (i === 0 ? line : pad + line))
+        .join("\n");
+};
+
+const javaEnvPut = (envList) => {
+    if (!envList.length) {
+        return "";
+    }
+    return `    put("env", new ArrayList<String>() {{
+${envList.map((e) => `        add(${JSON.stringify(e)});`).join("\n")}
+    }});
+`;
+};
+
+const javaLabelsPut = (labelsMap) => `    put("labels", new HashMap<String, Object>() {{
+${Object.entries(labelsMap)
+    .map(([k, v]) => `        put(${JSON.stringify(k)}, ${JSON.stringify(String(v))});`)
+    .join("\n")}
+    }});
+`;
+
+const kotlinEnvEntry = (envList) =>
+    envList.length ? `\n        "env" to listOf(${envList.map((e) => JSON.stringify(e)).join(", ")}),` : "";
+
+const kotlinLabelsEntry = (labelsMap) => {
+    const entries = Object.entries(labelsMap)
+        .map(([k, v]) => `${JSON.stringify(k)} to ${JSON.stringify(String(v))}`)
+        .join(", ");
+    return `\n        "labels" to mapOf(${entries}),`;
+};
+
+const goEnvBlock = (envList) => {
+    if (!envList.length) {
+        return "";
+    }
+    return `
+                "env": []string{
+${envList.map((e) => `                        ${JSON.stringify(e)},`).join("\n")}
+                },`;
+};
+
+const goLabelsBlock = (labelsMap) => {
+    const entries = Object.entries(labelsMap)
+        .map(([k, v]) => `                        ${JSON.stringify(k)}: ${JSON.stringify(String(v))},`)
+        .join("\n");
+    return `
+                "labels": map[string]interface{}{
+${entries}
+                },`;
+};
+
+const rustEnvBlock = (envList) => (envList.length ? `\n            "env": ${JSON.stringify(envList)},` : "");
+
+const rustLabelsBlock = (labelsMap) => `\n            "labels": ${JSON.stringify(labelsMap)},`;
+
+const csharpEnvBlock = (envList) => {
+    if (!envList.length) {
+        return "";
+    }
+    return `
+    ["env"] = new List<string>() {
+${envList.map((e) => `        ${JSON.stringify(e)}`).join(",\n")}
+    },`;
+};
+
+const csharpLabelsBlock = (labelsMap) => {
+    const entries = Object.entries(labelsMap)
+        .map(([k, v]) => `        [${JSON.stringify(k)}] = ${JSON.stringify(String(v))}`)
+        .join(",\n");
+    return `
+    ["labels"] = new Dictionary<string, object> {
+${entries}
+    },`;
+};
+
+const pythonEnvBlock = (envList) => (envList.length ? `\n        "env": ${JSON.stringify(envList)},` : "");
+
+const pythonLabelsBlock = (labelsMap) => `\n        "labels": ${JSON.stringify(labelsMap)},`;
+
+const jsEnvBlock = (envList) => (envList.length ? `\n            env: ${JSON.stringify(envList)},` : "");
+
+const jsLabelsBlock = (labelsMap) => `\n            labels: ${JSON.stringify(labelsMap)},`;
+
+const phpEnvBlock = (envList) => {
+    if (!envList.length) {
+        return "";
+    }
+    const items = envList.map((e) => JSON.stringify(e)).join(", ");
+    return `\n        "env"=>array(${items}),`;
+};
+
+const phpLabelsBlock = (labelsMap) => {
+    const entries = Object.entries(labelsMap)
+        .map(([k, v]) => `${JSON.stringify(k)}=>${JSON.stringify(String(v))}`)
+        .join(", ");
+    return `\n        "labels"=>array(${entries}),`;
+};
+
+const rubyEnvBlock = (envList) => (envList.length ? `\n  'env' => ${JSON.stringify(envList)},` : "");
+
+const rubyLabelsBlock = (labelsMap) => {
+    const entries = Object.entries(labelsMap)
+        .map(([k, v]) => `'${k}' => ${JSON.stringify(String(v))}`)
+        .join(", ");
+    return `\n  'labels' => { ${entries} },`;
+};
+
+const swiftEnvBlock = (envList) => (envList.length ? `\n        "env": ${JSON.stringify(envList)},` : "");
+
+const swiftLabelsBlock = (labelsMap) => `\n        "labels": ${JSON.stringify(labelsMap)},`;
+
+/** Terminal snippets mirror Remote hub + Browser capabilities (createSession SSOT). */
 const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444", session = {}) => {
     origin = window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
     const {
@@ -320,11 +616,136 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
         enableVnc = DEFAULT_SESSION_OPTS.enableVnc,
         enableVideo = DEFAULT_SESSION_OPTS.enableVideo,
         enableHar = DEFAULT_SESSION_OPTS.enableHar,
+        enableLog = DEFAULT_SESSION_OPTS.enableLog,
+        timeZone = DEFAULT_SESSION_OPTS.timeZone,
+        env = DEFAULT_SESSION_OPTS.env,
+        labels = DEFAULT_SESSION_OPTS.labels,
+        videoName = DEFAULT_SESSION_OPTS.videoName,
+        logName = DEFAULT_SESSION_OPTS.logName,
+        proxyPreset = DEFAULT_SESSION_OPTS.proxyPreset,
+        proxyServer: customProxyHost = DEFAULT_SESSION_OPTS.proxyServer,
+        proxyPort: customProxyPort = DEFAULT_SESSION_OPTS.proxyPort,
     } = session;
+    const proxyServer = resolveProxyServer(proxyPreset, customProxyHost, customProxyPort);
+    const proxy = buildProxyCapability(proxyServer);
+    const selenoidOpts = buildSelenoidOptions({
+        sessionTimeout,
+        name: sessionName,
+        screenResolution,
+        enableVnc,
+        enableVideo,
+        enableHar,
+        enableLog,
+        timeZone,
+        env,
+        labels,
+        videoName,
+        logName,
+    });
+    const envList = selenoidOpts.env || [];
+    const labelsMap = selenoidOpts.labels || {};
+    const timeZoneJson = JSON.stringify(selenoidOpts.timeZone);
+    const videoNameJson = selenoidOpts.videoName ? JSON.stringify(selenoidOpts.videoName) : null;
+    const logNameJson = selenoidOpts.logName ? JSON.stringify(selenoidOpts.logName) : null;
+    const curlProxyBlock = proxy
+        ? `"proxy": {
+                "proxyType": "manual",
+                "socksProxy": "${proxyServer}",
+                "socksVersion": 5
+            },
+            `
+        : "";
+    const javaProxyBlock = proxy
+        ? `options.setCapability("proxy", new HashMap<String, Object>() {{
+    put("proxyType", "manual");
+    put("socksProxy", "${proxyServer}");
+    put("socksVersion", 5);
+}});
+`
+        : "";
+    const kotlinProxyBlock = proxy
+        ? `options.setCapability(
+    "proxy",
+    mapOf(
+        "proxyType" to "manual",
+        "socksProxy" to "${proxyServer}",
+        "socksVersion" to 5
+    )
+)
+`
+        : "";
+    const goProxyBlock = proxy
+        ? `
+		"proxy": map[string]interface{}{
+				"proxyType":    "manual",
+				"socksProxy":   "${proxyServer}",
+				"socksVersion": 5,
+		},`
+        : "";
+    const rustProxyBlock = proxy
+        ? `
+    caps.add(
+        "proxy",
+        json!({
+            "proxyType": "manual",
+            "socksProxy": "${proxyServer}",
+            "socksVersion": 5
+        }),
+    )?;`
+        : "";
+    const csharpProxyBlock = proxy
+        ? `options.AddAdditionalOption("proxy", new Dictionary<string, object> {
+    ["proxyType"] = "manual",
+    ["socksProxy"] = "${proxyServer}",
+    ["socksVersion"] = 5
+});
+`
+        : "";
+    const pythonProxyBlock = proxy
+        ? `
+    "proxy": {
+        "proxyType": "manual",
+        "socksProxy": "${proxyServer}",
+        "socksVersion": 5
+    },`
+        : "";
+    const jsProxyBlock = proxy
+        ? `
+        proxy: {
+            proxyType: 'manual',
+            socksProxy: '${proxyServer}',
+            socksVersion: 5
+        },`
+        : "";
+    const phpProxyBlock = proxy
+        ? `
+    "proxy"=>array(
+        "proxyType"=>"manual",
+        "socksProxy"=>"${proxyServer}",
+        "socksVersion"=>5
+    ),`
+        : "";
+    const rubyProxyBlock = proxy
+        ? `
+caps["proxy"] = {
+  'proxyType' => 'manual',
+  'socksProxy' => '${proxyServer}',
+  'socksVersion' => 5
+}`
+        : "";
+    const swiftProxyBlock = proxy
+        ? `
+    "proxy": [
+        "proxyType": "manual",
+        "socksProxy": "${proxyServer}",
+        "socksVersion": 5
+    ],`
+        : "";
     const browserName = browser != "UNKNOWN" ? browser : "chrome";
     const nameJson = JSON.stringify(sessionName);
     const timeoutJson = JSON.stringify(sessionTimeout);
     const resolutionJson = JSON.stringify(screenResolution);
+    const curlSelenoidJson = indentJsonLines(JSON.stringify(selenoidOpts, null, 4), 12);
     let optionsClass = "SpecificBrowserOptions";
     switch (browser) {
         case "UNKNOWN":
@@ -341,55 +762,94 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
             optionsClass = "EdgeOptions";
             break;
     }
+    const javaOptionalPuts =
+        javaEnvPut(envList) +
+        javaLabelsPut(labelsMap) +
+        (videoNameJson ? `    put("videoName", ${videoNameJson});\n` : "") +
+        (logNameJson ? `    put("logName", ${logNameJson});\n` : "");
+    const kotlinOptional =
+        kotlinEnvEntry(envList) +
+        kotlinLabelsEntry(labelsMap) +
+        (videoNameJson ? `\n        "videoName" to ${videoNameJson},` : "") +
+        (logNameJson ? `\n        "logName" to ${logNameJson},` : "");
+    const goOptional =
+        goEnvBlock(envList) +
+        goLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n                "videoName": ${videoNameJson},` : "") +
+        (logNameJson ? `\n                "logName": ${logNameJson},` : "");
+    const rustOptional =
+        rustEnvBlock(envList) +
+        rustLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n            "videoName": ${videoNameJson},` : "") +
+        (logNameJson ? `\n            "logName": ${logNameJson},` : "");
+    const csharpOptional =
+        csharpEnvBlock(envList) +
+        csharpLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n    ["videoName"] = ${videoNameJson},` : "") +
+        (logNameJson ? `\n    ["logName"] = ${logNameJson},` : "");
+    const pythonOptional =
+        pythonEnvBlock(envList) +
+        pythonLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n        "videoName": ${videoNameJson},` : "") +
+        (logNameJson ? `\n        "logName": ${logNameJson},` : "");
+    const jsOptional =
+        jsEnvBlock(envList) +
+        jsLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n            videoName: ${videoNameJson},` : "") +
+        (logNameJson ? `\n            logName: ${logNameJson},` : "");
+    const phpOptional =
+        phpEnvBlock(envList) +
+        phpLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n        "videoName"=>${videoNameJson},` : "") +
+        (logNameJson ? `\n        "logName"=>${logNameJson},` : "");
+    const rubyOptional =
+        rubyEnvBlock(envList) +
+        rubyLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n  'videoName' => ${videoNameJson},` : "") +
+        (logNameJson ? `\n  'logName' => ${logNameJson},` : "");
+    const swiftOptional =
+        swiftEnvBlock(envList) +
+        swiftLabelsBlock(labelsMap) +
+        (videoNameJson ? `\n        "videoName": ${videoNameJson},` : "") +
+        (logNameJson ? `\n        "logName": ${logNameJson},` : "");
     return {
         curl: `curl -H 'Content-Type: application/json' ${origin}/wd/hub/session -d '{
     "capabilities": {
         "alwaysMatch": {
             "browserName": "${browserName}",
             ${version == "" ? "" : '"browserVersion": "' + version + '",'}
-            "selenoid:options": {
-                "name": ${nameJson},
-                "sessionTimeout": ${timeoutJson},
-                "screenResolution": ${resolutionJson},
-                "enableVNC": ${enableVnc},
-                "enableVideo": ${enableVideo},
-                "enableHAR": ${enableHar}
-            }
+            ${curlProxyBlock}"selenoid:options": ${curlSelenoidJson}
         }
     }
 }'
 `,
         java: `${optionsClass} options = new ${optionsClass}();
 ${version != "" ? 'options.setCapability("browserVersion", "' + version + '");' : ""}
-options.setCapability("selenoid:options", new HashMap<String, Object>() {{
+${javaProxyBlock}options.setCapability("selenoid:options", new HashMap<String, Object>() {{
     put("name", ${nameJson});
     put("sessionTimeout", ${timeoutJson});
     put("screenResolution", ${resolutionJson});
-    put("env", new ArrayList<String>() {{
-        add("TZ=UTC");
-    }});
-    put("labels", new HashMap<String, Object>() {{
-        put("manual", "true");
-    }});
-    put("enableVNC", ${enableVnc});
+    put("timeZone", ${timeZoneJson});
+${javaOptionalPuts}    put("enableVNC", ${enableVnc});
     put("enableVideo", ${enableVideo});
     put("enableHAR", ${enableHar});
+    put("enableLog", ${enableLog});
 }});
 RemoteWebDriver driver = new RemoteWebDriver(new URL("${origin}/wd/hub"), options);
 `,
         kotlin: `val options = ${optionsClass}()
 ${version != "" ? 'options.setCapability("browserVersion", "' + version + '")' : ""}
-options.setCapability(
+${kotlinProxyBlock}options.setCapability(
     "selenoid:options",
     mapOf(
         "name" to ${nameJson},
         "sessionTimeout" to ${timeoutJson},
         "screenResolution" to ${resolutionJson},
-        "env" to listOf("TZ=UTC"),
-        "labels" to mapOf("manual" to "true"),
+        "timeZone" to ${timeZoneJson},${kotlinOptional}
         "enableVNC" to ${enableVnc},
         "enableVideo" to ${enableVideo},
-        "enableHAR" to ${enableHar}
+        "enableHAR" to ${enableHar},
+        "enableLog" to ${enableLog}
     )
 )
 val driver = RemoteWebDriver(URL("${origin}/wd/hub"), options)
@@ -398,20 +858,16 @@ val driver = RemoteWebDriver(URL("${origin}/wd/hub"), options)
 
 caps := selenium.Capabilities{
         "browserName":    "${browserName}",
-		"browserVersion": "${version}",
+		"browserVersion": "${version}",${goProxyBlock}
 		"selenoid:options": map[string]interface{}{
                 "name": ${nameJson},
                 "sessionTimeout": ${timeoutJson},
                 "screenResolution": ${resolutionJson},
-                "env": []string{
-                        "TZ=UTC",
-                },
-                "labels": map[string]interface{}{
-                        "manual": "true",
-                },
+                "timeZone": ${timeZoneJson},${goOptional}
                 "enableVNC": ${enableVnc},
                 "enableVideo": ${enableVideo},
                 "enableHAR": ${enableHar},
+                "enableLog": ${enableLog},
         },
 }
 
@@ -434,13 +890,13 @@ ${version != "" ? '    caps.set_browser_version("' + version + '")?;\n' : ""}   
             "name": ${nameJson},
             "sessionTimeout": ${timeoutJson},
             "screenResolution": ${resolutionJson},
-            "env": ["TZ=UTC"],
-            "labels": { "manual": "true" },
+            "timeZone": ${timeZoneJson},${rustOptional}
             "enableVNC": ${enableVnc},
             "enableVideo": ${enableVideo},
-            "enableHAR": ${enableHar}
+            "enableHAR": ${enableHar},
+            "enableLog": ${enableLog}
         }),
-    )?;
+    )?;${rustProxyBlock}
 
     let driver = WebDriver::new("${origin}/wd/hub", caps).await?;
     driver.quit().await?;
@@ -449,19 +905,15 @@ ${version != "" ? '    caps.set_browser_version("' + version + '")?;\n' : ""}   
 `,
         "C#": `${optionsClass} options = new ${optionsClass}();
 ${version != "" ? 'options.BrowserVersion = "' + version + '";' : ""}
-options.AddAdditionalOption("selenoid:options", new Dictionary<string, object> {
+${csharpProxyBlock}options.AddAdditionalOption("selenoid:options", new Dictionary<string, object> {
     ["name"] = ${nameJson},
     ["sessionTimeout"] = ${timeoutJson},
     ["screenResolution"] = ${resolutionJson},
-    ["env"] = new List<string>() {
-        "TZ=UTC"
-    },
-    ["labels"] = new Dictionary<string, object> {
-        ["manual"] = "true"
-    },
+    ["timeZone"] = ${timeZoneJson},${csharpOptional}
     ["enableVNC"] = ${enableVnc},
     ["enableVideo"] = ${enableVideo},
-    ["enableHAR"] = ${enableHar}
+    ["enableHAR"] = ${enableHar},
+    ["enableLog"] = ${enableLog}
 });
 IWebDriver driver = new RemoteWebDriver(new Uri("${origin}/wd/hub"), options);
 `,
@@ -469,14 +921,16 @@ IWebDriver driver = new RemoteWebDriver(new Uri("${origin}/wd/hub"), options);
         
 capabilities = {
     "browserName": "${browserName}",
-    "browserVersion": "${version}",
+    "browserVersion": "${version}",${pythonProxyBlock}
     "selenoid:options": {
         "name": ${nameJson},
         "sessionTimeout": ${timeoutJson},
         "screenResolution": ${resolutionJson},
+        "timeZone": ${timeZoneJson},${pythonOptional}
         "enableVNC": ${enableVnc ? "True" : "False"},
         "enableVideo": ${enableVideo ? "True" : "False"},
-        "enableHAR": ${enableHar ? "True" : "False"}
+        "enableHAR": ${enableHar ? "True" : "False"},
+        "enableLog": ${enableLog ? "True" : "False"}
     }
 }
 
@@ -492,14 +946,16 @@ var options = {
     protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
     capabilities: { 
         browserName: '${browserName}',
-        browserVersion: '${version}',
+        browserVersion: '${version}',${jsProxyBlock}
         'selenoid:options': {
             name: ${nameJson},
             sessionTimeout: ${timeoutJson},
             screenResolution: ${resolutionJson},
+            timeZone: ${timeZoneJson},${jsOptional}
             enableVNC: ${enableVnc},
             enableVideo: ${enableVideo},
-            enableHAR: ${enableHar}
+            enableHAR: ${enableHar},
+            enableLog: ${enableLog}
         }      
     } 
 };
@@ -513,14 +969,16 @@ const options: RemoteOptions = {
     protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
     capabilities: {
         browserName: '${browserName}',
-        browserVersion: '${version}',
+        browserVersion: '${version}',${jsProxyBlock}
         'selenoid:options': {
             name: ${nameJson},
             sessionTimeout: ${timeoutJson},
             screenResolution: ${resolutionJson},
+            timeZone: ${timeZoneJson},${jsOptional}
             enableVNC: ${enableVnc},
             enableVideo: ${enableVideo},
-            enableHAR: ${enableHar}
+            enableHAR: ${enableHar},
+            enableLog: ${enableLog}
         }
     }
 };
@@ -529,28 +987,32 @@ const client = await remote(options);
         PHP: `$web_driver = RemoteWebDriver::create("${origin}/wd/hub",
 array(
     "browserName"=>"${browserName}",
-    "browserVersion"=>"${version}",
+    "browserVersion"=>"${version}",${phpProxyBlock}
     "selenoid:options"=>array(
         "name"=>${nameJson},
         "sessionTimeout"=>${timeoutJson},
         "screenResolution"=>${resolutionJson},
+        "timeZone"=>${timeZoneJson},${phpOptional}
         "enableVNC"=>${enableVnc ? "true" : "false"},
         "enableVideo"=>${enableVideo ? "true" : "false"},
-        "enableHAR"=>${enableHar ? "true" : "false"}
+        "enableHAR"=>${enableHar ? "true" : "false"},
+        "enableLog"=>${enableLog ? "true" : "false"}
     )
 )
 );
 `,
         ruby: `caps = Selenium::WebDriver::Remote::Capabilities.new
 browserName: '${browserName}',
-caps["browserVersion"] = "${version}"
+caps["browserVersion"] = "${version}"${rubyProxyBlock}
 caps["selenoid:options"] = {
   'name' => ${nameJson},
   'sessionTimeout' => ${timeoutJson},
   'screenResolution' => ${resolutionJson},
+  'timeZone' => ${timeZoneJson},${rubyOptional}
   'enableVNC' => ${enableVnc},
   'enableVideo' => ${enableVideo},
-  'enableHAR' => ${enableHar}
+  'enableHAR' => ${enableHar},
+  'enableLog' => ${enableLog}
 }
 
 driver = Selenium::WebDriver.for(:remote,
@@ -562,14 +1024,16 @@ import Selenium
 
 var caps: [String: Any] = [
     "browserName": "${browserName}",
-    "browserVersion": "${version}",
+    "browserVersion": "${version}",${swiftProxyBlock}
     "selenoid:options": [
         "name": ${nameJson},
         "sessionTimeout": ${timeoutJson},
         "screenResolution": ${resolutionJson},
+        "timeZone": ${timeZoneJson},${swiftOptional}
         "enableVNC": ${enableVnc},
         "enableVideo": ${enableVideo},
-        "enableHAR": ${enableHar}
+        "enableHAR": ${enableHar},
+        "enableLog": ${enableLog}
     ]
 ]
 
@@ -726,9 +1190,18 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const [enableVnc, setEnableVnc] = useState("true");
     const [enableVideo, setEnableVideo] = useState("true");
     const [enableHar, setEnableHar] = useState("false");
+    const [enableLog, setEnableLog] = useState("false");
     const [sessionTimeout, setSessionTimeout] = useState(DEFAULT_SESSION_OPTS.sessionTimeout);
     const [sessionName, setSessionName] = useState(DEFAULT_SESSION_OPTS.name);
     const [screenResolution, setScreenResolution] = useState(DEFAULT_SESSION_OPTS.screenResolution);
+    const [timeZone, setTimeZone] = useState(DEFAULT_SESSION_OPTS.timeZone);
+    const [env, setEnv] = useState(DEFAULT_SESSION_OPTS.env);
+    const [labels, setLabels] = useState(DEFAULT_SESSION_OPTS.labels);
+    const [videoName, setVideoName] = useState(DEFAULT_SESSION_OPTS.videoName);
+    const [logName, setLogName] = useState(DEFAULT_SESSION_OPTS.logName);
+    const [proxyPreset, setProxyPreset] = useState(DEFAULT_SESSION_OPTS.proxyPreset);
+    const [proxyServer, setProxyServer] = useState(DEFAULT_SESSION_OPTS.proxyServer);
+    const [proxyPort, setProxyPort] = useState(DEFAULT_SESSION_OPTS.proxyPort);
     const [vectorDraft, setVectorDraft] = useState(null);
     const [vectorMiss, setVectorMiss] = useState(false);
     const registryRef = useRef(null);
@@ -759,6 +1232,15 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         enableVnc: enableVnc === "true",
         enableVideo: enableVideo === "true",
         enableHar: enableHar === "true",
+        enableLog: enableLog === "true",
+        timeZone,
+        env,
+        labels,
+        videoName,
+        logName,
+        proxyPreset,
+        proxyServer,
+        proxyPort,
     };
     const capsSnap = {
         browserValue: value || "",
@@ -768,6 +1250,15 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         enableVnc,
         enableVideo,
         enableHar,
+        enableLog,
+        timeZone,
+        env,
+        labels,
+        videoName,
+        logName,
+        proxyPreset,
+        proxyServer,
+        proxyPort,
     };
     const vectorId = fingerprint(capsSnap);
     const displayVector = vectorDraft ?? vectorId;
@@ -830,6 +1321,23 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         setEnableVnc(next.enableVnc);
         setEnableVideo(next.enableVideo);
         setEnableHar(next.enableHar);
+        setEnableLog(next.enableLog || "false");
+        setTimeZone(next.timeZone || DEFAULT_SESSION_OPTS.timeZone);
+        setEnv(next.env || "");
+        setLabels(next.labels || DEFAULT_LABELS_CSV);
+        setVideoName(next.videoName || "");
+        setLogName(next.logName || "");
+        setProxyPreset(next.proxyPreset || PROXY_PRESET_OFF);
+        let nextHost = next.proxyServer || "";
+        let nextPort = next.proxyPort || "";
+        // Legacy vectors stored host:port in proxyServer only.
+        if (!next.proxyPort && nextHost.includes(":")) {
+            const split = splitProxyEndpoint(nextHost);
+            nextHost = split.host;
+            nextPort = split.port;
+        }
+        setProxyServer(nextHost);
+        setProxyPort(nextPort);
         if (next.browserValue) {
             const found = available.find((item) => item.value === next.browserValue);
             onBrowserChange(found || {});
@@ -849,6 +1357,15 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             enableVnc: "true",
             enableVideo: "true",
             enableHar: "false",
+            enableLog: "false",
+            timeZone: DEFAULT_SESSION_OPTS.timeZone,
+            env: "",
+            labels: DEFAULT_LABELS_CSV,
+            videoName: "",
+            logName: "",
+            proxyPreset: PROXY_PRESET_OFF,
+            proxyServer: "",
+            proxyPort: "",
         });
     };
 
@@ -899,6 +1416,22 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
+    };
+
+    const downloadSnippet = () => {
+        const text = activeOutput;
+        const filename =
+            outputTab === "json"
+                ? "capabilities.json"
+                : outputTab === "prompt"
+                ? "agent-prompt.md"
+                : `capabilities.${activeLang === "curl" ? "sh" : activeLang || "txt"}`;
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
     };
 
     return (
@@ -964,6 +1497,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                             touchOptions();
                             setEnableHar(v);
                         }}
+                        enableLog={enableLog}
+                        setEnableLog={(v) => {
+                            touchOptions();
+                            setEnableLog(v);
+                        }}
                         sessionTimeout={sessionTimeout}
                         setSessionTimeout={(v) => {
                             touchOptions();
@@ -978,6 +1516,53 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         setScreenResolution={(v) => {
                             touchOptions();
                             setScreenResolution(v);
+                        }}
+                        timeZone={timeZone}
+                        setTimeZone={(v) => {
+                            touchOptions();
+                            setTimeZone(v);
+                        }}
+                        env={env}
+                        setEnv={(v) => {
+                            touchOptions();
+                            setEnv(v);
+                        }}
+                        labels={labels}
+                        setLabels={(v) => {
+                            touchOptions();
+                            setLabels(v);
+                        }}
+                        videoName={videoName}
+                        setVideoName={(v) => {
+                            touchOptions();
+                            setVideoName(v);
+                        }}
+                        logName={logName}
+                        setLogName={(v) => {
+                            touchOptions();
+                            setLogName(v);
+                        }}
+                        proxyPreset={proxyPreset}
+                        setProxyPreset={(v) => {
+                            touchOptions();
+                            setProxyPreset(v);
+                            if (v === PROXY_PRESET_OFF || v === PROXY_PRESET_CUSTOM) {
+                                setProxyServer("");
+                                setProxyPort("");
+                            } else if (v === PROXY_PRESET_QA_GURU) {
+                                setProxyServer(PROXY_QA_GURU_HOST);
+                                setProxyPort(PROXY_QA_GURU_PORT);
+                            }
+                        }}
+                        proxyServer={proxyServer}
+                        setProxyServer={(v) => {
+                            touchOptions();
+                            setProxyServer(v);
+                        }}
+                        proxyPort={proxyPort}
+                        setProxyPort={(v) => {
+                            touchOptions();
+                            setProxyPort(v);
                         }}
                     />
                 </div>
@@ -1073,6 +1658,12 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                                 "data-testid": "capabilities-terminal-reset",
                             },
                             {
+                                icon: <IconDownload />,
+                                label: "Скачать",
+                                onClick: downloadSnippet,
+                                "data-testid": "capabilities-terminal-download",
+                            },
+                            {
                                 icon: <IconCopy />,
                                 label: "Копировать",
                                 onClick: copySnippet,
@@ -1113,23 +1704,36 @@ const Launch = ({
     setEnableVideo,
     enableHar,
     setEnableHar,
+    enableLog,
+    setEnableLog,
     sessionTimeout,
     setSessionTimeout,
     sessionName,
     setSessionName,
     screenResolution,
     setScreenResolution,
+    timeZone,
+    setTimeZone,
+    env,
+    setEnv,
+    labels,
+    setLabels,
+    videoName,
+    setVideoName,
+    logName,
+    setLogName,
+    proxyPreset,
+    setProxyPreset,
+    proxyServer,
+    setProxyServer,
+    proxyPort,
+    setProxyPort,
 }) => {
-    const defaultAdditionalCaps = { operaOptions: { binary: "/usr/bin/opera" } };
-
     const [loading, onLoading] = useState(false);
     const [error, onError] = useState("");
-    const [useMoreCaps, toggleMoreCaps] = useState(false);
-    const [moreCapsError, onMoreCapsError] = useState(false);
-    const [moreCaps, setMoreCaps] = useState(JSON.stringify(defaultAdditionalCaps));
     const remoteUrl = hubRemoteUrl(origin);
     const playwrightSocket = useRef(null);
-    // Multi-row remote-hub stack (URL, timeout|name, resolution, Vnc|Video, Har) —
+    // Multi-row remote-hub stack (URL, timeout|name, resolution, flags, tz/env/labels, names) —
     // presets #remote-hub; magnet skips --pair measurement but still mounts the stack shell + script.
     usePlaqueFieldMagnet({ enabled: Boolean(name) && !isPlaywright });
 
@@ -1140,31 +1744,57 @@ const Launch = ({
         const vnc = enableVnc === "true";
         const video = enableVideo === "true";
         const har = enableHar === "true";
+        const log = enableLog === "true";
+        const resolvedProxy = resolveProxyServer(proxyPreset, proxyServer, proxyPort);
+        const proxy = buildProxyCapability(resolvedProxy);
+        const selenoidOptions = buildSelenoidOptions({
+            sessionTimeout,
+            name: sessionName,
+            screenResolution,
+            enableVnc: vnc,
+            enableVideo: video,
+            enableHar: har,
+            enableLog: log,
+            timeZone,
+            env,
+            labels,
+            videoName,
+            logName,
+        });
         let desiredCapabilities = {
             browserName: `${name}`,
             version: `${version}`,
             enableVNC: vnc,
             enableVideo: video,
             enableHAR: har,
-            labels: { manual: "true" },
+            enableLog: log,
+            timeZone: selenoidOptions.timeZone,
+            labels: selenoidOptions.labels,
             sessionTimeout,
             name: sessionName,
             screenResolution,
         };
-        let selenoidOptions = {
-            enableVNC: vnc,
-            enableVideo: video,
-            enableHAR: har,
-            sessionTimeout,
-            name: sessionName,
-            screenResolution,
-            labels: { manual: "true" },
-        };
+        if (selenoidOptions.env) {
+            desiredCapabilities.env = selenoidOptions.env;
+        }
+        if (selenoidOptions.videoName) {
+            desiredCapabilities.videoName = selenoidOptions.videoName;
+        }
+        if (selenoidOptions.logName) {
+            desiredCapabilities.logName = selenoidOptions.logName;
+        }
 
-        if (useMoreCaps && !moreCapsError) {
-            const additionalCaps = JSON.parse(moreCaps);
-            desiredCapabilities = Object.assign(desiredCapabilities, additionalCaps);
-            selenoidOptions = Object.assign(selenoidOptions, additionalCaps);
+        if (proxy) {
+            desiredCapabilities = Object.assign(desiredCapabilities, { proxy });
+        }
+
+        const alwaysMatch = {
+            browserName: `${name}`,
+            browserVersion: `${version}`,
+            "selenoid:options": selenoidOptions,
+        };
+        if (proxy) {
+            alwaysMatch.proxy = proxy;
         }
 
         const controller = new AbortController();
@@ -1182,11 +1812,7 @@ const Launch = ({
                 body: JSON.stringify({
                     desiredCapabilities,
                     capabilities: {
-                        alwaysMatch: {
-                            browserName: `${name}`,
-                            browserVersion: `${version}`,
-                            "selenoid:options": selenoidOptions,
-                        },
+                        alwaysMatch,
                         firstMatch: [{}],
                     },
                 }),
@@ -1207,15 +1833,21 @@ const Launch = ({
         name,
         version,
         navigate,
-        useMoreCaps,
-        moreCapsError,
-        moreCaps,
         enableVnc,
         enableVideo,
         enableHar,
+        enableLog,
         sessionTimeout,
         sessionName,
         screenResolution,
+        timeZone,
+        env,
+        labels,
+        videoName,
+        logName,
+        proxyPreset,
+        proxyServer,
+        proxyPort,
     ]);
 
     const createPlaywrightSession = () => {
@@ -1307,15 +1939,8 @@ const Launch = ({
         createSession();
     };
 
-    const onTextareaUpdate = (e) => {
-        setMoreCaps(e.target.value);
-        try {
-            JSON.parse(e.target.value);
-            onMoreCapsError(false);
-        } catch (e) {
-            onMoreCapsError(e);
-        }
-    };
+    const proxyOff = proxyPreset === PROXY_PRESET_OFF;
+    const proxyPresetLocked = proxyPreset === PROXY_PRESET_QA_GURU;
 
     return (
         <div className="capabilities-launch">
@@ -1329,7 +1954,8 @@ const Launch = ({
                     {/*
                       presets #remote-hub: magnet stack →
                       solo(remoteUrl) + duo(sessionTimeout|name) + solo(screenResolution) +
-                      solo(enableVnc|enableVideo|enableHar) full-width stretch 50/50.
+                      solo(enableVnc|enableVideo|enableHar|enableLog) + solo(timeZone) +
+                      solo(env) + solo(labels) + conditional duo(videoName|logName).
                     */}
                     <div
                         className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
@@ -1419,6 +2045,143 @@ const Launch = ({
                                 stretch
                                 data-testid="caps-enable-har"
                             />
+                            <PlaqueFieldSeg
+                                label="enableLog"
+                                paramId="enableLog"
+                                value={enableLog}
+                                onValueChange={setEnableLog}
+                                stretch
+                                data-testid="caps-enable-log"
+                            />
+                        </PlaqueFieldGrid>
+
+                        <PlaqueFieldGrid layout="solo" aria-label="Time zone" data-testid="capabilities-caps-timezone">
+                            <PlaqueSelect
+                                label="timeZone"
+                                paramId="timeZone"
+                                value={timeZone}
+                                options={TIME_ZONE_OPTIONS}
+                                onChange={setTimeZone}
+                                data-testid="caps-time-zone"
+                            />
+                        </PlaqueFieldGrid>
+
+                        <PlaqueFieldGrid layout="solo" aria-label="Container env" data-testid="capabilities-caps-env">
+                            <PlaqueField
+                                label="env"
+                                paramId="env"
+                                labelVariant="param"
+                                type="text"
+                                value={env}
+                                placeholder="KEY=value,KEY2=value"
+                                onChange={(e) => setEnv(e.target.value)}
+                                data-testid="caps-env"
+                            />
+                        </PlaqueFieldGrid>
+
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Session labels"
+                            data-testid="capabilities-caps-labels"
+                        >
+                            <PlaqueField
+                                label="labels"
+                                paramId="labels"
+                                labelVariant="param"
+                                type="text"
+                                value={labels}
+                                placeholder="key=value,key2=value"
+                                onChange={(e) => setLabels(e.target.value)}
+                                data-testid="caps-labels"
+                            />
+                        </PlaqueFieldGrid>
+
+                        {enableVideo === "true" || enableLog === "true" ? (
+                            <PlaqueFieldGrid
+                                layout={enableVideo === "true" && enableLog === "true" ? "duo" : "solo"}
+                                aria-label="Artifact names"
+                                data-testid="capabilities-caps-names"
+                            >
+                                {enableVideo === "true" ? (
+                                    <PlaqueField
+                                        label="videoName"
+                                        paramId="videoName"
+                                        labelVariant="param"
+                                        type="text"
+                                        value={videoName}
+                                        placeholder="session.mp4"
+                                        onChange={(e) => setVideoName(e.target.value)}
+                                        data-testid="caps-video-name"
+                                    />
+                                ) : null}
+                                {enableLog === "true" ? (
+                                    <PlaqueField
+                                        label="logName"
+                                        paramId="logName"
+                                        labelVariant="param"
+                                        type="text"
+                                        value={logName}
+                                        placeholder="session.log"
+                                        onChange={(e) => setLogName(e.target.value)}
+                                        data-testid="caps-log-name"
+                                    />
+                                ) : null}
+                            </PlaqueFieldGrid>
+                        ) : null}
+                    </div>
+                </Panel>
+            ) : null}
+            {!isPlaywright && name ? (
+                <Panel
+                    title="Browser capabilities"
+                    testId="capabilities-browser-panel"
+                    titleTestId="capabilities-browser-title"
+                    className="capabilities-config-panel"
+                >
+                    <div className="plaque-field-grid-stack" data-testid="capabilities-browser-caps">
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Proxy preset"
+                            data-testid="capabilities-browser-proxy-preset"
+                        >
+                            <PlaqueSelect
+                                label="proxyPreset"
+                                paramId="proxyPreset"
+                                value={proxyPreset}
+                                options={PROXY_PRESET_OPTIONS}
+                                onChange={setProxyPreset}
+                                data-testid="caps-proxy-preset"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="duo"
+                            aria-label="Proxy endpoint"
+                            data-testid="capabilities-browser-proxy"
+                        >
+                            <PlaqueField
+                                label="proxyServer"
+                                paramId="proxyServer"
+                                labelVariant="param"
+                                type="text"
+                                value={proxyOff ? "" : proxyServer}
+                                placeholder="host"
+                                readOnly={proxyOff || proxyPresetLocked}
+                                disabled={proxyOff}
+                                onChange={(e) => setProxyServer(e.target.value)}
+                                data-testid="caps-proxy-server"
+                            />
+                            <PlaqueField
+                                label="proxyPort"
+                                paramId="proxyPort"
+                                labelVariant="param"
+                                type="text"
+                                value={proxyOff ? "" : proxyPort}
+                                placeholder="port"
+                                readOnly={proxyOff || proxyPresetLocked}
+                                disabled={proxyOff}
+                                onChange={(e) => setProxyPort(e.target.value)}
+                                data-testid="caps-proxy-port"
+                            />
                         </PlaqueFieldGrid>
                     </div>
                 </Panel>
@@ -1427,21 +2190,9 @@ const Launch = ({
                 loading={loading}
                 disabled={!name || loading}
                 error={error}
-                showMoreCapabilities={!isPlaywright && Boolean(name) && !loading}
-                useMoreCaps={useMoreCaps}
                 onCreateSession={onCreateSession}
-                onToggleMoreCaps={() => toggleMoreCaps(!useMoreCaps)}
                 onClearError={() => onError("")}
             />
-            {!useMoreCaps || isPlaywright ? null : (
-                <textarea
-                    spellCheck={false}
-                    rows={7}
-                    onChange={onTextareaUpdate}
-                    className={`more-capabilities error-${!!moreCapsError}`}
-                    defaultValue={JSON.stringify(defaultAdditionalCaps, null, 2)}
-                />
-            )}
         </div>
     );
 };

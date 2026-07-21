@@ -13,17 +13,26 @@ export const StyledCapabilities = styled.div`
   position: relative;
 
   /*
-   * Driver+Remote : terminal — canon configurator__layout--terminal 6-col ladder
-   * (docs/layout-standard.md § Configurator terminal shell). Full-bleed: no 5% side pad.
-   * Column heights independent — no align-items:stretch magnet between setup & terminal.
+   * SSOT copy of configurator__layout--terminal (docs/layout-standard.md).
+   * Mental 6-col: 1░ + cfg 2–3 + term 4–6. ░ = padding-left, NOT a track.
+   * Tracks ALWAYS cfg | term — one formula ≥769 via clamp. No 1100/1280/1600
+   * track rebuilds. No 1fr 2fr 2fr. No discrete ratio stages.
    */
   .capabilities-body {
     display: grid;
     align-items: start;
-    gap: 20px 24px;
+    justify-content: start;
+    column-gap: var(--space-6, 24px);
+    row-gap: 20px;
     width: 100%;
-    padding: 20px 16px 40px;
     box-sizing: border-box;
+    padding: 20px var(--page-padding-x, 16px) 40px;
+    --capabilities-col-rest: calc(
+      (1600px - 2 * var(--page-padding-x, 16px) - 5 * var(--space-6, 24px)) / 6
+    );
+    --capabilities-span-2: calc(
+      2 * var(--capabilities-col-rest) + var(--space-6, 24px)
+    );
   }
 
   .setup,
@@ -33,38 +42,46 @@ export const StyledCapabilities = styled.div`
     align-self: start;
   }
 
-  /* ≥1600 — cols 2–3 cfg / 4–6 term */
-  @media (min-width: 1600px) {
+  @media (min-width: 769px) {
     .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 3fr);
+      /*
+       * Body sits full-bleed (page-pad is our own padding). Configurator's
+       * layout 100% is already inside page-shell pad — subtract pads here so
+       * the 6-col math matches SSOT.
+       */
+      --capabilities-gutter: clamp(
+        0px,
+        calc(
+          100% - 2 * var(--page-padding-x, 16px) - 2 * var(--capabilities-span-2) -
+            2 * var(--space-6, 24px)
+        ),
+        var(--capabilities-col-rest)
+      );
+      --capabilities-gutter-gap: min(
+        var(--space-6, 24px),
+        var(--capabilities-gutter)
+      );
+      padding-left: calc(
+        var(--page-padding-x, 16px) + var(--capabilities-gutter) +
+          var(--capabilities-gutter-gap)
+      );
+      --capabilities-cfg: clamp(
+        var(--capabilities-col-rest),
+        calc(100% - var(--capabilities-span-2) - var(--space-6, 24px)),
+        var(--capabilities-span-2)
+      );
+      --capabilities-term: calc(
+        100% - var(--capabilities-cfg) - var(--space-6, 24px)
+      );
+      grid-template-columns: var(--capabilities-cfg) var(--capabilities-term);
     }
-    .setup { grid-column: 2; }
-    .code-panel { grid-column: 3; }
-  }
 
-  @media (min-width: 1280px) and (max-width: 1599px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 2fr);
+    .setup {
+      grid-column: 1 / 2;
     }
-    .setup { grid-column: 2; }
-    .code-panel { grid-column: 3; }
-  }
 
-  @media (min-width: 1100px) and (max-width: 1279px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 2fr);
-    }
-  }
-
-  @media (min-width: 900px) and (max-width: 1099px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    }
-  }
-
-  @media (min-width: 769px) and (max-width: 899px) {
-    .capabilities-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    .code-panel {
+      grid-column: 2 / 3;
     }
   }
 
@@ -79,8 +96,7 @@ export const StyledCapabilities = styled.div`
       flex: 0 1 auto;
     }
 
-    button.new-session,
-    button.new-session-more-capabilities {
+    button.new-session {
       width: 100%;
       margin-top: 10px;
       cursor: pointer;
@@ -206,35 +222,6 @@ export const StyledCapabilities = styled.div`
       }
     }
 
-    &.error-true {
-      border-color: ${errorColor};
-      color: ${errorColor};
-    }
-  }
-
-  .new-session-more-capabilities {
-    background: none;
-    border: none;
-    color: ${grayColor};
-    text-align: left;
-    padding: 0;
-    margin-top: 8px;
-  }
-  
-  textarea.more-capabilities {
-    border: 1px solid ${unselectedColor};
-    border-radius: 3px;
-    background-color: ${borderSectionColor};
-    color: ${selectedColor};
-    font-size: 13px;
-    font-family: "Source Code Pro",Menlo,Monaco,Consolas,"Courier New",monospace;
-    outline: none;
-    padding: 5px;
-    resize: vertical;
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 10px;
-    
     &.error-true {
       border-color: ${errorColor};
       color: ${errorColor};

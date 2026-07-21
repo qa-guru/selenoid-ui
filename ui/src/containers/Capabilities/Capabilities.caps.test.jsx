@@ -52,7 +52,7 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(screen.queryByTestId("capabilities-caps")).toBeNull();
     });
 
-    it("renders enableVnc/enableVideo/enableHar as 2-opt seg radiogroups, never native checkboxes", async () => {
+    it("renders enableVnc/enableVideo/enableHar/enableLog as 2-opt seg radiogroups, never native checkboxes", async () => {
         const user = userEvent.setup();
         renderCapabilities();
         await selectChrome(user);
@@ -61,10 +61,10 @@ describe("Capabilities boolean caps (seg canon)", () => {
 
         // No native checkbox anywhere in the caps block (skill configurator-boolean).
         expect(caps.querySelectorAll("input[type=checkbox]")).toHaveLength(0);
-        // Text inputs are allowed for name / remoteUrl (PlaqueField), not for booleans.
+        // Text inputs are allowed for name / remoteUrl / env / labels (PlaqueField), not for booleans.
         expect(caps.querySelectorAll("input[type=text]").length).toBeGreaterThanOrEqual(2);
 
-        for (const testId of ["caps-enable-vnc", "caps-enable-video", "caps-enable-har"]) {
+        for (const testId of ["caps-enable-vnc", "caps-enable-video", "caps-enable-har", "caps-enable-log"]) {
             const field = within(caps).getByTestId(testId);
             expect(within(field).getByRole("radiogroup")).toBeInTheDocument();
             expect(within(field).getByRole("button", { name: "true" })).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(screen.getByRole("combobox", { name: "screenResolution" })).toHaveValue("1920x1080x24");
     });
 
-    it("wires session options into createSession body (more-caps can still override)", async () => {
+    it("wires session options into createSession body", async () => {
         const user = userEvent.setup();
         const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
             ok: true,
@@ -127,14 +127,112 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.capabilities.alwaysMatch["selenoid:options"].sessionTimeout).toBe("15m");
         expect(body.capabilities.alwaysMatch["selenoid:options"].name).toBe("RTL session");
         expect(body.capabilities.alwaysMatch["selenoid:options"].screenResolution).toBe("1280x1024x24");
+        expect(body.capabilities.alwaysMatch["selenoid:options"].timeZone).toBe("UTC");
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableLog).toBe(false);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].labels).toEqual({ manual: "true" });
+        expect(body.capabilities.alwaysMatch["selenoid:options"].env).toBeUndefined();
         // remoteUrl is display-only — never a hub cap.
         expect(body.desiredCapabilities.remoteUrl).toBeUndefined();
         expect(body.capabilities.alwaysMatch["selenoid:options"].remoteUrl).toBeUndefined();
+        // proxy off by default — not present on alwaysMatch / selenoid:options.
+        expect(body.capabilities.alwaysMatch.proxy).toBeUndefined();
+        expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
 
         fetchMock.mockRestore();
     });
 
-    it("defaults to VNC/Video on and HAR off", async () => {
+    it("wires enableLog, timeZone, env, labels, videoName into selenoid:options", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ value: { sessionId: "sess-opts" } }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+
+        await user.click(segButton("caps-enable-log", "true"));
+        await user.selectOptions(screen.getByRole("combobox", { name: "timeZone" }), "Europe/Moscow");
+        await user.clear(screen.getByTestId("caps-env"));
+        await user.type(screen.getByTestId("caps-env"), "LANG=C,FOO=bar");
+        await user.clear(screen.getByTestId("caps-labels"));
+        await user.type(screen.getByTestId("caps-labels"), "manual=true,team=qa");
+        await user.clear(screen.getByTestId("caps-video-name"));
+        await user.type(screen.getByTestId("caps-video-name"), "demo.mp4");
+        await user.clear(screen.getByTestId("caps-log-name"));
+        await user.type(screen.getByTestId("caps-log-name"), "demo.log");
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
+        expect(sessionCall).toBeTruthy();
+        const opts = JSON.parse(sessionCall[1].body).capabilities.alwaysMatch["selenoid:options"];
+        expect(opts.enableLog).toBe(true);
+        expect(opts.timeZone).toBe("Europe/Moscow");
+        expect(opts.env).toEqual(["LANG=C", "FOO=bar"]);
+        expect(opts.labels).toEqual({ manual: "true", team: "qa" });
+        expect(opts.videoName).toBe("demo.mp4");
+        expect(opts.logName).toBe("demo.log");
+        expect(opts.proxy).toBeUndefined();
+
+        fetchMock.mockRestore();
+    });
+
+    it("puts proxy.qaguru.school preset on alwaysMatch.proxy root, not selenoid:options", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ value: { sessionId: "sess-proxy" } }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-browser-panel");
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "proxyPreset" }), "proxy.qaguru.school");
+        expect(screen.getByTestId("caps-proxy-server")).toHaveValue("proxy.qaguru.school");
+        expect(screen.getByTestId("caps-proxy-port")).toHaveValue("7777");
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
+        expect(sessionCall).toBeTruthy();
+        const body = JSON.parse(sessionCall[1].body);
+        const expectedProxy = {
+            proxyType: "manual",
+            socksProxy: "proxy.qaguru.school:7777",
+            socksVersion: 5,
+        };
+        expect(body.capabilities.alwaysMatch.proxy).toEqual(expectedProxy);
+        expect(body.desiredCapabilities.proxy).toEqual(expectedProxy);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
+
+        fetchMock.mockRestore();
+    });
+
+    it("clears proxyServer and proxyPort when switching from preset to custom", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-browser-panel");
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "proxyPreset" }), "proxy.qaguru.school");
+        expect(screen.getByTestId("caps-proxy-server")).toHaveValue("proxy.qaguru.school");
+        expect(screen.getByTestId("caps-proxy-port")).toHaveValue("7777");
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "proxyPreset" }), "custom");
+        expect(screen.getByTestId("caps-proxy-server")).toHaveValue("");
+        expect(screen.getByTestId("caps-proxy-port")).toHaveValue("");
+        expect(screen.getByTestId("caps-proxy-server")).not.toHaveAttribute("readonly");
+        expect(screen.getByTestId("caps-proxy-port")).not.toHaveAttribute("readonly");
+    });
+
+    it("defaults to VNC/Video on and HAR/Log off", async () => {
         const user = userEvent.setup();
         renderCapabilities();
         await selectChrome(user);
@@ -144,6 +242,12 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(segButton("caps-enable-video", "true")).toHaveAttribute("aria-pressed", "true");
         expect(segButton("caps-enable-har", "false")).toHaveAttribute("aria-pressed", "true");
         expect(segButton("caps-enable-har", "true")).toHaveAttribute("aria-pressed", "false");
+        expect(segButton("caps-enable-log", "false")).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("combobox", { name: "timeZone" })).toHaveValue("UTC");
+        expect(screen.getByTestId("caps-labels")).toHaveValue("manual=true");
+        expect(screen.getByTestId("caps-env")).toHaveValue("");
+        expect(screen.getByTestId("caps-video-name")).toBeInTheDocument();
+        expect(screen.queryByTestId("caps-log-name")).toBeNull();
     });
 
     it("toggles a cap value on click", async () => {

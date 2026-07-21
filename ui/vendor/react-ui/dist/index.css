@@ -305,16 +305,20 @@ html.theme-light {
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label,
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__text {
   float: none;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   align-self: flex-start;
   box-sizing: border-box;
   width: var(--plaque-mixed-label-col, max-content);
+  min-width: 0;
   max-width: 100%;
   height: var(--plaque-seg-band-height);
   display: inline-flex;
   align-items: center;
   padding-right: var(--space-2);
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-divider {
   float: none;
@@ -344,11 +348,12 @@ html.theme-light {
 .plaque-field--nowrap > .plaque-field-seg-track--many {
   display: flex !important;
   flex: 1 1 auto !important;
+  justify-content: flex-end !important;
   justify-self: unset !important;
   align-self: flex-start !important;
   width: auto !important;
   max-width: none !important;
-  min-width: 0 !important;
+  min-width: calc(2 * (4ch + var(--space-2)) + var(--plaque-seg-gap)) !important;
   height: auto !important;
 }
 .plaque-field--nowrap > .plaque-field__label,
@@ -361,16 +366,25 @@ html.theme-light {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.plaque-field--nowrap:has(> .plaque-field-seg-track--many) > .plaque-field__label,
+.plaque-field--nowrap:has(> .plaque-field-seg-track--many) > .plaque-field__text {
+  flex: 0 1 auto !important;
+}
 .plaque-field--nowrap > .plaque-divider {
   grid-column: 2 !important;
   grid-row: 1 !important;
 }
 .plaque-field--nowrap > .plaque-field__control,
 .plaque-field--nowrap > .plaque-field__value,
-.plaque-field--nowrap > .plaque-field-seg-track {
+.plaque-field--nowrap > .plaque-field-seg-track:not(.plaque-field-seg-track--many) {
   grid-column: 3 !important;
   grid-row: 1 !important;
   min-width: 0 !important;
+  max-width: 100% !important;
+}
+.plaque-field--nowrap > .plaque-field-seg-track--many {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
   max-width: 100% !important;
 }
 .plaque-field__text {
@@ -518,7 +532,7 @@ select.plaque-field__control option {
   background: var(--color-border);
 }
 .plaque-field--divided:has(> .plaque-field-seg-track) {
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   gap: var(--plaque-seg-gap);
   padding-left: var(--plaque-shell-pad-x);
@@ -609,20 +623,21 @@ select.plaque-field__control option {
   min-height: var(--plaque-seg-band-height);
   align-self: flex-start;
   align-items: stretch;
+  justify-content: flex-end;
   margin-block: 0;
   padding-block: 0;
   box-sizing: border-box;
 }
 .plaque-field--divided > .plaque-field-seg-track--many .plaque-field-seg {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-wrap: wrap;
   justify-content: flex-end;
   align-content: flex-start;
   align-items: center;
   column-gap: var(--plaque-seg-gap);
   row-gap: var(--plaque-seg-row-gap);
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   min-width: 0;
 }
@@ -728,8 +743,8 @@ select.plaque-field__control option {
 }
 .plaque-field-grid .plaque-field--divided .plaque-field-seg-track--many .plaque-field-seg {
   min-width: 0;
-  width: auto;
-  max-width: none;
+  width: max-content;
+  max-width: 100%;
   flex-shrink: 1;
 }
 .plaque-field-grid .plaque-field--divided .plaque-field-seg-track .plaque-field-seg__btn {

@@ -792,6 +792,25 @@ function IconCopy() {
     )
   ] });
 }
+function IconDownload() {
+  return /* @__PURE__ */ jsxs10(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      xmlns: "http://www.w3.org/2000/svg",
+      children: [
+        /* @__PURE__ */ jsx18("path", { d: "M8 2.5v7" }),
+        /* @__PURE__ */ jsx18("path", { d: "m5.25 7 2.75 2.75L10.75 7" }),
+        /* @__PURE__ */ jsx18("path", { d: "M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" })
+      ]
+    }
+  );
+}
 
 // src/code-highlight.ts
 var JSON_TOKEN = /("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g;
@@ -1031,6 +1050,7 @@ export {
   Badge,
   Button,
   IconCopy,
+  IconDownload,
   IconReset,
   Input,
   LangIcon,

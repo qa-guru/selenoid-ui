@@ -81,12 +81,15 @@
     --plaque-seg-band-height: calc(var(--plaque-control-height) - 2px);
     /* 1px rule between wrapped --many bands (= flex row-gap; gradient origin padding-box). */
     --plaque-seg-row-gap: 1px;
-    /* Shell ↔ seg btn inset. Track uses inset; shell-end is +1px so end air
-     matches vertical air around the 20px btn (centered in 24px track). */
+    /* Shell ↔ seg btn. chip-air = vertical margin of ~20px glyph in band;
+     shell-end uses the same token so top/bottom/right air match (no hardcode). */
     --plaque-seg-inset: var(--space-1);
     --plaque-shell-pad-x: var(--space-2);
-    --plaque-seg-shell-end: calc(var(--plaque-seg-inset) + 1px);
-    --plaque-seg-track-end: var(--plaque-seg-gap);
+    --plaque-seg-chip-height: calc(var(--plaque-control-height) - 12px);
+    --plaque-seg-chip-air: calc((var(--plaque-seg-band-height) - var(--plaque-seg-chip-height)) / 2);
+    --plaque-seg-shell-end: var(--plaque-seg-chip-air);
+    /* Track no longer adds end pad — --many uses shell-end only (= chip-air). */
+    --plaque-seg-track-end: 0px;
     --plaque-chevron-size: 10px;
     --plaque-select-text-gap: 17px;
     --plaque-chevron-inset: calc(var(--plaque-shell-pad-x) + var(--plaque-seg-gap));

@@ -69,7 +69,7 @@ function expectColor(actual, expectedHex) {
     expect(parseColor(actual)).toEqual(parseColor(expectedHex));
 }
 
-describe("Capabilities visual contract (Driver + Remote hub panels)", () => {
+describe("Capabilities visual contract (Driver + Remote hub + Browser caps panels)", () => {
     it("renders Driver panel with tagstrip of available browsers", () => {
         renderCapabilities();
 
@@ -101,7 +101,7 @@ describe("Capabilities visual contract (Driver + Remote hub panels)", () => {
         expectColor(style.borderTopColor, "#3d444c");
     });
 
-    it("opens Remote hub pair+magnet panel (URL, timeout|name, resolution, Vnc|Video, Har) after selecting a WebDriver browser", async () => {
+    it("opens Remote hub pair+magnet panel (URL, timeout|name, resolution, flags, tz/env/labels) after selecting a WebDriver browser", async () => {
         const user = userEvent.setup();
         renderCapabilities();
 
@@ -124,11 +124,41 @@ describe("Capabilities visual contract (Driver + Remote hub panels)", () => {
         expect(within(flags).getByTestId("caps-enable-vnc")).toHaveAttribute("data-param-id", "enableVnc");
         expect(within(flags).getByTestId("caps-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
         expect(within(flags).getByTestId("caps-enable-har")).toHaveAttribute("data-param-id", "enableHar");
+        expect(within(flags).getByTestId("caps-enable-log")).toHaveAttribute("data-param-id", "enableLog");
         expect(within(caps).queryByTestId("capabilities-caps-har")).toBeNull();
+
+        expect(within(caps).getByTestId("capabilities-caps-timezone")).toHaveClass("plaque-field-grid--solo");
+        expect(within(caps).getByTestId("caps-time-zone")).toHaveAttribute("data-param-id", "timeZone");
+        expect(within(caps).getByTestId("capabilities-caps-env")).toHaveClass("plaque-field-grid--solo");
+        expect(within(caps).getByTestId("caps-env").closest("label")).toHaveAttribute("data-param-id", "env");
+        expect(within(caps).getByTestId("capabilities-caps-labels")).toHaveClass("plaque-field-grid--solo");
+        expect(within(caps).getByTestId("caps-labels").closest("label")).toHaveAttribute("data-param-id", "labels");
+        expect(within(caps).getByTestId("capabilities-caps-names")).toHaveClass("plaque-field-grid--solo");
+        expect(within(caps).getByTestId("caps-video-name").closest("label")).toHaveAttribute(
+            "data-param-id",
+            "videoName"
+        );
 
         // No builder-only fields.
         expect(within(remote).queryByText("closeBrowserAfterEach")).toBeNull();
         expect(within(remote).queryByText("gradleBin")).toBeNull();
+
+        const browserCaps = await screen.findByTestId("capabilities-browser-panel");
+        expect(browserCaps).toHaveClass("panel", "panel--content");
+        expect(screen.getByTestId("capabilities-browser-title")).toHaveTextContent("Browser capabilities");
+        expect(within(browserCaps).getByTestId("capabilities-browser-proxy-preset")).toHaveClass(
+            "plaque-field-grid--solo"
+        );
+        expect(within(browserCaps).getByTestId("capabilities-browser-proxy")).toHaveClass("plaque-field-grid--duo");
+        expect(within(browserCaps).getByTestId("caps-proxy-preset")).toHaveAttribute("data-param-id", "proxyPreset");
+        expect(within(browserCaps).getByTestId("caps-proxy-server")).toBeInTheDocument();
+        expect(within(browserCaps).getByTestId("caps-proxy-port")).toBeInTheDocument();
+        expect(screen.getByRole("combobox", { name: "proxyPreset" })).toHaveValue("off");
+
+        // Legacy More capabilities removed.
+        expect(screen.queryByTestId("capabilities-more-caps")).toBeNull();
+        expect(screen.queryByText("More capabilities")).toBeNull();
+        expect(document.querySelector("textarea.more-capabilities")).toBeNull();
     });
 
     it("keeps Driver tagstrip in a solo row without magnet nowrap", () => {
@@ -138,5 +168,23 @@ describe("Capabilities visual contract (Driver + Remote hub panels)", () => {
         expect(browsers).toHaveClass("plaque-field-grid--solo");
         expect(browsers.closest(".plaque-field-grid-stack--magnet")).toBeNull();
         expect(within(browsers).getByTestId("capabilities-browser-select")).toBeInTheDocument();
+    });
+
+    it("locks Capabilities body to continuous 6-col clamp (no discrete fr ladder)", async () => {
+        const fs = await import("node:fs/promises");
+        const path = await import("node:path");
+        const { fileURLToPath } = await import("node:url");
+        const dir = path.dirname(fileURLToPath(import.meta.url));
+        const css = await fs.readFile(path.join(dir, "style.css.js"), "utf8");
+
+        // Canon: one cfg|term formula ≥769. Ban the old 1:2:2 / stage rebuilds.
+        expect(css).toMatch(/grid-template-columns:\s*var\(--capabilities-cfg\)\s+var\(--capabilities-term\)/);
+        expect(css).toMatch(/--capabilities-col-rest:\s*calc\(/);
+        expect(css).toMatch(/--capabilities-span-2:\s*calc\(/);
+        expect(css).toMatch(/--capabilities-gutter:\s*clamp\(/);
+        expect(css).not.toMatch(/1fr\)\s+minmax\(0,\s*2fr\)\s+minmax\(0,\s*2fr\)/);
+        expect(css).not.toMatch(/1fr\)\s+minmax\(0,\s*2fr\)\s+minmax\(0,\s*3fr\)/);
+        expect(css).not.toMatch(/@media\s*\(\s*min-width:\s*(900|1100|1280|1600)px\s*\)/);
+        expect(css).not.toMatch(/@media\s*\(\s*min-width:\s*\d+px\)\s+and\s*\(\s*max-width:/);
     });
 });
