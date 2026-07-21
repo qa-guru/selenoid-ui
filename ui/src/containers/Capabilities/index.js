@@ -1386,11 +1386,28 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         applyCapsSnap(snap);
     };
 
-    const browserOptions = available.map((item) => ({
-        value: item.value,
-        label: item.label,
-        title: item.label,
-    }));
+    const toBrowserOptions = (items) =>
+        items.map((item) => ({
+            value: item.value,
+            label: item.label,
+            title: item.label,
+        }));
+
+    // Protocol / platform rows in Driver (exclusive Tagstrip → createSession).
+    const webdriverAvailable = available.filter(
+        (item) => item.protocol !== "playwright" && item.name !== "android" && item.name !== "ios"
+    );
+    const playwrightAvailable = available.filter((item) => item.protocol === "playwright");
+    const androidAvailable = available.filter((item) => item.name === "android");
+    const iosAvailable = available.filter((item) => item.name === "ios");
+    // todo: Windows
+    // todo: Linux
+    // todo: Mac
+
+    const webdriverOptions = toBrowserOptions(webdriverAvailable);
+    const playwrightOptions = toBrowserOptions(playwrightAvailable);
+    const androidOptions = toBrowserOptions(androidAvailable);
+    const iosOptions = toBrowserOptions(iosAvailable);
 
     const onBrowserToggle = (optionValue) => {
         touchOptions();
@@ -1403,6 +1420,21 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             onBrowserChange(next);
         }
     };
+
+    const driverStripAria = (groupItems, loadedLabel) =>
+        groupItems.length ? loadedLabel : origin ? "No information about browsers" : "Loading browsers";
+
+    // Config panels default: magnet aligns label|divider across stack rows.
+    usePlaqueFieldMagnet({
+        enabled: true,
+        syncKey: [
+            webdriverOptions.length,
+            playwrightOptions.length,
+            androidOptions.length,
+            iosOptions.length,
+            value || "",
+        ].join(":"),
+    });
 
     const copySnippet = () => {
         const text = activeOutput;
@@ -1444,36 +1476,78 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         titleTestId="capabilities-driver-title"
                         className="capabilities-config-panel"
                     >
-                        <PlaqueFieldGrid
-                            layout="solo"
-                            aria-label="Available browsers"
+                        {/*
+                          Driver rows → createSession: exclusive Tagstrip (library
+                          PlaqueTagstrip; ≠ react-select). Selection unlocks Launch.
+                          Magnet stack — dividers flush on longest label (Webdriver).
+                          Tagstrips still wrap chips (--many); magnet does not lock 32px.
+                          todo: Windows · Linux · Mac
+                        */}
+                        <div
+                            className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
                             data-testid="capabilities-driver-browsers"
                         >
-                            {/*
-                              available → createSession: exclusive Tagstrip (library
-                              PlaqueTagstrip; ≠ react-select). Selection unlocks Launch.
-                              PlaqueSelect is the duo/solo alternative for ≤few options —
-                              Capabilities keeps Tagstrip for the full hub catalog.
-                              Solo without magnet — tagstrip wrap/density (magnet --nowrap
-                              would lock shell 32px and shove pills off-viewport).
-                            */}
-                            <PlaqueTagstrip
-                                label="available"
-                                paramId="available"
-                                className="capabilities-browser-select"
-                                options={browserOptions}
-                                values={value ? [value] : []}
-                                onToggle={onBrowserToggle}
-                                aria-label={
-                                    available.length
-                                        ? "Available browsers"
-                                        : origin
-                                        ? "No information about browsers"
-                                        : "Loading browsers"
-                                }
-                                data-testid="capabilities-browser-select"
-                            />
-                        </PlaqueFieldGrid>
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="Webdriver"
+                                data-testid="capabilities-driver-webdriver"
+                            >
+                                <PlaqueTagstrip
+                                    label="Webdriver"
+                                    paramId="webdriver"
+                                    className="capabilities-browser-select"
+                                    options={webdriverOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(webdriverAvailable, "Webdriver browsers")}
+                                    data-testid="capabilities-browser-select"
+                                />
+                            </PlaqueFieldGrid>
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="Playwright"
+                                data-testid="capabilities-driver-playwright"
+                            >
+                                <PlaqueTagstrip
+                                    label="Playwright"
+                                    paramId="playwright"
+                                    className="capabilities-browser-select"
+                                    options={playwrightOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(playwrightAvailable, "Playwright browsers")}
+                                    data-testid="capabilities-browser-select-playwright"
+                                />
+                            </PlaqueFieldGrid>
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="Android"
+                                data-testid="capabilities-driver-android"
+                            >
+                                <PlaqueTagstrip
+                                    label="Android"
+                                    paramId="android"
+                                    className="capabilities-browser-select"
+                                    options={androidOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(androidAvailable, "Android devices")}
+                                    data-testid="capabilities-browser-select-android"
+                                />
+                            </PlaqueFieldGrid>
+                            <PlaqueFieldGrid layout="solo" aria-label="iOS" data-testid="capabilities-driver-ios">
+                                <PlaqueTagstrip
+                                    label="iOS"
+                                    paramId="ios"
+                                    className="capabilities-browser-select"
+                                    options={iosOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(iosAvailable, "iOS devices")}
+                                    data-testid="capabilities-browser-select-ios"
+                                />
+                            </PlaqueFieldGrid>
+                        </div>
                     </Panel>
                     <Launch
                         browser={browser}
@@ -2138,7 +2212,10 @@ const Launch = ({
                     titleTestId="capabilities-browser-title"
                     className="capabilities-config-panel"
                 >
-                    <div className="plaque-field-grid-stack" data-testid="capabilities-browser-caps">
+                    <div
+                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        data-testid="capabilities-browser-caps"
+                    >
                         <PlaqueFieldGrid
                             layout="solo"
                             aria-label="Proxy preset"

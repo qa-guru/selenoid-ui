@@ -70,19 +70,29 @@ function expectColor(actual, expectedHex) {
 }
 
 describe("Capabilities visual contract (Driver + Remote hub + Browser caps panels)", () => {
-    it("renders Driver panel with tagstrip of available browsers", () => {
+    it("renders Driver panel with Webdriver / Playwright / Android tagstrips", () => {
         renderCapabilities();
 
         const driver = screen.getByTestId("capabilities-driver-panel");
         expect(driver).toHaveClass("panel", "panel--content");
         expect(screen.getByTestId("capabilities-driver-title")).toHaveTextContent("Driver");
 
-        const tagstrip = screen.getByTestId("capabilities-browser-select");
-        expect(tagstrip).toHaveClass("capabilities-browser-select");
-        expect(tagstrip).toHaveAttribute("data-param-id", "available");
-        expect(within(tagstrip).getByRole("group")).toBeInTheDocument();
-        expect(within(tagstrip).getByRole("button", { name: "chrome: 149.0" })).toBeInTheDocument();
-        expect(within(tagstrip).getByRole("button", { name: "firefox: 151.0" })).toBeInTheDocument();
+        const stack = screen.getByTestId("capabilities-driver-browsers");
+        expect(stack).toHaveClass("plaque-field-grid-stack", "plaque-field-grid-stack--magnet");
+
+        const webdriver = screen.getByTestId("capabilities-browser-select");
+        expect(webdriver).toHaveClass("capabilities-browser-select");
+        expect(webdriver).toHaveAttribute("data-param-id", "webdriver");
+        expect(within(webdriver).getByRole("group")).toBeInTheDocument();
+        expect(within(webdriver).getByRole("button", { name: "chrome: 149.0" })).toBeInTheDocument();
+        expect(within(webdriver).getByRole("button", { name: "firefox: 151.0" })).toBeInTheDocument();
+
+        expect(screen.getByTestId("capabilities-browser-select-playwright")).toHaveAttribute(
+            "data-param-id",
+            "playwright"
+        );
+        expect(screen.getByTestId("capabilities-browser-select-android")).toHaveAttribute("data-param-id", "android");
+        expect(screen.getByTestId("capabilities-browser-select-ios")).toHaveAttribute("data-param-id", "ios");
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
     });
 
@@ -161,13 +171,21 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(document.querySelector("textarea.more-capabilities")).toBeNull();
     });
 
-    it("keeps Driver tagstrip in a solo row without magnet nowrap", () => {
+    it("keeps Driver tagstrips in magnet solo rows (dividers flush)", () => {
         renderCapabilities();
 
-        const browsers = screen.getByTestId("capabilities-driver-browsers");
-        expect(browsers).toHaveClass("plaque-field-grid--solo");
-        expect(browsers.closest(".plaque-field-grid-stack--magnet")).toBeNull();
-        expect(within(browsers).getByTestId("capabilities-browser-select")).toBeInTheDocument();
+        const stack = screen.getByTestId("capabilities-driver-browsers");
+        expect(stack).toHaveClass("plaque-field-grid-stack--magnet");
+
+        for (const id of [
+            "capabilities-driver-webdriver",
+            "capabilities-driver-playwright",
+            "capabilities-driver-android",
+            "capabilities-driver-ios",
+        ]) {
+            expect(screen.getByTestId(id)).toHaveClass("plaque-field-grid--solo");
+        }
+        expect(within(stack).getByTestId("capabilities-browser-select")).toBeInTheDocument();
     });
 
     it("locks Capabilities body to continuous 6-col clamp (no discrete fr ladder)", async () => {
