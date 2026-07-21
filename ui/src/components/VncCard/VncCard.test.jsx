@@ -47,22 +47,30 @@ describe("VncCard", () => {
         const { container } = renderVnc({
             browser: { caps: { enableVNC: false } },
         });
-        expect(container.querySelector(".vnc-card")).toBeNull();
+        expect(container.querySelector(".vnc-window")).toBeNull();
     });
 
-    it("renders icon-btn chrome without dripicons when connected", () => {
-        renderVnc();
+    it("renders the design-system VncWindow chrome when connected", () => {
+        const { container } = renderVnc();
 
         expect(screen.getByTestId("vnc-screen-stub")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "Back" })).toHaveClass("icon-btn", "control_back", "link");
-        expect(screen.getByRole("button", { name: "Lock/Unlock Screen" })).toHaveClass("icon-btn", "control_lock");
-        expect(screen.getByRole("button", { name: "Fullscreen" })).toHaveClass("icon-btn", "control_fullscreen");
-        expect(screen.getByRole("button", { name: "copyFromSelenoid" })).toHaveClass("icon-btn", "control_copy");
-        expect(screen.getByRole("button", { name: "pasteToSelenoid" })).toHaveClass("icon-btn", "control_upload");
+        expect(container.querySelector(".vnc-window--connected")).toBeInTheDocument();
+
+        expect(screen.getByRole("link", { name: "Back" })).toHaveClass("window-control", "window-control--danger");
+        expect(screen.getByRole("button", { name: "Unlock screen" })).toHaveClass(
+            "window-control",
+            "window-control--info"
+        );
+        expect(screen.getByRole("button", { name: "Enter fullscreen" })).toHaveClass(
+            "window-control",
+            "window-control--success"
+        );
+        expect(screen.getByRole("button", { name: "Copy from Selenoid" })).toHaveClass("window-control");
+        expect(screen.getByRole("button", { name: "Paste to Selenoid" })).toHaveClass("window-control");
 
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
         expect(screen.getByRole("link", { name: "Back" }).querySelector("svg")).toBeTruthy();
-        expect(screen.getByRole("button", { name: "Fullscreen" }).querySelector("svg")).toBeTruthy();
+        expect(screen.getByRole("button", { name: "Enter fullscreen" }).querySelector("svg")).toBeTruthy();
     });
 
     it("toggles fullscreen and notifies parent", async () => {
@@ -70,16 +78,18 @@ describe("VncCard", () => {
         const onVNCFullscreenChange = vi.fn();
         renderVnc({ onVNCFullscreenChange });
 
-        await user.click(screen.getByRole("button", { name: "Fullscreen" }));
+        await user.click(screen.getByRole("button", { name: "Enter fullscreen" }));
         expect(onVNCFullscreenChange).toHaveBeenCalledWith(true);
+        expect(screen.getByRole("button", { name: "Exit fullscreen" })).toBeInTheDocument();
     });
 
     it("toggles lock via VncScreen.lock", async () => {
         const user = userEvent.setup();
         renderVnc();
 
-        await user.click(screen.getByRole("button", { name: "Lock/Unlock Screen" }));
+        await user.click(screen.getByRole("button", { name: "Unlock screen" }));
         expect(lockSpy).toHaveBeenCalledWith(true);
+        expect(screen.getByRole("button", { name: "Lock screen" })).toBeInTheDocument();
     });
 
     it("invokes clipboard fetch on copy control", async () => {
@@ -92,7 +102,7 @@ describe("VncCard", () => {
         });
 
         renderVnc();
-        await user.click(screen.getByRole("button", { name: "copyFromSelenoid" }));
+        await user.click(screen.getByRole("button", { name: "Copy from Selenoid" }));
 
         expect(fetchMock).toHaveBeenCalledWith("/clipboard/sess-123", { method: "GET" });
         vi.unstubAllGlobals();
