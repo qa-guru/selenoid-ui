@@ -1282,20 +1282,29 @@ function highlightMarkdownLine(line, prefix) {
   }
   return highlightMarkdownInline(line, prefix);
 }
+function trimOutputBlankLines(text) {
+  return String(text).replace(/^\n+/, "").replace(/\n+$/, "");
+}
 function highlightOutput(text, kind) {
+  const trimmed = trimOutputBlankLines(text);
   switch (kind) {
     case "json":
-      return highlightJson(text);
+      return highlightJson(trimmed);
     case "shell":
-      return highlightShell(text);
+      return highlightShell(trimmed);
     case "curl":
-      return highlightCurlHeredoc(text);
+      return highlightCurlHeredoc(trimmed);
     case "markdown":
-      return highlightMarkdown(text);
+      return highlightMarkdown(trimmed);
     case "plain":
     default:
-      return escapeHtml(text);
+      return escapeHtml(trimmed);
   }
+}
+function mountHighlightedOutput(el, text, kind = "json") {
+  if (!el) return;
+  el.classList.add("ch-code");
+  el.innerHTML = highlightOutput(text, kind);
 }
 export {
   AppHeader,
@@ -1338,6 +1347,8 @@ export {
   highlightMarkdown,
   highlightOutput,
   highlightShell,
+  mountHighlightedOutput,
+  trimOutputBlankLines,
   usePlaqueFieldMagnet
 };
 //# sourceMappingURL=index.js.map

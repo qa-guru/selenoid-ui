@@ -175,6 +175,19 @@
     overflow: auto;
 }
 
+/*
+  Terminal: __code owns the inset. React Panel wraps children in __body —
+  zero body pad so there is no phantom blank line before `{` / after `}`.
+  Prefer direct `.panel > .panel__code` (templates/panel.html); body wrap is ok
+  only with this rule.
+*/
+.panel--terminal > .panel__body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
 .panel__code {
     flex: 1 1 auto;
     min-height: 0;
