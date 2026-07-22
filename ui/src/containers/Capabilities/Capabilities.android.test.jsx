@@ -119,6 +119,32 @@ describe("Capabilities Android device panel", () => {
         expect(panel.textContent).toContain('"appium:orientation": "PORTRAIT"');
         expect(panel.textContent).toContain('"appium:noReset": false');
     });
+
+    it("uses Appium clients in java / python / js / ts snippets (not Selenium RemoteWebDriver)", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+        await selectAndroid(user);
+
+        const panel = screen.getByTestId("capabilities-terminal-panel");
+        const tabs = within(panel).getByRole("tablist", { name: "Language" });
+
+        await user.click(within(tabs).getByRole("tab", { name: "Java" }));
+        expect(panel.textContent).toContain("AndroidDriver");
+        expect(panel.textContent).not.toContain("RemoteWebDriver");
+
+        await user.click(within(tabs).getByRole("tab", { name: "Python" }));
+        expect(panel.textContent).toContain("from appium import webdriver");
+        expect(panel.textContent).toContain("AppiumOptions");
+        expect(panel.textContent).not.toContain("from selenium");
+
+        await user.click(within(tabs).getByRole("tab", { name: "Javascript" }));
+        expect(panel.textContent).toContain("require('webdriverio')");
+        expect(panel.textContent).toContain("await remote(options)");
+
+        await user.click(within(tabs).getByRole("tab", { name: "Typescript" }));
+        expect(panel.textContent).toContain("from 'webdriverio'");
+        expect(panel.textContent).toContain("await remote(options)");
+    });
 });
 
 describe("Capabilities iOS placeholder", () => {

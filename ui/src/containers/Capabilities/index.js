@@ -1354,26 +1354,26 @@ ${appJson ? `caps.setCapability("appium:app", ${appJson});\n` : ""}caps.setCapab
 caps.setCapability("appium:autoGrantPermissions", ${autoGrantBool});
 caps.setCapability("appium:orientation", ${orientationJson});
 ${javaSelenoid}
-RemoteWebDriver driver = new RemoteWebDriver(new URL("${origin}/wd/hub"), caps);
+AndroidDriver driver = new AndroidDriver(new URL("${origin}/wd/hub"), caps);
 `,
-        python: `from selenium import webdriver
+        python: `from appium import webdriver
+from appium.options.common import AppiumOptions
 
 capabilities = ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 0)}
 
-driver = webdriver.Remote(
-    command_executor="${origin}/wd/hub",
-    desired_capabilities=capabilities)
+options = AppiumOptions().load_capabilities(capabilities)
+driver = webdriver.Remote("${origin}/wd/hub", options=options)
 `,
-        javascript: `var webdriverio = require('webdriverio');
+        javascript: `const { remote } = require('webdriverio');
 
-var options = {
+const options = {
     hostname: '${window.location.hostname}',
     port: 4444,
     protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
     path: '/wd/hub',
     capabilities: ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 4)}
 };
-var client = webdriverio.remote(options);
+const driver = await remote(options);
 `,
         typescript: `import { remote, type RemoteOptions } from 'webdriverio';
 
@@ -1384,7 +1384,7 @@ const options: RemoteOptions = {
     path: '/wd/hub',
     capabilities: ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 4)}
 };
-const client = await remote(options);
+const driver = await remote(options);
 `,
     };
 };
