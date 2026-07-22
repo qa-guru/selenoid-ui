@@ -12,6 +12,7 @@ import {
     browserProtocol,
     findPlaywrightSession,
     isPlaywrightBrowser,
+    resizeSessionWindow,
     sessionIdFrom,
 } from "../../util/capabilitiesLogic";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
@@ -2252,7 +2253,13 @@ const Launch = ({
 
             if (response.status === 200) {
                 const data = await response.json();
-                navigate(`/sessions/${sessionIdFrom({ response: data })}`);
+                const sessionId = sessionIdFrom({ response: data });
+                try {
+                    await resizeSessionWindow(sessionId, screenResolution);
+                } catch (resizeErr) {
+                    console.warn("Can't resize session window to screenResolution", resizeErr);
+                }
+                navigate(`/sessions/${sessionId}`);
             }
         } catch (err) {
             console.error("Can't start session manually", err);
