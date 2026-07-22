@@ -10,6 +10,7 @@ import { StyledCapabilities } from "./style.css";
 import { retainPlaywrightSocket } from "../../util/playwrightSessions";
 import {
     browserProtocol,
+    browserWindowOptions,
     findPlaywrightSession,
     isPlaywrightBrowser,
     resizeSessionWindow,
@@ -64,6 +65,7 @@ import "@zero-design-system/react/styles.css";
  */
 const SESSION_TIMEOUT_OPTIONS = [
     { value: "1m" },
+    { value: "2m" },
     { value: "5m" },
     { value: "15m" },
     { value: "30m" },
@@ -90,12 +92,22 @@ const ORIENTATION_OPTIONS = [
     { value: "LANDSCAPE", label: "LANDSCAPE" },
 ];
 
+/** Aerokube emulator skins — selenoid:options.skin (hub → SKIN env). */
+const ANDROID_SKIN_OPTIONS = [
+    { value: "QVGA", label: "QVGA (240×320)" },
+    { value: "HVGA", label: "HVGA (320×480)" },
+];
+
+/** Android hub sessionTimeout — anti-flake default (cold start still bounded by hub service timeout). */
+const ANDROID_DEFAULT_SESSION_TIMEOUT = "2m";
+
 /** Android device caps beyond image DEFAULT_CAPABILITIES — mirrored by the Android panel. */
 const DEFAULT_ANDROID_OPTS = {
     app: "",
     noReset: "false",
     autoGrantPermissions: "true",
     orientation: "PORTRAIT",
+    skin: "QVGA",
 };
 
 /**
@@ -249,12 +261,19 @@ const buildSelenoidOptions = ({
 const asBool = (value) => value === true || value === "true";
 
 /** Minimal selenoid:options for a mobile (Android) session — no proxy/har/log/env. */
-const buildAndroidSelenoidOptions = ({ name, sessionTimeout, enableVnc, enableVideo }) => ({
-    enableVNC: asBool(enableVnc),
-    enableVideo: asBool(enableVideo),
-    name,
-    sessionTimeout,
-});
+const buildAndroidSelenoidOptions = ({ name, sessionTimeout, enableVnc, enableVideo, skin }) => {
+    const opts = {
+        enableVNC: asBool(enableVnc),
+        enableVideo: asBool(enableVideo),
+        name,
+        sessionTimeout,
+    };
+    const skinValue = String(skin || "").trim();
+    if (skinValue) {
+        opts.skin = skinValue;
+    }
+    return opts;
+};
 
 /**
  * W3C alwaysMatch for Selenoid Android (appium:* caps). Image entrypoint sets
@@ -442,6 +461,7 @@ const DEFAULT_SESSION_OPTS = {
     androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
     androidAutoGrantPermissions: DEFAULT_ANDROID_OPTS.autoGrantPermissions,
     androidOrientation: DEFAULT_ANDROID_OPTS.orientation,
+    androidSkin: DEFAULT_ANDROID_OPTS.skin,
 };
 
 /** Tab order in the terminal language rail (Object.keys order is not the UI SSOT). */
@@ -534,6 +554,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             noReset: String(sessionOpts.androidNoReset),
             autoGrantPermissions: String(sessionOpts.androidAutoGrantPermissions),
             orientation: sessionOpts.androidOrientation,
+            skin: sessionOpts.androidSkin || DEFAULT_ANDROID_OPTS.skin,
         });
     }
 
@@ -574,6 +595,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
                 `- app: **${payload.app || "—"}**`,
                 `- noReset / autoGrantPermissions: **${payload.noReset}** / **${payload.autoGrantPermissions}**`,
                 `- orientation: **${payload.orientation}**`,
+                `- skin: **${payload.skin}**`,
             ])
             .join("\n");
     }
@@ -1310,9 +1332,16 @@ const androidCode = (version = "", origin = "http://selenoid-uri:4444", session 
         noReset = DEFAULT_ANDROID_OPTS.noReset,
         autoGrantPermissions = DEFAULT_ANDROID_OPTS.autoGrantPermissions,
         orientation = DEFAULT_ANDROID_OPTS.orientation,
+        skin = DEFAULT_ANDROID_OPTS.skin,
     } = android;
 
-    const selenoidOptions = buildAndroidSelenoidOptions({ name: sessionName, sessionTimeout, enableVnc, enableVideo });
+    const selenoidOptions = buildAndroidSelenoidOptions({
+        name: sessionName,
+        sessionTimeout,
+        enableVnc,
+        enableVideo,
+        skin,
+    });
     const alwaysMatch = buildAndroidCapabilities({
         version,
         app,
@@ -1419,6 +1448,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         DEFAULT_SESSION_OPTS.androidAutoGrantPermissions
     );
     const [androidOrientation, setAndroidOrientation] = useState(DEFAULT_SESSION_OPTS.androidOrientation);
+    const [androidSkin, setAndroidSkin] = useState(DEFAULT_SESSION_OPTS.androidSkin);
     const [vectorDraft, setVectorDraft] = useState(null);
     const [vectorMiss, setVectorMiss] = useState(false);
     const registryRef = useRef(null);
@@ -1467,6 +1497,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         noReset: androidNoReset,
         autoGrantPermissions: androidAutoGrantPermissions,
         orientation: androidOrientation,
+        skin: androidSkin,
     };
     const sessionOpts = {
         sessionTimeout,
@@ -1489,6 +1520,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         androidNoReset: androidNoReset === "true",
         androidAutoGrantPermissions: androidAutoGrantPermissions === "true",
         androidOrientation,
+        androidSkin,
     };
     const capsSnap = {
         browserValue: value || "",
@@ -1512,6 +1544,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         androidNoReset,
         androidAutoGrantPermissions,
         androidOrientation,
+        androidSkin,
     };
     const vectorId = fingerprint(capsSnap);
     const displayVector = vectorDraft ?? vectorId;
@@ -1598,6 +1631,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         setAndroidNoReset(next.androidNoReset || DEFAULT_ANDROID_OPTS.noReset);
         setAndroidAutoGrantPermissions(next.androidAutoGrantPermissions || DEFAULT_ANDROID_OPTS.autoGrantPermissions);
         setAndroidOrientation(next.androidOrientation || DEFAULT_ANDROID_OPTS.orientation);
+        setAndroidSkin(next.androidSkin || DEFAULT_ANDROID_OPTS.skin);
         if (next.browserValue) {
             const found = selectableBrowsers.find((item) => item.value === next.browserValue);
             onBrowserChange(found || {});
@@ -1631,6 +1665,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
             androidAutoGrantPermissions: DEFAULT_ANDROID_OPTS.autoGrantPermissions,
             androidOrientation: DEFAULT_ANDROID_OPTS.orientation,
+            androidSkin: DEFAULT_ANDROID_OPTS.skin,
         });
     };
 
@@ -1686,6 +1721,9 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         }
         const next = selectableBrowsers.find((item) => item.value === optionValue);
         if (next) {
+            if (next.name === "android") {
+                setSessionTimeout(ANDROID_DEFAULT_SESSION_TIMEOUT);
+            }
             onBrowserChange(next);
         }
     };
@@ -1854,6 +1892,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         setAndroidOrientation={(v) => {
                             touchOptions();
                             setAndroidOrientation(v);
+                        }}
+                        androidSkin={androidSkin}
+                        setAndroidSkin={(v) => {
+                            touchOptions();
+                            setAndroidSkin(v);
                         }}
                         enableVnc={enableVnc}
                         setEnableVnc={(v) => {
@@ -2086,6 +2129,8 @@ const Launch = ({
     setAndroidAutoGrantPermissions,
     androidOrientation,
     setAndroidOrientation,
+    androidSkin,
+    setAndroidSkin,
     enableVnc,
     setEnableVnc,
     enableVideo,
@@ -2137,6 +2182,7 @@ const Launch = ({
                 sessionTimeout,
                 enableVnc: vnc,
                 enableVideo: video,
+                skin: androidSkin,
             });
             const androidAlwaysMatch = buildAndroidCapabilities({
                 version,
@@ -2229,6 +2275,11 @@ const Launch = ({
         if (proxy) {
             alwaysMatch.proxy = proxy;
         }
+        const windowOpts = browserWindowOptions(name, screenResolution);
+        if (windowOpts) {
+            Object.assign(alwaysMatch, windowOpts);
+            Object.assign(desiredCapabilities, windowOpts);
+        }
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 300000);
@@ -2277,6 +2328,7 @@ const Launch = ({
         androidNoReset,
         androidAutoGrantPermissions,
         androidOrientation,
+        androidSkin,
         enableVnc,
         enableVideo,
         enableHar,
@@ -2837,6 +2889,16 @@ const Launch = ({
                                 options={ORIENTATION_OPTIONS}
                                 onChange={setAndroidOrientation}
                                 data-testid="caps-android-orientation"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid layout="solo" aria-label="Skin" data-testid="capabilities-android-skin">
+                            <PlaqueSelect
+                                label="skin"
+                                paramId="skin"
+                                value={androidSkin}
+                                options={ANDROID_SKIN_OPTIONS}
+                                onChange={setAndroidSkin}
+                                data-testid="caps-android-skin"
                             />
                         </PlaqueFieldGrid>
                     </div>

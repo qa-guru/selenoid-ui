@@ -139,12 +139,15 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
 
         await waitFor(() =>
-            expect(fetchMock.mock.calls.some(([url]) => String(url) === "/wd/hub/session/sess-1/window/rect")).toBe(
+            expect(fetchMock.mock.calls.some(([url]) => String(url) === "/wd/hub/session/sess-1/window/maximize")).toBe(
                 true
             )
         );
-        const resizeCall = fetchMock.mock.calls.find(([url]) => String(url) === "/wd/hub/session/sess-1/window/rect");
-        expect(JSON.parse(resizeCall[1].body)).toEqual({ x: 0, y: 0, width: 1280, height: 1024 });
+        expect(body.capabilities.alwaysMatch["goog:chromeOptions"].args).toEqual([
+            "--window-size=1280,1024",
+            "--window-position=0,0",
+            "--start-maximized",
+        ]);
 
         fetchMock.mockRestore();
     });
