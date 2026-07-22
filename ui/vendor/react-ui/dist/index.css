@@ -1716,6 +1716,7 @@ select.plaque-field__control option {
   justify-content: center;
   min-width: 0;
 }
+/* Fills nearest positioned ancestor (app content shell / catalog demo host). */
 .vnc-window-frame--fullscreen {
   position: absolute;
   z-index: 2;

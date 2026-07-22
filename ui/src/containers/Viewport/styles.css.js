@@ -25,7 +25,11 @@ body {
 }
 `;
 
+/* Content shell below the fixed header: positioned containing block for
+   VNC/app fullscreen (`position: absolute; inset: 0` fills this box). */
 export const StyledViewport = styled.div`
+    position: relative;
     display: flex;
     flex-direction: column;
+    min-height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
 `;
