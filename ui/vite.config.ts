@@ -10,6 +10,7 @@ import { VitePWA } from "vite-plugin-pwa";
 const LIVE_NAV_DENYLIST = [
     /^\/events/,
     /^\/status/,
+    /^\/ui\/status/,
     /^\/video/,
     /^\/clipboard/,
     /^\/wd\/hub/,
@@ -92,6 +93,10 @@ export default defineConfig({
                 changeOrigin: true,
             },
             "/status": {
+                target: "http://localhost:8080",
+                changeOrigin: true,
+            },
+            "/ui/status": {
                 target: "http://localhost:8080",
                 changeOrigin: true,
             },

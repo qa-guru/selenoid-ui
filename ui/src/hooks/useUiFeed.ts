@@ -59,7 +59,9 @@ export function useUiFeed() {
 
         const loadStatus = async () => {
             try {
-                const response = await fetch("/status", { cache: "no-store" });
+                // UI-shaped payload ({state,...}) lives on /ui/status; public /status
+                // is the flat upstream-selenoid hub contract (student autotests).
+                const response = await fetch("/ui/status", { cache: "no-store" });
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }

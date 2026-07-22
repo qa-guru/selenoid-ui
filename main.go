@@ -57,7 +57,12 @@ func mux(sse *sse.SseBroker) http.Handler {
 	mux.HandleFunc("/ws/", ws)
 	mux.HandleFunc("/playwright/", playwright)
 	mux.HandleFunc("/ping", ping)
+	// UI-shaped status ({state, origin, browsers, sessions, browserProtocols,
+	// playwrightAccessKey, version}) consumed by the React UI. Served on a dedicated
+	// /ui/status path so the public /status can stay the flat upstream-selenoid hub
+	// contract (nginx routes public /status → hub). /status kept for standalone runs.
 	mux.HandleFunc("/status", status)
+	mux.HandleFunc("/ui/status", status)
 	mux.HandleFunc("/browsers-config", browsersConfig)
 	mux.HandleFunc("/video/", func(w http.ResponseWriter, r *http.Request) {
 		reverseProxy(statusURI).ServeHTTP(w, r)
