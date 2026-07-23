@@ -845,6 +845,25 @@ import { jsx as jsx20, jsxs as jsxs11 } from "react/jsx-runtime";
 function IconClose() {
   return /* @__PURE__ */ jsx20("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx20("path", { d: "m4 4 8 8M12 4l-8 8" }) });
 }
+function IconTrash() {
+  return /* @__PURE__ */ jsxs11(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx20("path", { d: "M2.5 4.5h11" }),
+        /* @__PURE__ */ jsx20("path", { d: "M6 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" }),
+        /* @__PURE__ */ jsx20("path", { d: "M4.5 4.5l.7 8a1.5 1.5 0 0 0 1.5 1.3h3.6a1.5 1.5 0 0 0 1.5-1.3l.7-8" }),
+        /* @__PURE__ */ jsx20("path", { d: "M6.5 7v4M9.5 7v4" })
+      ]
+    }
+  );
+}
 function IconDocumentRemove() {
   return /* @__PURE__ */ jsxs11(
     "svg",
@@ -989,7 +1008,8 @@ var defaultLabels = {
   enterFullscreen: "Enter fullscreen",
   exitFullscreen: "Exit fullscreen",
   copy: "Copy from Selenoid",
-  paste: "Paste to Selenoid"
+  paste: "Paste to Selenoid",
+  kill: "Kill container"
 };
 function VncWindow({
   state,
@@ -997,11 +1017,13 @@ function VncWindow({
   unlocked = false,
   screenSize,
   back,
+  kill,
   onBack,
   onToggleLock,
   onToggleFullscreen,
   onCopy,
   onPaste,
+  onKill,
   children,
   labels,
   className,
@@ -1013,6 +1035,17 @@ function VncWindow({
     ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
   } : void 0;
   const backControl = back ?? /* @__PURE__ */ jsx22(WindowControl, { tone: "danger", "aria-label": l.back, title: l.back, onClick: onBack, children: /* @__PURE__ */ jsx22(IconClose, {}) });
+  const killControl = kill ?? (onKill ? /* @__PURE__ */ jsx22(
+    WindowControl,
+    {
+      tone: "danger",
+      sessionControl: true,
+      "aria-label": l.kill,
+      title: l.kill,
+      onClick: onKill,
+      children: /* @__PURE__ */ jsx22(IconTrash, {})
+    }
+  ) : null);
   return /* @__PURE__ */ jsxs12("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: [
     /* @__PURE__ */ jsxs12(
       "div",
@@ -1057,6 +1090,7 @@ function VncWindow({
               )
             ] }),
             /* @__PURE__ */ jsxs12("div", { className: "vnc-window__actions", children: [
+              killControl,
               /* @__PURE__ */ jsx22(WindowControl, { tone: "neutral", "aria-label": l.copy, title: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx22(IconVncCopy, {}) }),
               /* @__PURE__ */ jsx22(WindowControl, { tone: "neutral", "aria-label": l.paste, title: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx22(IconUpload, {}) })
             ] })
@@ -1325,6 +1359,7 @@ export {
   IconDownload,
   IconLock,
   IconReset,
+  IconTrash,
   IconUnlock,
   IconUpload,
   IconVncCopy,

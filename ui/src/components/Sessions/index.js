@@ -5,29 +5,9 @@ import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import styled from "styled-components";
-import { Badge } from "@zero-design-system/react";
+import { Badge, IconTrash } from "@zero-design-system/react";
 import { useSessionDelete } from "./service";
 import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
-
-/** Local trash glyph for Sessions delete (no IconTrash in react-ui exports). */
-function IconTrash() {
-    return (
-        <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <path d="M2.5 4.5h11" />
-            <path d="M6 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" />
-            <path d="M4.5 4.5l.7 8a1.5 1.5 0 0 0 1.5 1.3h3.6a1.5 1.5 0 0 0 1.5-1.3l.7-8" />
-            <path d="M6.5 7v4M9.5 7v4" />
-        </svg>
-    );
-}
 
 /** Empty-state hourglass — composition only; dripicons off. */
 function IconHourglass() {
