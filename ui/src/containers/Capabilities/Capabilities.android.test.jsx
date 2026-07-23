@@ -6,12 +6,16 @@ import Capabilities from "./index";
 
 const BROWSERS = {
     chrome: { "149.0": {} },
-    android: { "16.0": {} },
+    android: { "10.0": {}, "11.0": {}, "16.0": {} },
 };
 
 const BROWSER_PROTOCOLS = {
     chrome: { "149.0": { protocol: "webdriver" } },
-    android: { "16.0": { protocol: "webdriver" } },
+    android: {
+        "10.0": { protocol: "webdriver" },
+        "11.0": { protocol: "webdriver" },
+        "16.0": { protocol: "webdriver" },
+    },
 };
 
 function renderCapabilities() {
@@ -26,7 +30,7 @@ function renderCapabilities() {
                             browserProtocols={BROWSER_PROTOCOLS}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            playwrightAccessKey=""
+                            accessKey=""
                         />
                     }
                 />
@@ -36,8 +40,8 @@ function renderCapabilities() {
     );
 }
 
-async function selectAndroid(user) {
-    await user.click(screen.getByRole("button", { name: "android: 16.0" }));
+async function selectAndroid(user, version = "10.0") {
+    await user.click(screen.getByRole("button", { name: `android: ${version}` }));
 }
 
 function segButton(fieldTestId, value) {
@@ -60,11 +64,36 @@ describe("Capabilities Android device panel", () => {
         expect(screen.getByTestId("caps-android-no-reset")).toHaveAttribute("data-param-id", "noReset");
         expect(screen.getByTestId("caps-android-auto-grant")).toHaveAttribute("data-param-id", "autoGrantPermissions");
         expect(screen.getByTestId("caps-android-orientation")).toHaveAttribute("data-param-id", "orientation");
+        expect(screen.getByTestId("caps-android-skin")).toHaveAttribute("data-param-id", "skin");
 
         // Mobile hides WebDriver proxy / Playwright panels.
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-playwright-panel")).toBeNull();
+    });
+
+    it("defaults Android sessionTimeout to 2m anti-flake", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+        await selectAndroid(user);
+
+        expect(screen.getByRole("combobox", { name: "sessionTimeout" })).toHaveValue("2m");
+    });
+
+    it("shows android 11.0 chip from catalog and keeps 2m + QVGA defaults", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+
+        expect(screen.getByRole("button", { name: "android: 11.0" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "android: 11.0" }));
+
+        expect(screen.getByRole("combobox", { name: "sessionTimeout" })).toHaveValue("2m");
+        expect(screen.getByRole("combobox", { name: "skin" })).toHaveValue("QVGA");
+
+        const panel = screen.getByTestId("capabilities-terminal-panel");
+        expect(panel.textContent).toContain('"browserVersion": "11.0"');
+        expect(panel.textContent).toContain('"skin": "QVGA"');
     });
 
     it("puts appium:* caps in alwaysMatch (no proxy, no WebDriver desiredCapabilities set)", async () => {
@@ -76,11 +105,12 @@ describe("Capabilities Android device panel", () => {
         });
 
         renderCapabilities();
-        await selectAndroid(user);
+        await selectAndroid(user, "16.0");
 
         await user.type(screen.getByTestId("caps-android-app"), "https://example.org/app-debug.apk");
         await user.click(segButton("caps-android-no-reset", "true"));
         await user.selectOptions(screen.getByRole("combobox", { name: "orientation" }), "LANDSCAPE");
+        await user.selectOptions(screen.getByRole("combobox", { name: "skin" }), "HVGA");
 
         await user.click(screen.getByTestId("capabilities-create-session"));
 
@@ -100,6 +130,8 @@ describe("Capabilities Android device panel", () => {
         expect(am["appium:orientation"]).toBe("LANDSCAPE");
         expect(am["selenoid:options"].enableVNC).toBe(true);
         expect(am["selenoid:options"].name).toBe("Manual session");
+        expect(am["selenoid:options"].sessionTimeout).toBe("2m");
+        expect(am["selenoid:options"].skin).toBe("HVGA");
 
         // Android is not a WebDriver-proxy path.
         expect(am.proxy).toBeUndefined();
@@ -117,6 +149,7 @@ describe("Capabilities Android device panel", () => {
         expect(panel.textContent).toContain('"browserName": "android"');
         expect(panel.textContent).toContain('"platformName": "Android"');
         expect(panel.textContent).toContain('"appium:orientation": "PORTRAIT"');
+        expect(panel.textContent).toContain('"skin": "QVGA"');
         expect(panel.textContent).toContain('"appium:noReset": false');
     });
 

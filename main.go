@@ -34,7 +34,7 @@ var (
 	browsersConfPath    string
 	allowedOrigin       string
 	users               string
-	playwrightAccessKey string
+	accessKey string
 	timeout             time.Duration
 	period              time.Duration
 
@@ -58,7 +58,7 @@ func mux(sse *sse.SseBroker) http.Handler {
 	mux.HandleFunc("/playwright/", playwright)
 	mux.HandleFunc("/ping", ping)
 	// UI-shaped status ({state, origin, browsers, sessions, browserProtocols,
-	// playwrightAccessKey, version}) consumed by the React UI. Served on a dedicated
+	// accessKey, version}) consumed by the React UI. Served on a dedicated
 	// /ui/status path so the public /status can stay the flat upstream-selenoid hub
 	// contract (nginx routes public /status → hub). /status kept for standalone runs.
 	mux.HandleFunc("/status", status)
@@ -158,7 +158,7 @@ func status(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 
 	v := gitRevision + "[" + buildStamp + "]"
-	status, err := selenoid.Status(req.Context(), webdriverURI, statusURI, v, browserProtocols, playwrightAccessKey)
+	status, err := selenoid.Status(req.Context(), webdriverURI, statusURI, v, browserProtocols, accessKey)
 	if err != nil {
 		log.Printf("[ERROR] [Can't get status: %v]", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -220,7 +220,7 @@ func init() {
 	flag.StringVar(&browsersConfPath, "browsers-conf", "", "browsers.json path with protocol metadata for the UI")
 	flag.StringVar(&allowedOrigin, "allowed-origin", "", "comma separated list of allowed Origin headers (use * to allow all)")
 	flag.StringVar(&users, "users", "", "htpasswd file path containing users information")
-	flag.StringVar(&playwrightAccessKey, "playwright-access-key", "", "Public Playwright ?accessKey= value exposed to UI Create Session / snippets")
+	flag.StringVar(&accessKey, "access-key", "", "Public hub accessKey (user:pass) for UI auth + Playwright WS query")
 	flag.DurationVar(&timeout, "timeout", 3*time.Second, "response timeout, e.g. 5s or 1m")
 	flag.DurationVar(&period, "period", 5*time.Second, "data refresh period, e.g. 5s or 1m")
 	flag.BoolVar(&version, "version", false, "Show version and exit")
@@ -280,7 +280,7 @@ func main() {
 	go sse.Tick(broker, func(ctx context.Context, br sse.Broker) {
 		timedCtx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
-		status, err := selenoid.Status(timedCtx, webdriverURI, statusURI, gitRevision+"["+buildStamp+"]", browserProtocols, playwrightAccessKey)
+		status, err := selenoid.Status(timedCtx, webdriverURI, statusURI, gitRevision+"["+buildStamp+"]", browserProtocols, accessKey)
 		if err != nil {
 			log.Printf("[ERROR] [Can't get status: %v]", err)
 			br.Notify([]byte(`{ "errors": [{"msg": "can't get status"}] }`))

@@ -10,6 +10,9 @@ import { StyledLog } from "./style.css";
 import colors from "ansi-256-colors";
 
 const RESIZE_DEBOUNCE_MS = 100;
+/** Matches `.term .terminal { line-height: 20px }` — fallback if cell metrics unavailable. */
+const FALLBACK_CELL_HEIGHT_PX = 20;
+const MIN_ROWS = 2;
 
 export default class Log extends Component {
     constructor(props) {
@@ -22,6 +25,7 @@ export default class Log extends Component {
             enableBold: false,
             fontSize: 13,
             lineHeight: 1,
+            scrollback: 5000,
             theme: {
                 background: "#151515",
             },
@@ -33,13 +37,15 @@ export default class Log extends Component {
         this.socket = null;
         this.currentOrigin = null;
         this.resizeTimer = null;
+        this.fitTimer = null;
         this.decoder = new TextDecoder("utf8");
     }
 
     componentDidMount() {
         this.term.open(this.termel);
-        this.fitAddon.fit();
+        this.fitToContent();
         this.term.writeln(colors.fg.getRgb(2, 3, 4) + "Initialize...\n\r" + colors.reset);
+        this.fitToContent();
 
         window.addEventListener("resize", this.onResize);
         this.connect(this.props);
@@ -55,6 +61,10 @@ export default class Log extends Component {
             clearTimeout(this.resizeTimer);
             this.resizeTimer = null;
         }
+        if (this.fitTimer) {
+            clearTimeout(this.fitTimer);
+            this.fitTimer = null;
+        }
         this.closeSocket();
         this.term.dispose();
     }
@@ -65,9 +75,57 @@ export default class Log extends Component {
         }
         this.resizeTimer = setTimeout(() => {
             this.resizeTimer = null;
-            this.fitAddon.fit();
+            this.fitToContent();
         }, RESIZE_DEBOUNCE_MS);
     };
+
+    cellHeightPx() {
+        const dims = this.term?._core?._renderService?.dimensions?.css?.cell;
+        if (dims && dims.height) {
+            return dims.height;
+        }
+        return FALLBACK_CELL_HEIGHT_PX;
+    }
+
+    /**
+     * Width → cols via FitAddon; height → buffer line count (content hug, no inner scroll).
+     */
+    fitToContent = () => {
+        if (!this.termel || !this.term.element) {
+            return;
+        }
+
+        const cellH = this.cellHeightPx();
+        // Seed height so proposeDimensions / fit can measure cols from width.
+        this.termel.style.height = `${MIN_ROWS * cellH}px`;
+
+        const proposed = this.fitAddon.proposeDimensions?.();
+        const cols = proposed?.cols || this.term.cols || 80;
+        const rows = Math.max(this.term.buffer.active.length, MIN_ROWS);
+
+        this.term.resize(cols, rows);
+        this.termel.style.height = `${rows * this.cellHeightPx()}px`;
+    };
+
+    scheduleFitToContent() {
+        if (this.fitTimer) {
+            clearTimeout(this.fitTimer);
+        }
+        this.fitTimer = setTimeout(() => {
+            this.fitTimer = null;
+            this.fitToContent();
+        }, RESIZE_DEBOUNCE_MS);
+    }
+
+    writeAndFit(chunk) {
+        this.term.write(chunk);
+        // Grow immediately when buffer outruns rows; debounce for bursty ws frames.
+        if (this.term.buffer.active.length > this.term.rows) {
+            this.fitToContent();
+        } else {
+            this.scheduleFitToContent();
+        }
+    }
 
     connect(props) {
         if (!(props && props.session && props.origin && props.browser)) {
@@ -88,23 +146,23 @@ export default class Log extends Component {
         // switchMap semantics: drop the previous socket before opening a new one.
         this.closeSocket();
         this.term.clear();
-        this.term.write(`Connecting to ${wsUrl}...\n\r`);
+        this.writeAndFit(`Connecting to ${wsUrl}...\n\r`);
 
         const socket = new WebSocket(wsUrl);
         socket.binaryType = "arraybuffer";
 
         socket.onmessage = (event) => {
             if (event) {
-                this.term.write(this.decoder.decode(event.data) + "\r");
+                this.writeAndFit(this.decoder.decode(event.data) + "\r");
             }
         };
 
         socket.onopen = () => {
-            this.term.write(colors.fg.getRgb(0, 2, 0) + "Connected!\n\r" + colors.reset);
+            this.writeAndFit(colors.fg.getRgb(0, 2, 0) + "Connected!\n\r" + colors.reset);
         };
 
         socket.onclose = () => {
-            this.term.write(colors.fg.getRgb(5, 1, 1) + "Disconnected\n\r" + colors.reset);
+            this.writeAndFit(colors.fg.getRgb(5, 1, 1) + "Disconnected\n\r" + colors.reset);
         };
 
         this.socket = socket;

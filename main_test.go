@@ -110,9 +110,9 @@ func TestPing(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	t.Run("Status", func(t *testing.T) {
-		prevAccessKey := playwrightAccessKey
-		playwrightAccessKey = "qa_engineer:aAb_-4gs53FD"
-		defer func() { playwrightAccessKey = prevAccessKey }()
+		prevAccessKey := accessKey
+		accessKey = "qa_engineer:aAb_-4gs53FD"
+		defer func() { accessKey = prevAccessKey }()
 
 		selenoidSrv := httptest.NewServer(selenoidApi())
 		defer selenoidSrv.Close()
@@ -128,7 +128,7 @@ func TestStatus(t *testing.T) {
 		bt, readErr := io.ReadAll(rsp.Body)
 		AssertThat(t, readErr, Is{nil})
 		AssertThat(t, json.Unmarshal(bt, &data), Is{nil})
-		AssertThat(t, data["playwrightAccessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
+		AssertThat(t, data["accessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
 	})
 }
 

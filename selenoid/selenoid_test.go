@@ -106,7 +106,7 @@ func TestStatus(t *testing.T) {
 		AssertThat(t, data, Not{nil})
 		var payload map[string]interface{}
 		AssertThat(t, json.Unmarshal(data, &payload), Is{nil})
-		AssertThat(t, payload["playwrightAccessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
+		AssertThat(t, payload["accessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
 		state, ok := payload["state"].(map[string]interface{})
 		AssertThat(t, ok, Is{true})
 		videos, ok := state["videos"].([]interface{})

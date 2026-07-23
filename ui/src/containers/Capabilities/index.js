@@ -17,6 +17,7 @@ import {
     sessionIdFrom,
 } from "../../util/capabilitiesLogic";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
+import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -41,6 +42,8 @@ import "@zero-design-system/react/styles.css";
  * | option           | wrapper      | layout | caps key                          |
  * |------------------|--------------|--------|-----------------------------------|
  * | remoteUrl        | PlaqueField  | solo   | — (readonly display)              |
+ * | authUser         | PlaqueField  | duo    | — (accessKey user)                |
+ * | authPass         | PlaqueField  | duo    | — (accessKey password)            |
  * | sessionTimeout   | PlaqueSelect | duo    | selenoid:options.sessionTimeout   |
  * | name             | PlaqueField  | duo    | selenoid:options.name             |
  * | screenResolution | PlaqueSelect | solo   | selenoid:options.screenResolution |
@@ -133,6 +136,9 @@ const PROXY_QA_GURU_PORT = "7777";
 const PROXY_QA_GURU_SERVER = `${PROXY_QA_GURU_HOST}:${PROXY_QA_GURU_PORT}`;
 /** Default labels CSV — editable in Remote hub (no snippet hardcode). */
 const DEFAULT_LABELS_CSV = "manual=true";
+/** Guest hub Basic Auth — same SSOT as qa.guru snippets (not a hub cap). */
+const DEFAULT_HUB_AUTH_USER = "qa_engineer";
+const DEFAULT_HUB_AUTH_PASS = "aAb_-4gs53FD";
 
 const PROXY_PRESET_OPTIONS = [
     { value: PROXY_PRESET_OFF, label: "off" },
@@ -355,15 +361,76 @@ const persistVectorRegistry = (registry) => {
     }
 };
 
-const hubRemoteUrl = (origin) => {
-    if (origin) {
-        return `${String(origin).replace(/\/$/, "")}/wd/hub`;
+const parseAuthToken = (token) => {
+    const raw = String(token || "").trim();
+    if (!raw) {
+        return null;
     }
-    if (typeof window === "undefined") {
-        return "/wd/hub";
+    const idx = raw.indexOf(":");
+    if (idx <= 0) {
+        return null;
     }
-    return `${window.location.protocol}//${window.location.host}/wd/hub`;
+    return { user: raw.slice(0, idx), pass: raw.slice(idx + 1) };
 };
+
+const formatHubAuthToken = (user, pass) => {
+    const authUser = String(user || "").trim();
+    if (!authUser) {
+        return "";
+    }
+    return `${authUser}:${String(pass ?? "")}`;
+};
+
+const migrateHubAuthSnap = (snap) => {
+    const next = { ...snap };
+    if (next.hubAuthToken && !next.accessKey) {
+        next.accessKey = next.hubAuthToken;
+    }
+    if (!next.accessKey && (next.hubAuthUser || next.hubAuthPass != null)) {
+        next.accessKey = formatHubAuthToken(next.hubAuthUser, next.hubAuthPass);
+    }
+    delete next.hubAuthToken;
+    delete next.hubAuthUser;
+    delete next.hubAuthPass;
+    return next;
+};
+
+const accessKeyFromFields = (user, pass) => formatHubAuthToken(user, pass);
+
+const fieldsFromAccessKey = (accessKey) => {
+    const parsed = parseAuthToken(accessKey);
+    return {
+        authUser: parsed?.user || DEFAULT_HUB_AUTH_USER,
+        authPass: parsed?.pass ?? DEFAULT_HUB_AUTH_PASS,
+    };
+};
+
+const hubAuthHeaders = (authToken) => {
+    const creds = parseAuthToken(authToken);
+    if (!creds || typeof btoa !== "function") {
+        return {};
+    }
+    return { Authorization: `Basic ${btoa(`${creds.user}:${creds.pass}`)}` };
+};
+
+const shellQuote = (value) => String(value).replace(/'/g, "'\\''");
+
+const hubAuthCurlFlag = (authToken) => {
+    const creds = parseAuthToken(authToken);
+    if (!creds) {
+        return "";
+    }
+    return `-u '${shellQuote(`${creds.user}:${creds.pass}`)}' `;
+};
+
+const hubFetchInit = (authToken, init = {}) => ({
+    ...init,
+    credentials: "omit",
+    headers: {
+        ...(init.headers || {}),
+        ...hubAuthHeaders(authToken),
+    },
+});
 
 const javaSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
@@ -434,13 +501,21 @@ const rustSelenoidOptionsBlock = (selenoidOptions) => {
     return `[\n${entries}\n    ]`;
 };
 
-const primeBasicAuth = () =>
-    fetch("/wd/hub/status", {
+const primeHubAuth = (authToken) => {
+    const headers = hubAuthHeaders(authToken);
+    if (!headers.Authorization) {
+        return Promise.resolve();
+    }
+    return fetch("/wd/hub/status", {
         method: "GET",
-        credentials: "include",
+        headers,
+        credentials: "omit",
     });
+};
 
 const DEFAULT_SESSION_OPTS = {
+    authUser: DEFAULT_HUB_AUTH_USER,
+    authPass: DEFAULT_HUB_AUTH_PASS,
     sessionTimeout: "60m",
     name: "Manual session",
     screenResolution: "1920x1080x24",
@@ -512,10 +587,6 @@ const orderedLangKeys = (caps) => {
     return ranked.concat(rest);
 };
 
-/** Hub origin for prompts/snippets (same host, port 4444). */
-const hubOrigin = () =>
-    window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
-
 /** Agent prompt — markdown vector + Driver + per-family config (configurator SSOT). */
 const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessionOpts, remoteUrl }) => {
     const browserLabel = name ? `${name}${version ? ` ${version}` : ""}` : "—";
@@ -526,6 +597,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         browserVersion: version || "",
         protocol: family,
         remoteUrl,
+        accessKey: accessKeyFromFields(sessionOpts.authUser, sessionOpts.authPass),
         sessionTimeout: sessionOpts.sessionTimeout,
         name: sessionOpts.name,
         enableVnc: String(sessionOpts.enableVnc),
@@ -589,6 +661,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             .concat([
                 "## Android device",
                 `- remoteUrl: \`${remoteUrl}\``,
+                `- accessKey: \`${accessKeyFromFields(sessionOpts.authUser, sessionOpts.authPass)}\``,
                 `- name: **${sessionOpts.name}**`,
                 `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
                 `- enableVnc / enableVideo: **${payload.enableVnc}** / **${payload.enableVideo}**`,
@@ -606,6 +679,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         .concat([
             "## Remote hub",
             `- remoteUrl: \`${remoteUrl}\``,
+            `- accessKey: \`${accessKeyFromFields(sessionOpts.authUser, sessionOpts.authPass)}\``,
             `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
             `- name: **${sessionOpts.name}**`,
             `- screenResolution: **${sessionOpts.screenResolution}**`,
@@ -744,9 +818,11 @@ const swiftEnvBlock = (envList) => (envList.length ? `\n        "env": ${JSON.st
 const swiftLabelsBlock = (labelsMap) => `\n        "labels": ${JSON.stringify(labelsMap)},`;
 
 /** Terminal snippets mirror Remote hub + Browser capabilities (createSession SSOT). */
-const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4444", session = {}) => {
-    origin = window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
+const code = (browser = "UNKNOWN", version = "", origin = "", session = {}) => {
+    const hubBase = resolveHubOrigin(origin);
     const {
+        authUser = DEFAULT_SESSION_OPTS.authUser,
+        authPass = DEFAULT_SESSION_OPTS.authPass,
         sessionTimeout = DEFAULT_SESSION_OPTS.sessionTimeout,
         name: sessionName = DEFAULT_SESSION_OPTS.name,
         screenResolution = DEFAULT_SESSION_OPTS.screenResolution,
@@ -763,6 +839,9 @@ const code = (browser = "UNKNOWN", version = "", origin = "http://selenoid-uri:4
         proxyServer: customProxyHost = DEFAULT_SESSION_OPTS.proxyServer,
         proxyPort: customProxyPort = DEFAULT_SESSION_OPTS.proxyPort,
     } = session;
+    const accessKey = accessKeyFromFields(authUser, authPass);
+    const hubUrl = hubSessionUrl(origin, accessKey);
+    const hubSessionEndpoint = `${hubBase}/wd/hub/session`;
     const proxyServer = resolveProxyServer(proxyPreset, customProxyHost, customProxyPort);
     const proxy = buildProxyCapability(proxyServer);
     const selenoidOpts = buildSelenoidOptions({
@@ -950,7 +1029,7 @@ caps["proxy"] = {
         (videoNameJson ? `\n        "videoName": ${videoNameJson},` : "") +
         (logNameJson ? `\n        "logName": ${logNameJson},` : "");
     return {
-        curl: `curl -H 'Content-Type: application/json' ${origin}/wd/hub/session -d '{
+        curl: `curl ${hubAuthCurlFlag(accessKey)}-H 'Content-Type: application/json' ${hubSessionEndpoint} -d '{
     "capabilities": {
         "alwaysMatch": {
             "browserName": "${browserName}",
@@ -972,7 +1051,7 @@ ${javaOptionalPuts}    put("enableVNC", ${enableVnc});
     put("enableHAR", ${enableHar});
     put("enableLog", ${enableLog});
 }});
-RemoteWebDriver driver = new RemoteWebDriver(new URL("${origin}/wd/hub"), options);
+RemoteWebDriver driver = new RemoteWebDriver(new URL("${hubUrl}"), options);
 `,
         kotlin: `val options = ${optionsClass}()
 ${version != "" ? 'options.setCapability("browserVersion", "' + version + '")' : ""}
@@ -989,7 +1068,7 @@ ${kotlinProxyBlock}options.setCapability(
         "enableLog" to ${enableLog}
     )
 )
-val driver = RemoteWebDriver(URL("${origin}/wd/hub"), options)
+val driver = RemoteWebDriver(URL("${hubUrl}"), options)
 `,
         go: `// import "github.com/tebeka/selenium"
 
@@ -1008,7 +1087,7 @@ caps := selenium.Capabilities{
         },
 }
 
-driver, err := selenium.NewRemote(caps, "${origin}/wd/hub")
+driver, err := selenium.NewRemote(caps, "${hubUrl}")
 if err != nil {
         t.Errorf("starting browser: %v", err)
 }
@@ -1035,7 +1114,7 @@ ${version != "" ? '    caps.set_browser_version("' + version + '")?;\n' : ""}   
         }),
     )?;${rustProxyBlock}
 
-    let driver = WebDriver::new("${origin}/wd/hub", caps).await?;
+    let driver = WebDriver::new("${hubUrl}", caps).await?;
     driver.quit().await?;
     Ok(())
 }
@@ -1052,7 +1131,7 @@ ${csharpProxyBlock}options.AddAdditionalOption("selenoid:options", new Dictionar
     ["enableHAR"] = ${enableHar},
     ["enableLog"] = ${enableLog}
 });
-IWebDriver driver = new RemoteWebDriver(new Uri("${origin}/wd/hub"), options);
+IWebDriver driver = new RemoteWebDriver(new Uri("${hubUrl}"), options);
 `,
         python: `from selenium import webdriver
         
@@ -1072,7 +1151,7 @@ capabilities = {
 }
 
 driver = webdriver.Remote(
-    command_executor="${origin}/wd/hub",
+    command_executor="${hubUrl}",
     desired_capabilities=capabilities)
 `,
         javascript: `var webdriverio = require('webdriverio');
@@ -1121,7 +1200,7 @@ const options: RemoteOptions = {
 };
 const client = await remote(options);
 `,
-        PHP: `$web_driver = RemoteWebDriver::create("${origin}/wd/hub",
+        PHP: `$web_driver = RemoteWebDriver::create("${hubUrl}",
 array(
     "browserName"=>"${browserName}",
     "browserVersion"=>"${version}",${phpProxyBlock}
@@ -1153,7 +1232,7 @@ caps["selenoid:options"] = {
 }
 
 driver = Selenium::WebDriver.for(:remote,
-  :url => "${origin}/wd/hub",
+  :url => "${hubUrl}",
   :desired_capabilities => caps)
 `,
         swift: `import Foundation
@@ -1175,7 +1254,7 @@ var caps: [String: Any] = [
 ]
 
 let driver = try RemoteWebDriver(
-    with: URL(string: "${origin}/wd/hub")!,
+    with: URL(string: "${hubUrl}")!,
     desiredCapabilities: caps
 )
 `,
@@ -1319,14 +1398,19 @@ print(wsEndpoint)
 };
 
 /** Terminal snippets for Selenoid Android (appium:* caps → /wd/hub). */
-const androidCode = (version = "", origin = "http://selenoid-uri:4444", session = {}, android = {}) => {
-    origin = window.location.protocol + "//" + window.location.hostname + (window.location.port == "" ? "" : ":4444");
+const androidCode = (version = "", origin = "", session = {}, android = {}) => {
+    const hubBase = resolveHubOrigin(origin);
     const {
+        authUser = DEFAULT_SESSION_OPTS.authUser,
+        authPass = DEFAULT_SESSION_OPTS.authPass,
         name: sessionName = DEFAULT_SESSION_OPTS.name,
         sessionTimeout = DEFAULT_SESSION_OPTS.sessionTimeout,
         enableVnc = DEFAULT_SESSION_OPTS.enableVnc,
         enableVideo = DEFAULT_SESSION_OPTS.enableVideo,
     } = session;
+    const accessKey = accessKeyFromFields(authUser, authPass);
+    const hubUrl = hubSessionUrl(origin, accessKey);
+    const hubSessionEndpoint = `${hubBase}/wd/hub/session`;
     const {
         app = DEFAULT_ANDROID_OPTS.app,
         noReset = DEFAULT_ANDROID_OPTS.noReset,
@@ -1369,7 +1453,7 @@ const androidCode = (version = "", origin = "http://selenoid-uri:4444", session 
 }});`;
 
     return {
-        curl: `curl -H 'Content-Type: application/json' ${origin}/wd/hub/session -d '{
+        curl: `curl ${hubAuthCurlFlag(accessKey)}-H 'Content-Type: application/json' ${hubSessionEndpoint} -d '{
     "capabilities": {
         "alwaysMatch": ${indentJsonLines(alwaysMatchJson, 8)}
     }
@@ -1384,7 +1468,7 @@ ${appJson ? `caps.setCapability("appium:app", ${appJson});\n` : ""}caps.setCapab
 caps.setCapability("appium:autoGrantPermissions", ${autoGrantBool});
 caps.setCapability("appium:orientation", ${orientationJson});
 ${javaSelenoid}
-AndroidDriver driver = new AndroidDriver(new URL("${origin}/wd/hub"), caps);
+AndroidDriver driver = new AndroidDriver(new URL("${hubUrl}"), caps);
 `,
         python: `from appium import webdriver
 from appium.options.common import AppiumOptions
@@ -1392,7 +1476,7 @@ from appium.options.common import AppiumOptions
 capabilities = ${indentJsonLines(JSON.stringify(alwaysMatch, null, 4), 0)}
 
 options = AppiumOptions().load_capabilities(capabilities)
-driver = webdriver.Remote("${origin}/wd/hub", options=options)
+driver = webdriver.Remote("${hubUrl}", options=options)
 `,
         javascript: `const { remote } = require('webdriverio');
 
@@ -1419,11 +1503,20 @@ const driver = await remote(options);
     };
 };
 
-const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin, playwrightAccessKey = "" }) => {
+const Capabilities = ({
+    browsers = {},
+    browserProtocols = {},
+    sessions = {},
+    origin,
+    accessKey: serverAccessKey = "",
+}) => {
     const navigate = useNavigate();
+    const accessKeySeeded = useRef(false);
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
     const [outputTab, setOutputTab] = useState("gradle");
+    const [authUser, setAuthUser] = useState(() => DEFAULT_SESSION_OPTS.authUser);
+    const [authPass, setAuthPass] = useState(() => DEFAULT_SESSION_OPTS.authPass);
     // Session options live here so Terminal snippets mirror Remote hub (createSession SSOT).
     const [enableVnc, setEnableVnc] = useState("true");
     const [enableVideo, setEnableVideo] = useState("true");
@@ -1456,6 +1549,18 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         registryRef.current = loadVectorRegistry();
     }
 
+    useEffect(() => {
+        if (accessKeySeeded.current || !serverAccessKey) {
+            return;
+        }
+        const fields = fieldsFromAccessKey(serverAccessKey);
+        setAuthUser(fields.authUser);
+        setAuthPass(fields.authPass);
+        accessKeySeeded.current = true;
+    }, [serverAccessKey]);
+
+    const accessKey = accessKeyFromFields(authUser, authPass);
+
     const available = [].concat(
         ...Object.keys(browsers).map((name) =>
             Object.keys(browsers[name]).map((version) => {
@@ -1487,6 +1592,8 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         headless: headless === "true",
     };
     const androidSession = {
+        authUser,
+        authPass,
         name: sessionName,
         sessionTimeout,
         enableVnc,
@@ -1500,6 +1607,8 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         skin: androidSkin,
     };
     const sessionOpts = {
+        authUser,
+        authPass,
         sessionTimeout,
         name: sessionName,
         screenResolution,
@@ -1523,6 +1632,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         androidSkin,
     };
     const capsSnap = {
+        accessKey,
         browserValue: value || "",
         sessionTimeout,
         sessionName,
@@ -1548,9 +1658,9 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     };
     const vectorId = fingerprint(capsSnap);
     const displayVector = vectorDraft ?? vectorId;
-    const remoteUrl = hubOrigin();
+    const remoteUrl = hubRemoteUrl(origin);
     const caps = isPlaywright
-        ? playwrightCode(name, version, playwrightAccessKey, pwSession)
+        ? playwrightCode(name, version, accessKey, pwSession)
         : isAndroid
         ? androidCode(version, origin, androidSession, androidOpts)
         : code(name, version, origin, sessionOpts);
@@ -1601,10 +1711,13 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     }, [name, version, family]);
 
     const applyCapsSnap = (snap) => {
-        const next = cloneSessionSnap(snap);
+        const next = migrateHubAuthSnap(cloneSessionSnap(snap));
         remember(next);
         setSessionTimeout(next.sessionTimeout);
         setSessionName(next.sessionName);
+        const fields = fieldsFromAccessKey(next.accessKey);
+        setAuthUser(fields.authUser);
+        setAuthPass(fields.authPass);
         setScreenResolution(next.screenResolution);
         setEnableVnc(next.enableVnc);
         setEnableVideo(next.enableVideo);
@@ -1644,6 +1757,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     const resetCaps = () => {
         applyCapsSnap({
+            accessKey: accessKeyFromFields(DEFAULT_HUB_AUTH_USER, DEFAULT_HUB_AUTH_PASS),
             browserValue: "",
             sessionTimeout: DEFAULT_SESSION_OPTS.sessionTimeout,
             sessionName: DEFAULT_SESSION_OPTS.name,
@@ -1864,7 +1978,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         isAndroid={isAndroid}
                         isIos={isIos}
                         isWebdriver={isWebdriver}
-                        playwrightAccessKey={playwrightAccessKey}
                         pwSession={pwSession}
                         androidCaps={androidOpts}
                         origin={origin}
@@ -1979,6 +2092,16 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         setProxyPort={(v) => {
                             touchOptions();
                             setProxyPort(v);
+                        }}
+                        authUser={authUser}
+                        setAuthUser={(v) => {
+                            touchOptions();
+                            setAuthUser(v);
+                        }}
+                        authPass={authPass}
+                        setAuthPass={(v) => {
+                            touchOptions();
+                            setAuthPass(v);
                         }}
                     />
                 </div>
@@ -2115,7 +2238,6 @@ const Launch = ({
     isAndroid,
     isIos,
     isWebdriver,
-    playwrightAccessKey = "",
     pwSession = {},
     androidCaps = {},
     origin,
@@ -2161,10 +2283,15 @@ const Launch = ({
     setProxyServer,
     proxyPort,
     setProxyPort,
+    authUser,
+    setAuthUser,
+    authPass,
+    setAuthPass,
 }) => {
     const [loading, onLoading] = useState(false);
     const [error, onError] = useState("");
     const remoteUrl = hubRemoteUrl(origin);
+    const accessKey = accessKeyFromFields(authUser, authPass);
     const playwrightSocket = useRef(null);
     // Config stacks (Remote hub / Playwright / Android) share the magnet; iOS placeholder has no fields.
     usePlaqueFieldMagnet({ enabled: Boolean(name) && !isIos });
@@ -2195,19 +2322,21 @@ const Launch = ({
             const androidController = new AbortController();
             const androidTimeout = setTimeout(() => androidController.abort(), 300000);
             try {
-                await primeBasicAuth();
-                const response = await fetch("/wd/hub/session", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    signal: androidController.signal,
-                    body: JSON.stringify({
-                        capabilities: {
-                            alwaysMatch: androidAlwaysMatch,
-                            firstMatch: [{}],
-                        },
-                    }),
-                });
+                await primeHubAuth(accessKey);
+                const response = await fetch(
+                    "/wd/hub/session",
+                    hubFetchInit(accessKey, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        signal: androidController.signal,
+                        body: JSON.stringify({
+                            capabilities: {
+                                alwaysMatch: androidAlwaysMatch,
+                                firstMatch: [{}],
+                            },
+                        }),
+                    })
+                );
                 if (response.status === 200) {
                     const data = await response.json();
                     navigate(`/sessions/${sessionIdFrom({ response: data })}`);
@@ -2285,22 +2414,24 @@ const Launch = ({
         const timeout = setTimeout(() => controller.abort(), 300000);
 
         try {
-            await primeBasicAuth();
-            const response = await fetch("/wd/hub/session", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                signal: controller.signal,
-                body: JSON.stringify({
-                    desiredCapabilities,
-                    capabilities: {
-                        alwaysMatch,
-                        firstMatch: [{}],
+            await primeHubAuth(accessKey);
+            const response = await fetch(
+                "/wd/hub/session",
+                hubFetchInit(accessKey, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
                     },
-                }),
-            });
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        desiredCapabilities,
+                        capabilities: {
+                            alwaysMatch,
+                            firstMatch: [{}],
+                        },
+                    }),
+                })
+            );
 
             if (response.status === 200) {
                 const data = await response.json();
@@ -2344,6 +2475,8 @@ const Launch = ({
         proxyPreset,
         proxyServer,
         proxyPort,
+        authUser,
+        authPass,
     ]);
 
     const createPlaywrightSession = () => {
@@ -2355,7 +2488,7 @@ const Launch = ({
         onLoading(true);
 
         const existingIds = new Set(Object.keys(sessions || {}));
-        const wsUrl = playwrightEndpoint(name, version, playwrightAccessKey, pwSession);
+        const wsUrl = playwrightEndpoint(name, version, accessKey, pwSession);
         let navigated = false;
         let eventSource;
 
@@ -2419,7 +2552,7 @@ const Launch = ({
             };
         };
 
-        primeBasicAuth()
+        primeHubAuth(accessKey)
             .then(() => openWebSocket())
             .catch((err) => {
                 console.error("Playwright auth failed", err);
@@ -2441,6 +2574,31 @@ const Launch = ({
     const proxyOff = proxyPreset === PROXY_PRESET_OFF;
     const proxyPresetLocked = proxyPreset === PROXY_PRESET_QA_GURU;
 
+    const renderWebdriverAuthRow = () => (
+        <PlaqueFieldGrid layout="duo" aria-label="Hub authentication" data-testid="capabilities-caps-auth">
+            <PlaqueField
+                label="authUser"
+                paramId="authUser"
+                labelVariant="param"
+                type="text"
+                value={authUser}
+                onChange={(e) => setAuthUser(e.target.value)}
+                autoComplete="username"
+                data-testid="capabilities-caps-auth-user"
+            />
+            <PlaqueField
+                label="authPass"
+                paramId="authPass"
+                labelVariant="param"
+                type="password"
+                value={authPass}
+                onChange={(e) => setAuthPass(e.target.value)}
+                autoComplete="current-password"
+                data-testid="capabilities-caps-auth-pass"
+            />
+        </PlaqueFieldGrid>
+    );
+
     return (
         <div className="capabilities-launch">
             {isWebdriver ? (
@@ -2452,7 +2610,7 @@ const Launch = ({
                 >
                     {/*
                       presets #remote-hub: magnet stack →
-                      solo(remoteUrl) + duo(sessionTimeout|name) + solo(screenResolution) +
+                      solo(remoteUrl) + duo(authUser|authPass) + duo(sessionTimeout|name) + solo(screenResolution) +
                       solo(enableVnc|enableVideo|enableHar|enableLog) + solo(timeZone) +
                       solo(env) + solo(labels) + conditional duo(videoName|logName).
                     */}
@@ -2475,6 +2633,8 @@ const Launch = ({
                                 data-testid="caps-remote-url"
                             />
                         </PlaqueFieldGrid>
+
+                        {renderWebdriverAuthRow()}
 
                         <PlaqueFieldGrid
                             layout="duo"
@@ -2936,7 +3096,7 @@ Capabilities.propTypes = {
     browserProtocols: PropTypes.object,
     sessions: PropTypes.object,
     origin: PropTypes.string,
-    playwrightAccessKey: PropTypes.string,
+    accessKey: PropTypes.string,
 };
 
 export default Capabilities;

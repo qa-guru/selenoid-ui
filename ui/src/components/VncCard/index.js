@@ -4,11 +4,13 @@ import { VncWindow, WindowControl, IconClose } from "@zero-design-system/react";
 import "@zero-design-system/react/styles.css";
 
 import VncScreen from "./VncScreen";
+import { parseScreenSize } from "../../util/capabilitiesLogic";
 
 /**
  * Selenoid VNC window — design-system `VncWindow` primitive wired to the noVNC
  * RFB screen and Selenoid clipboard endpoints. Chrome, states and fullscreen
  * collapse live in @zero-design-system/react (no local styled-components).
+ * Screen height follows `caps.screenResolution` aspect (default 16/9 in CSS).
  */
 export default class VncCard extends Component {
     state = { connection: "connecting", fullscreen: false, unlocked: false };
@@ -37,11 +39,14 @@ export default class VncCard extends Component {
             return <span />;
         }
 
+        const screenSize = parseScreenSize(browser.caps && browser.caps.screenResolution);
+
         return (
             <VncWindow
                 state={connection}
                 fullscreen={fullscreen}
                 unlocked={unlocked}
+                screenSize={screenSize || undefined}
                 back={
                     <WindowControl as={Link} to="/" tone="danger" title="Back" aria-label="Back">
                         <IconClose />

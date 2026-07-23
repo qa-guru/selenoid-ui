@@ -73,6 +73,13 @@ describe("VncCard", () => {
         expect(screen.getByRole("button", { name: "Enter fullscreen" }).querySelector("svg")).toBeTruthy();
     });
 
+    it("passes screenResolution as --vnc-aspect on VncWindow", () => {
+        renderVnc({
+            browser: { caps: { enableVNC: true, screenResolution: "1280x1024x24" } },
+        });
+        expect(screen.getByTestId("vnc-window")).toHaveStyle({ "--vnc-aspect": "1280 / 1024" });
+    });
+
     it("toggles fullscreen and notifies parent", async () => {
         const user = userEvent.setup();
         const onVNCFullscreenChange = vi.fn();

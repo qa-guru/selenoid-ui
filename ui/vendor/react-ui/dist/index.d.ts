@@ -497,6 +497,11 @@ interface VncWindowLabels {
     copy: string;
     paste: string;
 }
+/** Remote desktop pixels — drives flexible screen `aspect-ratio` via `--vnc-aspect`. */
+interface VncScreenSize {
+    width: number;
+    height: number;
+}
 interface VncWindowProps {
     /** VNC lifecycle state driving chrome + width collapse. */
     state: VncWindowState;
@@ -504,6 +509,11 @@ interface VncWindowProps {
     fullscreen?: boolean;
     /** Screen is interactive (lock open) — swaps the lock glyph. */
     unlocked?: boolean;
+    /**
+     * Remote desktop size (e.g. from `screenResolution`). Sets `--vnc-aspect` so
+     * the screen height follows width × W/H instead of a fixed px. Default CSS: 16/9.
+     */
+    screenSize?: VncScreenSize;
     /**
      * Custom Back control — e.g. a router `Link`. When omitted a `button` firing
      * `onBack` is rendered. Compose with `WindowControl as={Link} tone="danger"`.
@@ -525,7 +535,7 @@ interface VncWindowProps {
  * fullscreen, clipboard) over a black noVNC screen. Composes the `vnc-window`
  * primitive with `WindowControl` / `ConnectionStatus`.
  */
-declare function VncWindow({ state, fullscreen, unlocked, back, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, children, labels, className, 'data-testid': dataTestId, }: VncWindowProps): react.JSX.Element;
+declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, children, labels, className, 'data-testid': dataTestId, }: VncWindowProps): react.JSX.Element;
 
 declare function IconClose(): react.JSX.Element;
 declare function IconDocumentRemove(): react.JSX.Element;
@@ -559,4 +569,4 @@ declare function highlightOutput(text: string, kind: HighlightKind): string;
 /** Mount highlighted terminal output — always colored (`.ch-code` + tokens). */
 declare function mountHighlightedOutput(el: Element | null | undefined, text: string, kind?: HighlightKind): void;
 
-export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type ConnectionState, ConnectionStatus, type ConnectionStatusProps, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconChevronDown, IconChevronUp, IconClose, IconCopy, IconDocumentRemove, IconDotsHorizontal, IconDownload, IconLock, IconReset, IconUnlock, IconUpload, IconVncCopy, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, VncWindow, type VncWindowLabels, type VncWindowProps, type VncWindowState, WindowControl, type WindowControlProps, type WindowControlTone, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, mountHighlightedOutput, trimOutputBlankLines, usePlaqueFieldMagnet };
+export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type ConnectionState, ConnectionStatus, type ConnectionStatusProps, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconChevronDown, IconChevronUp, IconClose, IconCopy, IconDocumentRemove, IconDotsHorizontal, IconDownload, IconLock, IconReset, IconUnlock, IconUpload, IconVncCopy, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, type VncScreenSize, VncWindow, type VncWindowLabels, type VncWindowProps, type VncWindowState, WindowControl, type WindowControlProps, type WindowControlTone, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, mountHighlightedOutput, trimOutputBlankLines, usePlaqueFieldMagnet };

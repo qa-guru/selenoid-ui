@@ -8,30 +8,37 @@ export const StyledSession = styled.div`
     align-items: center;
     justify-content: flex-start;
 
+    /* Edge inset = inter-panel gap — same 14px gutter as widget-mosaic
+       (--wt-post-gap). flex:1 alone used to eat margins and collapse the
+       gutter between VncWindow and Log. */
     .interactive {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
+        /* Content heights independent — Log hugs buffer; do not magnet to VNC screen. */
+        align-items: start;
+        box-sizing: border-box;
         width: 100%;
+        padding: 0 var(--wt-post-gap, 14px) var(--wt-post-gap, 14px);
+        gap: var(--wt-post-gap, 14px);
     }
 
     .session-interactive-card {
         max-width: 1000px;
-        flex: 1;
-        flex-basis: 45%;
-        min-width: 450px;
-        margin: var(--space-6, 20px) 0 0;
+        flex: 1 1 45%;
+        min-width: min(450px, 100%);
+        margin: 0;
     }
 
     .session-info {
         color: var(--color-text, #fff);
-        padding: 0 var(--space-8, 30px);
+        padding: 0 var(--wt-post-gap, 14px);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 80px;
-        margin-bottom: var(--space-8, 30px);
+        margin-bottom: var(--wt-post-gap, 14px);
 
         &__main {
             height: 40px;

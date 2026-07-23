@@ -15,7 +15,7 @@ const EMPTY_FEED = {
     browsers: {},
     sessions: {},
     browserProtocols: {},
-    playwrightAccessKey: "",
+    accessKey: "",
     version: "unknown",
 };
 
@@ -61,7 +61,11 @@ export function useUiFeed() {
             try {
                 // UI-shaped payload ({state,...}) lives on /ui/status; public /status
                 // is the flat upstream-selenoid hub contract (student autotests).
-                const response = await fetch("/ui/status", { cache: "no-store" });
+                let response = await fetch("/ui/status", { cache: "no-store" });
+                // Dev fallback: older selenoid-ui binaries expose UI feed on /status only.
+                if (response.status === 404) {
+                    response = await fetch("/status", { cache: "no-store" });
+                }
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -155,7 +159,7 @@ export function useUiFeed() {
         browsers: feed.browsers || {},
         sessions: feed.sessions || {},
         browserProtocols: feed.browserProtocols || {},
-        playwrightAccessKey: feed.playwrightAccessKey || "",
+        accessKey: feed.accessKey || "",
         version: feed.version || "unknown",
         sseStatus,
         selenoidStatus,

@@ -16,7 +16,7 @@ const BROWSER_PROTOCOLS = {
     "playwright-chrome": { "1.61.0": { protocol: "playwright" } },
 };
 
-function renderCapabilities(playwrightAccessKey = ACCESS_KEY) {
+function renderCapabilities(accessKey = ACCESS_KEY) {
     return render(
         <MemoryRouter initialEntries={["/capabilities"]}>
             <Routes>
@@ -28,7 +28,7 @@ function renderCapabilities(playwrightAccessKey = ACCESS_KEY) {
                             browserProtocols={BROWSER_PROTOCOLS}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            playwrightAccessKey={playwrightAccessKey}
+                            accessKey={accessKey}
                         />
                     }
                 />
@@ -114,7 +114,7 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("name")).toBe("Manual session");
     });
 
-    it("opens Playwright WebSocket without accessKey when empty (still no ReferenceError)", async () => {
+    it("uses default accessKey in Playwright WebSocket when server accessKey is empty", async () => {
         const user = userEvent.setup();
         renderCapabilities("");
         await selectPlaywrightChrome(user);
@@ -123,7 +123,7 @@ describe("Capabilities Playwright Create Session", () => {
 
         await waitFor(() => expect(openedSockets).toHaveLength(1));
         const wsUrl = new URL(openedSockets[0].url);
-        expect(wsUrl.searchParams.get("accessKey")).toBeNull();
+        expect(wsUrl.searchParams.get("accessKey")).toBe(ACCESS_KEY);
     });
 
     it("shows Playwright session panel (name/timeout/vnc/video/headless), not WebDriver panels", async () => {

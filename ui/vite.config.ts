@@ -85,7 +85,7 @@ export default defineConfig({
         port: 3000,
         proxy: {
             "/events": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 changeOrigin: true,
             },
             "/clipboard": {
@@ -93,28 +93,28 @@ export default defineConfig({
                 changeOrigin: true,
             },
             "/status": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 changeOrigin: true,
             },
             "/ui/status": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 changeOrigin: true,
             },
             "/video": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 changeOrigin: true,
             },
             "/wd/hub": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 changeOrigin: true,
             },
             "/playwright": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 ws: true,
                 changeOrigin: true,
             },
             "/ws": {
-                target: "http://localhost:8080",
+                target: "http://localhost:8090",
                 ws: true,
                 changeOrigin: true,
             },

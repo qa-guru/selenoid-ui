@@ -995,6 +995,7 @@ function VncWindow({
   state,
   fullscreen = false,
   unlocked = false,
+  screenSize,
   back,
   onBack,
   onToggleLock,
@@ -1008,6 +1009,9 @@ function VncWindow({
 }) {
   const l = { ...defaultLabels, ...labels };
   const external = state === "connected" ? "" : `VNC ${state}`;
+  const aspectStyle = screenSize && screenSize.width > 0 && screenSize.height > 0 ? {
+    ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
+  } : void 0;
   const backControl = back ?? /* @__PURE__ */ jsx22(WindowControl, { tone: "danger", "aria-label": l.back, title: l.back, onClick: onBack, children: /* @__PURE__ */ jsx22(IconClose, {}) });
   return /* @__PURE__ */ jsxs12("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: [
     /* @__PURE__ */ jsxs12(
@@ -1021,6 +1025,7 @@ function VncWindow({
           fullscreen && "vnc-window--fullscreen",
           className
         ),
+        style: aspectStyle,
         "data-state": state,
         "data-testid": dataTestId,
         children: [

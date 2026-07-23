@@ -25,7 +25,7 @@ function renderCapabilities() {
                             browserProtocols={{}}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            playwrightAccessKey=""
+                            accessKey=""
                         />
                     }
                 />
@@ -79,6 +79,7 @@ describe("Capabilities boolean caps (seg canon)", () => {
         await screen.findByTestId("capabilities-caps");
 
         expect(screen.getByTestId("capabilities-caps-remote-url")).toHaveClass("plaque-field-grid--solo");
+        expect(screen.getByTestId("capabilities-caps-auth")).toHaveClass("plaque-field-grid--duo");
         expect(screen.getByTestId("capabilities-caps-session")).toHaveClass("plaque-field-grid--duo");
         expect(screen.getByTestId("capabilities-caps-resolution")).toHaveClass("plaque-field-grid--solo");
 
@@ -86,6 +87,14 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(remoteUrl).toHaveAttribute("readonly");
         expect(remoteUrl).toHaveValue("https://selenoid.qa.guru/wd/hub");
         expect(remoteUrl.closest("label")).toHaveAttribute("data-param-id", "remoteUrl");
+
+        const authUser = screen.getByTestId("capabilities-caps-auth-user");
+        expect(authUser).toHaveValue("qa_engineer");
+        expect(authUser.closest("label")).toHaveAttribute("data-param-id", "authUser");
+
+        const authPass = screen.getByTestId("capabilities-caps-auth-pass");
+        expect(authPass).toHaveValue("aAb_-4gs53FD");
+        expect(authPass.closest("label")).toHaveAttribute("data-param-id", "authPass");
 
         expect(screen.getByTestId("caps-session-timeout")).toHaveAttribute("data-param-id", "sessionTimeout");
         expect(screen.getByRole("combobox", { name: "sessionTimeout" })).toHaveValue("60m");
@@ -120,6 +129,8 @@ describe("Capabilities boolean caps (seg canon)", () => {
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
         const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
         expect(sessionCall).toBeTruthy();
+        expect(sessionCall[1].credentials).toBe("omit");
+        expect(sessionCall[1].headers.Authorization).toMatch(/^Basic /);
         const body = JSON.parse(sessionCall[1].body);
         expect(body.desiredCapabilities.sessionTimeout).toBe("15m");
         expect(body.desiredCapabilities.name).toBe("RTL session");

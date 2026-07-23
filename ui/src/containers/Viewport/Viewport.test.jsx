@@ -20,7 +20,7 @@ vi.mock("../../hooks/useUiFeed", () => ({
         browsers: { chrome: 2 },
         sessions: {},
         browserProtocols: {},
-        playwrightAccessKey: "",
+        accessKey: "",
         version: "2.3.0",
         sseStatus: "ok",
         selenoidStatus: "ok",
