@@ -16,6 +16,7 @@ export const StyledLog = styled.div`
         height: auto;
         width: 100%;
         flex: 0 1 auto;
+        align-self: start;
         min-height: 0;
 
         .log-card__body {
@@ -23,19 +24,19 @@ export const StyledLog = styled.div`
             height: auto;
             flex: 0 1 auto;
             min-height: 0;
-            display: flex;
-            flex-direction: column;
+            display: block;
             overflow: visible;
-            background-color: var(--panel-bg, #1a1917);
             padding: 0;
         }
 
+        /* xterm mount — not a second panel; same surface as panel--terminal body. */
         .term {
-            flex: 0 0 auto;
             min-height: 40px;
             width: 100%;
-            padding: var(--space-6, 20px) var(--space-6, 20px) var(--space-3, 10px);
+            padding: var(--space-3, 12px);
+            padding-bottom: calc(var(--space-3, 12px) + 0.25em);
             box-sizing: border-box;
+            background: transparent;
 
             .terminal,
             .xterm {
@@ -44,6 +45,7 @@ export const StyledLog = styled.div`
                 font-size: 13px;
                 line-height: 20px;
                 width: 100%;
+                background-color: transparent;
 
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
@@ -51,7 +53,7 @@ export const StyledLog = styled.div`
 
             /* Page scrolls; Log chrome must not grow inner scrollbars. */
             .xterm-viewport {
-                background-color: var(--panel-bg, #1a1917);
+                background-color: transparent !important;
                 overflow: hidden !important;
             }
 

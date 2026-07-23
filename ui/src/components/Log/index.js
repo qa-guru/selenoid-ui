@@ -27,7 +27,8 @@ export default class Log extends Component {
             lineHeight: 1,
             scrollback: 5000,
             theme: {
-                background: "#151515",
+                // Match panel--terminal (--panel-bg) — no nested inner frame.
+                background: "#1a1917",
             },
         });
         const fitAddon = new FitAddon();
