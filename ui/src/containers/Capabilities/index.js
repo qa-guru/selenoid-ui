@@ -18,6 +18,7 @@ import {
 } from "../../util/capabilitiesLogic";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
+import { defaultHubAuthPass, defaultHubAuthUser } from "../../config/hubAuth";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -136,9 +137,6 @@ const PROXY_QA_GURU_PORT = "7777";
 const PROXY_QA_GURU_SERVER = `${PROXY_QA_GURU_HOST}:${PROXY_QA_GURU_PORT}`;
 /** Default labels CSV — editable in Remote hub (no snippet hardcode). */
 const DEFAULT_LABELS_CSV = "manual=true";
-/** Guest hub Basic Auth — same SSOT as qa.guru snippets (not a hub cap). */
-const DEFAULT_HUB_AUTH_USER = "qa_engineer";
-const DEFAULT_HUB_AUTH_PASS = "aAb_-4gs53FD";
 
 const PROXY_PRESET_OPTIONS = [
     { value: PROXY_PRESET_OFF, label: "off" },
@@ -400,8 +398,8 @@ const accessKeyFromFields = (user, pass) => formatHubAuthToken(user, pass);
 const fieldsFromAccessKey = (accessKey) => {
     const parsed = parseAuthToken(accessKey);
     return {
-        authUser: parsed?.user || DEFAULT_HUB_AUTH_USER,
-        authPass: parsed?.pass ?? DEFAULT_HUB_AUTH_PASS,
+        authUser: parsed?.user || defaultHubAuthUser(),
+        authPass: parsed?.pass ?? defaultHubAuthPass(),
     };
 };
 
@@ -514,8 +512,8 @@ const primeHubAuth = (authToken) => {
 };
 
 const DEFAULT_SESSION_OPTS = {
-    authUser: DEFAULT_HUB_AUTH_USER,
-    authPass: DEFAULT_HUB_AUTH_PASS,
+    authUser: defaultHubAuthUser(),
+    authPass: defaultHubAuthPass(),
     sessionTimeout: "60m",
     name: "Manual session",
     screenResolution: "1920x1080x24",
@@ -1503,15 +1501,8 @@ const driver = await remote(options);
     };
 };
 
-const Capabilities = ({
-    browsers = {},
-    browserProtocols = {},
-    sessions = {},
-    origin,
-    accessKey: serverAccessKey = "",
-}) => {
+const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, origin }) => {
     const navigate = useNavigate();
-    const accessKeySeeded = useRef(false);
     const [browser, onBrowserChange] = useState({});
     const [lang, onLanguageChange] = useState("curl");
     const [outputTab, setOutputTab] = useState("gradle");
@@ -1548,16 +1539,6 @@ const Capabilities = ({
     if (registryRef.current === null) {
         registryRef.current = loadVectorRegistry();
     }
-
-    useEffect(() => {
-        if (accessKeySeeded.current || !serverAccessKey) {
-            return;
-        }
-        const fields = fieldsFromAccessKey(serverAccessKey);
-        setAuthUser(fields.authUser);
-        setAuthPass(fields.authPass);
-        accessKeySeeded.current = true;
-    }, [serverAccessKey]);
 
     const accessKey = accessKeyFromFields(authUser, authPass);
 
@@ -1757,7 +1738,7 @@ const Capabilities = ({
 
     const resetCaps = () => {
         applyCapsSnap({
-            accessKey: accessKeyFromFields(DEFAULT_HUB_AUTH_USER, DEFAULT_HUB_AUTH_PASS),
+            accessKey: accessKeyFromFields(defaultHubAuthUser(), defaultHubAuthPass()),
             browserValue: "",
             sessionTimeout: DEFAULT_SESSION_OPTS.sessionTimeout,
             sessionName: DEFAULT_SESSION_OPTS.name,
@@ -3096,7 +3077,6 @@ Capabilities.propTypes = {
     browserProtocols: PropTypes.object,
     sessions: PropTypes.object,
     origin: PropTypes.string,
-    accessKey: PropTypes.string,
 };
 
 export default Capabilities;

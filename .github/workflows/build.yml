@@ -32,6 +32,10 @@ jobs:
 
       - name: Build
         run: ci/build.sh
+        env:
+          VITE_HUB_ACCESS_KEY: ${{ secrets.HUB_ACCESS_KEY }}
+          VITE_HUB_AUTH_USER: ${{ secrets.HUB_AUTH_USER }}
+          VITE_HUB_AUTH_PASS: ${{ secrets.HUB_AUTH_PASS }}
 
       - name: Latest image
         env:

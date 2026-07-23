@@ -15,7 +15,6 @@ const EMPTY_FEED = {
     browsers: {},
     sessions: {},
     browserProtocols: {},
-    accessKey: "",
     version: "unknown",
 };
 
@@ -159,7 +158,6 @@ export function useUiFeed() {
         browsers: feed.browsers || {},
         sessions: feed.sessions || {},
         browserProtocols: feed.browserProtocols || {},
-        accessKey: feed.accessKey || "",
         version: feed.version || "unknown",
         sseStatus,
         selenoidStatus,

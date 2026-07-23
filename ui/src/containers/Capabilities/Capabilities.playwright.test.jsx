@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
 
-const ACCESS_KEY = "qa_engineer:aAb_-4gs53FD";
+const ACCESS_KEY = "test_user:test_pass";
 
 const BROWSERS = {
     chrome: { "149.0": {} },
@@ -16,7 +16,7 @@ const BROWSER_PROTOCOLS = {
     "playwright-chrome": { "1.61.0": { protocol: "playwright" } },
 };
 
-function renderCapabilities(accessKey = ACCESS_KEY) {
+function renderCapabilities() {
     return render(
         <MemoryRouter initialEntries={["/capabilities"]}>
             <Routes>
@@ -28,7 +28,6 @@ function renderCapabilities(accessKey = ACCESS_KEY) {
                             browserProtocols={BROWSER_PROTOCOLS}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            accessKey={accessKey}
                         />
                     }
                 />
@@ -76,9 +75,9 @@ describe("Capabilities Playwright Create Session", () => {
         vi.restoreAllMocks();
     });
 
-    it("shows accessKey in Playwright curl snippet when status provides it", async () => {
+    it("shows accessKey in Playwright curl snippet from default auth fields", async () => {
         const user = userEvent.setup();
-        renderCapabilities(ACCESS_KEY);
+        renderCapabilities();
         await selectPlaywrightChrome(user);
 
         const panel = document.querySelector(".code-panel");
@@ -95,7 +94,7 @@ describe("Capabilities Playwright Create Session", () => {
 
     it("opens Playwright WebSocket with accessKey and does not throw ReferenceError", async () => {
         const user = userEvent.setup();
-        renderCapabilities(ACCESS_KEY);
+        renderCapabilities();
         await selectPlaywrightChrome(user);
 
         // Browser capabilities (proxy) is WebDriver-only — hidden for Playwright.
@@ -114,9 +113,9 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("name")).toBe("Manual session");
     });
 
-    it("uses default accessKey in Playwright WebSocket when server accessKey is empty", async () => {
+    it("uses default accessKey in Playwright WebSocket", async () => {
         const user = userEvent.setup();
-        renderCapabilities("");
+        renderCapabilities();
         await selectPlaywrightChrome(user);
 
         await expect(user.click(screen.getByTestId("capabilities-create-session"))).resolves.toBeUndefined();

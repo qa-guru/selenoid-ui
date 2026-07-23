@@ -8,7 +8,7 @@ describe("capabilitiesPlaywright", () => {
     });
 
     it("includes accessKey in options and snippet query when provided", () => {
-        const key = "qa_engineer:aAb_-4gs53FD";
+        const key = "test_user:test_pass";
         const options = playwrightSelenoidOptions(key);
         expect(options.accessKey).toBe(key);
 

@@ -40,7 +40,6 @@ const Viewport = () => {
         browsers,
         sessions,
         browserProtocols,
-        accessKey,
         version,
         sseStatus,
         selenoidStatus,
@@ -110,7 +109,6 @@ const Viewport = () => {
                                 browserProtocols={browserProtocols}
                                 sessions={sessions}
                                 origin={origin}
-                                accessKey={accessKey}
                             />
                         }
                     />

@@ -30,7 +30,6 @@ function renderCapabilities() {
                             browserProtocols={BROWSER_PROTOCOLS}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            accessKey=""
                         />
                     }
                 />

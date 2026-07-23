@@ -141,6 +141,9 @@ export default defineConfig({
         },
     },
     test: {
+        env: {
+            VITE_HUB_ACCESS_KEY: "test_user:test_pass",
+        },
         environment: "jsdom",
         css: true,
         globals: true,

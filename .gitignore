@@ -16,6 +16,8 @@ coverage.txt
 
 # yarn is the only package manager for ui/ — never commit an npm lockfile
 ui/package-lock.json
+ui/.env.local
+ui/.env.*.local
 
 .DS_Store
 dist/**

@@ -25,7 +25,6 @@ function renderCapabilities() {
                             browserProtocols={{}}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            accessKey=""
                         />
                     }
                 />
@@ -89,11 +88,11 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(remoteUrl.closest("label")).toHaveAttribute("data-param-id", "remoteUrl");
 
         const authUser = screen.getByTestId("capabilities-caps-auth-user");
-        expect(authUser).toHaveValue("qa_engineer");
+        expect(authUser).toHaveValue("test_user");
         expect(authUser.closest("label")).toHaveAttribute("data-param-id", "authUser");
 
         const authPass = screen.getByTestId("capabilities-caps-auth-pass");
-        expect(authPass).toHaveValue("aAb_-4gs53FD");
+        expect(authPass).toHaveValue("test_pass");
         expect(authPass.closest("label")).toHaveAttribute("data-param-id", "authPass");
 
         expect(screen.getByTestId("caps-session-timeout")).toHaveAttribute("data-param-id", "sessionTimeout");

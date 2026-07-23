@@ -86,7 +86,7 @@ func selenoidState() State {
 func TestToUI(t *testing.T) {
 	t.Run("To UI", func(t *testing.T) {
 		statusURI, _ := url.Parse("http://localhost")
-		ui := toUI(selenoidState(), statusURI, "version", nil, "")
+		ui := toUI(selenoidState(), statusURI, "version", nil)
 		data, err := json.MarshalIndent(ui, "", " ")
 		AssertThat(t, err, Is{nil})
 		AssertThat(t, data, Is{Not{nil}})
@@ -101,12 +101,13 @@ func TestStatus(t *testing.T) {
 		srv := httptest.NewServer(mockStatusApi())
 		statusURI, _ := url.Parse(srv.URL)
 		webdriverURI := statusURI // Any value will work for this test
-		data, err := Status(context.Background(), webdriverURI, statusURI, "version", nil, "qa_engineer:aAb_-4gs53FD")
+		data, err := Status(context.Background(), webdriverURI, statusURI, "version", nil)
 		AssertThat(t, err, Is{nil})
 		AssertThat(t, data, Not{nil})
 		var payload map[string]interface{}
 		AssertThat(t, json.Unmarshal(data, &payload), Is{nil})
-		AssertThat(t, payload["accessKey"], Is{"qa_engineer:aAb_-4gs53FD"})
+		_, hasAccessKey := payload["accessKey"]
+		AssertThat(t, hasAccessKey, Is{false})
 		state, ok := payload["state"].(map[string]interface{})
 		AssertThat(t, ok, Is{true})
 		videos, ok := state["videos"].([]interface{})
@@ -133,7 +134,7 @@ func TestStatusDoesNotFetchVideoList(t *testing.T) {
 		srv := httptest.NewServer(mux)
 		defer srv.Close()
 		statusURI, _ := url.Parse(srv.URL)
-		data, err := Status(context.Background(), statusURI, statusURI, "version", nil, "")
+		data, err := Status(context.Background(), statusURI, statusURI, "version", nil)
 		AssertThat(t, err, Is{nil})
 		AssertThat(t, data, Not{nil})
 		AssertThat(t, videoHits, Is{0})

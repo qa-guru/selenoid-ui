@@ -75,7 +75,6 @@ type result struct {
 	Browsers            map[string]int         `json:"browsers"`
 	Sessions            map[string]sessionInfo `json:"sessions"`
 	BrowserProtocols    BrowserProtocols       `json:"browserProtocols,omitempty"`
-	AccessKey           string                 `json:"accessKey,omitempty"`
 	Version             string                 `json:"version"`
 	Errors              []interface{}          `json:"errors"`
 }
@@ -103,7 +102,7 @@ const (
 	statusPath = "/status"
 )
 
-func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, version string, browserProtocols BrowserProtocols, accessKey string) ([]byte, error) {
+func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, version string, browserProtocols BrowserProtocols) ([]byte, error) {
 	req, err := http.NewRequest("GET", statusURI.String()+statusPath, nil)
 	if err != nil {
 		return nil, err
@@ -124,10 +123,10 @@ func Status(ctx context.Context, webdriverURI *url.URL, statusURI *url.URL, vers
 	// Videos are loaded separately via paginated GET /video/?json — never embed the full list in status.
 	state.Videos = Videos{}
 
-	return json.Marshal(toUI(state, webdriverURI, version, browserProtocols, accessKey))
+	return json.Marshal(toUI(state, webdriverURI, version, browserProtocols))
 }
 
-func toUI(state State, webdriverURI *url.URL, version string, browserProtocols BrowserProtocols, accessKey string) result {
+func toUI(state State, webdriverURI *url.URL, version string, browserProtocols BrowserProtocols) result {
 	browsers := make(map[string]int)
 	sessions := make(map[string]sessionInfo)
 
@@ -155,7 +154,6 @@ func toUI(state State, webdriverURI *url.URL, version string, browserProtocols B
 		Browsers:            browsers,
 		Sessions:            sessions,
 		BrowserProtocols:    browserProtocols,
-		AccessKey:           accessKey,
 		Version:             version,
 		Errors:              make([]interface{}, 0),
 	}

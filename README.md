@@ -124,6 +124,13 @@ yarn --cwd ui test    # 22 tests (unit + component)
 yarn --cwd ui build
 ```
 
+**Guest hub auth (Capabilities + Playwright `accessKey`):** не хранится в git. CI подставляет при `yarn build`:
+
+- **`HUB_ACCESS_KEY`** (preferred) → `VITE_HUB_ACCESS_KEY` — один токен `user:pass` (как legacy `-access-key` / Playwright WS query);
+- или отдельно **`HUB_AUTH_USER`** + **`HUB_AUTH_PASS`**.
+
+Локально — [`ui/.env.example`](ui/.env.example) → `ui/.env.local`, либо пусто (поля auth вручную).
+
 v1 (CRA) — git tag `v2.2.x` и ранее.
 
 `-browsers-conf` — тот же [`config/browsers.json`](https://github.com/qa-guru/selenoid/blob/main/config/browsers.json), что у hub (в monorepo: `projects/selenoid-home/dev/browsers.json`).

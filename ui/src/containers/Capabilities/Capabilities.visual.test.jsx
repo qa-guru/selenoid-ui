@@ -26,7 +26,6 @@ function renderCapabilities() {
                             browserProtocols={{}}
                             sessions={{}}
                             origin="https://selenoid.qa.guru"
-                            accessKey=""
                         />
                     }
                 />
