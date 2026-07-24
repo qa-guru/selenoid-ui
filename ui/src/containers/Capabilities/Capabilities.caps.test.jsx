@@ -149,14 +149,13 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
 
         await waitFor(() =>
-            expect(fetchMock.mock.calls.some(([url]) => String(url) === "/wd/hub/session/sess-1/window/maximize")).toBe(
+            expect(fetchMock.mock.calls.some(([url]) => String(url) === "/wd/hub/session/sess-1/window/rect")).toBe(
                 true
             )
         );
         expect(body.capabilities.alwaysMatch["goog:chromeOptions"].args).toEqual([
             "--window-size=1280,1024",
             "--window-position=0,0",
-            "--start-maximized",
         ]);
 
         fetchMock.mockRestore();
@@ -198,6 +197,52 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(opts.videoName).toBe("demo.mp4");
         expect(opts.logName).toBe("demo.log");
         expect(opts.proxy).toBeUndefined();
+
+        fetchMock.mockRestore();
+    });
+
+    it("wires enableHAR honestly — hub records network to /har when toggled on (WebDriver Chromium)", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ value: { sessionId: "sess-har" } }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+
+        // Toggle enableHar on → real enableHAR flows to hub caps (no longer a no-op).
+        await user.click(segButton("caps-enable-har", "true"));
+        await user.click(screen.getByTestId("capabilities-create-session"));
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
+        const body = JSON.parse(sessionCall[1].body);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableHAR).toBe(true);
+        expect(body.desiredCapabilities.enableHAR).toBe(true);
+
+        fetchMock.mockRestore();
+    });
+
+    it("omits HAR recording when enableHar is off (default)", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ value: { sessionId: "sess-nohar" } }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
+        const body = JSON.parse(sessionCall[1].body);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableHAR).toBe(false);
+        expect(body.desiredCapabilities.enableHAR).toBe(false);
 
         fetchMock.mockRestore();
     });

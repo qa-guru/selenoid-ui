@@ -42,30 +42,30 @@ describe("capabilitiesLogic", () => {
     it("builds chromium/edge window launch options from screenResolution", () => {
         expect(browserWindowOptions("chrome", "1920x1080x24")).toEqual({
             "goog:chromeOptions": {
-                args: ["--window-size=1920,1080", "--window-position=0,0", "--start-maximized"],
+                args: ["--window-size=1920,1080", "--window-position=0,0"],
             },
         });
         expect(browserWindowOptions("msedge", "1280x1024x24")).toEqual({
             "ms:edgeOptions": {
-                args: ["--window-size=1280,1024", "--window-position=0,0", "--start-maximized"],
+                args: ["--window-size=1280,1024", "--window-position=0,0"],
             },
         });
         expect(browserWindowOptions("firefox", "1920x1080x24")).toBeNull();
     });
 
-    it("maximizes session window before falling back to window/rect", async () => {
+    it("sets window/rect from screenResolution", async () => {
         const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200 });
         await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(true);
         expect(fetchImpl).toHaveBeenCalledTimes(1);
-        expect(fetchImpl).toHaveBeenCalledWith("/wd/hub/session/sess-1/window/maximize", {
+        expect(fetchImpl).toHaveBeenCalledWith("/wd/hub/session/sess-1/window/rect", {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({}),
+            body: JSON.stringify({ x: 0, y: 0, width: 1920, height: 1080 }),
         });
     });
 
-    it("falls back to window/rect when maximize fails", async () => {
+    it("falls back to window/current/size when rect fails", async () => {
         const fetchImpl = vi
             .fn()
             .mockResolvedValueOnce({ ok: false, status: 404 })
@@ -73,9 +73,9 @@ describe("capabilitiesLogic", () => {
         await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(true);
         expect(fetchImpl).toHaveBeenNthCalledWith(
             2,
-            "/wd/hub/session/sess-1/window/rect",
+            "/wd/hub/session/sess-1/window/current/size",
             expect.objectContaining({
-                body: JSON.stringify({ x: 0, y: 0, width: 1920, height: 1080 }),
+                body: JSON.stringify({ width: 1920, height: 1080 }),
             })
         );
     });

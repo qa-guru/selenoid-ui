@@ -29,7 +29,7 @@ export function browserWindowOptions(browserName, screenResolution) {
     if (!size) {
         return null;
     }
-    const args = [`--window-size=${size.width},${size.height}`, "--window-position=0,0", "--start-maximized"];
+    const args = [`--window-size=${size.width},${size.height}`, "--window-position=0,0"];
     const name = String(browserName || "").toLowerCase();
     if (name === "chrome" || name === "chromium" || name === "opera") {
         return { "goog:chromeOptions": { args } };
@@ -52,17 +52,12 @@ async function postSessionCommand(sessionId, path, body, fetchImpl) {
 /**
  * Fit browser window to screenResolution after Create Session.
  * screenResolution only sizes Xvfb; browsers often keep a default window.
- * Maximize first (Firefox ignores oversized window/rect), then set rect/size.
+ * Prefer explicit window/rect (maximize is deprecated / flaky in containers).
  */
 export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl = fetch) {
     const size = parseScreenSize(screenResolution);
     if (!sessionId || !size) {
         return false;
-    }
-
-    const maximize = await postSessionCommand(sessionId, "/window/maximize", {}, fetchImpl);
-    if (maximize && maximize.ok) {
-        return true;
     }
 
     const rect = await postSessionCommand(
