@@ -82,10 +82,12 @@ const Viewport = () => {
 
             <StyledViewport>
                 <Routes>
-                    <Route path="/" element={<Navigate to="/statistic" replace />} />
+                    <Route path="/" element={<Navigate to="/statistics" replace />} />
+
+                    <Route path="/statistic" element={<Navigate to="/statistics" replace />} />
 
                     <Route
-                        path="/statistic"
+                        path="/statistics"
                         element={
                             <Stats
                                 {...{

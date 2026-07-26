@@ -12,12 +12,12 @@ export const headerConfig = {
     brand: {
         href: "https://qa.guru/",
         leading: {
-            href: "#/statistic",
+            href: "#/statistics",
             label: "Selenoid 3",
         },
     },
     nav: [
-        { href: "#/statistic", label: "Statistic", testid: "header-nav-statistic" },
+        { href: "#/statistics", label: "Statistics", testid: "header-nav-statistics" },
         { href: "#/sessions", label: "Sessions", testid: "header-nav-sessions" },
         { href: "#/new-session", label: "New Session", testid: "header-nav-new-session" },
     ],

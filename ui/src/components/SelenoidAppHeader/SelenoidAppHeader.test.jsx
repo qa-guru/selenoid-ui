@@ -15,7 +15,7 @@ function injectHeaderNav() {
     const nav = document.createElement("nav");
     nav.dataset.testid = "header-nav";
     const items = [
-        ["#/statistic", "header-nav-statistic", "Statistic"],
+        ["#/statistics", "header-nav-statistics", "Statistics"],
         ["#/sessions", "header-nav-sessions", "Sessions"],
         ["#/new-session", "header-nav-new-session", "New Session"],
     ];
@@ -83,22 +83,22 @@ describe("SelenoidAppHeader", () => {
         expect(ariaCurrentTestids()).toEqual(["header-nav-new-session"]);
     });
 
-    it("highlights Statistic on the statistic route", async () => {
-        renderHeader(["/statistic"]);
+    it("highlights Statistics on the statistics route", async () => {
+        renderHeader(["/statistics"]);
         injectHeaderNav();
 
         await waitFor(() => {
-            expect(activeTestids()).toEqual(["header-nav-statistic"]);
+            expect(activeTestids()).toEqual(["header-nav-statistics"]);
         });
     });
 
     it("re-syncs the active item on SPA navigation", async () => {
         const user = userEvent.setup();
-        renderHeader(["/statistic"]);
+        renderHeader(["/statistics"]);
         injectHeaderNav();
 
         await waitFor(() => {
-            expect(activeTestids()).toEqual(["header-nav-statistic"]);
+            expect(activeTestids()).toEqual(["header-nav-statistics"]);
         });
 
         await user.click(screen.getByTestId("go-sessions"));

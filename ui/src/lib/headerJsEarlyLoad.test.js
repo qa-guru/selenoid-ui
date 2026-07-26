@@ -44,9 +44,9 @@ describe("header.js early load (no #app-header yet)", () => {
         document.body.appendChild(mount);
 
         window.headerConfig = {
-            brand: { href: "#/statistic", label: "Selenoid UI" },
+            brand: { href: "#/statistics", label: "Selenoid UI" },
             nav: [
-                { href: "#/statistic", label: "Statistic", testid: "header-nav-statistic" },
+                { href: "#/statistics", label: "Statistics", testid: "header-nav-statistics" },
                 { href: "#/sessions", label: "Sessions", testid: "header-nav-sessions" },
                 { href: "#/new-session", label: "New Session", testid: "header-nav-new-session" },
             ],
@@ -56,7 +56,7 @@ describe("header.js early load (no #app-header yet)", () => {
 
         await mod.remountHeader();
 
-        expect(document.querySelector('[data-testid="header-nav-statistic"]')).toBeTruthy();
+        expect(document.querySelector('[data-testid="header-nav-statistics"]')).toBeTruthy();
         expect(document.querySelector('[data-testid="header-nav-sessions"]')).toBeTruthy();
         expect(document.querySelector('[data-testid="header-nav-new-session"]')).toBeTruthy();
     });
