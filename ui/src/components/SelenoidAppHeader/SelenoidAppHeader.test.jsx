@@ -17,7 +17,7 @@ function injectHeaderNav() {
     const items = [
         ["#/", "header-nav-stats", "STATS"],
         ["#/capabilities", "header-nav-capabilities", "CAPABILITIES"],
-        ["#/videos", "header-nav-videos", "VIDEOS"],
+        ["#/sessions", "header-nav-sessions", "SESSIONS"],
     ];
     for (const [href, testid, label] of items) {
         const link = document.createElement("a");
@@ -45,8 +45,8 @@ function ariaCurrentTestids() {
 function Navigator() {
     const navigate = useNavigate();
     return (
-        <button type="button" data-testid="go-videos" onClick={() => navigate("/videos")}>
-            go videos
+        <button type="button" data-testid="go-sessions" onClick={() => navigate("/sessions")}>
+            go sessions
         </button>
     );
 }
@@ -101,11 +101,11 @@ describe("SelenoidAppHeader", () => {
             expect(activeTestids()).toEqual(["header-nav-stats"]);
         });
 
-        await user.click(screen.getByTestId("go-videos"));
+        await user.click(screen.getByTestId("go-sessions"));
 
         await waitFor(() => {
-            expect(activeTestids()).toEqual(["header-nav-videos"]);
+            expect(activeTestids()).toEqual(["header-nav-sessions"]);
         });
-        expect(ariaCurrentTestids()).toEqual(["header-nav-videos"]);
+        expect(ariaCurrentTestids()).toEqual(["header-nav-sessions"]);
     });
 });

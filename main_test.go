@@ -185,6 +185,35 @@ func TestVideo(t *testing.T) {
 	})
 }
 
+func artifactApi() http.Handler {
+	mux := http.NewServeMux()
+	echo := func(body string) http.HandlerFunc {
+		return func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(body))
+		}
+	}
+	mux.HandleFunc("/logs/", echo("im a log"))
+	mux.HandleFunc("/har/", echo("{}"))
+	mux.HandleFunc("/sessions/", echo(`{"sessions":[],"total":0}`))
+	return mux
+}
+
+func TestArtifactProxies(t *testing.T) {
+	t.Run("logs/har/sessions proxy to the hub", func(t *testing.T) {
+		hub := httptest.NewServer(artifactApi())
+		defer hub.Close()
+		statusURI, _ = url.Parse(hub.URL)
+
+		for _, path := range []string{"/logs/session.log", "/har/session.har", "/sessions/?json"} {
+			rsp, err := http.Get(withUrl(path))
+			AssertThat(t, err, Is{nil})
+			AssertThat(t, rsp, Code{http.StatusOK})
+			AssertThat(t, rsp.Body, Is{Not{nil}})
+		}
+	})
+}
+
 func TestVideoFail(t *testing.T) {
 	t.Run("Video fail", func(t *testing.T) {
 		statusURI, _ = url.Parse("http://127.0.0.1:1")

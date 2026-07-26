@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SessionInfo from "./SessionInfo";
 import VncCard from "../VncCard";
 import Log from "../Log";
+import HarViewer, { wantsHar } from "../HarViewer";
 import { StyledSession } from "./style.css";
 
 /**
@@ -21,49 +22,80 @@ function usePrevious(value) {
     return ref.current;
 }
 
+/** Keep Session mounted briefly after quit so HarViewer can poll the flushed /har file. */
+const HAR_HOLD_MS = 20_000;
+
 const Session = ({ origin, session, browser }) => {
     const navigate = useNavigate();
     const prevBrowser = usePrevious(browser);
+    const [endedCaps, setEndedCaps] = useState(null);
+    const holdTimer = useRef(null);
 
     useEffect(() => {
-        if (prevBrowser && !browser) {
-            // if browser disappears only
-            navigate("/");
+        if (browser?.caps && wantsHar(browser.caps)) {
+            setEndedCaps(browser.caps);
         }
-    }, [browser, navigate, prevBrowser]);
+    }, [browser]);
+
+    useEffect(() => {
+        if (!(prevBrowser && !browser)) {
+            return undefined;
+        }
+        const caps = endedCaps || prevBrowser.caps || {};
+        if (wantsHar(caps)) {
+            // Hold the page so the full-width HAR viewer can pick up the archive.
+            holdTimer.current = setTimeout(() => navigate("/"), HAR_HOLD_MS);
+            return () => {
+                if (holdTimer.current) {
+                    clearTimeout(holdTimer.current);
+                }
+            };
+        }
+        navigate("/");
+        return undefined;
+    }, [browser, navigate, prevBrowser, endedCaps]);
 
     const [isLogHidden, onVNCFullscreenChange] = useState(false);
+    const capsForHar = browser?.caps || endedCaps || {};
+    const sessionAlive = Boolean(browser);
 
     return (
         <StyledSession>
             <SessionInfo
                 {...{
                     session,
-                    browser,
+                    browser: browser || { caps: capsForHar },
                 }}
             />
 
-            {browser && (
-                <div className="interactive">
-                    <VncContainer
-                        {...{
-                            origin,
-                            session,
-                            browser,
-                            onVNCFullscreenChange,
-                        }}
-                    />
-                    <div className="session-interactive-card">
-                        <Log
-                            {...{
-                                origin,
-                                session,
-                                browser,
-                            }}
-                            hidden={isLogHidden}
-                        />
+            {(browser || wantsHar(capsForHar)) && (
+                <>
+                    {browser && (
+                        <div className="interactive">
+                            <VncContainer
+                                {...{
+                                    origin,
+                                    session,
+                                    browser,
+                                    onVNCFullscreenChange,
+                                }}
+                            />
+                            <div className="session-interactive-card">
+                                <Log
+                                    {...{
+                                        origin,
+                                        session,
+                                        browser,
+                                    }}
+                                    hidden={isLogHidden}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    <div className="session-har-slot">
+                        <HarViewer session={session} browser={{ caps: capsForHar }} sessionAlive={sessionAlive} />
                     </div>
-                </div>
+                </>
             )}
         </StyledSession>
     );

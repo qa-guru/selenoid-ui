@@ -69,6 +69,8 @@ describe("Capabilities Android device panel", () => {
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-playwright-panel")).toBeNull();
+        // HAR is WebDriver client-side only — never on Android.
+        expect(screen.queryByTestId("caps-enable-har")).toBeNull();
     });
 
     it("defaults Android sessionTimeout to 2m anti-flake", async () => {

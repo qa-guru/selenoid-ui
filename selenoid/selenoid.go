@@ -17,6 +17,8 @@ type Caps struct {
 	Version          string            `json:"version"`
 	ScreenResolution string            `json:"screenResolution"`
 	VNC              bool              `json:"enableVNC"`
+	HAR              bool              `json:"enableHAR"`
+	HARName          string            `json:"harName,omitempty"`
 	TestName         string            `json:"name"`
 	TimeZone         string            `json:"timeZone"`
 	Labels           map[string]string `json:"labels,omitempty"`

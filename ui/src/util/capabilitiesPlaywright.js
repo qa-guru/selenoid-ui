@@ -4,6 +4,8 @@ export const DEFAULT_PLAYWRIGHT_SESSION = {
     sessionTimeout: "60m",
     enableVnc: true,
     enableVideo: true,
+    /** Hub CDP → /har/<id>.har — not Playwright client recordHar. */
+    enableHar: false,
     headless: false,
 };
 
@@ -22,6 +24,7 @@ export const playwrightSelenoidOptions = (accessKey = "", session = {}) => {
         sessionTimeout: s.sessionTimeout,
         enableVNC: boolStr(s.enableVnc),
         enableVideo: boolStr(s.enableVideo),
+        enableHAR: boolStr(s.enableHar),
         headless: boolStr(s.headless),
         "labels.manual": "true",
     };

@@ -100,6 +100,8 @@ describe("Capabilities Playwright Create Session", () => {
         // Browser capabilities (proxy) is WebDriver-only — hidden for Playwright.
         expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
+        // HAR toggle is WebDriver client-side only; Playwright uses recordHar in tests.
+        expect(screen.queryByTestId("caps-enable-har")).toBeNull();
 
         const create = screen.getByTestId("capabilities-create-session");
         expect(create).toBeEnabled();

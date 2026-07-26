@@ -44,6 +44,7 @@ describe("capabilitiesPlaywright", () => {
             sessionTimeout: "15m",
             enableVnc: false,
             enableVideo: false,
+            enableHar: true,
             headless: true,
         });
         const parsed = new URL(url);
@@ -52,6 +53,12 @@ describe("capabilitiesPlaywright", () => {
         expect(parsed.searchParams.get("sessionTimeout")).toBe("15m");
         expect(parsed.searchParams.get("enableVNC")).toBe("false");
         expect(parsed.searchParams.get("enableVideo")).toBe("false");
+        expect(parsed.searchParams.get("enableHAR")).toBe("true");
         expect(parsed.searchParams.get("headless")).toBe("true");
+    });
+
+    it("defaults enableHAR to false in the WS query", () => {
+        const parsed = new URL(playwrightEndpoint("playwright-chromium", "1.61.1"));
+        expect(parsed.searchParams.get("enableHAR")).toBe("false");
     });
 });

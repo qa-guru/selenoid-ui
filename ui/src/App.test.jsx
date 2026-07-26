@@ -24,6 +24,6 @@ describe("App", () => {
         });
         expect(window.headerConfig?.brand?.href).toBe("https://qa.guru/");
         expect(window.headerConfig?.brand?.label).toBeUndefined();
-        expect(window.headerConfig?.nav?.map((item) => item.label)).toEqual(["STATS", "CAPABILITIES", "VIDEOS"]);
+        expect(window.headerConfig?.nav?.map((item) => item.label)).toEqual(["STATS", "CAPABILITIES", "SESSIONS"]);
     });
 });

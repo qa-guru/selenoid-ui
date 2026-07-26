@@ -67,4 +67,4 @@ Prod deploy: `SELENOID_UI_VERSION=v2.3.0`.
 2. Push `main` + align hub/cm `v2.3.0` tags (stack cut) — **по команде**.
 3. `git tag -a v2.3.0 -m "v2.3.0"` → push tags — **по команде**.
 4. Release assets `dist/selenoid-ui_*`; Docker `qaguru/selenoid-ui:v2.3.0`.
-5. OUT: `warm-pool-orchestrator/`, `@zero-design-system/react` header (v3).
+5. OUT: `selenoid-warm-pool/`, `@zero-design-system/react` header (v3).

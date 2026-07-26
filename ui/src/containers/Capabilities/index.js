@@ -50,7 +50,7 @@ import "@zero-design-system/react/styles.css";
  * | screenResolution | PlaqueSelect | solo   | selenoid:options.screenResolution |
  * | enableVnc        | PlaqueFieldSeg | solo | enableVNC / selenoid:options      |
  * | enableVideo      | PlaqueFieldSeg | solo | enableVideo                       |
- * | enableHar        | PlaqueFieldSeg | solo | enableHAR                         |
+ * | enableHar        | PlaqueFieldSeg | solo | enableHAR → hub CDP → /har/<id>.har|
  * | enableLog        | PlaqueFieldSeg | solo | enableLog                         |
  * | timeZone         | PlaqueSelect | solo   | selenoid:options.timeZone         |
  * | env              | PlaqueField  | solo   | selenoid:options.env              |
@@ -234,10 +234,12 @@ const buildSelenoidOptions = ({
     labels,
     videoName,
     logName,
+    harName,
 }) => {
     const opts = {
         enableVNC: Boolean(enableVnc),
         enableVideo: Boolean(enableVideo),
+        // enableHAR: hub records browser network over CDP and writes /har/<id>.har (WebDriver Chromium)
         enableHAR: Boolean(enableHar),
         enableLog: Boolean(enableLog),
         sessionTimeout,
@@ -252,11 +254,15 @@ const buildSelenoidOptions = ({
     }
     const video = String(videoName || "").trim();
     const log = String(logName || "").trim();
+    const har = String(harName || "").trim();
     if (opts.enableVideo && video) {
         opts.videoName = video;
     }
     if (opts.enableLog && log) {
         opts.logName = log;
+    }
+    if (opts.enableHAR && har) {
+        opts.harName = har;
     }
     return opts;
 };
@@ -682,7 +688,8 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             `- name: **${sessionOpts.name}**`,
             `- screenResolution: **${sessionOpts.screenResolution}**`,
             `- timeZone: **${payload.timeZone}**`,
-            `- enableVnc / enableVideo / enableHar / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableHar}** / **${payload.enableLog}**`,
+            `- enableVnc / enableVideo / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableLog}**`,
+            `- enableHar: **${payload.enableHar}** (hub CDP → /har/<id>.har; WebDriver Chromium)`,
             `- env: **${payload.env || "—"}**`,
             `- labels: **${payload.labels || "—"}**`,
             `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
@@ -1046,7 +1053,6 @@ ${javaProxyBlock}options.setCapability("selenoid:options", new HashMap<String, O
     put("timeZone", ${timeZoneJson});
 ${javaOptionalPuts}    put("enableVNC", ${enableVnc});
     put("enableVideo", ${enableVideo});
-    put("enableHAR", ${enableHar});
     put("enableLog", ${enableLog});
 }});
 RemoteWebDriver driver = new RemoteWebDriver(new URL("${hubUrl}"), options);
@@ -1062,7 +1068,6 @@ ${kotlinProxyBlock}options.setCapability(
         "timeZone" to ${timeZoneJson},${kotlinOptional}
         "enableVNC" to ${enableVnc},
         "enableVideo" to ${enableVideo},
-        "enableHAR" to ${enableHar},
         "enableLog" to ${enableLog}
     )
 )
@@ -1080,7 +1085,6 @@ caps := selenium.Capabilities{
                 "timeZone": ${timeZoneJson},${goOptional}
                 "enableVNC": ${enableVnc},
                 "enableVideo": ${enableVideo},
-                "enableHAR": ${enableHar},
                 "enableLog": ${enableLog},
         },
 }
@@ -1107,7 +1111,6 @@ ${version != "" ? '    caps.set_browser_version("' + version + '")?;\n' : ""}   
             "timeZone": ${timeZoneJson},${rustOptional}
             "enableVNC": ${enableVnc},
             "enableVideo": ${enableVideo},
-            "enableHAR": ${enableHar},
             "enableLog": ${enableLog}
         }),
     )?;${rustProxyBlock}
@@ -1126,7 +1129,6 @@ ${csharpProxyBlock}options.AddAdditionalOption("selenoid:options", new Dictionar
     ["timeZone"] = ${timeZoneJson},${csharpOptional}
     ["enableVNC"] = ${enableVnc},
     ["enableVideo"] = ${enableVideo},
-    ["enableHAR"] = ${enableHar},
     ["enableLog"] = ${enableLog}
 });
 IWebDriver driver = new RemoteWebDriver(new Uri("${hubUrl}"), options);
@@ -1143,7 +1145,6 @@ capabilities = {
         "timeZone": ${timeZoneJson},${pythonOptional}
         "enableVNC": ${enableVnc ? "True" : "False"},
         "enableVideo": ${enableVideo ? "True" : "False"},
-        "enableHAR": ${enableHar ? "True" : "False"},
         "enableLog": ${enableLog ? "True" : "False"}
     }
 }
@@ -1168,7 +1169,6 @@ var options = {
             timeZone: ${timeZoneJson},${jsOptional}
             enableVNC: ${enableVnc},
             enableVideo: ${enableVideo},
-            enableHAR: ${enableHar},
             enableLog: ${enableLog}
         }      
     } 
@@ -1191,7 +1191,6 @@ const options: RemoteOptions = {
             timeZone: ${timeZoneJson},${jsOptional}
             enableVNC: ${enableVnc},
             enableVideo: ${enableVideo},
-            enableHAR: ${enableHar},
             enableLog: ${enableLog}
         }
     }
@@ -1209,7 +1208,6 @@ array(
         "timeZone"=>${timeZoneJson},${phpOptional}
         "enableVNC"=>${enableVnc ? "true" : "false"},
         "enableVideo"=>${enableVideo ? "true" : "false"},
-        "enableHAR"=>${enableHar ? "true" : "false"},
         "enableLog"=>${enableLog ? "true" : "false"}
     )
 )
@@ -1225,7 +1223,6 @@ caps["selenoid:options"] = {
   'timeZone' => ${timeZoneJson},${rubyOptional}
   'enableVNC' => ${enableVnc},
   'enableVideo' => ${enableVideo},
-  'enableHAR' => ${enableHar},
   'enableLog' => ${enableLog}
 }
 
@@ -1246,7 +1243,6 @@ var caps: [String: Any] = [
         "timeZone": ${timeZoneJson},${swiftOptional}
         "enableVNC": ${enableVnc},
         "enableVideo": ${enableVideo},
-        "enableHAR": ${enableHar},
         "enableLog": ${enableLog}
     ]
 ]
@@ -1570,6 +1566,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         sessionTimeout,
         enableVnc: enableVnc === "true",
         enableVideo: enableVideo === "true",
+        enableHar: enableHar === "true",
         headless: headless === "true",
     };
     const androidSession = {
@@ -2332,8 +2329,8 @@ const Launch = ({
             return;
         }
 
-        const har = enableHar === "true";
         const log = enableLog === "true";
+        const har = enableHar === "true";
         const resolvedProxy = resolveProxyServer(proxyPreset, proxyServer, proxyPort);
         const proxy = buildProxyCapability(resolvedProxy);
         const selenoidOptions = buildSelenoidOptions({
@@ -2684,6 +2681,18 @@ const Launch = ({
                                 onValueChange={setEnableHar}
                                 stretch
                                 data-testid="caps-enable-har"
+                                aria-label="enableHar — hub records network over CDP → /har/<id>.har"
+                                options={[
+                                    {
+                                        value: "true",
+                                        title:
+                                            "Hub records browser network over CDP → download /har/<id>.har (Chrome/Edge WebDriver)",
+                                    },
+                                    {
+                                        value: "false",
+                                        title: "Do not record HAR",
+                                    },
+                                ]}
                             />
                             <PlaqueFieldSeg
                                 label="enableLog"
@@ -2836,7 +2845,7 @@ const Launch = ({
                     titleTestId="capabilities-playwright-title"
                     className="capabilities-config-panel"
                 >
-                    {/* selenoid:options → WS query params (name, sessionTimeout, enableVNC/Video, headless). */}
+                    {/* selenoid:options → WS query params (name, sessionTimeout, enableVNC/Video/HAR, headless). */}
                     <div
                         className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
                         data-testid="capabilities-playwright-caps"
@@ -2899,6 +2908,26 @@ const Launch = ({
                                 onValueChange={setEnableVideo}
                                 stretch
                                 data-testid="caps-playwright-enable-video"
+                            />
+                            <PlaqueFieldSeg
+                                label="enableHar"
+                                paramId="enableHar"
+                                value={enableHar}
+                                onValueChange={setEnableHar}
+                                stretch
+                                data-testid="caps-playwright-enable-har"
+                                aria-label="enableHar — hub CDP → /har/<id>.har (not client recordHar)"
+                                options={[
+                                    {
+                                        value: "true",
+                                        title:
+                                            "Hub records network over CDP → /har/<id>.har (needs DevTools :7070 on the image)",
+                                    },
+                                    {
+                                        value: "false",
+                                        title: "Do not record hub HAR (use client recordHar in autotests)",
+                                    },
+                                ]}
                             />
                             <PlaqueFieldSeg
                                 label="headless"

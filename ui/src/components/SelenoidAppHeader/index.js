@@ -8,8 +8,8 @@ const MOUNT_SELECTOR = "#app-header";
 const NAV_LINK_SELECTOR = '[data-testid="header-nav"] a, [data-testid="header-menu-nav"] a';
 
 /**
- * Normalize a route so `/videos/` and `/videos` compare equal while `/` stays
- * exact.
+ * Normalize a route so `/sessions/` and `/sessions` compare equal while `/`
+ * stays exact.
  * @param {string} path
  * @returns {string}
  */

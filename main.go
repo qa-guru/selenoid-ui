@@ -66,6 +66,18 @@ func mux(sse *sse.SseBroker) http.Handler {
 	mux.HandleFunc("/video/", func(w http.ResponseWriter, r *http.Request) {
 		reverseProxy(statusURI).ServeHTTP(w, r)
 	})
+	// Artifact directories live on the hub next to /video/: logs, HAR archives,
+	// and the session-centric listing that groups them by session id. Proxy all
+	// three so the UI can list/download/delete finished-session artifacts.
+	mux.HandleFunc("/logs/", func(w http.ResponseWriter, r *http.Request) {
+		reverseProxy(statusURI).ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/har/", func(w http.ResponseWriter, r *http.Request) {
+		reverseProxy(statusURI).ServeHTTP(w, r)
+	})
+	mux.HandleFunc("/sessions/", func(w http.ResponseWriter, r *http.Request) {
+		reverseProxy(statusURI).ServeHTTP(w, r)
+	})
 	mux.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
 		reverseProxy(webdriverURI).ServeHTTP(w, r)
 	})

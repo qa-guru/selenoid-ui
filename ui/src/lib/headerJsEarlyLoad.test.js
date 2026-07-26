@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 /**
  * Regression: selenoid-header-bridge imports header.js from <head> before React
  * mounts #app-header. A top-level throw poisons the ES module cache and kills
- * Stats / Capabilities / Videos nav for the whole session.
+ * Stats / Capabilities / Sessions nav for the whole session.
  */
 describe("header.js early load (no #app-header yet)", () => {
     beforeEach(() => {
@@ -48,7 +48,7 @@ describe("header.js early load (no #app-header yet)", () => {
             nav: [
                 { href: "#/", label: "Stats", testid: "header-nav-stats" },
                 { href: "#/capabilities", label: "Capabilities", testid: "header-nav-capabilities" },
-                { href: "#/videos", label: "Videos", testid: "header-nav-videos" },
+                { href: "#/sessions", label: "Sessions", testid: "header-nav-sessions" },
             ],
             lang: { default: "en" },
             theme: { default: "dark" },
@@ -58,6 +58,6 @@ describe("header.js early load (no #app-header yet)", () => {
 
         expect(document.querySelector('[data-testid="header-nav-stats"]')).toBeTruthy();
         expect(document.querySelector('[data-testid="header-nav-capabilities"]')).toBeTruthy();
-        expect(document.querySelector('[data-testid="header-nav-videos"]')).toBeTruthy();
+        expect(document.querySelector('[data-testid="header-nav-sessions"]')).toBeTruthy();
     });
 });

@@ -19,7 +19,7 @@ export const headerConfig = {
     nav: [
         { href: "#/", label: "STATS", testid: "header-nav-stats" },
         { href: "#/capabilities", label: "CAPABILITIES", testid: "header-nav-capabilities" },
-        { href: "#/videos", label: "VIDEOS", testid: "header-nav-videos" },
+        { href: "#/sessions", label: "SESSIONS", testid: "header-nav-sessions" },
     ],
     lang: {
         default: "en",
