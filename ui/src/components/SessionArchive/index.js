@@ -4,7 +4,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import { StyledArchive } from "./style.css";
-import { Badge, IconTrash, Panel } from "@zero-design-system/react";
+import { IconTrash, Panel } from "@zero-design-system/react";
 import { useDeleteSession } from "./service";
 import { fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
 import { sessionIdShort } from "../../util/sessionsLogic";
@@ -26,6 +26,89 @@ function IconHourglass() {
             <path d="M11.5 2.5c0 3-3.5 4-3.5 5.5s3.5 3 3.5 5.5" />
         </svg>
     );
+}
+
+function IconVideo() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <rect x="2.5" y="4" width="8" height="8" rx="1.5" />
+            <path d="M10.5 7.25 13.5 5.5v5L10.5 8.75" />
+        </svg>
+    );
+}
+
+function IconLog() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M4 2.5h5l3 3v8H4z" />
+            <path d="M9 2.5v3h3M6 8.5h4M6 11h3" />
+        </svg>
+    );
+}
+
+function IconHar() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <circle cx="8" cy="8" r="5.5" />
+            <path d="M2.5 8h11M8 2.5c1.6 1.8 1.6 9.2 0 11M8 2.5c-1.6 1.8-1.6 9.2 0 11" />
+        </svg>
+    );
+}
+
+function formatSessionDate(value) {
+    if (!value) {
+        return "";
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+    return date.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
+}
+
+function formatDuration(started, finished) {
+    if (!started || !finished) {
+        return "";
+    }
+    const ms = new Date(finished) - new Date(started);
+    if (!(ms >= 0) || Number.isNaN(ms)) {
+        return "";
+    }
+    const totalSec = Math.round(ms / 1000);
+    if (totalSec < 60) {
+        return `${totalSec}s`;
+    }
+    const minutes = Math.floor(totalSec / 60);
+    const seconds = totalSec % 60;
+    if (minutes < 60) {
+        return seconds ? `${minutes}m ${seconds}s` : `${minutes}m`;
+    }
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ${minutes % 60}m`;
 }
 
 const SessionArchive = ({ query = "" }) => {
@@ -163,6 +246,11 @@ const SessionArchive = ({ query = "" }) => {
 const SessionRow = ({ session, onDeleted, ref }) => {
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
     const detailHref = `/sessions/${session.id}`;
+    const name = session.name || "";
+    const quota = session.quota || "";
+    const dateLabel = formatSessionDate(session.finished || session.started);
+    const durationLabel = formatDuration(session.started, session.finished);
+    const hasArtifacts = Boolean(session.video || session.log || session.har);
 
     return (
         <div ref={ref} className="archive__row" data-testid="session-card" data-session={session.id}>
@@ -170,16 +258,48 @@ const SessionRow = ({ session, onDeleted, ref }) => {
                 {sessionIdShort(session.id)}
             </Link>
 
-            <Link to={detailHref} className="archive__artifacts" data-testid="session-detail-artifacts">
-                {session.video && <Badge>VIDEO</Badge>}
-                {session.log && <Badge>LOG</Badge>}
-                {session.har && <Badge>HAR</Badge>}
-                {!session.video && !session.log && !session.har && (
-                    <span className="archive__empty-artifacts">no artifacts</span>
-                )}
+            <Link to={detailHref} className="archive__main" data-testid="session-detail-main">
+                <span className="archive__name" title={name || undefined} data-testid="session-name">
+                    {name || "—"}
+                </span>
+                <span className="archive__meta">
+                    <span className="archive__quota" data-testid="session-quota" title={quota || undefined}>
+                        {quota || "—"}
+                    </span>
+                    <span className="archive__date" data-testid="session-date">
+                        {dateLabel || "—"}
+                    </span>
+                    <span className="archive__duration" data-testid="session-duration">
+                        {durationLabel || "—"}
+                    </span>
+                </span>
             </Link>
 
             <div className="archive__actions">
+                <Link
+                    to={detailHref}
+                    className="archive__artifacts"
+                    data-testid="session-detail-artifacts"
+                    aria-label="Session artifacts"
+                >
+                    {session.video && (
+                        <span className="archive__artifact-icon" title="VIDEO" data-testid="artifact-video">
+                            <IconVideo />
+                        </span>
+                    )}
+                    {session.log && (
+                        <span className="archive__artifact-icon" title="LOG" data-testid="artifact-log">
+                            <IconLog />
+                        </span>
+                    )}
+                    {session.har && (
+                        <span className="archive__artifact-icon" title="HAR" data-testid="artifact-har">
+                            <IconHar />
+                        </span>
+                    )}
+                    {!hasArtifacts && <span className="archive__empty-artifacts">—</span>}
+                </Link>
+
                 <button
                     type="button"
                     className="icon-btn session-delete"

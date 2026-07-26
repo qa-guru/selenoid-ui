@@ -53,7 +53,7 @@ export const StyledArchive = styled.div`
     }
 
     .archive__id {
-        flex: 0 0 120px;
+        flex: 0 0 88px;
         color: var(--color-text, #fff);
         text-decoration: none;
         font-weight: 300;
@@ -65,41 +65,132 @@ export const StyledArchive = styled.div`
         }
     }
 
-    .archive__artifacts {
+    .archive__main {
         display: flex;
         align-items: center;
+        gap: var(--space-4, 15px);
         flex: 1;
-        gap: 0.5em;
-        flex-wrap: wrap;
+        min-width: 0;
         text-decoration: none;
         color: inherit;
-        min-width: 0;
+
+        &:hover .archive__name {
+            color: var(--color-success, #59a781);
+        }
     }
 
-    .archive__empty-artifacts {
+    .archive__name {
+        flex: 1 1 160px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 300;
+        color: var(--color-text, #fff);
+    }
+
+    .archive__meta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4, 15px);
+        flex: 0 1 auto;
+        min-width: 0;
         color: var(--color-text-muted, #aaa);
-        font-size: 0.9em;
+        font-size: 0.92em;
+        font-weight: 300;
+    }
+
+    .archive__quota,
+    .archive__date,
+    .archive__duration {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .archive__quota {
+        flex: 0 1 96px;
+        max-width: 120px;
+    }
+
+    .archive__date {
+        flex: 0 0 auto;
+    }
+
+    .archive__duration {
+        flex: 0 0 64px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
     }
 
     .archive__actions {
         display: flex;
         align-items: center;
+        gap: 0.35em;
         flex-shrink: 0;
+        margin-left: auto;
+    }
 
-        .session-delete {
+    .archive__artifacts {
+        display: flex;
+        align-items: center;
+        gap: 0.25em;
+        text-decoration: none;
+        color: var(--color-text-muted, #aaa);
+        min-width: 0;
+
+        &:hover {
             color: var(--color-text, #fff);
-            background: transparent;
-            border: none;
-            cursor: pointer;
+        }
+    }
 
-            &:hover:not(:disabled) {
-                color: var(--color-danger, #ff6e59);
-            }
+    .archive__artifact-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        color: inherit;
 
-            &:disabled {
-                opacity: 0.5;
-                cursor: default;
-            }
+        svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+    }
+
+    .archive__empty-artifacts {
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.9em;
+        min-width: 22px;
+        text-align: center;
+    }
+
+    .archive__actions .session-delete {
+        color: var(--color-text, #fff);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+
+        .icon svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+
+        &:hover:not(:disabled) {
+            color: var(--color-danger, #ff6e59);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: default;
         }
     }
 
@@ -154,5 +245,29 @@ export const StyledArchive = styled.div`
         min-width: 64px;
         text-align: center;
         color: var(--color-text, #fff);
+    }
+
+    @media (max-width: 720px) {
+        .archive__row {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .archive__main {
+            flex: 1 1 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            order: 3;
+        }
+
+        .archive__meta {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .archive__actions {
+            margin-left: auto;
+        }
     }
 `;

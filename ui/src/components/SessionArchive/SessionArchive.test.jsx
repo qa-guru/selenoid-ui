@@ -69,11 +69,22 @@ describe("SessionArchive", () => {
         expect(screen.getByTestId("archive-pager-status")).toHaveTextContent("2 / 2");
     });
 
-    it("renders a list row with detail link and artifact badges (no video preview)", async () => {
+    it("renders a list row with meta, artifact icons, and detail link (no video preview)", async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
-                sessions: [{ id: "sess-1", video: "sess-1.mp4", log: "sess-1.log", har: "sess-1.har" }],
+                sessions: [
+                    {
+                        id: "sess-1",
+                        video: "sess-1.mp4",
+                        log: "sess-1.log",
+                        har: "sess-1.har",
+                        name: "com.example.VeryLongTestNameThatShouldTruncate",
+                        quota: "alice",
+                        started: "2026-07-26T10:00:00Z",
+                        finished: "2026-07-26T10:01:35Z",
+                    },
+                ],
                 total: 1,
                 limit: 10,
                 offset: 0,
@@ -85,13 +96,25 @@ describe("SessionArchive", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-1");
         });
-        expect(screen.getByText("VIDEO")).toBeInTheDocument();
-        expect(screen.getByText("LOG")).toBeInTheDocument();
-        expect(screen.getByText("HAR")).toBeInTheDocument();
+        expect(screen.getByTestId("session-name")).toHaveTextContent("com.example.VeryLongTestNameThatShouldTruncate");
+        expect(screen.getByTestId("session-name")).toHaveAttribute(
+            "title",
+            "com.example.VeryLongTestNameThatShouldTruncate"
+        );
+        expect(screen.getByTestId("session-quota")).toHaveTextContent("alice");
+        expect(screen.getByTestId("session-duration")).toHaveTextContent("1m 35s");
+        expect(screen.getByTestId("artifact-video")).toHaveAttribute("title", "VIDEO");
+        expect(screen.getByTestId("artifact-log")).toHaveAttribute("title", "LOG");
+        expect(screen.getByTestId("artifact-har")).toHaveAttribute("title", "HAR");
+        expect(screen.queryByText("VIDEO")).toBeNull();
         expect(screen.queryByTestId("session-video")).toBeNull();
         expect(document.querySelector("video")).toBeNull();
         // No dripicons — local SVG chrome only.
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
+        // Artifact icons sit in the same actions group as delete.
+        const actions = screen.getByTestId("session-delete").closest(".archive__actions");
+        expect(actions.contains(screen.getByTestId("artifact-video"))).toBe(true);
+        expect(actions.contains(screen.getByTestId("session-delete"))).toBe(true);
     });
 
     it("links har-only sessions into the detail page", async () => {
@@ -110,8 +133,8 @@ describe("SessionArchive", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-2");
         });
-        expect(screen.getByText("HAR")).toBeInTheDocument();
-        expect(screen.queryByText("VIDEO")).toBeNull();
+        expect(screen.getByTestId("artifact-har")).toBeInTheDocument();
+        expect(screen.queryByTestId("artifact-video")).toBeNull();
         expect(document.querySelector("video")).toBeNull();
     });
 
