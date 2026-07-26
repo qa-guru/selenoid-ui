@@ -16,21 +16,38 @@ export const StyledSessions = styled.div`
 
     .sessions-panel__body {
         padding: 0;
-        min-height: 120px;
+        min-height: 60px;
     }
 
     .no-any {
         color: var(--color-text, #fff);
         display: flex;
-        flex-wrap: wrap;
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: nowrap;
         align-items: center;
-        font-size: 1.2em;
         justify-content: center;
-        padding: var(--space-8, 30px) var(--space-4, 15px);
+        gap: var(--space-3, 10px);
+        font-size: 1.2em;
+        min-height: 60px;
+        padding: 10px var(--space-5, 16px);
+        box-sizing: border-box;
+        white-space: nowrap;
+
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            line-height: 0;
+
+            svg {
+                width: 1.1em;
+                height: 1.1em;
+                display: block;
+            }
+        }
 
         .nosession-any-text {
-            margin: var(--space-3, 10px);
+            margin: 0;
         }
 
         // don't show until all sessions are gone
