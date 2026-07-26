@@ -3,7 +3,7 @@
  * (`.header:has(.selenoid-header-group)`).
  *
  * `.header--metrics-nav-fold` — brand + nav + metrics + tools no longer fit →
- *   hide inline nav, show burger (Stats/Capabilities/Videos stay after the logo
+ *   hide inline nav, show burger (Statistics/Sessions/New Session stay after the logo
  *   until they actually collide with the tiles).
  * `.header--metrics-wrap` — after nav fold, brand + metrics + burger collide →
  *   metrics on band 2; brand + burger stay on band 1.

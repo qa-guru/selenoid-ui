@@ -60,9 +60,9 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 
 UI не заменяет hub — он **подключается к уже запущенному Selenoid** и даёт:
 
-- список активных сессий и статус квот;
-- страницу **Capabilities** с готовыми сниппетами для WebDriver и Playwright;
-- страницу **Sessions** — живые сессии сверху и архив завершённых с их артефактами (видео + логи + HAR, удаление сессии целиком). Заменяет прежнюю вкладку Videos;
+- **Statistics** (`#/statistics`) — статус квот и обзор hub;
+- **Sessions** (`#/sessions`) — живые сессии сверху и архив завершённых с артефактами (видео + логи + HAR, удаление сессии целиком). Заменяет прежнюю вкладку Videos;
+- **New Session** (`#/new-session`) — создание сессии и сниппеты для WebDriver / Playwright (бывшая Capabilities);
 - VNC-просмотр браузера и логи сессии;
 - прокси WebSocket `/playwright/` → hub (нужно для Create Session из браузера).
 
@@ -125,7 +125,7 @@ yarn --cwd ui test    # 22 tests (unit + component)
 yarn --cwd ui build
 ```
 
-**Guest hub auth (Capabilities + Playwright `accessKey`):** не хранится в git. CI подставляет при `yarn build`:
+**Guest hub auth (New Session + Playwright `accessKey`):** не хранится в git. CI подставляет при `yarn build`:
 
 - **`HUB_ACCESS_KEY`** (preferred) → `VITE_HUB_ACCESS_KEY` — один токен `user:pass` (как legacy `-access-key` / Playwright WS query);
 - или отдельно **`HUB_AUTH_USER`** + **`HUB_AUTH_PASS`**.
@@ -136,7 +136,8 @@ v1 (CRA) — git tag `v2.2.x` и ранее.
 
 `-browsers-conf` — тот же [`config/browsers.json`](https://github.com/qa-guru/selenoid/blob/main/config/browsers.json), что у hub (в monorepo: `projects/selenoid-home/dev/browsers.json`).
 
-Capabilities: [http://127.0.0.1:8080/#/capabilities](http://127.0.0.1:8080/#/capabilities)
+Nav: [Statistics](http://127.0.0.1:8080/#/statistics) · [Sessions](http://127.0.0.1:8080/#/sessions) · [New Session](http://127.0.0.1:8080/#/new-session)  
+(`#/` и `#/capabilities` редиректят на `#/statistics` и `#/new-session`.)
 
 - **WebDriver** (chrome, firefox): **Create Session** → POST `/wd/hub/session`
 - **Playwright**: сниппеты WebSocket; **Create Session** → прокси `ws://…/playwright/{browser}/{version}` и переход в сессию по SSE `/events`
