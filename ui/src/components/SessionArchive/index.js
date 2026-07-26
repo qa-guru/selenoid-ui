@@ -79,6 +79,10 @@ function IconHar() {
     );
 }
 
+function pad2(value) {
+    return String(value).padStart(2, "0");
+}
+
 function formatSessionDate(value) {
     if (!value) {
         return "";
@@ -87,7 +91,10 @@ function formatSessionDate(value) {
     if (Number.isNaN(date.getTime())) {
         return "";
     }
-    return date.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = String(date.getFullYear()).slice(-2);
+    return `${month}/${day}/${year}, ${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 }
 
 function formatDuration(started, finished) {

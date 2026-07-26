@@ -103,6 +103,9 @@ describe("SessionArchive", () => {
         );
         expect(screen.getByTestId("session-quota")).toHaveTextContent("alice");
         expect(screen.getByTestId("session-duration")).toHaveTextContent("1m 35s");
+        // 24h clock with zero-padded hours (01:00, not 1:00); no AM/PM.
+        expect(screen.getByTestId("session-date")).toHaveTextContent(/^\d{1,2}\/\d{1,2}\/\d{2}, \d{2}:\d{2}$/);
+        expect(screen.getByTestId("session-date").textContent).not.toMatch(/AM|PM/i);
         // Left fields: session → date → duration → owner → name; actions stay on the right.
         const fields = screen.getByTestId("session-detail-link");
         expect([...fields.children].map((el) => el.className.split(" ")[0])).toEqual([

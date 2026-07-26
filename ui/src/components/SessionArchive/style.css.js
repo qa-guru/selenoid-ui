@@ -25,14 +25,15 @@ export const StyledArchive = styled.div`
     }
 
     .archive__row {
-        min-height: 52px;
+        min-height: 44px;
         display: flex;
         align-items: center;
         gap: var(--space-4, 15px);
         border-bottom: 1px dashed ${colorBorder};
         color: var(--color-text, #fff);
-        padding: 10px 0;
+        padding: 8px 0;
         min-width: 280px;
+        font-size: 0.82em;
     }
 
     .archive__row_state {
@@ -68,11 +69,12 @@ export const StyledArchive = styled.div`
     }
 
     .archive__id {
-        flex: 0 0 88px;
+        flex: 0 0 76px;
         color: var(--color-text, #fff);
         font-weight: 300;
-        font-size: 1.05em;
+        font-size: 1em;
         font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-variant-numeric: tabular-nums;
     }
 
     .archive__date,
@@ -83,12 +85,13 @@ export const StyledArchive = styled.div`
         text-overflow: ellipsis;
         white-space: nowrap;
         color: var(--color-text-muted, #aaa);
-        font-size: 0.92em;
+        font-size: 0.95em;
         font-weight: 300;
     }
 
     .archive__date {
-        flex: 0 0 9.5em;
+        flex: 0 0 8.75em;
+        font-variant-numeric: tabular-nums;
     }
 
     .archive__duration {
