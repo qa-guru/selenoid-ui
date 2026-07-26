@@ -46,7 +46,7 @@ describe("Sessions", () => {
         renderSessions();
 
         expect(screen.getByTestId("sessions-panel")).toBeInTheDocument();
-        expect(screen.getByTestId("sessions-title")).toHaveTextContent("Sessions");
+        expect(screen.getByTestId("sessions-title")).toHaveTextContent("Live sessions");
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("firefox")).toBeInTheDocument();
         expect(screen.getByText("MANUAL")).toBeInTheDocument();

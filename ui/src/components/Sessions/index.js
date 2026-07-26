@@ -48,7 +48,7 @@ const Sessions = ({ sessions = {}, query = "" }) => {
     return (
         <StyledSessions>
             <Panel
-                title="Sessions"
+                title="Live sessions"
                 testId="sessions-panel"
                 titleTestId="sessions-title"
                 className="sessions-panel"
