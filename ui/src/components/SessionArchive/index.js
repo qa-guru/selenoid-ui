@@ -254,34 +254,29 @@ const SessionRow = ({ session, onDeleted, ref }) => {
 
     return (
         <div ref={ref} className="archive__row" data-testid="session-card" data-session={session.id}>
-            <Link to={detailHref} className="archive__id" title={session.id} data-testid="session-detail-link">
-                {sessionIdShort(session.id)}
-            </Link>
-
-            <Link to={detailHref} className="archive__main" data-testid="session-detail-main">
+            <Link to={detailHref} className="archive__fields" data-testid="session-detail-link">
+                <span className="archive__id" title={session.id}>
+                    {sessionIdShort(session.id)}
+                </span>
+                <span className="archive__date" data-testid="session-date">
+                    {dateLabel}
+                </span>
+                <span className="archive__duration" data-testid="session-duration">
+                    {durationLabel}
+                </span>
+                <span
+                    className={`archive__quota${quota ? "" : " archive__quota_empty"}`}
+                    data-testid="session-quota"
+                    title={quota || undefined}
+                >
+                    {quota}
+                </span>
                 <span
                     className={`archive__name${name ? "" : " archive__name_empty"}`}
                     title={name || undefined}
                     data-testid="session-name"
                 >
                     {name || "—"}
-                </span>
-                <span className="archive__meta">
-                    {quota ? (
-                        <span className="archive__quota" data-testid="session-quota" title={quota}>
-                            {quota}
-                        </span>
-                    ) : null}
-                    {dateLabel ? (
-                        <span className="archive__date" data-testid="session-date">
-                            {dateLabel}
-                        </span>
-                    ) : null}
-                    {durationLabel ? (
-                        <span className="archive__duration" data-testid="session-duration">
-                            {durationLabel}
-                        </span>
-                    ) : null}
                 </span>
             </Link>
 

@@ -103,6 +103,15 @@ describe("SessionArchive", () => {
         );
         expect(screen.getByTestId("session-quota")).toHaveTextContent("alice");
         expect(screen.getByTestId("session-duration")).toHaveTextContent("1m 35s");
+        // Left fields: session → date → duration → owner → name; actions stay on the right.
+        const fields = screen.getByTestId("session-detail-link");
+        expect([...fields.children].map((el) => el.className.split(" ")[0])).toEqual([
+            "archive__id",
+            "archive__date",
+            "archive__duration",
+            "archive__quota",
+            "archive__name",
+        ]);
         expect(screen.getByTestId("artifact-video")).toHaveAttribute("title", "VIDEO");
         expect(screen.getByTestId("artifact-log")).toHaveAttribute("title", "LOG");
         expect(screen.getByTestId("artifact-har")).toHaveAttribute("title", "HAR");

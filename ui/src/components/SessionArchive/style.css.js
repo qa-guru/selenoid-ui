@@ -52,20 +52,7 @@ export const StyledArchive = styled.div`
         }
     }
 
-    .archive__id {
-        flex: 0 0 88px;
-        color: var(--color-text, #fff);
-        text-decoration: none;
-        font-weight: 300;
-        font-size: 1.05em;
-        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
-
-        &:hover {
-            color: var(--color-success, #59a781);
-        }
-    }
-
-    .archive__main {
+    .archive__fields {
         display: flex;
         align-items: center;
         gap: var(--space-4, 15px);
@@ -74,9 +61,48 @@ export const StyledArchive = styled.div`
         text-decoration: none;
         color: inherit;
 
+        &:hover .archive__id,
         &:hover .archive__name {
             color: var(--color-success, #59a781);
         }
+    }
+
+    .archive__id {
+        flex: 0 0 88px;
+        color: var(--color-text, #fff);
+        font-weight: 300;
+        font-size: 1.05em;
+        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+    }
+
+    .archive__date,
+    .archive__duration,
+    .archive__quota {
+        flex: 0 0 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.92em;
+        font-weight: 300;
+    }
+
+    .archive__date {
+        flex: 0 0 9.5em;
+    }
+
+    .archive__duration {
+        flex: 0 0 4.5em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .archive__quota {
+        flex: 0 1 96px;
+        max-width: 120px;
+    }
+
+    .archive__quota_empty {
+        flex: 0 0 auto;
     }
 
     .archive__name {
@@ -92,41 +118,6 @@ export const StyledArchive = styled.div`
     .archive__name_empty {
         flex: 0 0 auto;
         color: var(--color-text-muted, #aaa);
-    }
-
-    .archive__meta {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4, 15px);
-        flex: 0 0 auto;
-        margin-left: auto;
-        min-width: 0;
-        color: var(--color-text-muted, #aaa);
-        font-size: 0.92em;
-        font-weight: 300;
-    }
-
-    .archive__quota,
-    .archive__date,
-    .archive__duration {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .archive__quota {
-        flex: 0 1 96px;
-        max-width: 120px;
-    }
-
-    .archive__date {
-        flex: 0 0 auto;
-    }
-
-    .archive__duration {
-        flex: 0 0 64px;
-        text-align: right;
-        font-variant-numeric: tabular-nums;
     }
 
     .archive__actions {
@@ -276,17 +267,17 @@ export const StyledArchive = styled.div`
             gap: 8px;
         }
 
-        .archive__main {
+        .archive__fields {
             flex: 1 1 100%;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
+            flex-wrap: wrap;
+            gap: 4px 12px;
             order: 3;
         }
 
-        .archive__meta {
-            width: 100%;
-            flex-wrap: wrap;
+        .archive__date,
+        .archive__duration,
+        .archive__quota {
+            flex: 0 0 auto;
         }
 
         .archive__actions {
