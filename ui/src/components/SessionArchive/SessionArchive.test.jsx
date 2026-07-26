@@ -1,8 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import SessionArchive from "./index";
+
+function renderArchive(ui = <SessionArchive />) {
+    return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
 
 describe("SessionArchive", () => {
     beforeEach(() => {
@@ -20,7 +25,7 @@ describe("SessionArchive", () => {
             json: async () => ({ sessions, total: 12, limit: 10, offset: 0 }),
         });
 
-        render(<SessionArchive />);
+        renderArchive();
 
         await waitFor(() => {
             expect(screen.getByTestId("archive-pager")).toBeInTheDocument();
@@ -54,7 +59,7 @@ describe("SessionArchive", () => {
                 }),
             });
 
-        render(<SessionArchive />);
+        renderArchive();
         await waitFor(() => expect(screen.getByTestId("archive-pager-next")).toBeEnabled());
         await user.click(screen.getByTestId("archive-pager-next"));
 
@@ -75,7 +80,7 @@ describe("SessionArchive", () => {
             }),
         });
 
-        render(<SessionArchive />);
+        renderArchive();
 
         await waitFor(() => {
             expect(screen.getByTestId("session-video-link")).toHaveAttribute("href", "/video/sess-1.mp4");
@@ -83,6 +88,7 @@ describe("SessionArchive", () => {
         expect(screen.getByTestId("session-log-link")).toHaveAttribute("href", "/logs/sess-1.log");
         expect(screen.getByTestId("session-har-link")).toHaveAttribute("href", "/har/sess-1.har");
         expect(screen.getByTestId("session-video")).toBeTruthy();
+        expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-1");
         // No dripicons — local SVG chrome only.
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
     });
@@ -98,13 +104,14 @@ describe("SessionArchive", () => {
             }),
         });
 
-        render(<SessionArchive />);
+        renderArchive();
 
         await waitFor(() => {
             expect(screen.getByTestId("session-no-video")).toBeInTheDocument();
         });
         expect(screen.queryByTestId("session-video")).toBeNull();
         expect(screen.getByTestId("session-har-link")).toHaveAttribute("href", "/har/sess-2.har");
+        expect(screen.getByTestId("session-no-video")).toHaveAttribute("href", "/sessions/sess-2");
     });
 
     it("delete-whole issues a DELETE for every present artifact", async () => {
@@ -122,7 +129,7 @@ describe("SessionArchive", () => {
             // three per-artifact DELETEs (ok only) + the post-delete reload (needs json)
             .mockResolvedValue({ ok: true, json: async () => ({ sessions: [], total: 0, limit: 10, offset: 0 }) });
 
-        render(<SessionArchive />);
+        renderArchive();
         await waitFor(() => expect(screen.getByTestId("session-delete")).toBeInTheDocument());
         await user.click(screen.getByTestId("session-delete"));
 
@@ -139,7 +146,7 @@ describe("SessionArchive", () => {
             json: async () => ({ sessions: [], total: 0, limit: 10, offset: 0 }),
         });
 
-        render(<SessionArchive />);
+        renderArchive();
 
         expect(screen.getByTestId("archive-panel")).toBeInTheDocument();
         expect(screen.getByTestId("archive-title")).toHaveTextContent("Finished sessions");

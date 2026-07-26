@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
@@ -197,11 +198,14 @@ const ArtifactLink = ({ href, label, testid }) => (
 const SessionCard = ({ session, preload, onDeleted, ref }) => {
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
     const videoSrc = session.video ? `/video/${session.video}` : null;
+    const detailHref = `/sessions/${session.id}`;
 
     return (
         <StyledCard ref={ref} data-testid="session-card" data-session={session.id}>
             <div className="name" title={session.id}>
-                {sessionIdShort(session.id)}
+                <Link to={detailHref} className="name__link" data-testid="session-detail-link">
+                    {sessionIdShort(session.id)}
+                </Link>
             </div>
             <div className="card__body">
                 <div className="controls">
@@ -236,11 +240,11 @@ const SessionCard = ({ session, preload, onDeleted, ref }) => {
                             <source src={videoSrc} type="video/mp4" />
                         </video>
                     ) : (
-                        <div className="no-video" data-testid="session-no-video">
+                        <Link className="no-video" to={detailHref} data-testid="session-no-video">
                             <span>No video</span>
                             {session.log && <span>log available</span>}
                             {session.har && <span>HAR available</span>}
-                        </div>
+                        </Link>
                     )}
                 </div>
             </div>

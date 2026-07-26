@@ -70,4 +70,13 @@ describe("HarViewer", () => {
         expect(fetch).toHaveBeenCalledWith("/har/sess-1.har", { cache: "no-store" });
         expect(screen.getByTestId("session-har-download")).toHaveAttribute("href", "/har/sess-1.har");
     });
+
+    it("renders when an explicit finished-session file is provided without caps", async () => {
+        render(<HarViewer session="sess-2" file="custom.har" sessionAlive={false} />);
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
+        });
+        expect(fetch).toHaveBeenCalledWith("/har/custom.har", { cache: "no-store" });
+    });
 });

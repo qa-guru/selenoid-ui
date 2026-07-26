@@ -51,10 +51,10 @@ function statusClass(status) {
  * enableHAR is on; renders entries after the hub flushes the archive on session end.
  * Hub CDP capture — not Playwright client recordHar.
  */
-const HarViewer = ({ session, browser = {}, sessionAlive = true }) => {
+const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp }) => {
     const caps = browser.caps || {};
-    const enabled = wantsHar(caps);
-    const file = harFileName(session, caps);
+    const enabled = Boolean(fileProp) || wantsHar(caps);
+    const file = fileProp || harFileName(session, caps);
     const href = `/har/${file}`;
 
     const [phase, setPhase] = useState(enabled ? "waiting" : "idle");
@@ -215,6 +215,8 @@ HarViewer.propTypes = {
         caps: PropTypes.object,
     }),
     sessionAlive: PropTypes.bool,
+    /** Explicit artifact file name (finished sessions); bypasses caps.enableHAR gate. */
+    file: PropTypes.string,
 };
 
 export default HarViewer;

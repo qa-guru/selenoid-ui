@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { buildSessionListUrl, fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
+import { buildSessionListUrl, fetchSessionById, fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
 
 describe("SessionArchive api", () => {
     beforeEach(() => {
@@ -44,5 +44,39 @@ describe("SessionArchive api", () => {
         expect(url).toContain("limit=");
         expect(url).toContain("offset=");
         expect(url).not.toMatch(/limit=0/);
+    });
+
+    it("fetchSessionById returns exact match only", async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                sessions: [
+                    { id: "abc-1", video: "abc-1.mp4" },
+                    { id: "abc-10", video: "abc-10.mp4" },
+                ],
+                total: 2,
+                limit: 10,
+                offset: 0,
+            }),
+        });
+
+        const found = await fetchSessionById("abc-1");
+        expect(found).toEqual({ id: "abc-1", video: "abc-1.mp4" });
+        expect(fetch).toHaveBeenCalledWith(expect.stringContaining("q=abc-1"));
+    });
+
+    it("fetchSessionById returns null when no exact id", async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                sessions: [{ id: "other", har: "other.har" }],
+                total: 1,
+                limit: 10,
+                offset: 0,
+            }),
+        });
+
+        expect(await fetchSessionById("missing")).toBeNull();
+        expect(await fetchSessionById("")).toBeNull();
     });
 });

@@ -1,11 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader";
 import { Badge, Panel } from "@zero-design-system/react";
 
-const SessionInfo = ({ session = "", browser = { caps: {} } }) => {
+const SessionInfo = ({ session = "", browser = { caps: {} }, finished = false, artifacts = {} }) => {
     const caps = browser.caps || {};
+    const shortId = session ? session.substring(0, 8) : "";
 
     return (
         <Panel
@@ -18,25 +20,38 @@ const SessionInfo = ({ session = "", browser = { caps: {} } }) => {
             <div className="session-info">
                 <div className="session-info__main">
                     <div className="session-browser">
-                        <BeatLoader size={5} color={"#fff"} loading={!browser.quota} />
-                        <span className="session-browser__quota">{browser.quota}</span>
-                        {browser.quota && <span className="session-browser__version-separator">/</span>}
-                        <span className="session-browser__name">{caps.browserName}</span>
-                        {caps.browserName && <span className="session-browser__version-separator">/</span>}
-                        <span className="session-browser__version">{caps.version}</span>
-                        {caps.version && caps.screenResolution && (
-                            <span className="session-browser__version-separator">/</span>
+                        {!finished && <BeatLoader size={5} color={"#fff"} loading={!browser.quota} />}
+                        {finished ? (
+                            <Link to="/sessions" className="session-info__back" data-testid="session-back">
+                                ← Sessions
+                            </Link>
+                        ) : (
+                            <>
+                                <span className="session-browser__quota">{browser.quota}</span>
+                                {browser.quota && <span className="session-browser__version-separator">/</span>}
+                                <span className="session-browser__name">{caps.browserName}</span>
+                                {caps.browserName && <span className="session-browser__version-separator">/</span>}
+                                <span className="session-browser__version">{caps.version}</span>
+                                {caps.version && caps.screenResolution && (
+                                    <span className="session-browser__version-separator">/</span>
+                                )}
+                                {caps.screenResolution && <Badge>{caps.screenResolution}</Badge>}
+                            </>
                         )}
-                        {caps.screenResolution && <Badge>{caps.screenResolution}</Badge>}
                     </div>
 
-                    <div className="session-info__id">{session.substring(0, 8)}</div>
+                    <div className="session-info__id" data-testid="session-info-id">
+                        {shortId}
+                    </div>
                 </div>
 
                 <div className="session-info__additional">
                     <div className="custom-capabilities">
+                        {finished && <Badge variant="primary">FINISHED</Badge>}
                         {caps.name && <Badge>{caps.name}</Badge>}
-                        {(caps.enableHAR || caps.enableHar) && <Badge>HAR</Badge>}
+                        {(caps.enableHAR || caps.enableHar || artifacts.har) && <Badge>HAR</Badge>}
+                        {artifacts.video && <Badge>VIDEO</Badge>}
+                        {artifacts.log && <Badge>LOG</Badge>}
                     </div>
                 </div>
             </div>
@@ -49,11 +64,17 @@ SessionInfo.propTypes = {
     browser: PropTypes.shape({
         quota: PropTypes.string,
         caps: PropTypes.shape({
-            browserName: PropTypes.string.isRequired,
-            version: PropTypes.string.isRequired,
+            browserName: PropTypes.string,
+            version: PropTypes.string,
             screenResolution: PropTypes.string,
             name: PropTypes.string,
-        }).isRequired,
+        }),
+    }),
+    finished: PropTypes.bool,
+    artifacts: PropTypes.shape({
+        video: PropTypes.string,
+        log: PropTypes.string,
+        har: PropTypes.string,
     }),
 };
 

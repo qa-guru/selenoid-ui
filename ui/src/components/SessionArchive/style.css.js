@@ -115,6 +115,15 @@ export const StyledCard = styled.div`
         height: 30px;
         overflow-x: auto;
         white-space: nowrap;
+
+        .name__link {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                color: var(--color-success, #59a781);
+            }
+        }
     }
 
     .card__body {
@@ -179,6 +188,11 @@ export const StyledCard = styled.div`
                 align-items: center;
                 color: var(--color-text-muted, #aaa);
                 font-size: 0.9em;
+                text-decoration: none;
+
+                &:hover {
+                    color: var(--color-success, #59a781);
+                }
             }
         }
     }

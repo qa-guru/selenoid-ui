@@ -102,5 +102,60 @@ export const StyledSession = styled.div`
                 flex-wrap: wrap;
             }
         }
+
+        &__back {
+            color: var(--color-accent, #6cb6ff);
+            text-decoration: none;
+            font-size: 0.9em;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .session-missing {
+        color: var(--color-text-muted, #aaa);
+        padding: var(--space-8, 30px) var(--space-4, 15px);
+        text-align: center;
+    }
+`;
+
+export const StyledSessionVideo = styled.div`
+    width: 100%;
+
+    .session-video-card {
+        width: 100%;
+    }
+
+    .session-video-card__body {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        min-height: 160px;
+        background-color: var(--color-surface-deep, #131614);
+    }
+
+    .session-video-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--color-border, #3d444c);
+    }
+
+    .session-video-toolbar__link {
+        color: var(--color-accent, #6cb6ff);
+        text-decoration: none;
+        font-size: 12px;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    video {
+        width: 100%;
+        max-height: min(48vh, 520px);
+        background: #000;
     }
 `;

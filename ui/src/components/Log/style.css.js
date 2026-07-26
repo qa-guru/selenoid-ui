@@ -63,6 +63,43 @@ export const StyledLog = styled.div`
         }
     }
 
+    .log-file-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--color-border, #3d444c);
+    }
+
+    .log-file-toolbar__link {
+        color: var(--color-accent, #6cb6ff);
+        text-decoration: none;
+        font-size: 12px;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .log-file-pre {
+        margin: 0;
+        padding: var(--space-3, 12px);
+        max-height: min(48vh, 520px);
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: var(--panel-code-color, var(--color-text, #fff));
+        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-size: 13px;
+        line-height: 20px;
+    }
+
+    .log-file-empty {
+        padding: 24px 16px;
+        color: var(--color-text-muted, #999);
+        font-size: 13px;
+        text-align: center;
+    }
+
     .log-info {
         display: inline-flex;
         margin: auto;

@@ -27,3 +27,17 @@ export async function fetchSessionPage({ page = 0, limit = SESSION_PAGE_SIZE, q 
         offset: Number(payload.offset) || 0,
     };
 }
+
+/**
+ * Resolve one finished session by id via the hub list endpoint (`q` substring filter).
+ * Returns null when no exact id match is present.
+ */
+export async function fetchSessionById(id) {
+    const sessionId = String(id || "").trim();
+    if (!sessionId) {
+        return null;
+    }
+    const payload = await fetchSessionPage({ page: 0, limit: SESSION_PAGE_SIZE, q: sessionId });
+    const exact = (payload.sessions || []).find((session) => session.id === sessionId);
+    return exact || null;
+}
