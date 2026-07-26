@@ -48,12 +48,14 @@ type Browsers map[string]Version
 
 // State - current state
 type State struct {
-	Total    int      `json:"total"`
-	Used     int      `json:"used"`
-	Queued   int      `json:"queued"`
-	Pending  int      `json:"pending"`
-	Browsers Browsers `json:"browsers"`
-	Videos   Videos   `json:"videos"`
+	Total     int      `json:"total"`
+	Used      int      `json:"used"`
+	Queued    int      `json:"queued"`
+	Pending   int      `json:"pending"`
+	WarmReady int      `json:"warmReady"`
+	WarmTotal int      `json:"warmTotal"`
+	Browsers  Browsers `json:"browsers"`
+	Videos    Videos   `json:"videos"`
 }
 
 type Videos []string

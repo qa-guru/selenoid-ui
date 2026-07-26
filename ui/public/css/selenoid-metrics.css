@@ -1,4 +1,4 @@
-/* Selenoid hub metrics — USED / QUEUED / QUOTA row for header and dashboard.
+/* Selenoid hub metrics — USED / QUEUED / WARM / QUOTA row for header and dashboard.
    Separators: .plaque-divider between items (not border on boxes). */
 @import url("plaque-divider.css");
 
@@ -53,6 +53,10 @@
 
 .selenoid-metrics__item[data-testid="selenoid-metrics-queued"] {
     min-width: 3.25rem;
+}
+
+.selenoid-metrics__item[data-testid="selenoid-metrics-warm"] {
+    min-width: 4rem;
 }
 
 .selenoid-metrics__item[data-testid="selenoid-metrics-quota"] {

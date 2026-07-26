@@ -6,6 +6,8 @@
         "used": 3,
         "queued": 0,
         "pending": 0,
+        "warmReady": 0,
+        "warmTotal": 3,
         "browsers": {
             "firefox": {
                 "": {

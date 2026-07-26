@@ -170,6 +170,8 @@ import { jsx as jsx6, jsxs as jsxs3 } from "react/jsx-runtime";
 function SelenoidMetrics({
   usedPercent,
   queued,
+  warmReady,
+  warmTotal,
   quotaUsed,
   quotaPending,
   quotaTotal,
@@ -199,6 +201,15 @@ function SelenoidMetrics({
         /* @__PURE__ */ jsxs3("div", { className: "selenoid-metrics__item", "data-testid": "selenoid-metrics-queued", children: [
           /* @__PURE__ */ jsx6("span", { className: "selenoid-metrics__label", children: "Queued" }),
           /* @__PURE__ */ jsx6("span", { className: "selenoid-metrics__value", children: queued })
+        ] }),
+        /* @__PURE__ */ jsx6("span", { className: "plaque-divider", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsxs3("div", { className: "selenoid-metrics__item", "data-testid": "selenoid-metrics-warm", children: [
+          /* @__PURE__ */ jsx6("span", { className: "selenoid-metrics__label", children: "Warm" }),
+          /* @__PURE__ */ jsxs3("span", { className: "selenoid-metrics__value", children: [
+            warmReady,
+            /* @__PURE__ */ jsx6("span", { className: "selenoid-metrics__quota-sep", children: " / " }),
+            warmTotal
+          ] })
         ] }),
         /* @__PURE__ */ jsx6("span", { className: "plaque-divider", "aria-hidden": "true" }),
         /* @__PURE__ */ jsxs3("div", { className: "selenoid-metrics__item", "data-testid": "selenoid-metrics-quota", children: [
