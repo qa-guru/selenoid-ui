@@ -259,19 +259,29 @@ const SessionRow = ({ session, onDeleted, ref }) => {
             </Link>
 
             <Link to={detailHref} className="archive__main" data-testid="session-detail-main">
-                <span className="archive__name" title={name || undefined} data-testid="session-name">
+                <span
+                    className={`archive__name${name ? "" : " archive__name_empty"}`}
+                    title={name || undefined}
+                    data-testid="session-name"
+                >
                     {name || "—"}
                 </span>
                 <span className="archive__meta">
-                    <span className="archive__quota" data-testid="session-quota" title={quota || undefined}>
-                        {quota || "—"}
-                    </span>
-                    <span className="archive__date" data-testid="session-date">
-                        {dateLabel || "—"}
-                    </span>
-                    <span className="archive__duration" data-testid="session-duration">
-                        {durationLabel || "—"}
-                    </span>
+                    {quota ? (
+                        <span className="archive__quota" data-testid="session-quota" title={quota}>
+                            {quota}
+                        </span>
+                    ) : null}
+                    {dateLabel ? (
+                        <span className="archive__date" data-testid="session-date">
+                            {dateLabel}
+                        </span>
+                    ) : null}
+                    {durationLabel ? (
+                        <span className="archive__duration" data-testid="session-duration">
+                            {durationLabel}
+                        </span>
+                    ) : null}
                 </span>
             </Link>
 

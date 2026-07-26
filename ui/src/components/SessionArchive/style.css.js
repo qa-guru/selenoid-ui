@@ -80,7 +80,7 @@ export const StyledArchive = styled.div`
     }
 
     .archive__name {
-        flex: 1 1 160px;
+        flex: 1 1 180px;
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -89,11 +89,17 @@ export const StyledArchive = styled.div`
         color: var(--color-text, #fff);
     }
 
+    .archive__name_empty {
+        flex: 0 0 auto;
+        color: var(--color-text-muted, #aaa);
+    }
+
     .archive__meta {
         display: flex;
         align-items: center;
         gap: var(--space-4, 15px);
-        flex: 0 1 auto;
+        flex: 0 0 auto;
+        margin-left: auto;
         min-width: 0;
         color: var(--color-text-muted, #aaa);
         font-size: 0.92em;
