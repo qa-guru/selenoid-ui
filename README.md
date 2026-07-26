@@ -50,11 +50,11 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 [![Release](https://img.shields.io/github/release/qa-guru/selenoid-ui.svg)](https://github.com/qa-guru/selenoid-ui/releases/latest)
 [![Docker Pulls](https://img.shields.io/docker/pulls/qaguru/selenoid-ui.svg)](https://hub.docker.com/r/qaguru/selenoid-ui)
 
-|                   |                                                                                                           |
-| ----------------- | --------------------------------------------------------------------------------------------------------- |
-| **GitHub**        | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)                                             |
-| **Docker Hub**    | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui)                                       |
-| **Текущий релиз** | **v2.3.0** (in progress) — [docs/RELEASE_v2.3.0.md](docs/RELEASE_v2.3.0.md) · `qaguru/selenoid-ui:v2.3.0` |
+|                   |                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| **GitHub**        | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)                               |
+| **Docker Hub**    | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui)                         |
+| **Текущий релиз** | **v3.0.8** — [docs/RELEASE_v3.0.8.md](docs/RELEASE_v3.0.8.md) · `qaguru/selenoid-ui:v3.0.8` |
 
 ## Роль в экосистеме
 
