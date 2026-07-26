@@ -12,6 +12,8 @@ const LIVE_NAV_DENYLIST = [
     /^\/status/,
     /^\/ui\/status/,
     /^\/video/,
+    /^\/har/,
+    /^\/sessions/,
     /^\/clipboard/,
     /^\/wd\/hub/,
     /^\/playwright/,
@@ -73,9 +75,11 @@ export default defineConfig({
             },
         }),
     ] as any,
+    // Include .ts/.tsx so esbuild strips types in dev; loader tsx keeps JSX-in-JS.
+    // Narrow include to .jsx? alone left `as` / annotations in served .ts modules.
     esbuild: {
-        loader: "jsx",
-        include: /src\/.*\.jsx?$/,
+        loader: "tsx",
+        include: /src\/.*\.[jt]sx?$/,
         exclude: [],
     },
     build: {
@@ -102,6 +106,21 @@ export default defineConfig({
                 changeOrigin: true,
             },
             "/video": {
+                target: "http://localhost:8090",
+                changeOrigin: true,
+            },
+            // Finished-session artifact listings/downloads (logs, HAR) and the
+            // session-centric grouping endpoint. Declared before "/log" so the
+            // "/logs" file API is not swallowed by the "/log" ws stream prefix.
+            "/logs": {
+                target: "http://localhost:8090",
+                changeOrigin: true,
+            },
+            "/har": {
+                target: "http://localhost:8090",
+                changeOrigin: true,
+            },
+            "/sessions": {
                 target: "http://localhost:8090",
                 changeOrigin: true,
             },

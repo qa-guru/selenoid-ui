@@ -97,12 +97,16 @@ export function browserProtocol(browserProtocols, name, version) {
     return browserProtocols?.[name || ""]?.[version || ""]?.protocol === "playwright" ? "playwright" : "webdriver";
 }
 
+function playwrightSessionCaps(session: any) {
+    return session?.caps || {};
+}
+
 export function findPlaywrightSession(sessions, existingIds, name, version) {
-    for (const [id, session] of Object.entries(sessions || {}) as [string, { caps?: Record<string, unknown> }][]) {
+    for (const [id, session] of Object.entries(sessions || {})) {
         if (existingIds.has(id)) {
             continue;
         }
-        const caps = session.caps || {};
+        const caps = playwrightSessionCaps(session);
         if (caps.browserName !== name) {
             continue;
         }
