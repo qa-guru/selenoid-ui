@@ -43,7 +43,7 @@ _Вы на `main` / v3-dev — активная разработка (рубеж
 
 <!-- stack-branches-note:end -->
 
-Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) — форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) с поддержкой **Playwright-сессий** в Capabilities.
+Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) — форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) с поддержкой **Playwright-сессий** на странице New Session.
 
 [![Build Status](https://github.com/qa-guru/selenoid-ui/workflows/build/badge.svg)](https://github.com/qa-guru/selenoid-ui/actions?query=workflow%3Abuild)
 [![Coverage](https://codecov.io/github/qa-guru/selenoid-ui/coverage.svg)](https://codecov.io/gh/qa-guru/selenoid-ui)
@@ -83,7 +83,7 @@ UI не заменяет hub — он **подключается к уже за�
 
 ## Отличия от upstream
 
-- В Capabilities отображаются **Playwright-браузеры** (`playwright-chromium`, `playwright-firefox`, …) наряду с WebDriver (`chrome`, `firefox`).
+- В **New Session** отображаются **Playwright-браузеры** (`playwright-chromium`, `playwright-firefox`, …) наряду с WebDriver (`chrome`, `firefox`).
 - **Create Session** для Playwright открывает WebSocket через прокси UI (`/playwright/…`), а не POST `/wd/hub/session`.
 - Нужен тот же `browsers.json`, что у hub — иначе Playwright-версии в UI не совпадут с hub.
 - **SSE resilience:** immediate `GET /status`, fallback poll каждые 4s, reconnect с backoff, индикатор **STALE** вместо мгновенного сброса в UNKNOWN.
@@ -164,7 +164,7 @@ Compose: [`docker-compose.yml`](docker-compose.yml) монтирует `$PWD` в
 1. Соберите hub (`go build -o selenoid .` в [qa-guru/selenoid](https://github.com/qa-guru/selenoid)) и поднимите с `config/browsers.json`
 2. Соберите UI (команды выше)
 3. Запустите UI с `-browsers-conf`, указывающим на тот же `browsers.json`
-4. Capabilities → **playwright-chromium: 1.61.1** → **Create Session** → должен открыться экран сессии с VNC
+4. New Session → **playwright-chromium: 1.61.1** → **Create Session** → должен открыться экран сессии с VNC
 5. Для chrome/firefox — создание сессии через WebDriver без изменений
 
 Проверка только Go-backend (без React):
