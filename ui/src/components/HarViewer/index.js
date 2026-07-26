@@ -6,6 +6,12 @@ import { StyledHarViewer } from "./style.css";
 
 const POLL_MS = 2500;
 const MAX_ROWS = 200;
+const TIMING_KEYS = ["blocked", "dns", "connect", "ssl", "send", "wait", "receive"];
+const TABS = [
+    { id: "headers", label: "Headers" },
+    { id: "timings", label: "Timings" },
+    { id: "response", label: "Response" },
+];
 
 function harFileName(session, caps = {}) {
     const custom = String(caps.harName || caps.HARName || "").trim();
@@ -20,7 +26,10 @@ function wantsHar(caps = {}) {
 }
 
 function formatSize(n) {
-    const v = Number(n) || 0;
+    const v = Number(n);
+    if (!Number.isFinite(v) || v <= 0) {
+        return "—";
+    }
     if (v < 1024) {
         return `${v} B`;
     }
@@ -28,6 +37,14 @@ function formatSize(n) {
         return `${(v / 1024).toFixed(1)} KB`;
     }
     return `${(v / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatTiming(n) {
+    const v = Number(n);
+    if (!Number.isFinite(v) || v < 0) {
+        return "—";
+    }
+    return `${Math.round(v)} ms`;
 }
 
 function statusClass(status) {
@@ -46,6 +63,125 @@ function statusClass(status) {
     return "har-status--muted";
 }
 
+function headerPairs(headers) {
+    if (!Array.isArray(headers)) {
+        return [];
+    }
+    return headers
+        .filter((h) => h && (h.name != null || h.value != null))
+        .map((h) => ({ name: String(h.name || ""), value: String(h.value ?? "") }));
+}
+
+function HeaderKv({ title, headers }) {
+    const pairs = headerPairs(headers);
+    return (
+        <div className="har-section">
+            <div className="har-section__title">{title}</div>
+            {pairs.length === 0 ? (
+                <div className="har-muted">No headers captured.</div>
+            ) : (
+                <div className="har-kv">
+                    {pairs.map((h, i) => (
+                        <React.Fragment key={`${h.name}-${i}`}>
+                            <div className="har-kv__k">{h.name}</div>
+                            <div className="har-kv__v">{h.value || "—"}</div>
+                        </React.Fragment>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+HeaderKv.propTypes = {
+    title: PropTypes.string.isRequired,
+    headers: PropTypes.array,
+};
+
+function EntryDetail({ entry, tab, onTabChange }) {
+    const req = entry.request || {};
+    const resp = entry.response || {};
+    const content = resp.content || {};
+    const timings = entry.timings || {};
+    const status = Number(resp.status) || 0;
+    const statusText = resp.statusText || "";
+    const mime = content.mimeType || "—";
+    const size = formatSize(content.size);
+    const bodyText = typeof content.text === "string" ? content.text : "";
+    const bodyNote = bodyText ? bodyText : "Body not captured (headers + size only).";
+
+    return (
+        <div className="har-detail" data-testid="session-har-detail">
+            <div className="har-tabs" role="tablist" aria-label="HAR entry details">
+                {TABS.map((t) => (
+                    <button
+                        key={t.id}
+                        type="button"
+                        role="tab"
+                        className={tab === t.id ? "har-tab har-tab--active" : "har-tab"}
+                        aria-selected={tab === t.id}
+                        data-testid={`session-har-tab-${t.id}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onTabChange(t.id);
+                        }}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+
+            {tab === "headers" && (
+                <div className="har-tab-panel" role="tabpanel" data-testid="session-har-panel-headers">
+                    <HeaderKv title="Response Headers" headers={resp.headers} />
+                    <HeaderKv title="Request Headers" headers={req.headers} />
+                </div>
+            )}
+
+            {tab === "timings" && (
+                <div className="har-tab-panel" role="tabpanel" data-testid="session-har-panel-timings">
+                    <div className="har-kv">
+                        {TIMING_KEYS.map((key) => (
+                            <React.Fragment key={key}>
+                                <div className="har-kv__k">{key}</div>
+                                <div className="har-kv__v">{formatTiming(timings[key])}</div>
+                            </React.Fragment>
+                        ))}
+                        <div className="har-kv__k">total</div>
+                        <div className="har-kv__v">{formatTiming(entry.time)}</div>
+                    </div>
+                </div>
+            )}
+
+            {tab === "response" && (
+                <div className="har-tab-panel" role="tabpanel" data-testid="session-har-panel-response">
+                    <div className="har-kv">
+                        <div className="har-kv__k">status</div>
+                        <div className="har-kv__v">
+                            {status || "—"}
+                            {statusText ? ` ${statusText}` : ""}
+                        </div>
+                        <div className="har-kv__k">mimeType</div>
+                        <div className="har-kv__v">{mime}</div>
+                        <div className="har-kv__k">size</div>
+                        <div className="har-kv__v">{size}</div>
+                    </div>
+                    <div className="har-section">
+                        <div className="har-section__title">Body</div>
+                        <pre className={bodyText ? "har-body" : "har-body har-muted"}>{bodyNote}</pre>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+EntryDetail.propTypes = {
+    entry: PropTypes.object.isRequired,
+    tab: PropTypes.oneOf(["headers", "timings", "response"]).isRequired,
+    onTabChange: PropTypes.func.isRequired,
+};
+
 /**
  * Full-width Session HAR panel. Polls hub GET /har/<id>.har (via UI proxy) while
  * enableHAR is on; renders entries after the hub flushes the archive on session end.
@@ -61,6 +197,8 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
     const [har, setHar] = useState(null);
     const [error, setError] = useState("");
     const [updatedAt, setUpdatedAt] = useState(null);
+    const [expandedIdx, setExpandedIdx] = useState(null);
+    const [detailTab, setDetailTab] = useState("headers");
     const aliveRef = useRef(sessionAlive);
     aliveRef.current = sessionAlive;
 
@@ -131,6 +269,16 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
         return `${all.length} entries · ${creator}${all.length > MAX_ROWS ? ` · showing ${MAX_ROWS}` : ""}`;
     }, [har]);
 
+    const toggleRow = useCallback((idx) => {
+        setExpandedIdx((prev) => {
+            if (prev === idx) {
+                return null;
+            }
+            setDetailTab("headers");
+            return idx;
+        });
+    }, []);
+
     if (!enabled) {
         return null;
     }
@@ -180,17 +328,51 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
                                     const resp = entry.response || {};
                                     const content = resp.content || {};
                                     const status = Number(resp.status) || 0;
+                                    const open = expandedIdx === idx;
+                                    const rowId = `har-row-${idx}`;
                                     return (
-                                        <tr key={`${req.url}-${idx}`}>
-                                            <td className="har-method">{req.method || ""}</td>
-                                            <td className={statusClass(status)}>{status || "—"}</td>
-                                            <td className="har-url" title={req.url}>
-                                                {req.url || ""}
-                                            </td>
-                                            <td className="har-mime">{content.mimeType || ""}</td>
-                                            <td>{formatSize(content.size)}</td>
-                                            <td>{Math.round(Number(entry.time) || 0)} ms</td>
-                                        </tr>
+                                        <React.Fragment key={`${req.method || "GET"}-${req.url || ""}-${idx}`}>
+                                            <tr
+                                                id={rowId}
+                                                className={open ? "har-row har-row--open" : "har-row"}
+                                                tabIndex={0}
+                                                role="button"
+                                                aria-expanded={open}
+                                                aria-controls={`har-detail-${idx}`}
+                                                data-testid={`session-har-row-${idx}`}
+                                                onClick={() => toggleRow(idx)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" || e.key === " ") {
+                                                        e.preventDefault();
+                                                        toggleRow(idx);
+                                                    }
+                                                }}
+                                            >
+                                                <td className="har-method">{req.method || ""}</td>
+                                                <td className={statusClass(status)}>{status || "—"}</td>
+                                                <td className="har-url" title={req.url}>
+                                                    {req.url || ""}
+                                                </td>
+                                                <td className="har-mime">{content.mimeType || "—"}</td>
+                                                <td>{formatSize(content.size)}</td>
+                                                <td>{Math.round(Number(entry.time) || 0)} ms</td>
+                                            </tr>
+                                            {open && (
+                                                <tr
+                                                    id={`har-detail-${idx}`}
+                                                    className="har-detail-row"
+                                                    data-testid={`session-har-detail-row-${idx}`}
+                                                >
+                                                    <td colSpan={6} onClick={(e) => e.stopPropagation()}>
+                                                        <EntryDetail
+                                                            entry={entry}
+                                                            tab={detailTab}
+                                                            onTabChange={setDetailTab}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
                                     );
                                 })}
                             </tbody>
@@ -220,4 +402,4 @@ HarViewer.propTypes = {
 };
 
 export default HarViewer;
-export { harFileName, wantsHar };
+export { harFileName, wantsHar, formatSize, formatTiming };

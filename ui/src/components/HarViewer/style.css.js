@@ -91,8 +91,21 @@ export const StyledHarViewer = styled.div`
         font-weight: 600;
     }
 
-    .har-table tbody tr:hover {
+    .har-row {
+        cursor: pointer;
+    }
+
+    .har-row:hover {
         background: rgba(255, 255, 255, 0.03);
+    }
+
+    .har-row:focus-visible {
+        outline: 1px solid var(--color-accent, #6cb6ff);
+        outline-offset: -1px;
+    }
+
+    .har-row--open {
+        background: rgba(255, 255, 255, 0.04);
     }
 
     .har-method {
@@ -129,5 +142,105 @@ export const StyledHarViewer = styled.div`
     }
     .har-status--muted {
         color: var(--color-text-muted, #999);
+    }
+
+    .har-detail-row > td {
+        padding: 0;
+        white-space: normal;
+        border-bottom: 1px solid var(--color-border, #3d444c);
+        background: rgba(0, 0, 0, 0.18);
+    }
+
+    .har-detail {
+        padding: 8px 12px 12px;
+    }
+
+    .har-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--color-border, #3d444c);
+        margin-bottom: 10px;
+    }
+
+    .har-tab {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        padding: 6px 12px;
+        color: var(--color-text-muted, #999);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .har-tab:hover {
+        color: var(--color-text, #ccc);
+    }
+
+    .har-tab--active {
+        color: var(--color-text, #ccc);
+        border-bottom-color: var(--color-accent, #6cb6ff);
+    }
+
+    .har-tab:focus-visible {
+        outline: 1px solid var(--color-accent, #6cb6ff);
+        outline-offset: -2px;
+    }
+
+    .har-tab-panel {
+        min-height: 48px;
+    }
+
+    .har-section + .har-section {
+        margin-top: 12px;
+    }
+
+    .har-section__title {
+        margin-bottom: 6px;
+        color: var(--color-text-muted, #999);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .har-kv {
+        display: grid;
+        grid-template-columns: minmax(96px, 140px) 1fr;
+        gap: 2px 12px;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .har-kv__k {
+        color: var(--color-text-muted, #999);
+        word-break: break-all;
+        white-space: normal;
+    }
+
+    .har-kv__v {
+        color: var(--color-text, #ccc);
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+
+    .har-muted {
+        color: var(--color-text-muted, #999);
+    }
+
+    .har-body {
+        margin: 0;
+        padding: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        max-height: 180px;
+        overflow: auto;
+        color: var(--color-text, #ccc);
     }
 `;
