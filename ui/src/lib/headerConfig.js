@@ -12,14 +12,14 @@ export const headerConfig = {
     brand: {
         href: "https://qa.guru/",
         leading: {
-            href: "#/",
+            href: "#/statistic",
             label: "Selenoid 3",
         },
     },
     nav: [
-        { href: "#/", label: "STATS", testid: "header-nav-stats" },
-        { href: "#/capabilities", label: "CAPABILITIES", testid: "header-nav-capabilities" },
-        { href: "#/sessions", label: "SESSIONS", testid: "header-nav-sessions" },
+        { href: "#/statistic", label: "Statistic", testid: "header-nav-statistic" },
+        { href: "#/sessions", label: "Sessions", testid: "header-nav-sessions" },
+        { href: "#/new-session", label: "New Session", testid: "header-nav-new-session" },
     ],
     lang: {
         default: "en",

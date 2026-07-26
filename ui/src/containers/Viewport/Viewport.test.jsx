@@ -82,9 +82,9 @@ describe("Viewport", () => {
         expect(filter).toHaveValue("chrome");
     });
 
-    it("shows Capabilities browser select and Create Session on the capabilities route", () => {
+    it("shows Capabilities browser select and Create Session on the new-session route", () => {
         injectHeaderSlots();
-        renderViewport(["/capabilities"]);
+        renderViewport(["/new-session"]);
 
         expect(screen.getByTestId("capabilities-browser-select")).toBeInTheDocument();
         expect(screen.getByTestId("capabilities-driver-panel")).toBeInTheDocument();

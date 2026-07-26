@@ -15,9 +15,9 @@ function injectHeaderNav() {
     const nav = document.createElement("nav");
     nav.dataset.testid = "header-nav";
     const items = [
-        ["#/", "header-nav-stats", "STATS"],
-        ["#/capabilities", "header-nav-capabilities", "CAPABILITIES"],
-        ["#/sessions", "header-nav-sessions", "SESSIONS"],
+        ["#/statistic", "header-nav-statistic", "Statistic"],
+        ["#/sessions", "header-nav-sessions", "Sessions"],
+        ["#/new-session", "header-nav-new-session", "New Session"],
     ];
     for (const [href, testid, label] of items) {
         const link = document.createElement("a");
@@ -74,31 +74,31 @@ describe("SelenoidAppHeader", () => {
     });
 
     it("highlights the nav item matching the current hash route", async () => {
-        renderHeader(["/capabilities"]);
+        renderHeader(["/new-session"]);
         injectHeaderNav();
 
         await waitFor(() => {
-            expect(activeTestids()).toEqual(["header-nav-capabilities"]);
+            expect(activeTestids()).toEqual(["header-nav-new-session"]);
         });
-        expect(ariaCurrentTestids()).toEqual(["header-nav-capabilities"]);
+        expect(ariaCurrentTestids()).toEqual(["header-nav-new-session"]);
     });
 
-    it("highlights STATS on the root route", async () => {
-        renderHeader(["/"]);
+    it("highlights Statistic on the statistic route", async () => {
+        renderHeader(["/statistic"]);
         injectHeaderNav();
 
         await waitFor(() => {
-            expect(activeTestids()).toEqual(["header-nav-stats"]);
+            expect(activeTestids()).toEqual(["header-nav-statistic"]);
         });
     });
 
     it("re-syncs the active item on SPA navigation", async () => {
         const user = userEvent.setup();
-        renderHeader(["/"]);
+        renderHeader(["/statistic"]);
         injectHeaderNav();
 
         await waitFor(() => {
-            expect(activeTestids()).toEqual(["header-nav-stats"]);
+            expect(activeTestids()).toEqual(["header-nav-statistic"]);
         });
 
         await user.click(screen.getByTestId("go-sessions"));

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Route, Routes, useParams } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 
 import { GlobalStyle, StyledViewport } from "./styles.css";
 
@@ -82,8 +82,10 @@ const Viewport = () => {
 
             <StyledViewport>
                 <Routes>
+                    <Route path="/" element={<Navigate to="/statistic" replace />} />
+
                     <Route
-                        path="/"
+                        path="/statistic"
                         element={
                             <Stats
                                 {...{
@@ -105,7 +107,7 @@ const Viewport = () => {
                     />
 
                     <Route
-                        path="/capabilities"
+                        path="/new-session"
                         element={
                             <Capabilities
                                 browsers={state.browsers}
@@ -115,6 +117,8 @@ const Viewport = () => {
                             />
                         }
                     />
+
+                    <Route path="/capabilities" element={<Navigate to="/new-session" replace />} />
 
                     <Route path="/sessions/:session" element={<SessionRoute origin={origin} sessions={sessions} />} />
                 </Routes>

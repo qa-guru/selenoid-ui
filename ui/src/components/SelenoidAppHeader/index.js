@@ -21,8 +21,8 @@ function normalize(path) {
 }
 
 /**
- * Map a HashRouter nav href (`#/capabilities`) to its route path
- * (`/capabilities`). Returns null for non-hash / external hrefs so they are
+ * Map a HashRouter nav href (`#/new-session`) to its route path
+ * (`/new-session`). Returns null for non-hash / external hrefs so they are
  * never highlighted.
  * @param {string | null} href
  * @returns {string | null}

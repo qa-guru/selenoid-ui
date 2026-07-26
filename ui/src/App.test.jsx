@@ -19,11 +19,11 @@ describe("App", () => {
         render(<App />);
 
         expect(window.headerConfig?.brand?.leading).toEqual({
-            href: "#/",
+            href: "#/statistic",
             label: "Selenoid 3",
         });
         expect(window.headerConfig?.brand?.href).toBe("https://qa.guru/");
         expect(window.headerConfig?.brand?.label).toBeUndefined();
-        expect(window.headerConfig?.nav?.map((item) => item.label)).toEqual(["STATS", "CAPABILITIES", "SESSIONS"]);
+        expect(window.headerConfig?.nav?.map((item) => item.label)).toEqual(["Statistic", "Sessions", "New Session"]);
     });
 });

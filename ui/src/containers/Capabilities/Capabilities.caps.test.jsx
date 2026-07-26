@@ -15,10 +15,10 @@ const BROWSERS = {
 
 function renderCapabilities() {
     return render(
-        <MemoryRouter initialEntries={["/capabilities"]}>
+        <MemoryRouter initialEntries={["/new-session"]}>
             <Routes>
                 <Route
-                    path="/capabilities"
+                    path="/new-session"
                     element={
                         <Capabilities
                             browsers={BROWSERS}
