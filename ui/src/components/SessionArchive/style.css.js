@@ -1,5 +1,7 @@
 import styled from "styled-components";
 
+const colorBorder = "var(--color-border-strong, #555f6a)";
+
 export const StyledArchive = styled.div`
     box-sizing: border-box;
     width: 100%;
@@ -10,17 +12,30 @@ export const StyledArchive = styled.div`
     }
 
     .archive-panel__body {
-        padding: var(--space-3, 10px) 0 0;
+        padding: 0;
         min-height: 120px;
     }
 
     .archive__list {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 0 var(--space-5, 16px);
+        box-sizing: border-box;
     }
 
-    .archive__card_state {
+    .archive__row {
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-4, 15px);
+        border-bottom: 1px dashed ${colorBorder};
+        color: var(--color-text, #fff);
+        padding: 10px 0;
+        min-width: 280px;
+    }
+
+    .archive__row_state {
         &-enter {
             opacity: 0.01;
         }
@@ -34,6 +49,57 @@ export const StyledArchive = styled.div`
         &-exit-active {
             opacity: 0.01;
             transition: opacity 500ms ease-out;
+        }
+    }
+
+    .archive__id {
+        flex: 0 0 120px;
+        color: var(--color-text, #fff);
+        text-decoration: none;
+        font-weight: 300;
+        font-size: 1.05em;
+        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+
+        &:hover {
+            color: var(--color-success, #59a781);
+        }
+    }
+
+    .archive__artifacts {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        gap: 0.5em;
+        flex-wrap: wrap;
+        text-decoration: none;
+        color: inherit;
+        min-width: 0;
+    }
+
+    .archive__empty-artifacts {
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.9em;
+    }
+
+    .archive__actions {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+
+        .session-delete {
+            color: var(--color-text, #fff);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+
+            &:hover:not(:disabled) {
+                color: var(--color-danger, #ff6e59);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: default;
+            }
         }
     }
 
@@ -88,112 +154,5 @@ export const StyledArchive = styled.div`
         min-width: 64px;
         text-align: center;
         color: var(--color-text, #fff);
-    }
-`;
-
-export const StyledCard = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 45%;
-    padding: var(--space-3, 10px) var(--space-6, 20px);
-    margin-bottom: var(--space-8, 30px);
-    max-width: 70%;
-
-    &:hover {
-        .card__body .controls {
-            visibility: visible;
-        }
-    }
-
-    .name {
-        color: var(--color-text, #fff);
-        font-size: 1.3em;
-        font-weight: 300;
-        padding: 0 var(--space-1, 5px) var(--space-3, 10px) 0;
-        border-bottom: 1px dashed var(--color-border-strong, #555f6a);
-        line-height: 30px;
-        height: 30px;
-        overflow-x: auto;
-        white-space: nowrap;
-
-        .name__link {
-            color: inherit;
-            text-decoration: none;
-
-            &:hover {
-                color: var(--color-success, #59a781);
-            }
-        }
-    }
-
-    .card__body {
-        display: flex;
-        flex: 1;
-        min-width: 300px;
-        min-height: 200px;
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 0;
-            flex-basis: calc(var(--control-height-md, 36px) + var(--space-2, 8px));
-            color: var(--color-text, #fff);
-            visibility: hidden;
-
-            .control {
-                flex-basis: 50px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
-                border-bottom: 1px dashed var(--color-border-strong, #555f6a);
-
-                .icon-btn {
-                    color: var(--color-text, #fff);
-                    text-decoration: none;
-                    background: transparent;
-                    border: none;
-                    cursor: pointer;
-
-                    &:hover {
-                        color: var(--color-success, #59a781);
-                    }
-                }
-
-                .session-delete:hover {
-                    color: var(--color-danger, #ff6e59);
-                }
-            }
-        }
-
-        .content {
-            display: flex;
-            flex: 1;
-            padding: var(--space-1, 5px);
-            flex-basis: 300px;
-            background-color: var(--color-surface-deep, #131614);
-            justify-content: center;
-            align-items: center;
-
-            video {
-                width: 100%;
-                height: 100%;
-            }
-
-            .no-video {
-                display: flex;
-                flex-direction: column;
-                gap: var(--space-2, 8px);
-                align-items: center;
-                color: var(--color-text-muted, #aaa);
-                font-size: 0.9em;
-                text-decoration: none;
-
-                &:hover {
-                    color: var(--color-success, #59a781);
-                }
-            }
-        }
     }
 `;

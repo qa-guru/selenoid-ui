@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
-import { StyledArchive, StyledCard } from "./style.css";
-import { IconTrash, Panel } from "@zero-design-system/react";
+import { StyledArchive } from "./style.css";
+import { Badge, IconTrash, Panel } from "@zero-design-system/react";
 import { useDeleteSession } from "./service";
 import { fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
-import { videoPreloadMode, sessionIdShort } from "../../util/sessionsLogic";
+import { sessionIdShort } from "../../util/sessionsLogic";
 
 /** Empty-state hourglass — composition only; dripicons off. */
 function IconHourglass() {
@@ -24,25 +24,6 @@ function IconHourglass() {
             <path d="M3.5 2.5h9M3.5 13.5h9" />
             <path d="M4.5 2.5c0 3 3.5 4 3.5 5.5S4.5 11 4.5 13.5" />
             <path d="M11.5 2.5c0 3-3.5 4-3.5 5.5s3.5 3 3.5 5.5" />
-        </svg>
-    );
-}
-
-/** Link glyph for artifact download/open — dripicons off. */
-function IconLink() {
-    return (
-        <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <path d="M6.5 9.5l3-3" />
-            <path d="M7 11.5l-.7.7a3 3 0 0 1-4.2-4.2l.7-.7" />
-            <path d="M9 4.5l.7-.7a3 3 0 0 1 4.2 4.2l-.7.7" />
         </svg>
     );
 }
@@ -103,7 +84,6 @@ const SessionArchive = ({ query = "" }) => {
         setReloadToken((token) => token + 1);
     }, []);
 
-    const preloadVal = videoPreloadMode(sessions.length);
     const pageCount = Math.max(1, Math.ceil(total / limit) || 1);
     const showPager = total > limit;
 
@@ -125,15 +105,10 @@ const SessionArchive = ({ query = "" }) => {
                                     key={session.id}
                                     nodeRef={nodeRef}
                                     timeout={500}
-                                    classNames="archive__card_state"
+                                    classNames="archive__row_state"
                                     unmountOnExit
                                 >
-                                    <SessionCard
-                                        ref={nodeRef}
-                                        session={session}
-                                        preload={preloadVal}
-                                        onDeleted={onDeleted}
-                                    />
+                                    <SessionRow ref={nodeRef} session={session} onDeleted={onDeleted} />
                                 </CSSTransition>
                             );
                         })}
@@ -185,70 +160,45 @@ const SessionArchive = ({ query = "" }) => {
     );
 };
 
-const ArtifactLink = ({ href, label, testid }) => (
-    <div className="control">
-        <a href={href} className="icon-btn" title={label} aria-label={label} data-testid={testid}>
-            <span className="icon" aria-hidden="true">
-                <IconLink />
-            </span>
-        </a>
-    </div>
-);
-
-const SessionCard = ({ session, preload, onDeleted, ref }) => {
+const SessionRow = ({ session, onDeleted, ref }) => {
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
-    const videoSrc = session.video ? `/video/${session.video}` : null;
     const detailHref = `/sessions/${session.id}`;
 
     return (
-        <StyledCard ref={ref} data-testid="session-card" data-session={session.id}>
-            <div className="name" title={session.id}>
-                <Link to={detailHref} className="name__link" data-testid="session-detail-link">
-                    {sessionIdShort(session.id)}
-                </Link>
-            </div>
-            <div className="card__body">
-                <div className="controls">
-                    {session.video && <ArtifactLink href={videoSrc} label="Video" testid="session-video-link" />}
-                    {session.log && (
-                        <ArtifactLink href={`/logs/${session.log}`} label="Log" testid="session-log-link" />
-                    )}
-                    {session.har && <ArtifactLink href={`/har/${session.har}`} label="HAR" testid="session-har-link" />}
-                    <div className="control">
-                        <button
-                            type="button"
-                            className="icon-btn session-delete"
-                            title="Delete session"
-                            aria-label="Delete session"
-                            data-testid="session-delete"
-                            disabled={deleting}
-                            onClick={deleteSession}
-                        >
-                            {deleting ? (
-                                <BeatLoader size={2} color={"#fff"} />
-                            ) : (
-                                <span className="icon" aria-hidden="true">
-                                    <IconTrash />
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                </div>
-                <div className="content">
-                    {videoSrc ? (
-                        <video controls preload={preload} data-testid="session-video">
-                            <source src={videoSrc} type="video/mp4" />
-                        </video>
+        <div ref={ref} className="archive__row" data-testid="session-card" data-session={session.id}>
+            <Link to={detailHref} className="archive__id" title={session.id} data-testid="session-detail-link">
+                {sessionIdShort(session.id)}
+            </Link>
+
+            <Link to={detailHref} className="archive__artifacts" data-testid="session-detail-artifacts">
+                {session.video && <Badge>VIDEO</Badge>}
+                {session.log && <Badge>LOG</Badge>}
+                {session.har && <Badge>HAR</Badge>}
+                {!session.video && !session.log && !session.har && (
+                    <span className="archive__empty-artifacts">no artifacts</span>
+                )}
+            </Link>
+
+            <div className="archive__actions">
+                <button
+                    type="button"
+                    className="icon-btn session-delete"
+                    title="Delete session"
+                    aria-label="Delete session"
+                    data-testid="session-delete"
+                    disabled={deleting}
+                    onClick={deleteSession}
+                >
+                    {deleting ? (
+                        <BeatLoader size={2} color={"#fff"} />
                     ) : (
-                        <Link className="no-video" to={detailHref} data-testid="session-no-video">
-                            <span>No video</span>
-                            {session.log && <span>log available</span>}
-                            {session.har && <span>HAR available</span>}
-                        </Link>
+                        <span className="icon" aria-hidden="true">
+                            <IconTrash />
+                        </span>
                     )}
-                </div>
+                </button>
             </div>
-        </StyledCard>
+        </div>
     );
 };
 

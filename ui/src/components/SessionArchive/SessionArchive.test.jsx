@@ -69,7 +69,7 @@ describe("SessionArchive", () => {
         expect(screen.getByTestId("archive-pager-status")).toHaveTextContent("2 / 2");
     });
 
-    it("renders per-artifact links (video/log/har) for a session", async () => {
+    it("renders a list row with detail link and artifact badges (no video preview)", async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -83,17 +83,18 @@ describe("SessionArchive", () => {
         renderArchive();
 
         await waitFor(() => {
-            expect(screen.getByTestId("session-video-link")).toHaveAttribute("href", "/video/sess-1.mp4");
+            expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-1");
         });
-        expect(screen.getByTestId("session-log-link")).toHaveAttribute("href", "/logs/sess-1.log");
-        expect(screen.getByTestId("session-har-link")).toHaveAttribute("href", "/har/sess-1.har");
-        expect(screen.getByTestId("session-video")).toBeTruthy();
-        expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-1");
+        expect(screen.getByText("VIDEO")).toBeInTheDocument();
+        expect(screen.getByText("LOG")).toBeInTheDocument();
+        expect(screen.getByText("HAR")).toBeInTheDocument();
+        expect(screen.queryByTestId("session-video")).toBeNull();
+        expect(document.querySelector("video")).toBeNull();
         // No dripicons — local SVG chrome only.
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
     });
 
-    it("shows a no-video placeholder when only log/har exist", async () => {
+    it("links har-only sessions into the detail page", async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -107,11 +108,11 @@ describe("SessionArchive", () => {
         renderArchive();
 
         await waitFor(() => {
-            expect(screen.getByTestId("session-no-video")).toBeInTheDocument();
+            expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-2");
         });
-        expect(screen.queryByTestId("session-video")).toBeNull();
-        expect(screen.getByTestId("session-har-link")).toHaveAttribute("href", "/har/sess-2.har");
-        expect(screen.getByTestId("session-no-video")).toHaveAttribute("href", "/sessions/sess-2");
+        expect(screen.getByText("HAR")).toBeInTheDocument();
+        expect(screen.queryByText("VIDEO")).toBeNull();
+        expect(document.querySelector("video")).toBeNull();
     });
 
     it("delete-whole issues a DELETE for every present artifact", async () => {
