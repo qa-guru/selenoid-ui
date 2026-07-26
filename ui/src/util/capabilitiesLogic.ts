@@ -98,7 +98,7 @@ export function browserProtocol(browserProtocols, name, version) {
 }
 
 export function findPlaywrightSession(sessions, existingIds, name, version) {
-    for (const [id, session] of Object.entries(sessions || {})) {
+    for (const [id, session] of Object.entries(sessions || {}) as [string, { caps?: Record<string, unknown> }][]) {
         if (existingIds.has(id)) {
             continue;
         }

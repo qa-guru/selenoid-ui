@@ -4,21 +4,23 @@
 
 Этот файл на **этой ветке** (`main`, `feat/selenoid-3-*` и др. v3-dev) описывает **живой** toolchain checkout’а. Источник правды по фронту — [`ui/package.json`](ui/package.json).
 
-| Поле            | Значение                                                                  |
-| --------------- | ------------------------------------------------------------------------- |
-| Линия           | Selenoid 3                                                                |
-| Stack semver    | **v3.0.5** (UI cut; hub/cm Docker pin TBD)                                |
-| Docker API      | TBD (paired с hub)                                                        |
-| Docker Engine   | TBD (paired с hub)                                                        |
-| Go              | 1.26.5                                                                    |
-| Go (примечание) | Факт `go.mod` + `toolchain go1.26.5`                                      |
-| React           | 19                                                                        |
-| Router          | react-router-dom 7                                                        |
-| UI              | Vite 6                                                                    |
-| Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL |
-| Node CI         | 24                                                                        |
-| Git anchor      | `main` / `feat/selenoid-3-*`                                              |
-| PWA             | landed (`vite-plugin-pwa`: shell precache, live API/SSE online-only)      |
+| Поле            | Значение                                                                       |
+| --------------- | ------------------------------------------------------------------------------ |
+| Линия           | Selenoid 3                                                                     |
+| Stack semver    | **v3.0.5** (UI cut; hub/cm Docker pin TBD)                                     |
+| Docker API      | TBD (paired с hub)                                                             |
+| Docker Engine   | TBD (paired с hub)                                                             |
+| Go              | 1.26.5                                                                         |
+| Go (примечание) | Факт `go.mod` + `toolchain go1.26.5`                                           |
+| React           | 19                                                                             |
+| Router          | react-router-dom 7                                                             |
+| UI              | Vite 6                                                                         |
+| TypeScript      | **7** (`typescript@^7.0.2`, native `tsc`; Vite bundler retained)               |
+| Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL      |
+| Typecheck       | `yarn --cwd ui typecheck` → `tsc -p tsconfig.json --noEmit` (CI: `ci/test.sh`) |
+| Node CI         | 24                                                                             |
+| Git anchor      | `main` / `feat/selenoid-3-*`                                                   |
+| PWA             | landed (`vite-plugin-pwa`: shell precache, live API/SSE online-only)           |
 
 ## Selenoid 2 maintenance pin (не путать)
 

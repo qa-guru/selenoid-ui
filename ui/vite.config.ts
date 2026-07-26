@@ -21,6 +21,7 @@ const LIVE_NAV_DENYLIST = [
 ];
 
 export default defineConfig({
+    // Plugin types diverge when vitest nests a different vite major than the app.
     plugins: [
         react(),
         // PWA baseline (canon: reference-app / stacks java-spring frontend-react):
@@ -71,7 +72,7 @@ export default defineConfig({
                 enabled: false,
             },
         }),
-    ],
+    ] as any,
     esbuild: {
         loader: "jsx",
         include: /src\/.*\.jsx?$/,

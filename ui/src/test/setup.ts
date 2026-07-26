@@ -9,7 +9,19 @@ Object.defineProperty(window, "EventSource", {
 });
 
 class MockWebSocket {
-    constructor(url) {
+    static CONNECTING = 0;
+    static OPEN = 1;
+    static CLOSING = 2;
+    static CLOSED = 3;
+
+    url: string;
+    readyState: number;
+    onopen: ((ev?: Event) => void) | null;
+    onclose: ((ev?: CloseEvent) => void) | null;
+    onerror: ((ev?: Event) => void) | null;
+    onmessage: ((ev?: MessageEvent) => void) | null;
+
+    constructor(url: string) {
         this.url = url;
         this.readyState = MockWebSocket.OPEN;
         this.onopen = null;
@@ -24,11 +36,6 @@ class MockWebSocket {
 
     send() {}
 }
-
-MockWebSocket.CONNECTING = 0;
-MockWebSocket.OPEN = 1;
-MockWebSocket.CLOSING = 2;
-MockWebSocket.CLOSED = 3;
 
 Object.defineProperty(window, "WebSocket", {
     value: MockWebSocket,
