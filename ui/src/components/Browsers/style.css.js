@@ -2,44 +2,90 @@ import styled from "styled-components";
 
 export const StyledBrowsers = styled.div`
     color: var(--color-text, #fff);
-    display: flex;
-    flex-direction: column;
-    flex-basis: 30%;
-    min-width: 250px;
-`;
+    width: 100%;
+    max-width: 520px;
 
-export const StyledBrowser = styled.div`
-    overflow: hidden;
-    display: inline-flex;
-    line-height: 30px;
-    position: relative;
+    .browsers-panel {
+        width: 100%;
+    }
 
-    .stats {
-        display: flex;
+    .browsers-panel__body {
+        padding: 0;
+    }
 
-        .name {
-            overflow: hidden;
-            letter-spacing: 1px;
-        }
+    .browsers-table-wrap {
+        overflow: auto;
+        width: 100%;
+    }
 
-        .count {
-            font-size: 2em;
-            width: 80px;
-        }
+    .browsers-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        line-height: 1.35;
+        color: var(--color-text, #fff);
+    }
 
-        .percent {
-            font-size: 0.8em;
-            line-height: 20px;
-            width: 30px;
-            padding-left: var(--space-1, 5px);
-        }
+    .browsers-table th,
+    .browsers-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--color-border, #3d444c);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .browsers-table th {
+        color: var(--color-text-muted, #999);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: var(--panel-bar-bg, transparent);
+    }
+
+    .browsers-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .browsers-table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .browsers-table .name {
+        letter-spacing: 0.5px;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    .browsers-table .count {
+        font-size: 1.35em;
+        font-variant-numeric: tabular-nums;
+        width: 72px;
+        white-space: nowrap;
+    }
+
+    .browsers-table .share {
+        width: 96px;
+        white-space: nowrap;
+    }
+
+    .browsers-table .percent {
+        font-size: 0.85em;
+        color: var(--color-text-muted, #aaa);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .usage-track {
+        margin-top: 6px;
+        height: 2px;
+        width: 100%;
+        min-width: 56px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
     }
 
     .usage-bar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        border-bottom: 1px dashed;
-        transition: all 300ms ease-in;
+        height: 100%;
+        transition: width 300ms ease-in, background-color 300ms ease-in;
     }
 `;

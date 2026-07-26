@@ -1,6 +1,7 @@
 import React from "react";
 
 import PropTypes from "prop-types";
+import { Panel } from "@zero-design-system/react";
 import { StyledBrowsers } from "./style.css";
 import Browser from "./Browser";
 
@@ -20,9 +21,30 @@ const Browsers = ({ totalUsed, browsers }) => {
 
     return (
         <StyledBrowsers>
-            {descendingCount(browsers).map((browser) => (
-                <Browser key={browser.name} totalUsed={totalUsed} {...browser} />
-            ))}
+            <Panel
+                title="Browsers"
+                testId="browsers-panel"
+                titleTestId="browsers-title"
+                className="browsers-panel"
+                bodyClassName="browsers-panel__body"
+            >
+                <div className="browsers-table-wrap">
+                    <table className="browsers-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Browser</th>
+                                <th scope="col">Used</th>
+                                <th scope="col">Share</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {descendingCount(browsers).map((browser) => (
+                                <Browser key={browser.name} totalUsed={totalUsed} {...browser} />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Panel>
         </StyledBrowsers>
     );
 };

@@ -45,7 +45,8 @@ describe("Sessions", () => {
     it("renders session list without filter", () => {
         renderSessions();
 
-        expect(screen.getByText("Sessions")).toBeInTheDocument();
+        expect(screen.getByTestId("sessions-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("sessions-title")).toHaveTextContent("Sessions");
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("firefox")).toBeInTheDocument();
         expect(screen.getByText("MANUAL")).toBeInTheDocument();

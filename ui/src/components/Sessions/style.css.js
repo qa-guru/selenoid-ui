@@ -1,137 +1,129 @@
 import styled from "styled-components";
 
-const colorBorder = "#555f6a";
-const borderSectionColor = "#353b42";
-const secondaryColor = "#aaa";
+const colorBorder = "var(--color-border-strong, #555f6a)";
+const secondaryColor = "var(--color-text-muted, #aaa)";
 const manualColor = "#F0A202";
 
 export const StyledSessions = styled.div`
-  overflow: auto;
-
-  .section-title {
-    color: #666;
-    position: relative;
-    top: 0;
-    left: 0;
-    padding-left: 5%;
-    border-bottom: 1px solid ${borderSectionColor};
-    width: 95%;
-    letter-spacing: 1px;
-    font-size: 10px;
-    line-height: 20px;
-    margin-bottom: 20px;
-    
-    &_hidden-true {
-      display: none;
-    }
-    
-  }
-
-  .no-any {
-    color: #fff;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    align-items: center;
-    font-size: 1.2em;
-    justify-content: center;
-
-    .nosession-any-text {
-      margin: 10px;
-    }
-
-    // don't show until all sessions are gone
-    &_state-enter-active {
-      display: none;
-    }
-  }
-}
-
-.sessions__list {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 0 50px;
-  box-sizing: border-box;
-
-  .session {
-    transition: all 0.5s;
-    min-height: 60px;
-    display: flex;
-    justify-content: flex-start;
-    min-width: 350px;
-    border-bottom: 1px dashed ${colorBorder};
-    color: #fff;
-    padding: 10px 0 0;
+    box-sizing: border-box;
+    width: 100%;
     overflow: auto;
+    padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
 
-    //TRANSITIONS
-    &_state-enter {
-      opacity: 0.01;
+    .sessions-panel {
+        width: 100%;
     }
 
-    &_state-enter-active {
-      opacity: 1;
-      transition: opacity 500ms ease-in;
+    .sessions-panel__body {
+        padding: 0;
+        min-height: 120px;
     }
 
-    &_state-exit {
-      opacity: 1;
-    }
-
-    &_state-exit-active {
-      opacity: 0.01;
-      transition: opacity 500ms ease-out;
-    }
-    
-    .identity {
-      display: flex;
-      flex-direction: column;
-      max-width: 50%;
-      flex: 0 0 50%;
-      padding-right: 15px;
-      
-      .browser {
+    .no-any {
+        color: var(--color-text, #fff);
         display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: center;
+        font-size: 1.2em;
+        justify-content: center;
+        padding: var(--space-8, 30px) var(--space-4, 15px);
 
-        .name {
-          text-transform: uppercase;
-          font-weight: 300;
-          line-height: 30px;
+        .nosession-any-text {
+            margin: var(--space-3, 10px);
         }
-        
-        .version {
-          font-weight: 300;
-          text-transform: lowercase;
-          font-size: 0.8em;
-          color: ${secondaryColor};
-          margin-left: 5px;
-        }
-      }
-      
-      .session-name {
-        overflow: hidden;
-        border-left: 2px solid ${colorBorder};
-        color: ${secondaryColor};
-        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
 
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        padding-left: 5px;
-      }
-    }
-    
-    &_manual {
-      .identity {
-        .session-name {
-          border-color: ${manualColor};
+        // don't show until all sessions are gone
+        &_state-enter-active {
+            display: none;
         }
-      }
     }
 
-    .session-delete {
-      color: #fff;
-      flex-shrink: 0;
+    .sessions__list {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 0 var(--space-5, 16px);
+        box-sizing: border-box;
+
+        .session {
+            transition: all 0.5s;
+            min-height: 60px;
+            display: flex;
+            justify-content: flex-start;
+            min-width: 280px;
+            border-bottom: 1px dashed ${colorBorder};
+            color: var(--color-text, #fff);
+            padding: 10px 0 0;
+            overflow: auto;
+
+            &_state-enter {
+                opacity: 0.01;
+            }
+
+            &_state-enter-active {
+                opacity: 1;
+                transition: opacity 500ms ease-in;
+            }
+
+            &_state-exit {
+                opacity: 1;
+            }
+
+            &_state-exit-active {
+                opacity: 0.01;
+                transition: opacity 500ms ease-out;
+            }
+
+            .identity {
+                display: flex;
+                flex-direction: column;
+                max-width: 50%;
+                flex: 0 0 50%;
+                padding-right: 15px;
+
+                .browser {
+                    display: flex;
+
+                    .name {
+                        text-transform: uppercase;
+                        font-weight: 300;
+                        line-height: 30px;
+                    }
+
+                    .version {
+                        font-weight: 300;
+                        text-transform: lowercase;
+                        font-size: 0.8em;
+                        color: ${secondaryColor};
+                        margin-left: 5px;
+                    }
+                }
+
+                .session-name {
+                    overflow: hidden;
+                    border-left: 2px solid ${colorBorder};
+                    color: ${secondaryColor};
+                    font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                    padding-left: 5px;
+                }
+            }
+
+            &_manual {
+                .identity {
+                    .session-name {
+                        border-color: ${manualColor};
+                    }
+                }
+            }
+
+            .session-delete {
+                color: var(--color-text, #fff);
+                flex-shrink: 0;
+            }
+        }
     }
-  }
 `;

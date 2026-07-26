@@ -30,25 +30,39 @@ export const StyledSession = styled.div`
         margin: 0;
     }
 
+    /* Full-width HAR under the VNC + Log row (not a side card). */
+    .session-har-slot {
+        box-sizing: border-box;
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .session-info-panel {
+        box-sizing: border-box;
+        width: calc(100% - 2 * var(--wt-post-gap, 14px));
+        max-width: 1000px;
+        margin: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
+        flex-shrink: 0;
+    }
+
+    .session-info-panel__body {
+        padding: var(--space-3, 10px) var(--space-4, 15px);
+    }
+
     .session-info {
         color: var(--color-text, #fff);
-        padding: 0 var(--wt-post-gap, 14px);
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
         justify-content: center;
-        height: 80px;
-        margin-bottom: var(--wt-post-gap, 14px);
+        gap: var(--space-2, 8px);
 
         &__main {
-            height: 40px;
+            min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            min-width: 350px;
-            border-bottom: 1px dashed var(--color-border, #3d444c);
-            margin: var(--space-4, 15px) 0;
-            flex-shrink: 0;
+            flex-wrap: wrap;
             gap: var(--space-3, 12px);
 
             .session-browser {

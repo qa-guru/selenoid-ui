@@ -15,7 +15,7 @@ describe("usageBarColor", () => {
 });
 
 describe("Browsers", () => {
-    it("renders rows sorted by count with token usage-bar", () => {
+    it("renders panel table rows sorted by count with token usage-bar", () => {
         render(
             <Browsers
                 totalUsed={10}
@@ -27,6 +27,9 @@ describe("Browsers", () => {
             />
         );
 
+        expect(screen.getByTestId("browsers-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("browsers-title")).toHaveTextContent("Browsers");
+
         const rows = screen.getAllByTestId("browser-row");
         expect(rows).toHaveLength(3);
         expect(within(rows[0]).getByText("chrome")).toBeInTheDocument();
@@ -35,15 +38,15 @@ describe("Browsers", () => {
 
         const chromeBar = within(rows[0]).getByTestId("browser-usage-bar");
         expect(chromeBar).toHaveStyle({ width: "70%" });
-        expect(chromeBar.style.borderBottomColor).toBe("var(--color-danger)");
+        expect(chromeBar.style.backgroundColor).toBe("var(--color-danger)");
 
         const firefoxBar = within(rows[1]).getByTestId("browser-usage-bar");
         expect(firefoxBar).toHaveStyle({ width: "20%" });
-        expect(firefoxBar.style.borderBottomColor).toBe("var(--color-info)");
+        expect(firefoxBar.style.backgroundColor).toBe("var(--color-info)");
 
         const operaBar = within(rows[2]).getByTestId("browser-usage-bar");
         expect(operaBar).toHaveStyle({ width: "10%" });
-        expect(operaBar.style.borderBottomColor).toBe("var(--color-info)");
+        expect(operaBar.style.backgroundColor).toBe("var(--color-info)");
     });
 
     it("returns null when totalUsed is undefined", () => {

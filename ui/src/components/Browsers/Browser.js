@@ -1,5 +1,4 @@
 import React from "react";
-import { StyledBrowser } from "./style.css";
 import PropTypes from "prop-types";
 
 /**
@@ -22,21 +21,23 @@ const Browser = ({ name, used, totalUsed }) => {
     const perc = totalUsed > 0 ? ((used / totalUsed) * 100).toFixed() : 0;
 
     return (
-        <StyledBrowser data-testid="browser-row">
-            <div className="stats">
-                <div className="percent">{perc}%</div>
-                <div className="count">{used}</div>
-                <div className="name">{name}</div>
-            </div>
-            <div
-                className="usage-bar"
-                data-testid="browser-usage-bar"
-                style={{
-                    width: `${perc}%`,
-                    borderBottomColor: usageBarColor(perc),
-                }}
-            />
-        </StyledBrowser>
+        <tr data-testid="browser-row">
+            <td className="name">{name}</td>
+            <td className="count">{used}</td>
+            <td className="share">
+                <span className="percent">{perc}%</span>
+                <div className="usage-track" aria-hidden="true">
+                    <div
+                        className="usage-bar"
+                        data-testid="browser-usage-bar"
+                        style={{
+                            width: `${perc}%`,
+                            backgroundColor: usageBarColor(perc),
+                        }}
+                    />
+                </div>
+            </td>
+        </tr>
     );
 };
 

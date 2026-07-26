@@ -5,7 +5,7 @@ import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import styled from "styled-components";
-import { Badge, IconTrash } from "@zero-design-system/react";
+import { Badge, IconTrash, Panel } from "@zero-design-system/react";
 import { useSessionDelete } from "./service";
 import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
 
@@ -47,38 +47,45 @@ const Sessions = ({ sessions = {}, query = "" }) => {
 
     return (
         <StyledSessions>
-            <div className={`section-title section-title_hidden-${!!query}`}>Sessions</div>
-            <TransitionGroup className="sessions__list">
-                {ids.map((id) => {
-                    const nodeRef = getNodeRef(id);
-                    return (
-                        <CSSTransition
-                            key={id}
-                            nodeRef={nodeRef}
-                            timeout={500}
-                            classNames="session_state"
-                            unmountOnExit
-                        >
-                            <Session ref={nodeRef} id={id} session={sessions[id]} />
-                        </CSSTransition>
-                    );
-                })}
-            </TransitionGroup>
-            <CSSTransition
-                in={!ids.length}
-                nodeRef={noAnyRef}
-                timeout={500}
-                exit={false}
-                classNames="sessions__no-any_state"
-                unmountOnExit
+            <Panel
+                title="Sessions"
+                testId="sessions-panel"
+                titleTestId="sessions-title"
+                className="sessions-panel"
+                bodyClassName="sessions-panel__body"
             >
-                <div ref={noAnyRef} className="no-any">
-                    <span className="icon" title="No any" aria-hidden="true">
-                        <IconHourglass />
-                    </span>
-                    <div className="nosession-any-text">NO SESSIONS YET :'(</div>
-                </div>
-            </CSSTransition>
+                <TransitionGroup className="sessions__list">
+                    {ids.map((id) => {
+                        const nodeRef = getNodeRef(id);
+                        return (
+                            <CSSTransition
+                                key={id}
+                                nodeRef={nodeRef}
+                                timeout={500}
+                                classNames="session_state"
+                                unmountOnExit
+                            >
+                                <Session ref={nodeRef} id={id} session={sessions[id]} />
+                            </CSSTransition>
+                        );
+                    })}
+                </TransitionGroup>
+                <CSSTransition
+                    in={!ids.length}
+                    nodeRef={noAnyRef}
+                    timeout={500}
+                    exit={false}
+                    classNames="sessions__no-any_state"
+                    unmountOnExit
+                >
+                    <div ref={noAnyRef} className="no-any">
+                        <span className="icon" title="No any" aria-hidden="true">
+                            <IconHourglass />
+                        </span>
+                        <div className="nosession-any-text">NO SESSIONS YET :'(</div>
+                    </div>
+                </CSSTransition>
+            </Panel>
         </StyledSessions>
     );
 };

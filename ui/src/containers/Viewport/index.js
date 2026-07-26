@@ -12,7 +12,7 @@ import Stats from "../../containers/Stats";
 import Capabilities from "../../containers/Capabilities";
 import Sessions from "../../components/Sessions";
 import Session from "../../components/Session";
-import Videos from "../../components/Videos";
+import SessionArchive from "../../components/SessionArchive";
 import { useUiFeed } from "../../hooks/useUiFeed";
 import { useHeaderSlot } from "../../hooks/useHeaderSlot";
 
@@ -85,21 +85,24 @@ const Viewport = () => {
                     <Route
                         path="/"
                         element={
-                            <>
-                                {query ? null : (
-                                    <Stats
-                                        {...{
-                                            state,
-                                            browsers,
-                                        }}
-                                    />
-                                )}
-                                <Sessions sessions={sessions} query={query} />
-                            </>
+                            <Stats
+                                {...{
+                                    state,
+                                    browsers,
+                                }}
+                            />
                         }
                     />
 
-                    <Route path="/videos" element={<Videos query={query} />} />
+                    <Route
+                        path="/sessions"
+                        element={
+                            <>
+                                <Sessions sessions={sessions} query={query} />
+                                <SessionArchive query={query} />
+                            </>
+                        }
+                    />
 
                     <Route
                         path="/capabilities"
