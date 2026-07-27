@@ -108,30 +108,20 @@ const Session = ({ origin, session, browser }) => {
 
             {showFinished && (
                 <>
-                    <div className="interactive">
-                        {artifacts.video ? (
-                            <div className="session-interactive-card">
-                                <SessionVideo file={artifacts.video} />
-                            </div>
-                        ) : (
-                            <div className="session-interactive-card">
-                                <div className="session-missing" data-testid="session-no-video">
-                                    No video
+                    {(artifacts.video || artifacts.log) && (
+                        <div className="interactive">
+                            {artifacts.video && (
+                                <div className="session-interactive-card">
+                                    <SessionVideo file={artifacts.video} />
                                 </div>
-                            </div>
-                        )}
-                        {artifacts.log ? (
-                            <div className="session-interactive-card">
-                                <SessionLogFile file={artifacts.log} />
-                            </div>
-                        ) : (
-                            <div className="session-interactive-card">
-                                <div className="session-missing" data-testid="session-no-log">
-                                    No session logs
+                            )}
+                            {artifacts.log && (
+                                <div className="session-interactive-card">
+                                    <SessionLogFile file={artifacts.log} />
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                     <div className="session-har-slot">
                         {harFile || wantsHar(capsForHar) ? (
                             <HarViewer

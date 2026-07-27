@@ -86,7 +86,9 @@ describe("Session detail page", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-detail-video")).toBeInTheDocument();
         });
-        expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("line one");
+        await waitFor(() => {
+            expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("line one");
+        });
         expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
         expect(screen.getByTestId("session-back")).toHaveAttribute("href", "/sessions");
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
@@ -103,5 +105,45 @@ describe("Session detail page", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-not-found")).toBeInTheDocument();
         });
+    });
+
+    it("omits empty video/log placeholders when finished session has only HAR", async () => {
+        fetch.mockImplementation(async (url) => {
+            if (String(url).startsWith("/sessions/?")) {
+                return {
+                    ok: true,
+                    json: async () => ({
+                        sessions: [{ id: "har-only", har: "har-only.har" }],
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                    }),
+                };
+            }
+            if (String(url) === "/har/har-only.har") {
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        log: {
+                            version: "1.2",
+                            creator: { name: "selenoid" },
+                            entries: [],
+                        },
+                    }),
+                };
+            }
+            return { ok: false, status: 404, json: async () => ({}), text: async () => "" };
+        });
+
+        renderSession({ session: "har-only", browser: undefined });
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
+        });
+        expect(screen.queryByTestId("session-no-video")).toBeNull();
+        expect(screen.queryByTestId("session-no-log")).toBeNull();
+        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+        expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR");
     });
 });
