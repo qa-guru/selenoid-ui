@@ -2757,64 +2757,6 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
-            {isWebdriver || isPlaywright ? (
-                <Panel
-                    title="Browser capabilities"
-                    testId="capabilities-browser-panel"
-                    titleTestId="capabilities-browser-title"
-                    className="capabilities-config-panel"
-                >
-                    <div
-                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                        data-testid="capabilities-browser-caps"
-                    >
-                        <PlaqueFieldGrid
-                            layout="solo"
-                            aria-label="Proxy preset"
-                            data-testid="capabilities-browser-proxy-preset"
-                        >
-                            <PlaqueSelect
-                                label="proxyPreset"
-                                paramId="proxyPreset"
-                                value={proxyPreset}
-                                options={PROXY_PRESET_OPTIONS}
-                                onChange={setProxyPreset}
-                                data-testid="caps-proxy-preset"
-                            />
-                        </PlaqueFieldGrid>
-                        <PlaqueFieldGrid
-                            layout="duo"
-                            aria-label="Proxy endpoint"
-                            data-testid="capabilities-browser-proxy"
-                        >
-                            <PlaqueField
-                                label="proxyServer"
-                                paramId="proxyServer"
-                                labelVariant="param"
-                                type="text"
-                                value={proxyOff ? "" : proxyServer}
-                                placeholder="host"
-                                readOnly={proxyOff || proxyPresetLocked}
-                                disabled={proxyOff}
-                                onChange={(e) => setProxyServer(e.target.value)}
-                                data-testid="caps-proxy-server"
-                            />
-                            <PlaqueField
-                                label="proxyPort"
-                                paramId="proxyPort"
-                                labelVariant="param"
-                                type="text"
-                                value={proxyOff ? "" : proxyPort}
-                                placeholder="port"
-                                readOnly={proxyOff || proxyPresetLocked}
-                                disabled={proxyOff}
-                                onChange={(e) => setProxyPort(e.target.value)}
-                                data-testid="caps-proxy-port"
-                            />
-                        </PlaqueFieldGrid>
-                    </div>
-                </Panel>
-            ) : null}
             {isPlaywright && name ? (
                 <Panel
                     title="Playwright session"
@@ -2824,7 +2766,7 @@ const Launch = ({
                 >
                     {/*
                       selenoid:options → WS query (parity with Remote hub + headless).
-                      Proxy stays WebDriver-only (W3C alwaysMatch.proxy).
+                      Proxy panel renders below (same order as WebDriver Remote hub → Browser capabilities).
                     */}
                     <div
                         className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
@@ -3019,6 +2961,64 @@ const Launch = ({
                                 ) : null}
                             </PlaqueFieldGrid>
                         ) : null}
+                    </div>
+                </Panel>
+            ) : null}
+            {isWebdriver || isPlaywright ? (
+                <Panel
+                    title="Browser capabilities"
+                    testId="capabilities-browser-panel"
+                    titleTestId="capabilities-browser-title"
+                    className="capabilities-config-panel"
+                >
+                    <div
+                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        data-testid="capabilities-browser-caps"
+                    >
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Proxy preset"
+                            data-testid="capabilities-browser-proxy-preset"
+                        >
+                            <PlaqueSelect
+                                label="proxyPreset"
+                                paramId="proxyPreset"
+                                value={proxyPreset}
+                                options={PROXY_PRESET_OPTIONS}
+                                onChange={setProxyPreset}
+                                data-testid="caps-proxy-preset"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="duo"
+                            aria-label="Proxy endpoint"
+                            data-testid="capabilities-browser-proxy"
+                        >
+                            <PlaqueField
+                                label="proxyServer"
+                                paramId="proxyServer"
+                                labelVariant="param"
+                                type="text"
+                                value={proxyOff ? "" : proxyServer}
+                                placeholder="host"
+                                readOnly={proxyOff || proxyPresetLocked}
+                                disabled={proxyOff}
+                                onChange={(e) => setProxyServer(e.target.value)}
+                                data-testid="caps-proxy-server"
+                            />
+                            <PlaqueField
+                                label="proxyPort"
+                                paramId="proxyPort"
+                                labelVariant="param"
+                                type="text"
+                                value={proxyOff ? "" : proxyPort}
+                                placeholder="port"
+                                readOnly={proxyOff || proxyPresetLocked}
+                                disabled={proxyOff}
+                                onChange={(e) => setProxyPort(e.target.value)}
+                                data-testid="caps-proxy-port"
+                            />
+                        </PlaqueFieldGrid>
                     </div>
                 </Panel>
             ) : null}

@@ -169,10 +169,13 @@ describe("Capabilities Playwright Create Session", () => {
         expect(authPass).toHaveValue("test_pass");
         expect(authPass.closest("label")).toHaveAttribute("data-param-id", "authPass");
 
-        // WebDriver Remote hub is hidden for Playwright; proxy panel is shared.
+        // WebDriver Remote hub is hidden for Playwright; proxy panel is below session (WD order).
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         expect(screen.getByTestId("capabilities-browser-panel")).toBeInTheDocument();
         expect(screen.getByTestId("caps-proxy-preset")).toHaveAttribute("data-param-id", "proxyPreset");
+        const sessionPanel = screen.getByTestId("capabilities-playwright-panel");
+        const proxyPanel = screen.getByTestId("capabilities-browser-panel");
+        expect(Boolean(sessionPanel.compareDocumentPosition(proxyPanel) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
         expect(screen.queryByTestId("capabilities-android-panel")).toBeNull();
     });
 
