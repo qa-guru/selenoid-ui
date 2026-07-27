@@ -42,23 +42,55 @@ describe("capabilitiesPlaywright", () => {
         const url = playwrightEndpoint("playwright-chrome", "1.61.0", "", {
             name: "PW manual",
             sessionTimeout: "15m",
+            screenResolution: "1280x1024x24",
             enableVnc: false,
-            enableVideo: false,
+            enableVideo: true,
             enableHar: true,
+            enableLog: true,
+            timeZone: "Europe/Moscow",
+            env: "FOO=bar,BAZ=qux",
+            labels: "manual=true,team=qa",
+            videoName: "pw.mp4",
+            logName: "pw.log",
             headless: true,
         });
         const parsed = new URL(url);
 
         expect(parsed.searchParams.get("name")).toBe("PW manual");
         expect(parsed.searchParams.get("sessionTimeout")).toBe("15m");
+        expect(parsed.searchParams.get("screenResolution")).toBe("1280x1024x24");
         expect(parsed.searchParams.get("enableVNC")).toBe("false");
-        expect(parsed.searchParams.get("enableVideo")).toBe("false");
+        expect(parsed.searchParams.get("enableVideo")).toBe("true");
         expect(parsed.searchParams.get("enableHAR")).toBe("true");
+        expect(parsed.searchParams.get("enableLog")).toBe("true");
+        expect(parsed.searchParams.get("timeZone")).toBe("Europe/Moscow");
+        expect(parsed.searchParams.get("env.FOO")).toBe("bar");
+        expect(parsed.searchParams.get("env.BAZ")).toBe("qux");
+        expect(parsed.searchParams.get("labels.manual")).toBe("true");
+        expect(parsed.searchParams.get("labels.team")).toBe("qa");
+        expect(parsed.searchParams.get("videoName")).toBe("pw.mp4");
+        expect(parsed.searchParams.get("logName")).toBe("pw.log");
         expect(parsed.searchParams.get("headless")).toBe("true");
     });
 
     it("defaults enableHAR to false in the WS query", () => {
         const parsed = new URL(playwrightEndpoint("playwright-chromium", "1.61.1"));
         expect(parsed.searchParams.get("enableHAR")).toBe("false");
+        expect(parsed.searchParams.get("screenResolution")).toBe("1920x1080x24");
+        expect(parsed.searchParams.get("enableLog")).toBe("false");
+        expect(parsed.searchParams.get("timeZone")).toBe("UTC");
+    });
+
+    it("omits videoName/logName when flags are off", () => {
+        const parsed = new URL(
+            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+                enableVideo: false,
+                enableLog: false,
+                videoName: "ignored.mp4",
+                logName: "ignored.log",
+            })
+        );
+        expect(parsed.searchParams.get("videoName")).toBeNull();
+        expect(parsed.searchParams.get("logName")).toBeNull();
     });
 });

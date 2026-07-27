@@ -60,14 +60,17 @@ import "@zero-design-system/react/styles.css";
  * | enableVideo      | PlaqueFieldSeg | solo | enableVideo                       |
  * | enableHar        | PlaqueFieldSeg | solo | enableHAR → hub CDP → /har/<id>.har|
  * | enableLog        | PlaqueFieldSeg | solo | enableLog                         |
+ * | headless         | PlaqueFieldSeg | solo | headless (Playwright only)        |
  * | timeZone         | PlaqueSelect | solo   | selenoid:options.timeZone         |
  * | env              | PlaqueField  | solo   | selenoid:options.env              |
  * | labels           | PlaqueField  | solo   | selenoid:options.labels           |
  * | videoName        | PlaqueField  | duo    | selenoid:options.videoName (cond) |
  * | logName          | PlaqueField  | duo    | selenoid:options.logName (cond)   |
- * | proxyPreset      | PlaqueSelect | solo   | alwaysMatch.proxy (via server)    |
+ * | proxyPreset      | PlaqueSelect | solo   | alwaysMatch.proxy (WebDriver only)|
  * | proxyServer      | PlaqueField  | duo    | host half of socksProxy           |
  * | proxyPort        | PlaqueField  | duo    | port half of socksProxy           |
+ *
+ * Playwright session panel mirrors Remote hub (+ headless). Proxy is WebDriver-only.
  *
  * Ban: closeBrowser* / gradle* / junit* / allure* / builder fields.
  *
@@ -562,7 +565,17 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             proxyEndpoint: proxyEndpoint || "",
         });
     } else if (family === "playwright") {
-        payload.headless = String(sessionOpts.headless);
+        Object.assign(payload, {
+            screenResolution: sessionOpts.screenResolution,
+            enableHar: String(sessionOpts.enableHar),
+            enableLog: String(sessionOpts.enableLog),
+            timeZone: sessionOpts.timeZone || "UTC",
+            env: sessionOpts.env || "",
+            labels: sessionOpts.labels || DEFAULT_LABELS_CSV,
+            videoName: sessionOpts.videoName || "",
+            logName: sessionOpts.logName || "",
+            headless: String(sessionOpts.headless),
+        });
     } else if (family === "android") {
         Object.assign(payload, {
             app: sessionOpts.androidApp || "",
@@ -592,10 +605,17 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             .concat([
                 "## Playwright session",
                 `- remoteUrl: \`${remoteUrl}\``,
-                `- name: **${sessionOpts.name}**`,
+                `- accessKey: \`${formatAccessKey(sessionOpts.authUser, sessionOpts.authPass)}\``,
                 `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
-                `- enableVnc / enableVideo: **${payload.enableVnc}** / **${payload.enableVideo}**`,
+                `- name: **${sessionOpts.name}**`,
+                `- screenResolution: **${sessionOpts.screenResolution}**`,
+                `- timeZone: **${payload.timeZone}**`,
+                `- enableVnc / enableVideo / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableLog}**`,
+                `- enableHar: **${payload.enableHar}** (hub CDP → /har/<id>.har)`,
                 `- headless: **${payload.headless}**`,
+                `- env: **${payload.env || "—"}**`,
+                `- labels: **${payload.labels || "—"}**`,
+                `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
             ])
             .join("\n");
     }
@@ -1503,9 +1523,16 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const pwSession = {
         name: sessionName,
         sessionTimeout,
+        screenResolution,
         enableVnc: enableVnc === "true",
         enableVideo: enableVideo === "true",
         enableHar: enableHar === "true",
+        enableLog: enableLog === "true",
+        timeZone,
+        env,
+        labels,
+        videoName,
+        logName,
         headless: headless === "true",
     };
     const androidSession = {
@@ -2784,7 +2811,10 @@ const Launch = ({
                     titleTestId="capabilities-playwright-title"
                     className="capabilities-config-panel"
                 >
-                    {/* selenoid:options → WS query params (name, sessionTimeout, enableVNC/Video/HAR, headless). */}
+                    {/*
+                      selenoid:options → WS query (parity with Remote hub + headless).
+                      Proxy stays WebDriver-only (W3C alwaysMatch.proxy).
+                    */}
                     <div
                         className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
                         data-testid="capabilities-playwright-caps"
@@ -2830,6 +2860,20 @@ const Launch = ({
                         </PlaqueFieldGrid>
                         <PlaqueFieldGrid
                             layout="solo"
+                            aria-label="Screen resolution"
+                            data-testid="capabilities-playwright-resolution"
+                        >
+                            <PlaqueSelect
+                                label="screenResolution"
+                                paramId="screenResolution"
+                                value={screenResolution}
+                                options={SCREEN_RESOLUTION_OPTIONS}
+                                onChange={setScreenResolution}
+                                data-testid="caps-playwright-screen-resolution"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
                             aria-label="Playwright flags"
                             data-testid="capabilities-playwright-flags"
                         >
@@ -2870,6 +2914,14 @@ const Launch = ({
                                 ]}
                             />
                             <PlaqueFieldSeg
+                                label="enableLog"
+                                paramId="enableLog"
+                                value={enableLog}
+                                onValueChange={setEnableLog}
+                                stretch
+                                data-testid="caps-playwright-enable-log"
+                            />
+                            <PlaqueFieldSeg
                                 label="headless"
                                 paramId="headless"
                                 value={headless}
@@ -2878,6 +2930,84 @@ const Launch = ({
                                 data-testid="caps-playwright-headless"
                             />
                         </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Time zone"
+                            data-testid="capabilities-playwright-timezone"
+                        >
+                            <PlaqueSelect
+                                label="timeZone"
+                                paramId="timeZone"
+                                value={timeZone}
+                                options={TIME_ZONE_OPTIONS}
+                                onChange={setTimeZone}
+                                data-testid="caps-playwright-time-zone"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Container env"
+                            data-testid="capabilities-playwright-env"
+                        >
+                            <PlaqueField
+                                label="env"
+                                paramId="env"
+                                labelVariant="param"
+                                type="text"
+                                value={env}
+                                placeholder="KEY=value,KEY2=value"
+                                onChange={(e) => setEnv(e.target.value)}
+                                data-testid="caps-playwright-env"
+                            />
+                        </PlaqueFieldGrid>
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Session labels"
+                            data-testid="capabilities-playwright-labels"
+                        >
+                            <PlaqueField
+                                label="labels"
+                                paramId="labels"
+                                labelVariant="param"
+                                type="text"
+                                value={labels}
+                                placeholder="key=value,key2=value"
+                                onChange={(e) => setLabels(e.target.value)}
+                                data-testid="caps-playwright-labels"
+                            />
+                        </PlaqueFieldGrid>
+                        {enableVideo === "true" || enableLog === "true" ? (
+                            <PlaqueFieldGrid
+                                layout={enableVideo === "true" && enableLog === "true" ? "duo" : "solo"}
+                                aria-label="Artifact names"
+                                data-testid="capabilities-playwright-names"
+                            >
+                                {enableVideo === "true" ? (
+                                    <PlaqueField
+                                        label="videoName"
+                                        paramId="videoName"
+                                        labelVariant="param"
+                                        type="text"
+                                        value={videoName}
+                                        placeholder="session.mp4"
+                                        onChange={(e) => setVideoName(e.target.value)}
+                                        data-testid="caps-playwright-video-name"
+                                    />
+                                ) : null}
+                                {enableLog === "true" ? (
+                                    <PlaqueField
+                                        label="logName"
+                                        paramId="logName"
+                                        labelVariant="param"
+                                        type="text"
+                                        value={logName}
+                                        placeholder="session.log"
+                                        onChange={(e) => setLogName(e.target.value)}
+                                        data-testid="caps-playwright-log-name"
+                                    />
+                                ) : null}
+                            </PlaqueFieldGrid>
+                        ) : null}
                     </div>
                 </Panel>
             ) : null}

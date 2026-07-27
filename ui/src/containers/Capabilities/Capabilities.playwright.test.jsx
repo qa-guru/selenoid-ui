@@ -100,7 +100,8 @@ describe("Capabilities Playwright Create Session", () => {
         // Browser capabilities (proxy) is WebDriver-only — hidden for Playwright.
         expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
-        // HAR toggle is WebDriver client-side only; Playwright uses recordHar in tests.
+        // Hub HAR toggle lives on the Playwright panel (caps-playwright-enable-har).
+        expect(screen.getByTestId("caps-playwright-enable-har")).toBeInTheDocument();
         expect(screen.queryByTestId("caps-enable-har")).toBeNull();
 
         const create = screen.getByTestId("capabilities-create-session");
@@ -113,6 +114,10 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.pathname).toBe("/playwright/playwright-chrome/1.61.0");
         expect(wsUrl.searchParams.get("accessKey")).toBe(ACCESS_KEY);
         expect(wsUrl.searchParams.get("name")).toBe("Manual session");
+        expect(wsUrl.searchParams.get("screenResolution")).toBe("1920x1080x24");
+        expect(wsUrl.searchParams.get("enableLog")).toBe("false");
+        expect(wsUrl.searchParams.get("timeZone")).toBe("UTC");
+        expect(wsUrl.searchParams.get("labels.manual")).toBe("true");
     });
 
     it("uses default accessKey in Playwright WebSocket", async () => {
@@ -127,7 +132,7 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("accessKey")).toBe(ACCESS_KEY);
     });
 
-    it("shows Playwright session panel (name/timeout/vnc/video/headless), not WebDriver panels", async () => {
+    it("shows Playwright session panel (hub parity + headless), not WebDriver panels", async () => {
         const user = userEvent.setup();
         renderCapabilities(ACCESS_KEY);
         await selectPlaywrightChrome(user);
@@ -139,9 +144,22 @@ describe("Capabilities Playwright Create Session", () => {
             "sessionTimeout"
         );
         expect(screen.getByTestId("caps-playwright-session-name")).toHaveValue("Manual session");
+        expect(screen.getByTestId("caps-playwright-screen-resolution")).toHaveAttribute(
+            "data-param-id",
+            "screenResolution"
+        );
         expect(screen.getByTestId("caps-playwright-enable-vnc")).toHaveAttribute("data-param-id", "enableVnc");
         expect(screen.getByTestId("caps-playwright-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
+        expect(screen.getByTestId("caps-playwright-enable-har")).toHaveAttribute("data-param-id", "enableHar");
+        expect(screen.getByTestId("caps-playwright-enable-log")).toHaveAttribute("data-param-id", "enableLog");
         expect(screen.getByTestId("caps-playwright-headless")).toHaveAttribute("data-param-id", "headless");
+        expect(screen.getByTestId("caps-playwright-time-zone")).toHaveAttribute("data-param-id", "timeZone");
+        expect(screen.getByTestId("caps-playwright-env").closest("label")).toHaveAttribute("data-param-id", "env");
+        expect(screen.getByTestId("caps-playwright-labels")).toHaveValue("manual=true");
+        expect(screen.getByTestId("caps-playwright-video-name").closest("label")).toHaveAttribute(
+            "data-param-id",
+            "videoName"
+        );
 
         const authUser = within(panel).getByTestId("capabilities-caps-auth-user");
         expect(authUser).toHaveValue("test_user");
@@ -173,7 +191,7 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("accessKey")).toBe("pw_user:pw_pass");
     });
 
-    it("mirrors Playwright panel options (name, headless) into the Create Session WebSocket query", async () => {
+    it("mirrors Playwright panel options (name, headless, resolution, labels) into the Create Session WebSocket query", async () => {
         const user = userEvent.setup();
         renderCapabilities(ACCESS_KEY);
         await selectPlaywrightChrome(user);
@@ -182,6 +200,10 @@ describe("Capabilities Playwright Create Session", () => {
         await user.type(screen.getByTestId("caps-playwright-session-name"), "PW panel");
         const headless = screen.getByTestId("caps-playwright-headless");
         await user.click(within(headless).getByRole("button", { name: "true" }));
+        await user.clear(screen.getByTestId("caps-playwright-labels"));
+        await user.type(screen.getByTestId("caps-playwright-labels"), "manual=true,team=qa");
+        await user.clear(screen.getByTestId("caps-playwright-video-name"));
+        await user.type(screen.getByTestId("caps-playwright-video-name"), "pw-panel.mp4");
 
         await user.click(screen.getByTestId("capabilities-create-session"));
 
@@ -189,5 +211,9 @@ describe("Capabilities Playwright Create Session", () => {
         const wsUrl = new URL(openedSockets[0].url);
         expect(wsUrl.searchParams.get("name")).toBe("PW panel");
         expect(wsUrl.searchParams.get("headless")).toBe("true");
+        expect(wsUrl.searchParams.get("screenResolution")).toBe("1920x1080x24");
+        expect(wsUrl.searchParams.get("labels.manual")).toBe("true");
+        expect(wsUrl.searchParams.get("labels.team")).toBe("qa");
+        expect(wsUrl.searchParams.get("videoName")).toBe("pw-panel.mp4");
     });
 });
