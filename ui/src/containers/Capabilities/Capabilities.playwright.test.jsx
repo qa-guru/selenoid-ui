@@ -97,8 +97,8 @@ describe("Capabilities Playwright Create Session", () => {
         renderCapabilities();
         await selectPlaywrightChrome(user);
 
-        // Browser capabilities (proxy) is WebDriver-only — hidden for Playwright.
-        expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
+        // Browser capabilities (proxy) is shared — WebDriver W3C / Playwright socksProxy query.
+        expect(screen.getByTestId("capabilities-browser-panel")).toBeInTheDocument();
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         // Hub HAR toggle lives on the Playwright panel (caps-playwright-enable-har).
         expect(screen.getByTestId("caps-playwright-enable-har")).toBeInTheDocument();
@@ -118,6 +118,7 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("enableLog")).toBe("false");
         expect(wsUrl.searchParams.get("timeZone")).toBe("UTC");
         expect(wsUrl.searchParams.get("labels.manual")).toBe("true");
+        expect(wsUrl.searchParams.get("socksProxy")).toBeNull();
     });
 
     it("uses default accessKey in Playwright WebSocket", async () => {
@@ -168,9 +169,10 @@ describe("Capabilities Playwright Create Session", () => {
         expect(authPass).toHaveValue("test_pass");
         expect(authPass.closest("label")).toHaveAttribute("data-param-id", "authPass");
 
-        // WebDriver-only panels are hidden for Playwright.
+        // WebDriver Remote hub is hidden for Playwright; proxy panel is shared.
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
-        expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
+        expect(screen.getByTestId("capabilities-browser-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("caps-proxy-preset")).toHaveAttribute("data-param-id", "proxyPreset");
         expect(screen.queryByTestId("capabilities-android-panel")).toBeNull();
     });
 
@@ -215,5 +217,18 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("labels.manual")).toBe("true");
         expect(wsUrl.searchParams.get("labels.team")).toBe("qa");
         expect(wsUrl.searchParams.get("videoName")).toBe("pw-panel.mp4");
+    });
+
+    it("puts proxy.qaguru.school preset into Playwright WebSocket socksProxy", async () => {
+        const user = userEvent.setup();
+        renderCapabilities(ACCESS_KEY);
+        await selectPlaywrightChrome(user);
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "proxyPreset" }), "proxy.qaguru.school");
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("socksProxy")).toBe("proxy.qaguru.school:7777");
     });
 });

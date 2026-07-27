@@ -93,4 +93,13 @@ describe("capabilitiesPlaywright", () => {
         expect(parsed.searchParams.get("videoName")).toBeNull();
         expect(parsed.searchParams.get("logName")).toBeNull();
     });
+
+    it("includes socksProxy in the WS query when set", () => {
+        const parsed = new URL(
+            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+                socksProxy: "proxy.qaguru.school:7777",
+            })
+        );
+        expect(parsed.searchParams.get("socksProxy")).toBe("proxy.qaguru.school:7777");
+    });
 });

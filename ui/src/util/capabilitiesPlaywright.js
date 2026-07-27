@@ -13,6 +13,8 @@ export const DEFAULT_PLAYWRIGHT_SESSION = {
     labels: "manual=true",
     videoName: "",
     logName: "",
+    /** host:port or scheme://host:port — hub normalizes to PW_PROXY for launchServer. */
+    socksProxy: "",
     headless: false,
 };
 
@@ -53,8 +55,8 @@ const parseLabelsMap = (raw) => {
  * both flow through here so the terminal mirrors what gets launched.
  *
  * Hub parse: capsFromQuery in playwright.go (name, screenResolution, sessionTimeout,
- * enableVNC/Video/HAR/Log, videoName, logName, harName, timeZone, env.*, labels.*).
- * Proxy is WebDriver W3C-only — not in this map.
+ * enableVNC/Video/HAR/Log, videoName, logName, harName, timeZone, env.*, labels.*,
+ * socksProxy → PW_PROXY for image launchServer / headed VNC).
  */
 export const playwrightSelenoidOptions = (accessKey = "", session = {}) => {
     const s = { ...DEFAULT_PLAYWRIGHT_SESSION, ...session };
@@ -97,6 +99,11 @@ export const playwrightSelenoidOptions = (accessKey = "", session = {}) => {
     }
     if (boolStr(s.enableLog) === "true" && log) {
         options.logName = log;
+    }
+
+    const proxy = String(s.socksProxy || "").trim();
+    if (proxy) {
+        options.socksProxy = proxy;
     }
 
     if (accessKey) {

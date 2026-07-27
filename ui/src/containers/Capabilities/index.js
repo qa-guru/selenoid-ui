@@ -66,11 +66,12 @@ import "@zero-design-system/react/styles.css";
  * | labels           | PlaqueField  | solo   | selenoid:options.labels           |
  * | videoName        | PlaqueField  | duo    | selenoid:options.videoName (cond) |
  * | logName          | PlaqueField  | duo    | selenoid:options.logName (cond)   |
- * | proxyPreset      | PlaqueSelect | solo   | alwaysMatch.proxy (WebDriver only)|
- * | proxyServer      | PlaqueField  | duo    | host half of socksProxy           |
- * | proxyPort        | PlaqueField  | duo    | port half of socksProxy           |
+ * | proxyPreset      | PlaqueSelect | solo   | WD: alwaysMatch.proxy / PW: socksProxy query |
+ * | proxyServer      | PlaqueField  | duo    | host half of socksProxy                      |
+ * | proxyPort        | PlaqueField  | duo    | port half of socksProxy                      |
  *
- * Playwright session panel mirrors Remote hub (+ headless). Proxy is WebDriver-only.
+ * Playwright session panel mirrors Remote hub (+ headless). Proxy panel is shared:
+ * WebDriver → W3C alwaysMatch.proxy; Playwright → socksProxy WS query → hub PW_PROXY.
  *
  * Ban: closeBrowser* / gradle* / junit* / allure* / builder fields.
  *
@@ -575,6 +576,10 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             videoName: sessionOpts.videoName || "",
             logName: sessionOpts.logName || "",
             headless: String(sessionOpts.headless),
+            proxyPreset: sessionOpts.proxyPreset || PROXY_PRESET_OFF,
+            proxyServer: sessionOpts.proxyServer || "",
+            proxyPort: sessionOpts.proxyPort || "",
+            proxyEndpoint: proxyEndpoint || "",
         });
     } else if (family === "android") {
         Object.assign(payload, {
@@ -616,6 +621,11 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
                 `- env: **${payload.env || "—"}**`,
                 `- labels: **${payload.labels || "—"}**`,
                 `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
+                "",
+                "## Browser capabilities",
+                `- proxyPreset: **${payload.proxyPreset}**`,
+                `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
+                `- socksProxy: **${payload.proxyEndpoint || "—"}** (hub → PW_PROXY → launchServer)`,
             ])
             .join("\n");
     }
@@ -1533,6 +1543,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         labels,
         videoName,
         logName,
+        socksProxy: resolveProxyServer(proxyPreset, proxyServer, proxyPort),
         headless: headless === "true",
     };
     const androidSession = {
@@ -2746,7 +2757,7 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
-            {isWebdriver ? (
+            {isWebdriver || isPlaywright ? (
                 <Panel
                     title="Browser capabilities"
                     testId="capabilities-browser-panel"
