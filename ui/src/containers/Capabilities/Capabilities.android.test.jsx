@@ -65,6 +65,9 @@ describe("Capabilities Android device panel", () => {
         expect(screen.getByTestId("caps-android-orientation")).toHaveAttribute("data-param-id", "orientation");
         expect(screen.getByTestId("caps-android-skin")).toHaveAttribute("data-param-id", "skin");
 
+        expect(within(panel).getByTestId("capabilities-caps-auth-user")).toHaveValue("test_user");
+        expect(within(panel).getByTestId("capabilities-caps-auth-pass")).toHaveValue("test_pass");
+
         // Mobile hides WebDriver proxy / Playwright panels.
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();

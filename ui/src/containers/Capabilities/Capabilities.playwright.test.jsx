@@ -143,10 +143,34 @@ describe("Capabilities Playwright Create Session", () => {
         expect(screen.getByTestId("caps-playwright-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
         expect(screen.getByTestId("caps-playwright-headless")).toHaveAttribute("data-param-id", "headless");
 
+        const authUser = within(panel).getByTestId("capabilities-caps-auth-user");
+        expect(authUser).toHaveValue("test_user");
+        expect(authUser.closest("label")).toHaveAttribute("data-param-id", "authUser");
+        const authPass = within(panel).getByTestId("capabilities-caps-auth-pass");
+        expect(authPass).toHaveValue("test_pass");
+        expect(authPass.closest("label")).toHaveAttribute("data-param-id", "authPass");
+
         // WebDriver-only panels are hidden for Playwright.
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-browser-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-android-panel")).toBeNull();
+    });
+
+    it("uses edited authUser/authPass as Playwright WebSocket accessKey", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+        await selectPlaywrightChrome(user);
+
+        await user.clear(screen.getByTestId("capabilities-caps-auth-user"));
+        await user.type(screen.getByTestId("capabilities-caps-auth-user"), "pw_user");
+        await user.clear(screen.getByTestId("capabilities-caps-auth-pass"));
+        await user.type(screen.getByTestId("capabilities-caps-auth-pass"), "pw_pass");
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("accessKey")).toBe("pw_user:pw_pass");
     });
 
     it("mirrors Playwright panel options (name, headless) into the Create Session WebSocket query", async () => {

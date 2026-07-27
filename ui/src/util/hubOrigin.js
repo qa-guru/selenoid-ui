@@ -1,3 +1,5 @@
+import { parseAccessKey } from "../config/hubAuth";
+
 /** Internal hub hostnames from selenoid-ui `-webdriver-uri` / docker links — not browser-reachable. */
 export const INTERNAL_HUB_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "selenoid"]);
 
@@ -60,21 +62,9 @@ export function hubRemoteUrl(origin, pageOrigin) {
     return `${base}/wd/hub`;
 }
 
-function parseAuthToken(token) {
-    const raw = String(token || "").trim();
-    if (!raw) {
-        return null;
-    }
-    const idx = raw.indexOf(":");
-    if (idx <= 0) {
-        return null;
-    }
-    return { user: raw.slice(0, idx), pass: raw.slice(idx + 1) };
-}
-
 export function hubSessionUrl(origin, authToken, pageOrigin) {
     const base = hubRemoteUrl(origin, pageOrigin);
-    const creds = parseAuthToken(authToken);
+    const creds = parseAccessKey(authToken);
     if (!creds) {
         return base;
     }

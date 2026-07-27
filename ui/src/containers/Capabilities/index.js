@@ -18,7 +18,15 @@ import {
 } from "../../util/capabilitiesLogic";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
-import { defaultHubAuthPass, defaultHubAuthUser } from "../../config/hubAuth";
+import {
+    defaultHubAuthPass,
+    defaultHubAuthUser,
+    fieldsFromAccessKey,
+    formatAccessKey,
+    hubAuthCurlFlag,
+    hubFetchInit,
+    primeHubAuth,
+} from "../../config/hubAuth";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -365,76 +373,19 @@ const persistVectorRegistry = (registry) => {
     }
 };
 
-const parseAuthToken = (token) => {
-    const raw = String(token || "").trim();
-    if (!raw) {
-        return null;
-    }
-    const idx = raw.indexOf(":");
-    if (idx <= 0) {
-        return null;
-    }
-    return { user: raw.slice(0, idx), pass: raw.slice(idx + 1) };
-};
-
-const formatHubAuthToken = (user, pass) => {
-    const authUser = String(user || "").trim();
-    if (!authUser) {
-        return "";
-    }
-    return `${authUser}:${String(pass ?? "")}`;
-};
-
 const migrateHubAuthSnap = (snap) => {
     const next = { ...snap };
     if (next.hubAuthToken && !next.accessKey) {
         next.accessKey = next.hubAuthToken;
     }
     if (!next.accessKey && (next.hubAuthUser || next.hubAuthPass != null)) {
-        next.accessKey = formatHubAuthToken(next.hubAuthUser, next.hubAuthPass);
+        next.accessKey = formatAccessKey(next.hubAuthUser, next.hubAuthPass);
     }
     delete next.hubAuthToken;
     delete next.hubAuthUser;
     delete next.hubAuthPass;
     return next;
 };
-
-const accessKeyFromFields = (user, pass) => formatHubAuthToken(user, pass);
-
-const fieldsFromAccessKey = (accessKey) => {
-    const parsed = parseAuthToken(accessKey);
-    return {
-        authUser: parsed?.user || defaultHubAuthUser(),
-        authPass: parsed?.pass ?? defaultHubAuthPass(),
-    };
-};
-
-const hubAuthHeaders = (authToken) => {
-    const creds = parseAuthToken(authToken);
-    if (!creds || typeof btoa !== "function") {
-        return {};
-    }
-    return { Authorization: `Basic ${btoa(`${creds.user}:${creds.pass}`)}` };
-};
-
-const shellQuote = (value) => String(value).replace(/'/g, "'\\''");
-
-const hubAuthCurlFlag = (authToken) => {
-    const creds = parseAuthToken(authToken);
-    if (!creds) {
-        return "";
-    }
-    return `-u '${shellQuote(`${creds.user}:${creds.pass}`)}' `;
-};
-
-const hubFetchInit = (authToken, init = {}) => ({
-    ...init,
-    credentials: "omit",
-    headers: {
-        ...(init.headers || {}),
-        ...hubAuthHeaders(authToken),
-    },
-});
 
 const javaSelenoidOptionsBlock = (selenoidOptions) => {
     const entries = Object.entries(selenoidOptions)
@@ -503,18 +454,6 @@ const rustSelenoidOptionsBlock = (selenoidOptions) => {
         .map(([key, value]) => `        ("${key}".to_string(), "${value}".to_string()),`)
         .join("\n");
     return `[\n${entries}\n    ]`;
-};
-
-const primeHubAuth = (authToken) => {
-    const headers = hubAuthHeaders(authToken);
-    if (!headers.Authorization) {
-        return Promise.resolve();
-    }
-    return fetch("/wd/hub/status", {
-        method: "GET",
-        headers,
-        credentials: "omit",
-    });
 };
 
 const DEFAULT_SESSION_OPTS = {
@@ -601,7 +540,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         browserVersion: version || "",
         protocol: family,
         remoteUrl,
-        accessKey: accessKeyFromFields(sessionOpts.authUser, sessionOpts.authPass),
+        accessKey: formatAccessKey(sessionOpts.authUser, sessionOpts.authPass),
         sessionTimeout: sessionOpts.sessionTimeout,
         name: sessionOpts.name,
         enableVnc: String(sessionOpts.enableVnc),
@@ -665,7 +604,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             .concat([
                 "## Android device",
                 `- remoteUrl: \`${remoteUrl}\``,
-                `- accessKey: \`${accessKeyFromFields(sessionOpts.authUser, sessionOpts.authPass)}\``,
+                `- accessKey: \`${formatAccessKey(sessionOpts.authUser, sessionOpts.authPass)}\``,
                 `- name: **${sessionOpts.name}**`,
                 `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
                 `- enableVnc / enableVideo: **${payload.enableVnc}** / **${payload.enableVideo}**`,
@@ -683,7 +622,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         .concat([
             "## Remote hub",
             `- remoteUrl: \`${remoteUrl}\``,
-            `- accessKey: \`${accessKeyFromFields(sessionOpts.authUser, sessionOpts.authPass)}\``,
+            `- accessKey: \`${formatAccessKey(sessionOpts.authUser, sessionOpts.authPass)}\``,
             `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
             `- name: **${sessionOpts.name}**`,
             `- screenResolution: **${sessionOpts.screenResolution}**`,
@@ -844,7 +783,7 @@ const code = (browser = "UNKNOWN", version = "", origin = "", session = {}) => {
         proxyServer: customProxyHost = DEFAULT_SESSION_OPTS.proxyServer,
         proxyPort: customProxyPort = DEFAULT_SESSION_OPTS.proxyPort,
     } = session;
-    const accessKey = accessKeyFromFields(authUser, authPass);
+    const accessKey = formatAccessKey(authUser, authPass);
     const hubUrl = hubSessionUrl(origin, accessKey);
     const hubSessionEndpoint = `${hubBase}/wd/hub/session`;
     const proxyServer = resolveProxyServer(proxyPreset, customProxyHost, customProxyPort);
@@ -1402,7 +1341,7 @@ const androidCode = (version = "", origin = "", session = {}, android = {}) => {
         enableVnc = DEFAULT_SESSION_OPTS.enableVnc,
         enableVideo = DEFAULT_SESSION_OPTS.enableVideo,
     } = session;
-    const accessKey = accessKeyFromFields(authUser, authPass);
+    const accessKey = formatAccessKey(authUser, authPass);
     const hubUrl = hubSessionUrl(origin, accessKey);
     const hubSessionEndpoint = `${hubBase}/wd/hub/session`;
     const {
@@ -1536,7 +1475,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         registryRef.current = loadVectorRegistry();
     }
 
-    const accessKey = accessKeyFromFields(authUser, authPass);
+    const accessKey = formatAccessKey(authUser, authPass);
 
     const available = [].concat(
         ...Object.keys(browsers).map((name) =>
@@ -1735,7 +1674,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     const resetCaps = () => {
         applyCapsSnap({
-            accessKey: accessKeyFromFields(defaultHubAuthUser(), defaultHubAuthPass()),
+            accessKey: formatAccessKey(defaultHubAuthUser(), defaultHubAuthPass()),
             browserValue: "",
             sessionTimeout: DEFAULT_SESSION_OPTS.sessionTimeout,
             sessionName: DEFAULT_SESSION_OPTS.name,
@@ -2269,7 +2208,7 @@ const Launch = ({
     const [loading, onLoading] = useState(false);
     const [error, onError] = useState("");
     const remoteUrl = hubRemoteUrl(origin);
-    const accessKey = accessKeyFromFields(authUser, authPass);
+    const accessKey = formatAccessKey(authUser, authPass);
     const playwrightSocket = useRef(null);
     // Config stacks (Remote hub / Playwright / Android) share the magnet; iOS placeholder has no fields.
     usePlaqueFieldMagnet({ enabled: Boolean(name) && !isIos });
@@ -2552,7 +2491,7 @@ const Launch = ({
     const proxyOff = proxyPreset === PROXY_PRESET_OFF;
     const proxyPresetLocked = proxyPreset === PROXY_PRESET_QA_GURU;
 
-    const renderWebdriverAuthRow = () => (
+    const renderAuthRow = () => (
         <PlaqueFieldGrid layout="duo" aria-label="Hub authentication" data-testid="capabilities-caps-auth">
             <PlaqueField
                 label="authUser"
@@ -2612,7 +2551,7 @@ const Launch = ({
                             />
                         </PlaqueFieldGrid>
 
-                        {renderWebdriverAuthRow()}
+                        {renderAuthRow()}
 
                         <PlaqueFieldGrid
                             layout="duo"
@@ -2865,6 +2804,7 @@ const Launch = ({
                                 data-testid="caps-playwright-remote-url"
                             />
                         </PlaqueFieldGrid>
+                        {renderAuthRow()}
                         <PlaqueFieldGrid
                             layout="duo"
                             aria-label="Session identity"
@@ -2968,6 +2908,7 @@ const Launch = ({
                                 data-testid="caps-android-remote-url"
                             />
                         </PlaqueFieldGrid>
+                        {renderAuthRow()}
                         <PlaqueFieldGrid
                             layout="duo"
                             aria-label="Session identity"
