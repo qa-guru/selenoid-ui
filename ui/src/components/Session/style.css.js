@@ -41,7 +41,8 @@ export const StyledSession = styled.div`
         box-sizing: border-box;
         width: calc(100% - 2 * var(--wt-post-gap, 14px));
         max-width: 1000px;
-        margin: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
+        /* Bottom was 0 → Session info stuck to VNC/Video; keep mosaic gutter. */
+        margin: var(--wt-post-gap, 14px);
         /* Content height only — Panel default flex:1 ate the viewport and
            clipped VNC + Log. Same override as Capabilities .setup .panel. */
         flex: 0 0 auto;
