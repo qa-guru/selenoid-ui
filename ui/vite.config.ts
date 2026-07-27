@@ -162,6 +162,8 @@ export default defineConfig({
     },
     test: {
         env: {
+            VITE_HUB_AUTH_USER: "test_user",
+            VITE_HUB_AUTH_PASS: "test_pass",
             VITE_HUB_ACCESS_KEY: "test_user:test_pass",
         },
         environment: "jsdom",

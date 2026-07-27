@@ -5,7 +5,6 @@ import {
     defaultHubAuthPass,
     defaultHubAuthUser,
     defaultPlaywrightAccessKey,
-    fieldsFromAccessKey,
     formatAccessKey,
     hubAuthCurlFlag,
     hubAuthHeaders,
@@ -13,21 +12,32 @@ import {
 } from "./hubAuth";
 
 describe("hubAuth", () => {
-    it("reads VITE_HUB_ACCESS_KEY and derives user/pass + Playwright accessKey", () => {
-        expect(defaultHubAccessKey()).toBe("test_user:test_pass");
-        expect(defaultHubAuthUser()).toBe("test_user");
-        expect(defaultHubAuthPass()).toBe("test_pass");
-        expect(defaultPlaywrightAccessKey()).toBe("test_user:test_pass");
+    it("reads three independent env vars (no cross-derive)", () => {
+        vi.stubEnv("VITE_HUB_ACCESS_KEY", "pw_token");
+        vi.stubEnv("VITE_HUB_AUTH_USER", "wd_user");
+        vi.stubEnv("VITE_HUB_AUTH_PASS", "wd_pass");
+        expect(defaultHubAccessKey()).toBe("pw_token");
+        expect(defaultPlaywrightAccessKey()).toBe("pw_token");
+        expect(defaultHubAuthUser()).toBe("wd_user");
+        expect(defaultHubAuthPass()).toBe("wd_pass");
     });
 
-    it("falls back to separate VITE_HUB_AUTH_* when access key is unset", () => {
+    it("does not derive Playwright accessKey from AUTH_USER/PASS", () => {
         vi.stubEnv("VITE_HUB_ACCESS_KEY", "");
         vi.stubEnv("VITE_HUB_AUTH_USER", "solo_user");
         vi.stubEnv("VITE_HUB_AUTH_PASS", "solo_pass");
-        expect(defaultHubAccessKey()).toBe("");
         expect(defaultHubAuthUser()).toBe("solo_user");
         expect(defaultHubAuthPass()).toBe("solo_pass");
-        expect(defaultPlaywrightAccessKey()).toBe("solo_user:solo_pass");
+        expect(defaultPlaywrightAccessKey()).toBe("");
+    });
+
+    it("does not derive AUTH_USER/PASS from ACCESS_KEY", () => {
+        vi.stubEnv("VITE_HUB_ACCESS_KEY", "from_key:secret");
+        vi.stubEnv("VITE_HUB_AUTH_USER", "");
+        vi.stubEnv("VITE_HUB_AUTH_PASS", "");
+        expect(defaultHubAccessKey()).toBe("from_key:secret");
+        expect(defaultHubAuthUser()).toBe("");
+        expect(defaultHubAuthPass()).toBe("");
     });
 
     it("returns empty strings when env is unset", () => {
@@ -39,7 +49,7 @@ describe("hubAuth", () => {
         expect(defaultPlaywrightAccessKey()).toBe("");
     });
 
-    it("parses and formats accessKey tokens", () => {
+    it("parses and formats WD Basic Auth tokens", () => {
         expect(parseAccessKey("u:p:extra")).toEqual({ user: "u", pass: "p:extra" });
         expect(parseAccessKey("nouser")).toBeNull();
         expect(parseAccessKey(":pass")).toBeNull();
@@ -48,14 +58,6 @@ describe("hubAuth", () => {
         expect(formatAccessKey("  bob  ", "")).toBe("bob:");
         expect(formatAccessKey("", "x")).toBe("");
         expect(formatAccessKey("   ", "x")).toBe("");
-    });
-
-    it("fieldsFromAccessKey falls back to defaults for missing parts", () => {
-        expect(fieldsFromAccessKey("guest:secret")).toEqual({ authUser: "guest", authPass: "secret" });
-        expect(fieldsFromAccessKey("")).toEqual({
-            authUser: defaultHubAuthUser(),
-            authPass: defaultHubAuthPass(),
-        });
     });
 
     it("builds Basic Auth header and curl -u flag", () => {

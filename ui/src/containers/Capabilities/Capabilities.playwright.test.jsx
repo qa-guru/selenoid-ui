@@ -75,7 +75,7 @@ describe("Capabilities Playwright Create Session", () => {
         vi.restoreAllMocks();
     });
 
-    it("shows accessKey in Playwright curl snippet from default auth fields", async () => {
+    it("shows accessKey in Playwright curl snippet from default accessKey", async () => {
         const user = userEvent.setup();
         renderCapabilities();
         await selectPlaywrightChrome(user);
@@ -162,12 +162,11 @@ describe("Capabilities Playwright Create Session", () => {
             "videoName"
         );
 
-        const authUser = within(panel).getByTestId("capabilities-caps-auth-user");
-        expect(authUser).toHaveValue("test_user");
-        expect(authUser.closest("label")).toHaveAttribute("data-param-id", "authUser");
-        const authPass = within(panel).getByTestId("capabilities-caps-auth-pass");
-        expect(authPass).toHaveValue("test_pass");
-        expect(authPass.closest("label")).toHaveAttribute("data-param-id", "authPass");
+        const accessKeyField = within(panel).getByTestId("capabilities-caps-access-key-field");
+        expect(accessKeyField).toHaveValue(ACCESS_KEY);
+        expect(accessKeyField.closest("label")).toHaveAttribute("data-param-id", "accessKey");
+        expect(within(panel).queryByTestId("capabilities-caps-auth-user")).toBeNull();
+        expect(within(panel).queryByTestId("capabilities-caps-auth-pass")).toBeNull();
 
         // WebDriver Remote hub is hidden for Playwright; proxy panel is below session (WD order).
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
@@ -179,21 +178,20 @@ describe("Capabilities Playwright Create Session", () => {
         expect(screen.queryByTestId("capabilities-android-panel")).toBeNull();
     });
 
-    it("uses edited authUser/authPass as Playwright WebSocket accessKey", async () => {
+    it("uses edited accessKey in Playwright WebSocket query", async () => {
         const user = userEvent.setup();
         renderCapabilities();
         await selectPlaywrightChrome(user);
 
-        await user.clear(screen.getByTestId("capabilities-caps-auth-user"));
-        await user.type(screen.getByTestId("capabilities-caps-auth-user"), "pw_user");
-        await user.clear(screen.getByTestId("capabilities-caps-auth-pass"));
-        await user.type(screen.getByTestId("capabilities-caps-auth-pass"), "pw_pass");
+        const accessKeyField = screen.getByTestId("capabilities-caps-access-key-field");
+        await user.clear(accessKeyField);
+        await user.type(accessKeyField, "pw_token_only");
 
         await user.click(screen.getByTestId("capabilities-create-session"));
 
         await waitFor(() => expect(openedSockets).toHaveLength(1));
         const wsUrl = new URL(openedSockets[0].url);
-        expect(wsUrl.searchParams.get("accessKey")).toBe("pw_user:pw_pass");
+        expect(wsUrl.searchParams.get("accessKey")).toBe("pw_token_only");
     });
 
     it("mirrors Playwright panel options (name, headless, resolution, labels) into the Create Session WebSocket query", async () => {

@@ -125,10 +125,10 @@ yarn --cwd ui test    # 22 tests (unit + component)
 yarn --cwd ui build
 ```
 
-**Guest hub auth (New Session + Playwright `accessKey`):** не хранится в git. CI подставляет при `yarn build`:
+**Guest hub auth (New Session):** не хранится в git. CI подставляет три независимые переменные при `yarn build` (без cross-derive в UI):
 
-- **`HUB_ACCESS_KEY`** (preferred) → `VITE_HUB_ACCESS_KEY` — один токен `user:pass` (как legacy `-access-key` / Playwright WS query);
-- или отдельно **`HUB_AUTH_USER`** + **`HUB_AUTH_PASS`**.
+- **`HUB_AUTH_USER`** / **`HUB_AUTH_PASS`** → `VITE_HUB_AUTH_*` — WebDriver Basic Auth (duo `authUser` / `authPass`);
+- **`HUB_ACCESS_KEY`** → `VITE_HUB_ACCESS_KEY` — Playwright `?accessKey=` (одно поле).
 
 Локально — [`ui/.env.example`](ui/.env.example) → `ui/.env.local`, либо пусто (поля auth вручную).
 

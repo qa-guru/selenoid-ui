@@ -1,8 +1,16 @@
-/** Hub guest auth SSOT — UI duo authUser/authPass; wire formats Basic Auth + Playwright ?accessKey=. */
+/**
+ * Hub guest auth SSOT.
+ *
+ * Three independent build-time vars (no cross-derive):
+ *   VITE_HUB_AUTH_USER / VITE_HUB_AUTH_PASS — WebDriver Basic Auth duo
+ *   VITE_HUB_ACCESS_KEY — Playwright ?accessKey= (single opaque token)
+ *
+ * formatAccessKey joins user:pass only for WD Basic Auth / curl -u wire form.
+ */
 
 export type AccessKeyCreds = { user: string; pass: string };
 
-/** Parse hub accessKey / Playwright ?accessKey= token (`user:pass`). */
+/** Parse Basic Auth / legacy `user:pass` token. */
 export const parseAccessKey = (token: unknown): AccessKeyCreds | null => {
     const raw = String(token || "").trim();
     if (!raw) {
@@ -15,7 +23,7 @@ export const parseAccessKey = (token: unknown): AccessKeyCreds | null => {
     return { user: raw.slice(0, idx), pass: raw.slice(idx + 1) };
 };
 
-/** Wire token for Playwright ?accessKey= and agent payload (empty user → ""). */
+/** WD Basic Auth wire token (`user:pass`). Empty user → "". Not used for Playwright. */
 export const formatAccessKey = (user: unknown, pass: unknown): string => {
     const authUser = String(user || "").trim();
     if (!authUser) {
@@ -24,45 +32,17 @@ export const formatAccessKey = (user: unknown, pass: unknown): string => {
     return `${authUser}:${String(pass ?? "")}`;
 };
 
-/**
- * Build-time hub defaults (CI / ui/.env.local). Empty = manual entry in Capabilities.
- * VITE_HUB_ACCESS_KEY (`user:pass`) wins over separate VITE_HUB_AUTH_USER/PASS.
- */
-export const defaultHubAccessKey = (): string => import.meta.env.VITE_HUB_ACCESS_KEY ?? "";
+/** Playwright ?accessKey= default — VITE_HUB_ACCESS_KEY only (never derived from AUTH_*). */
+export const defaultHubAccessKey = (): string => String(import.meta.env.VITE_HUB_ACCESS_KEY ?? "").trim();
 
-export const defaultHubAuthUser = (): string => {
-    const parsed = parseAccessKey(defaultHubAccessKey());
-    if (parsed?.user) {
-        return parsed.user;
-    }
-    return import.meta.env.VITE_HUB_AUTH_USER ?? "";
-};
+/** Alias — same bake-time Playwright token. */
+export const defaultPlaywrightAccessKey = (): string => defaultHubAccessKey();
 
-export const defaultHubAuthPass = (): string => {
-    const parsed = parseAccessKey(defaultHubAccessKey());
-    if (parsed) {
-        return parsed.pass;
-    }
-    return import.meta.env.VITE_HUB_AUTH_PASS ?? "";
-};
+/** WebDriver authUser default — VITE_HUB_AUTH_USER only. */
+export const defaultHubAuthUser = (): string => String(import.meta.env.VITE_HUB_AUTH_USER ?? "").trim();
 
-/** Same guest token as Basic Auth — preferred baked key, else user:pass from AUTH_* fields. */
-export const defaultPlaywrightAccessKey = (): string => {
-    const key = defaultHubAccessKey();
-    if (key) {
-        return key;
-    }
-    return formatAccessKey(defaultHubAuthUser(), defaultHubAuthPass());
-};
-
-/** Split accessKey into form fields; missing parts fall back to build-time defaults. */
-export const fieldsFromAccessKey = (accessKey: unknown): { authUser: string; authPass: string } => {
-    const parsed = parseAccessKey(accessKey);
-    return {
-        authUser: parsed?.user || defaultHubAuthUser(),
-        authPass: parsed?.pass ?? defaultHubAuthPass(),
-    };
-};
+/** WebDriver authPass default — VITE_HUB_AUTH_PASS only. */
+export const defaultHubAuthPass = (): string => String(import.meta.env.VITE_HUB_AUTH_PASS ?? "").trim();
 
 export const hubAuthHeaders = (authToken: unknown): Record<string, string> => {
     const creds = parseAccessKey(authToken);

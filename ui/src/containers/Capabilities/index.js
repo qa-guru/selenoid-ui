@@ -19,12 +19,13 @@ import {
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
 import {
+    defaultHubAccessKey,
     defaultHubAuthPass,
     defaultHubAuthUser,
-    fieldsFromAccessKey,
     formatAccessKey,
     hubAuthCurlFlag,
     hubFetchInit,
+    parseAccessKey,
     primeHubAuth,
 } from "../../config/hubAuth";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
@@ -51,8 +52,9 @@ import "@zero-design-system/react/styles.css?v=segfloat2";
  * | option           | wrapper      | layout | caps key                          |
  * |------------------|--------------|--------|-----------------------------------|
  * | remoteUrl        | PlaqueField  | solo   | — (readonly display)              |
- * | authUser         | PlaqueField  | duo    | — (accessKey user)                |
- * | authPass         | PlaqueField  | duo    | — (accessKey password)            |
+ * | authUser         | PlaqueField  | duo    | — WD Basic Auth user              |
+ * | authPass         | PlaqueField  | duo    | — WD Basic Auth password          |
+ * | accessKey        | PlaqueField  | solo   | — PW ?accessKey= (Playwright only)|
  * | sessionTimeout   | PlaqueSelect | duo    | selenoid:options.sessionTimeout   |
  * | name             | PlaqueField  | duo    | selenoid:options.name             |
  * | screenResolution | PlaqueSelect | solo   | selenoid:options.screenResolution |
@@ -382,8 +384,23 @@ const migrateHubAuthSnap = (snap) => {
     if (next.hubAuthToken && !next.accessKey) {
         next.accessKey = next.hubAuthToken;
     }
-    if (!next.accessKey && (next.hubAuthUser || next.hubAuthPass != null)) {
-        next.accessKey = formatAccessKey(next.hubAuthUser, next.hubAuthPass);
+    if (next.hubAuthUser != null && next.authUser == null) {
+        next.authUser = next.hubAuthUser;
+    }
+    if (next.hubAuthPass != null && next.authPass == null) {
+        next.authPass = next.hubAuthPass;
+    }
+    // Legacy vectors stored only joined accessKey — seed WD duo if missing.
+    if (next.accessKey && (next.authUser == null || next.authPass == null)) {
+        const parsed = parseAccessKey(next.accessKey);
+        if (parsed) {
+            if (next.authUser == null) {
+                next.authUser = parsed.user;
+            }
+            if (next.authPass == null) {
+                next.authPass = parsed.pass;
+            }
+        }
     }
     delete next.hubAuthToken;
     delete next.hubAuthUser;
@@ -463,6 +480,7 @@ const rustSelenoidOptionsBlock = (selenoidOptions) => {
 const DEFAULT_SESSION_OPTS = {
     authUser: defaultHubAuthUser(),
     authPass: defaultHubAuthPass(),
+    accessKey: defaultHubAccessKey(),
     sessionTimeout: "60m",
     name: "Manual session",
     screenResolution: "1920x1080x24",
@@ -538,13 +556,14 @@ const orderedLangKeys = (caps) => {
 const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessionOpts, remoteUrl }) => {
     const browserLabel = name ? `${name}${version ? ` ${version}` : ""}` : "—";
     const proxyEndpoint = resolveProxyServer(sessionOpts.proxyPreset, sessionOpts.proxyServer, sessionOpts.proxyPort);
+    const wdBasicAuth = formatAccessKey(sessionOpts.authUser, sessionOpts.authPass);
     const payload = {
         vector: vectorId,
         browser: name || "",
         browserVersion: version || "",
         protocol: family,
         remoteUrl,
-        accessKey: formatAccessKey(sessionOpts.authUser, sessionOpts.authPass),
+        accessKey: family === "playwright" ? sessionOpts.accessKey || "" : wdBasicAuth,
         sessionTimeout: sessionOpts.sessionTimeout,
         name: sessionOpts.name,
         enableVnc: String(sessionOpts.enableVnc),
@@ -610,7 +629,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             .concat([
                 "## Playwright session",
                 `- remoteUrl: \`${remoteUrl}\``,
-                `- accessKey: \`${formatAccessKey(sessionOpts.authUser, sessionOpts.authPass)}\``,
+                `- accessKey: \`${sessionOpts.accessKey || ""}\``,
                 `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
                 `- name: **${sessionOpts.name}**`,
                 `- screenResolution: **${sessionOpts.screenResolution}**`,
@@ -634,7 +653,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             .concat([
                 "## Android device",
                 `- remoteUrl: \`${remoteUrl}\``,
-                `- accessKey: \`${formatAccessKey(sessionOpts.authUser, sessionOpts.authPass)}\``,
+                `- authUser / authPass: \`${sessionOpts.authUser || ""}\` / \`${sessionOpts.authPass || ""}\``,
                 `- name: **${sessionOpts.name}**`,
                 `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
                 `- enableVnc / enableVideo: **${payload.enableVnc}** / **${payload.enableVideo}**`,
@@ -652,7 +671,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         .concat([
             "## Remote hub",
             `- remoteUrl: \`${remoteUrl}\``,
-            `- accessKey: \`${formatAccessKey(sessionOpts.authUser, sessionOpts.authPass)}\``,
+            `- authUser / authPass: \`${sessionOpts.authUser || ""}\` / \`${sessionOpts.authPass || ""}\``,
             `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
             `- name: **${sessionOpts.name}**`,
             `- screenResolution: **${sessionOpts.screenResolution}**`,
@@ -1473,6 +1492,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const [outputTab, setOutputTab] = useState("gradle");
     const [authUser, setAuthUser] = useState(() => DEFAULT_SESSION_OPTS.authUser);
     const [authPass, setAuthPass] = useState(() => DEFAULT_SESSION_OPTS.authPass);
+    const [accessKey, setAccessKey] = useState(() => DEFAULT_SESSION_OPTS.accessKey);
     // Session options live here so Terminal snippets mirror Remote hub (createSession SSOT).
     const [enableVnc, setEnableVnc] = useState("true");
     const [enableVideo, setEnableVideo] = useState("true");
@@ -1504,8 +1524,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     if (registryRef.current === null) {
         registryRef.current = loadVectorRegistry();
     }
-
-    const accessKey = formatAccessKey(authUser, authPass);
 
     const available = [].concat(
         ...Object.keys(browsers).map((name) =>
@@ -1564,6 +1582,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const sessionOpts = {
         authUser,
         authPass,
+        accessKey,
         sessionTimeout,
         name: sessionName,
         screenResolution,
@@ -1587,6 +1606,8 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         androidSkin,
     };
     const capsSnap = {
+        authUser,
+        authPass,
         accessKey,
         browserValue: value || "",
         sessionTimeout,
@@ -1670,9 +1691,9 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         remember(next);
         setSessionTimeout(next.sessionTimeout);
         setSessionName(next.sessionName);
-        const fields = fieldsFromAccessKey(next.accessKey);
-        setAuthUser(fields.authUser);
-        setAuthPass(fields.authPass);
+        setAuthUser(next.authUser ?? DEFAULT_SESSION_OPTS.authUser);
+        setAuthPass(next.authPass ?? DEFAULT_SESSION_OPTS.authPass);
+        setAccessKey(next.accessKey ?? DEFAULT_SESSION_OPTS.accessKey);
         setScreenResolution(next.screenResolution);
         setEnableVnc(next.enableVnc);
         setEnableVideo(next.enableVideo);
@@ -1712,7 +1733,9 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     const resetCaps = () => {
         applyCapsSnap({
-            accessKey: formatAccessKey(defaultHubAuthUser(), defaultHubAuthPass()),
+            authUser: DEFAULT_SESSION_OPTS.authUser,
+            authPass: DEFAULT_SESSION_OPTS.authPass,
+            accessKey: DEFAULT_SESSION_OPTS.accessKey,
             browserValue: "",
             sessionTimeout: DEFAULT_SESSION_OPTS.sessionTimeout,
             sessionName: DEFAULT_SESSION_OPTS.name,
@@ -2058,6 +2081,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                             touchOptions();
                             setAuthPass(v);
                         }}
+                        accessKey={accessKey}
+                        setAccessKey={(v) => {
+                            touchOptions();
+                            setAccessKey(v);
+                        }}
                     />
                 </div>
                 <div className="code-panel">
@@ -2242,11 +2270,14 @@ const Launch = ({
     setAuthUser,
     authPass,
     setAuthPass,
+    accessKey,
+    setAccessKey,
 }) => {
     const [loading, onLoading] = useState(false);
     const [error, onError] = useState("");
     const remoteUrl = hubRemoteUrl(origin);
-    const accessKey = formatAccessKey(authUser, authPass);
+    /** WD / Android Basic Auth wire token — never used to invent Playwright accessKey. */
+    const wdAuthToken = formatAccessKey(authUser, authPass);
     const playwrightSocket = useRef(null);
     // Config stacks (Remote hub / Playwright / Android) share the magnet; iOS placeholder has no fields.
     usePlaqueFieldMagnet({ enabled: Boolean(name) && !isIos });
@@ -2277,10 +2308,10 @@ const Launch = ({
             const androidController = new AbortController();
             const androidTimeout = setTimeout(() => androidController.abort(), 300000);
             try {
-                await primeHubAuth(accessKey);
+                await primeHubAuth(wdAuthToken);
                 const response = await fetch(
                     "/wd/hub/session",
-                    hubFetchInit(accessKey, {
+                    hubFetchInit(wdAuthToken, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         signal: androidController.signal,
@@ -2369,10 +2400,10 @@ const Launch = ({
         const timeout = setTimeout(() => controller.abort(), 300000);
 
         try {
-            await primeHubAuth(accessKey);
+            await primeHubAuth(wdAuthToken);
             const response = await fetch(
                 "/wd/hub/session",
-                hubFetchInit(accessKey, {
+                hubFetchInit(wdAuthToken, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -2432,6 +2463,7 @@ const Launch = ({
         proxyPort,
         authUser,
         authPass,
+        wdAuthToken,
     ]);
 
     const createPlaywrightSession = () => {
@@ -2444,6 +2476,8 @@ const Launch = ({
 
         const existingIds = new Set(Object.keys(sessions || {}));
         const wsUrl = playwrightEndpoint(name, version, accessKey, pwSession);
+        // Prime proxy with WD Basic Auth when available; else try accessKey if it is user:pass.
+        const primeToken = wdAuthToken || (parseAccessKey(accessKey) ? accessKey : "");
         let navigated = false;
         let eventSource;
 
@@ -2507,7 +2541,7 @@ const Launch = ({
             };
         };
 
-        primeHubAuth(accessKey)
+        primeHubAuth(primeToken)
             .then(() => openWebSocket())
             .catch((err) => {
                 console.error("Playwright auth failed", err);
@@ -2529,7 +2563,7 @@ const Launch = ({
     const proxyOff = proxyPreset === PROXY_PRESET_OFF;
     const proxyPresetLocked = proxyPreset === PROXY_PRESET_QA_GURU;
 
-    const renderAuthRow = () => (
+    const renderWdAuthRow = () => (
         <PlaqueFieldGrid layout="duo" aria-label="Hub authentication" data-testid="capabilities-caps-auth">
             <PlaqueField
                 label="authUser"
@@ -2550,6 +2584,21 @@ const Launch = ({
                 onChange={(e) => setAuthPass(e.target.value)}
                 autoComplete="current-password"
                 data-testid="capabilities-caps-auth-pass"
+            />
+        </PlaqueFieldGrid>
+    );
+
+    const renderPlaywrightAccessKey = () => (
+        <PlaqueFieldGrid layout="solo" aria-label="Playwright access key" data-testid="capabilities-caps-access-key">
+            <PlaqueField
+                label="accessKey"
+                paramId="accessKey"
+                labelVariant="param"
+                type="password"
+                value={accessKey}
+                onChange={(e) => setAccessKey(e.target.value)}
+                autoComplete="off"
+                data-testid="capabilities-caps-access-key-field"
             />
         </PlaqueFieldGrid>
     );
@@ -2589,7 +2638,7 @@ const Launch = ({
                             />
                         </PlaqueFieldGrid>
 
-                        {renderAuthRow()}
+                        {renderWdAuthRow()}
 
                         <PlaqueFieldGrid
                             layout="duo"
@@ -2787,7 +2836,7 @@ const Launch = ({
                                 data-testid="caps-playwright-remote-url"
                             />
                         </PlaqueFieldGrid>
-                        {renderAuthRow()}
+                        {renderPlaywrightAccessKey()}
                         <PlaqueFieldGrid
                             layout="duo"
                             aria-label="Session identity"
@@ -3049,7 +3098,7 @@ const Launch = ({
                                 data-testid="caps-android-remote-url"
                             />
                         </PlaqueFieldGrid>
-                        {renderAuthRow()}
+                        {renderWdAuthRow()}
                         <PlaqueFieldGrid
                             layout="duo"
                             aria-label="Session identity"
