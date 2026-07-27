@@ -310,6 +310,8 @@ html.theme-light {
   content: "";
   display: block;
   clear: both;
+  height: 0;
+  margin-block-start: calc(-1 * var(--plaque-seg-row-gap));
 }
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label,
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__text {
@@ -639,7 +641,8 @@ select.plaque-field__control option {
   min-height: var(--plaque-seg-chip-height);
   height: auto;
   box-sizing: border-box;
-  margin-block: var(--plaque-seg-chip-air);
+  margin-block-start: var(--plaque-seg-chip-air);
+  margin-block-end: calc(var(--plaque-seg-chip-air) + var(--plaque-seg-row-gap));
   margin-left: var(--plaque-seg-gap);
   margin-right: 0;
 }
