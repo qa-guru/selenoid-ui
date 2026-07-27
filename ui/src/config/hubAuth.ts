@@ -1,9 +1,13 @@
 /**
  * Hub guest auth SSOT.
  *
- * Three independent build-time vars (no cross-derive):
+ * Build-time vars:
  *   VITE_HUB_AUTH_USER / VITE_HUB_AUTH_PASS — WebDriver Basic Auth duo
  *   VITE_HUB_ACCESS_KEY — Playwright ?accessKey= (single opaque token)
+ *
+ * When AUTH_* are empty, WD defaults fall back to parsing ACCESS_KEY as
+ * `user:pass` (prod often bakes only HUB_ACCESS_KEY). Playwright never
+ * derives from AUTH_* — ACCESS_KEY only.
  *
  * formatAccessKey joins user:pass only for WD Basic Auth / curl -u wire form.
  */
@@ -38,11 +42,33 @@ export const defaultHubAccessKey = (): string => String(import.meta.env.VITE_HUB
 /** Alias — same bake-time Playwright token. */
 export const defaultPlaywrightAccessKey = (): string => defaultHubAccessKey();
 
-/** WebDriver authUser default — VITE_HUB_AUTH_USER only. */
-export const defaultHubAuthUser = (): string => String(import.meta.env.VITE_HUB_AUTH_USER ?? "").trim();
+/**
+ * WebDriver authUser default — VITE_HUB_AUTH_USER, else parse ACCESS_KEY.
+ * Explicit AUTH_USER wins so duo can differ from the Playwright token.
+ */
+export const defaultHubAuthUser = (): string => {
+    const explicit = String(import.meta.env.VITE_HUB_AUTH_USER ?? "").trim();
+    if (explicit) {
+        return explicit;
+    }
+    return parseAccessKey(defaultHubAccessKey())?.user ?? "";
+};
 
-/** WebDriver authPass default — VITE_HUB_AUTH_PASS only. */
-export const defaultHubAuthPass = (): string => String(import.meta.env.VITE_HUB_AUTH_PASS ?? "").trim();
+/**
+ * WebDriver authPass default — paired with AUTH_USER when that is set;
+ * otherwise parse ACCESS_KEY (same bake-only-ACCESS_KEY prod path).
+ */
+export const defaultHubAuthPass = (): string => {
+    const explicitUser = String(import.meta.env.VITE_HUB_AUTH_USER ?? "").trim();
+    if (explicitUser) {
+        return String(import.meta.env.VITE_HUB_AUTH_PASS ?? "");
+    }
+    const parsed = parseAccessKey(defaultHubAccessKey());
+    if (parsed) {
+        return parsed.pass;
+    }
+    return String(import.meta.env.VITE_HUB_AUTH_PASS ?? "");
+};
 
 export const hubAuthHeaders = (authToken: unknown): Record<string, string> => {
     const creds = parseAccessKey(authToken);

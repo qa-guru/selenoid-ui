@@ -54,7 +54,7 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 | ----------------- | ----------------------------------------------------------------------------------------------- |
 | **GitHub**        | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)                                   |
 | **Docker Hub**    | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui)                             |
-| **Текущий релиз** | **v3.0.11** — [docs/RELEASE_v3.0.11.md](docs/RELEASE_v3.0.11.md) · `qaguru/selenoid-ui:v3.0.11` |
+| **Текущий релиз** | **v3.0.12** — [docs/RELEASE_v3.0.12.md](docs/RELEASE_v3.0.12.md) · `qaguru/selenoid-ui:v3.0.12` |
 
 ## Роль в экосистеме
 
@@ -125,10 +125,12 @@ yarn --cwd ui test    # 22 tests (unit + component)
 yarn --cwd ui build
 ```
 
-**Guest hub auth (New Session):** не хранится в git. CI подставляет три независимые переменные при `yarn build` (без cross-derive в UI):
+**Guest hub auth (New Session):** не хранится в git. CI подставляет при `yarn build`:
 
 - **`HUB_AUTH_USER`** / **`HUB_AUTH_PASS`** → `VITE_HUB_AUTH_*` — WebDriver Basic Auth (duo `authUser` / `authPass`);
 - **`HUB_ACCESS_KEY`** → `VITE_HUB_ACCESS_KEY` — Playwright `?accessKey=` (одно поле).
+
+Если `AUTH_*` пусты, WD duo берёт `user:pass` из `ACCESS_KEY` (prod часто печёт только этот secret). Playwright никогда не собирается из `AUTH_*`.
 
 Локально — [`ui/.env.example`](ui/.env.example) → `ui/.env.local`, либо пусто (поля auth вручную).
 

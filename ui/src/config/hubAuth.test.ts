@@ -12,7 +12,7 @@ import {
 } from "./hubAuth";
 
 describe("hubAuth", () => {
-    it("reads three independent env vars (no cross-derive)", () => {
+    it("reads three independent env vars when AUTH_* are set", () => {
         vi.stubEnv("VITE_HUB_ACCESS_KEY", "pw_token");
         vi.stubEnv("VITE_HUB_AUTH_USER", "wd_user");
         vi.stubEnv("VITE_HUB_AUTH_PASS", "wd_pass");
@@ -31,13 +31,23 @@ describe("hubAuth", () => {
         expect(defaultPlaywrightAccessKey()).toBe("");
     });
 
-    it("does not derive AUTH_USER/PASS from ACCESS_KEY", () => {
+    it("falls back WD AUTH_* from ACCESS_KEY when AUTH_USER is empty", () => {
         vi.stubEnv("VITE_HUB_ACCESS_KEY", "from_key:secret");
         vi.stubEnv("VITE_HUB_AUTH_USER", "");
         vi.stubEnv("VITE_HUB_AUTH_PASS", "");
         expect(defaultHubAccessKey()).toBe("from_key:secret");
-        expect(defaultHubAuthUser()).toBe("");
-        expect(defaultHubAuthPass()).toBe("");
+        expect(defaultHubAuthUser()).toBe("from_key");
+        expect(defaultHubAuthPass()).toBe("secret");
+        expect(defaultPlaywrightAccessKey()).toBe("from_key:secret");
+    });
+
+    it("keeps explicit AUTH_* over ACCESS_KEY parse", () => {
+        vi.stubEnv("VITE_HUB_ACCESS_KEY", "from_key:secret");
+        vi.stubEnv("VITE_HUB_AUTH_USER", "wd_only");
+        vi.stubEnv("VITE_HUB_AUTH_PASS", "wd_secret");
+        expect(defaultHubAuthUser()).toBe("wd_only");
+        expect(defaultHubAuthPass()).toBe("wd_secret");
+        expect(defaultPlaywrightAccessKey()).toBe("from_key:secret");
     });
 
     it("returns empty strings when env is unset", () => {
