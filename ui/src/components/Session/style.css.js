@@ -122,6 +122,62 @@ export const StyledSession = styled.div`
         padding: var(--space-8, 30px) var(--space-4, 15px);
         text-align: center;
     }
+
+    /* Same empty-state shell as Sessions / Archive (.no-any inside Panel). */
+    .session-missing-panel {
+        box-sizing: border-box;
+        width: calc(100% - 2 * var(--wt-post-gap, 14px));
+        max-width: 1000px;
+        margin: var(--wt-post-gap, 14px);
+        flex: 0 0 auto;
+    }
+
+    .session-missing-panel__body {
+        padding: 0;
+        min-height: 60px;
+    }
+
+    .no-any {
+        color: var(--color-text, #fff);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3, 10px);
+        font-size: 1.2em;
+        min-height: 60px;
+        padding: 10px var(--space-5, 16px);
+        box-sizing: border-box;
+        white-space: nowrap;
+
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            line-height: 0;
+
+            svg {
+                width: 1.1em;
+                height: 1.1em;
+                display: block;
+            }
+        }
+
+        .nosession-any-text {
+            margin: 0;
+        }
+    }
+
+    .session-missing__back {
+        color: var(--color-accent, #6cb6ff);
+        text-decoration: none;
+        font-size: 0.9em;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
 `;
 
 export const StyledSessionVideo = styled.div`

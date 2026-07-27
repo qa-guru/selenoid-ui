@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { Panel } from "@zero-design-system/react";
 import SessionInfo from "./SessionInfo";
 import SessionVideo from "./SessionVideo";
 import SessionLogFile from "./SessionLogFile";
@@ -9,6 +10,25 @@ import Log from "../Log";
 import HarViewer, { wantsHar } from "../HarViewer";
 import { fetchSessionById } from "../SessionArchive/api";
 import { StyledSession } from "./style.css";
+
+/** Empty-state hourglass — same composition as Sessions / Archive. */
+function IconHourglass() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M3.5 2.5h9M3.5 13.5h9" />
+            <path d="M4.5 2.5c0 3 3.5 4 3.5 5.5S4.5 11 4.5 13.5" />
+            <path d="M11.5 2.5c0 3-3.5 4-3.5 5.5s3.5 3 3.5 5.5" />
+        </svg>
+    );
+}
 
 const Session = ({ origin, session, browser }) => {
     const [endedCaps, setEndedCaps] = useState(null);
@@ -140,18 +160,42 @@ const Session = ({ origin, session, browser }) => {
             )}
 
             {!showLive && !showFinished && artifactsStatus === "loading" && (
-                <div className="session-missing" data-testid="session-loading">
-                    Loading session…
-                </div>
+                <Panel
+                    title="Session"
+                    testId="session-loading-panel"
+                    titleTestId="session-loading-title"
+                    className="session-missing-panel"
+                    bodyClassName="session-missing-panel__body"
+                >
+                    <div className="no-any" data-testid="session-loading">
+                        <span className="icon" title="Loading" aria-hidden="true">
+                            <IconHourglass />
+                        </span>
+                        <div className="nosession-any-text">LOADING SESSION…</div>
+                    </div>
+                </Panel>
             )}
 
             {!showLive && !showFinished && (artifactsStatus === "missing" || artifactsStatus === "error") && (
-                <div className="session-missing" data-testid="session-not-found">
-                    Session not found.{" "}
-                    <Link to="/sessions" data-testid="session-back-missing">
-                        Back to sessions
-                    </Link>
-                </div>
+                <Panel
+                    title="Session"
+                    testId="session-missing-panel"
+                    titleTestId="session-missing-title"
+                    className="session-missing-panel"
+                    bodyClassName="session-missing-panel__body"
+                >
+                    <div className="no-any" data-testid="session-not-found">
+                        <span className="icon" title="No any" aria-hidden="true">
+                            <IconHourglass />
+                        </span>
+                        <div className="nosession-any-text">
+                            {"SESSION NOT FOUND :'( "}
+                            <Link to="/sessions" className="session-missing__back" data-testid="session-back-missing">
+                                ← Sessions
+                            </Link>
+                        </div>
+                    </div>
+                </Panel>
             )}
         </StyledSession>
     );
