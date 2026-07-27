@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { CSSTransition } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import { StyledArchive } from "./style.css";
@@ -125,17 +125,7 @@ const SessionArchive = ({ query = "" }) => {
     const [limit, setLimit] = useState(SESSION_PAGE_SIZE);
     const [loading, setLoading] = useState(true);
     const [reloadToken, setReloadToken] = useState(0);
-    // React 19 removed findDOMNode; CSSTransition needs an explicit nodeRef per item.
-    const nodeRefs = useRef(new Map());
     const noAnyRef = useRef(null);
-    const getNodeRef = (key) => {
-        let ref = nodeRefs.current.get(key);
-        if (!ref) {
-            ref = React.createRef();
-            nodeRefs.current.set(key, ref);
-        }
-        return ref;
-    };
 
     useEffect(() => {
         setPage(0);
@@ -186,23 +176,12 @@ const SessionArchive = ({ query = "" }) => {
                 className="archive-panel"
                 bodyClassName="archive-panel__body"
             >
-                <TransitionGroup className="archive__list">
-                    {sessions.length > 0 &&
-                        sessions.map((session) => {
-                            const nodeRef = getNodeRef(session.id);
-                            return (
-                                <CSSTransition
-                                    key={session.id}
-                                    nodeRef={nodeRef}
-                                    timeout={500}
-                                    classNames="archive__row_state"
-                                    unmountOnExit
-                                >
-                                    <SessionRow ref={nodeRef} session={session} onDeleted={onDeleted} />
-                                </CSSTransition>
-                            );
-                        })}
-                </TransitionGroup>
+                {/* No TransitionGroup: page swaps would stack exit+enter and double list height. */}
+                <div className="archive__list">
+                    {sessions.map((session) => (
+                        <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
+                    ))}
+                </div>
 
                 {showPager && (
                     <div className="archive__pager" data-testid="archive-pager">
@@ -250,7 +229,7 @@ const SessionArchive = ({ query = "" }) => {
     );
 };
 
-const SessionRow = ({ session, onDeleted, ref }) => {
+const SessionRow = ({ session, onDeleted }) => {
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
     const detailHref = `/sessions/${session.id}`;
     const name = session.name || "";
@@ -260,7 +239,7 @@ const SessionRow = ({ session, onDeleted, ref }) => {
     const hasArtifacts = Boolean(session.video || session.log || session.har);
 
     return (
-        <div ref={ref} className="archive__row" data-testid="session-card" data-session={session.id}>
+        <div className="archive__row" data-testid="session-card" data-session={session.id}>
             <Link to={detailHref} className="archive__fields" data-testid="session-detail-link">
                 <span className="archive__id" title={session.id}>
                     {sessionIdShort(session.id)}

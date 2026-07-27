@@ -36,23 +36,6 @@ export const StyledArchive = styled.div`
         font-size: 0.82em;
     }
 
-    .archive__row_state {
-        &-enter {
-            opacity: 0.01;
-        }
-        &-enter-active {
-            opacity: 1;
-            transition: opacity 500ms ease-in;
-        }
-        &-exit {
-            opacity: 1;
-        }
-        &-exit-active {
-            opacity: 0.01;
-            transition: opacity 500ms ease-out;
-        }
-    }
-
     .archive__fields {
         display: flex;
         align-items: center;
