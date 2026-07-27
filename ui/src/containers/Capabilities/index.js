@@ -2423,11 +2423,18 @@ const Launch = ({
                 const data = await response.json();
                 const sessionId = sessionIdFrom({ response: data });
                 try {
-                    await resizeSessionWindow(sessionId, screenResolution);
+                    // Bound resize so a hung window/rect (auth challenge) cannot block navigate.
+                    await Promise.race([
+                        resizeSessionWindow(sessionId, screenResolution, fetch, wdAuthToken),
+                        new Promise((resolve) => setTimeout(resolve, 8000)),
+                    ]);
                 } catch (resizeErr) {
                     console.warn("Can't resize session window to screenResolution", resizeErr);
                 }
                 navigate(`/sessions/${sessionId}`);
+            } else {
+                onError(new Error(`Create Session failed: HTTP ${response.status}`));
+                onLoading(false);
             }
         } catch (err) {
             console.error("Can't start session manually", err);

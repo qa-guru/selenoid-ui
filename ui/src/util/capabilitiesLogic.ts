@@ -40,11 +40,17 @@ export function browserWindowOptions(browserName, screenResolution) {
     return null;
 }
 
-async function postSessionCommand(sessionId, path, body, fetchImpl) {
+async function postSessionCommand(sessionId, path, body, fetchImpl, authToken) {
+    const headers = {
+        "Content-Type": "application/json",
+        ...(authToken ? { Authorization: `Basic ${btoa(String(authToken))}` } : {}),
+    };
     return fetchImpl(`/wd/hub/session/${encodeURIComponent(sessionId)}${path}`, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        // Prefer explicit Basic Auth (prod nginx). credentials:include alone hangs headless
+        // browsers on auth challenges after Create Session succeeds.
+        credentials: "omit",
+        headers,
         body: body == null ? undefined : JSON.stringify(body),
     });
 }
@@ -53,8 +59,13 @@ async function postSessionCommand(sessionId, path, body, fetchImpl) {
  * Fit browser window to screenResolution after Create Session.
  * screenResolution only sizes Xvfb; browsers often keep a default window.
  * Prefer explicit window/rect (maximize is deprecated / flaky in containers).
+ *
+ * @param {string} sessionId
+ * @param {string} screenResolution
+ * @param {typeof fetch} [fetchImpl]
+ * @param {string} [authToken] WD Basic Auth `user:pass` (same as Create Session)
  */
-export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl = fetch) {
+export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl = fetch, authToken = "") {
     const size = parseScreenSize(screenResolution);
     if (!sessionId || !size) {
         return false;
@@ -64,7 +75,8 @@ export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl
         sessionId,
         "/window/rect",
         { x: 0, y: 0, width: size.width, height: size.height },
-        fetchImpl
+        fetchImpl,
+        authToken
     );
     if (rect && rect.ok) {
         return true;
@@ -75,7 +87,8 @@ export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl
         sessionId,
         "/window/current/size",
         { width: size.width, height: size.height },
-        fetchImpl
+        fetchImpl,
+        authToken
     );
     return Boolean(wire && wire.ok);
 }

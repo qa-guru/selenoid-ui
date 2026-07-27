@@ -59,10 +59,24 @@ describe("capabilitiesLogic", () => {
         expect(fetchImpl).toHaveBeenCalledTimes(1);
         expect(fetchImpl).toHaveBeenCalledWith("/wd/hub/session/sess-1/window/rect", {
             method: "POST",
-            credentials: "include",
+            credentials: "omit",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ x: 0, y: 0, width: 1920, height: 1080 }),
         });
+    });
+
+    it("sends Basic Auth on window/rect when authToken is provided", async () => {
+        const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+        await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl, "user1:1234")).resolves.toBe(true);
+        expect(fetchImpl).toHaveBeenCalledWith(
+            "/wd/hub/session/sess-1/window/rect",
+            expect.objectContaining({
+                credentials: "omit",
+                headers: expect.objectContaining({
+                    Authorization: `Basic ${btoa("user1:1234")}`,
+                }),
+            })
+        );
     });
 
     it("falls back to window/current/size when rect fails", async () => {
