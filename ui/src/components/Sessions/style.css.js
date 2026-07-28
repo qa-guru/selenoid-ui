@@ -231,23 +231,46 @@ export const StyledSessions = styled.div`
     }
 
     @media (max-width: 720px) {
+        /* 2 rows: id/quota/actions · browser/name/caps — not 3 */
         .session {
             flex-wrap: wrap;
-            gap: 8px;
+            column-gap: 10px;
+            row-gap: 6px;
         }
 
-        .session__fields {
-            flex: 1 1 100%;
-            order: 3;
+        .session__id {
+            order: 1;
         }
 
-        .session__caps {
-            order: 4;
-            margin-left: 0;
+        .session__quota {
+            order: 2;
+            flex: 1 1 auto;
+            max-width: none;
         }
 
         .session__actions {
-            margin-left: auto;
+            order: 3;
+            margin-left: 0;
+        }
+
+        .session::after {
+            content: "";
+            order: 4;
+            flex: 1 0 100%;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .session__fields {
+            order: 5;
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .session__caps {
+            order: 6;
+            margin-left: 0;
+            flex: 0 0 auto;
         }
     }
 `;
