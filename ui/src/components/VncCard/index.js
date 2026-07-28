@@ -1,7 +1,7 @@
 import React, { Component, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { VncWindow, WindowControl, IconClose } from "@zero-design-system/react";
-import "@zero-design-system/react/styles.css?v=segfloat2";
+import "@zero-design-system/react/styles.css?v=segrule1";
 
 import VncScreen from "./VncScreen";
 import { parseScreenSize } from "../../util/capabilitiesLogic";

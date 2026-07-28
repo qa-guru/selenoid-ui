@@ -19,7 +19,9 @@ const TEMPLATE_URLS = [new URL("../templates/header.html", import.meta.url)];
  * @typedef {{ href: string, label: string, active?: boolean, testid?: string }} HeaderNavItem
  * @typedef {{ default?: 'ru' | 'en' }} HeaderLangConfig
  * @typedef {{ default?: 'dark' | 'light' }} HeaderThemeConfig
- * @typedef {{ brand?: HeaderBrandConfig, nav?: HeaderNavItem[], lang?: HeaderLangConfig, theme?: HeaderThemeConfig }} HeaderConfig
+ * @typedef {{ href?: string, label?: string, hidden?: boolean, iconSrc?: string }} HeaderToolLinkConfig
+ * @typedef {{ github?: HeaderToolLinkConfig, githubPages?: HeaderToolLinkConfig }} HeaderToolsConfig
+ * @typedef {{ brand?: HeaderBrandConfig, nav?: HeaderNavItem[], lang?: HeaderLangConfig, theme?: HeaderThemeConfig, tools?: HeaderToolsConfig }} HeaderConfig
  */
 
 export const HEADER_LANG_CHANGE = "header:lang-change";
@@ -82,6 +84,7 @@ function resolveHeaderConfig(override) {
             ...override.theme,
         },
         nav: override.nav ?? DEFAULT_HEADER_CONFIG.nav,
+        tools: override.tools,
     };
 }
 
@@ -203,6 +206,44 @@ function applyHeaderConfig(root, config) {
     // direct URLs, top-nav clicks and in-form links stay in sync — including SPA
     // pushState navigation observed via observeNavigation().
     syncActiveNav(root);
+}
+
+/** @param {ParentNode} root @param {HeaderToolsConfig | undefined} tools */
+function applyHeaderTools(root, tools) {
+    if (!tools) {
+        return;
+    }
+    /** @type {[keyof HeaderToolsConfig, string][]} */
+    const entries = [
+        ["github", "header-github"],
+        ["githubPages", "header-github-pages"],
+    ];
+    for (const [key, testid] of entries) {
+        const cfg = tools[key];
+        if (!cfg) {
+            continue;
+        }
+        const el = root.querySelector(`[data-testid="${testid}"]`);
+        if (!(el instanceof HTMLAnchorElement)) {
+            continue;
+        }
+        if (cfg.hidden) {
+            el.hidden = true;
+            continue;
+        }
+        if (cfg.href) {
+            el.href = cfg.href;
+        }
+        if (cfg.label) {
+            el.setAttribute("aria-label", cfg.label);
+        }
+        if (cfg.iconSrc) {
+            const wrap = el.querySelector(".icon");
+            if (wrap instanceof HTMLElement) {
+                wrap.innerHTML = `<img src="${cfg.iconSrc}" alt="" width="18" height="18" decoding="async" />`;
+            }
+        }
+    }
 }
 
 /** @param {ParentNode} root @param {HeaderConfig} config */
@@ -436,6 +477,7 @@ async function mountHeader() {
 
     const config = resolveHeaderConfig(window.headerConfig);
     applyHeaderConfig(mount, config);
+    applyHeaderTools(mount, config.tools);
     buildHeaderMenu(mount, config);
     applyLangDefault(mount, config.lang);
     applyThemeDefault(config.theme);

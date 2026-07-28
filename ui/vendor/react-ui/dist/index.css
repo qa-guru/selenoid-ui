@@ -40,6 +40,7 @@
   --plaque-seg-gap: 5px;
   --plaque-seg-band-height: calc(var(--plaque-control-height) - 2px);
   --plaque-seg-row-gap: 1px;
+  --plaque-seg-rule: color-mix(in srgb, var(--color-border) 40%, transparent);
   --plaque-seg-inset: var(--space-1);
   --plaque-shell-pad-x: var(--space-2);
   --plaque-seg-chip-height: calc(var(--plaque-control-height) - 12px);
@@ -298,8 +299,8 @@ html.theme-light {
       to bottom,
       transparent 0,
       transparent var(--plaque-seg-band-height),
-      var(--color-border) var(--plaque-seg-band-height),
-      var(--color-border) calc(var(--plaque-seg-band-height) + var(--plaque-seg-row-gap)));
+      var(--plaque-seg-rule) var(--plaque-seg-band-height),
+      var(--plaque-seg-rule) calc(var(--plaque-seg-band-height) + var(--plaque-seg-row-gap)));
   background-origin: padding-box;
   background-clip: padding-box;
   background-size: calc(100% - 2 * var(--plaque-divider-inset)) 100%;
@@ -335,6 +336,7 @@ html.theme-light {
   min-height: var(--plaque-divider-height, calc(var(--font-size-sm) * 1.35));
   margin-block-start: calc((var(--plaque-seg-band-height) - var(--plaque-divider-height, calc(var(--font-size-sm) * 1.35))) / 2);
   margin-right: var(--plaque-seg-gap);
+  background: var(--plaque-seg-rule);
 }
 .plaque-field--divided.plaque-field--nowrap {
   display: grid !important;

@@ -43,7 +43,7 @@ import {
     highlightOutput,
     usePlaqueFieldMagnet,
 } from "@zero-design-system/react";
-import "@zero-design-system/react/styles.css?v=segfloat2";
+import "@zero-design-system/react/styles.css?v=segrule1";
 
 /**
  * Capabilities session options → react-ui wrapper → hub caps key.
