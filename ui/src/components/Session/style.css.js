@@ -54,24 +54,20 @@ export const StyledSession = styled.div`
 
     .session-info {
         color: var(--color-text, #fff);
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: center;
-        gap: var(--space-2, 8px);
 
         &__main {
             min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: var(--space-3, 12px);
 
             .session-browser {
                 line-height: 40px;
                 display: inline-flex;
                 align-items: center;
+                flex-shrink: 0;
                 gap: var(--space-1, 4px);
 
                 &__name {
@@ -98,12 +94,19 @@ export const StyledSession = styled.div`
         }
 
         &__additional {
+            flex: 1 1 auto;
+            min-width: 0;
+
             .custom-capabilities {
                 display: flex;
                 align-items: center;
                 gap: var(--space-2, 8px);
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
             }
+        }
+
+        &__id {
+            flex-shrink: 0;
         }
 
         &__back {

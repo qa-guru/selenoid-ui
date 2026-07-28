@@ -70,18 +70,18 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, finished = false, a
                         )}
                     </div>
 
+                    <div className="session-info__additional">
+                        <div className="custom-capabilities">
+                            {finished && <Badge variant="primary">FINISHED</Badge>}
+                            {caps.name && <Badge>{caps.name}</Badge>}
+                            {(caps.enableHAR || caps.enableHar || artifacts.har) && <Badge>HAR</Badge>}
+                            {artifacts.video && <Badge>VIDEO</Badge>}
+                            {artifacts.log && <Badge>LOG</Badge>}
+                        </div>
+                    </div>
+
                     <div className="session-info__id" data-testid="session-info-id">
                         {shortId}
-                    </div>
-                </div>
-
-                <div className="session-info__additional">
-                    <div className="custom-capabilities">
-                        {finished && <Badge variant="primary">FINISHED</Badge>}
-                        {caps.name && <Badge>{caps.name}</Badge>}
-                        {(caps.enableHAR || caps.enableHar || artifacts.har) && <Badge>HAR</Badge>}
-                        {artifacts.video && <Badge>VIDEO</Badge>}
-                        {artifacts.log && <Badge>LOG</Badge>}
                     </div>
                 </div>
             </div>
