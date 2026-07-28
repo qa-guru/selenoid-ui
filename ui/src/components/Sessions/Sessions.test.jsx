@@ -75,8 +75,8 @@ describe("Sessions", () => {
         expect(screen.getByText("VNC")).toHaveClass("badge", "badge--primary");
 
         const resolution = screen.getByText("1920x1080");
-        expect(resolution).toHaveClass("badge");
-        expect(resolution).not.toHaveClass("badge--primary");
+        expect(resolution).toHaveClass("session__resolution");
+        expect(resolution).not.toHaveClass("badge");
 
         const deleteBtn = screen.getByRole("button", { name: "Delete" });
         expect(deleteBtn).toHaveClass("icon-btn", "session-delete");

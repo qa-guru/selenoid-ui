@@ -62,85 +62,192 @@ export const StyledSessions = styled.div`
         justify-content: flex-start;
         padding: 0 var(--space-5, 16px);
         box-sizing: border-box;
+    }
 
-        .session {
-            transition: all 0.5s;
-            min-height: 60px;
-            display: flex;
-            justify-content: flex-start;
-            min-width: 280px;
-            border-bottom: 1px dashed ${colorBorder};
+    .session {
+        transition: opacity 0.5s;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-4, 15px);
+        min-width: 280px;
+        border-bottom: 1px dashed ${colorBorder};
+        color: var(--color-text, #fff);
+        padding: 8px 0;
+        font-size: 0.82em;
+        overflow: hidden;
+
+        &_state-enter {
+            opacity: 0.01;
+        }
+
+        &_state-enter-active {
+            opacity: 1;
+            transition: opacity 500ms ease-in;
+        }
+
+        &_state-exit {
+            opacity: 1;
+        }
+
+        &_state-exit-active {
+            opacity: 0.01;
+            transition: opacity 500ms ease-out;
+        }
+    }
+
+    .session__id {
+        flex: 0 0 76px;
+        color: var(--color-text, #fff);
+        font-weight: 300;
+        font-size: 1em;
+        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+        font-variant-numeric: tabular-nums;
+        text-decoration: none;
+
+        &:hover {
+            color: var(--color-success, #59a781);
+        }
+    }
+
+    .session__quota {
+        flex: 0 1 96px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: ${secondaryColor};
+        font-size: 0.95em;
+        font-weight: 300;
+    }
+
+    .session__fields {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4, 15px);
+        flex: 1;
+        min-width: 0;
+        text-decoration: none;
+        color: inherit;
+
+        &:hover .name,
+        &:hover .session-name {
+            color: var(--color-success, #59a781);
+        }
+    }
+
+    .browser {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.35em;
+        flex: 0 0 auto;
+        white-space: nowrap;
+
+        .name {
+            text-transform: uppercase;
+            font-weight: 300;
+            line-height: 1.2;
             color: var(--color-text, #fff);
-            padding: 10px 0 0;
-            overflow: auto;
+        }
 
-            &_state-enter {
-                opacity: 0.01;
-            }
+        .version {
+            font-weight: 300;
+            font-size: 0.95em;
+            color: ${secondaryColor};
+        }
+    }
 
-            &_state-enter-active {
-                opacity: 1;
-                transition: opacity 500ms ease-in;
-            }
+    .session-name {
+        flex: 1 1 140px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 300;
+        color: var(--color-text, #fff);
+        border-left: 2px solid ${colorBorder};
+        padding-left: 8px;
+    }
 
-            &_state-exit {
-                opacity: 1;
-            }
+    .session-name_empty {
+        flex: 0 0 auto;
+        color: ${secondaryColor};
+    }
 
-            &_state-exit-active {
-                opacity: 0.01;
-                transition: opacity 500ms ease-out;
-            }
+    .session_manual .session-name {
+        border-color: ${manualColor};
+    }
 
-            .identity {
-                display: flex;
-                flex-direction: column;
-                max-width: 50%;
-                flex: 0 0 50%;
-                padding-right: 15px;
+    .session__caps {
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+        flex-shrink: 0;
+        flex-wrap: nowrap;
+    }
 
-                .browser {
-                    display: flex;
+    .session__resolution {
+        color: ${secondaryColor};
+        font-size: 0.95em;
+        font-weight: 300;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
 
-                    .name {
-                        text-transform: uppercase;
-                        font-weight: 300;
-                        line-height: 30px;
-                    }
+    .session__actions {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
 
-                    .version {
-                        font-weight: 300;
-                        text-transform: lowercase;
-                        font-size: 0.8em;
-                        color: ${secondaryColor};
-                        margin-left: 5px;
-                    }
-                }
+    .session-delete {
+        color: var(--color-text, #fff);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        flex-shrink: 0;
 
-                .session-name {
-                    overflow: hidden;
-                    border-left: 2px solid ${colorBorder};
-                    color: ${secondaryColor};
-                    font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+        .icon svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
 
-                    -webkit-font-smoothing: antialiased;
-                    -moz-osx-font-smoothing: grayscale;
-                    padding-left: 5px;
-                }
-            }
+        &:hover:not(:disabled) {
+            color: var(--color-danger, #ff6e59);
+        }
 
-            &_manual {
-                .identity {
-                    .session-name {
-                        border-color: ${manualColor};
-                    }
-                }
-            }
+        &:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+    }
 
-            .session-delete {
-                color: var(--color-text, #fff);
-                flex-shrink: 0;
-            }
+    @media (max-width: 720px) {
+        .session {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .session__fields {
+            flex: 1 1 100%;
+            order: 3;
+        }
+
+        .session__caps {
+            order: 4;
+            margin-left: 0;
+        }
+
+        .session__actions {
+            margin-left: auto;
         }
     }
 `;

@@ -4,7 +4,6 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
-import styled from "styled-components";
 import { Badge, IconTrash, Panel } from "@zero-design-system/react";
 import { useSessionDelete } from "./service";
 import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
@@ -93,35 +92,34 @@ const Sessions = ({ sessions = {}, query = "" }) => {
 const Session = ({ id, session: { quota, caps }, ref }) => {
     const [deleting, deleteSession] = useSessionDelete(id);
     const href = deleting ? `#` : `/sessions/${id}`;
+    const manual = Boolean(caps.labels && caps.labels.manual);
+    const name = caps.name || "";
 
     return (
-        <div ref={ref} className={`session ${(caps.labels && caps.labels.manual && "session_manual") || ""}`}>
-            <SessionId>
-                <span className="quota">{quota}</span> /{" "}
-                <Link to={href} className="link id">
-                    {sessionIdShort(id)}
-                </Link>
-            </SessionId>
-            <Link className="link identity" to={href}>
-                <div className="browser">
+        <div ref={ref} className={`session${manual ? " session_manual" : ""}`}>
+            <Link to={href} className="link id session__id" title={id}>
+                {sessionIdShort(id)}
+            </Link>
+            <span className="session__quota" title={quota || undefined}>
+                {quota || "—"}
+            </span>
+            <Link className="link identity session__fields" to={href}>
+                <span className="browser">
                     <span className="name">{caps.browserName}</span>
-                    <span className="version">{caps.version}</span>
-                </div>
-
-                {caps.name && (
-                    <div className="session-name" title={caps.name}>
-                        {caps.name}
-                    </div>
-                )}
+                    {caps.version && <span className="version">{caps.version}</span>}
+                </span>
+                <span className={`session-name${name ? "" : " session-name_empty"}`} title={name || undefined}>
+                    {name || "—"}
+                </span>
             </Link>
 
-            <Capabilities>
-                {caps.labels && caps.labels.manual && <Badge variant="primary">MANUAL</Badge>}
+            <div className="session__caps">
+                {manual && <Badge variant="primary">MANUAL</Badge>}
                 {caps.enableVNC && <Badge variant="primary">VNC</Badge>}
-                {caps.screenResolution && <Badge>{caps.screenResolution}</Badge>}
-            </Capabilities>
-            <Actions>
-                {caps.labels && caps.labels.manual && (
+                {caps.screenResolution && <span className="session__resolution">{caps.screenResolution}</span>}
+            </div>
+            <div className="session__actions">
+                {manual && (
                     <button
                         type="button"
                         className="icon-btn session-delete"
@@ -139,41 +137,9 @@ const Session = ({ id, session: { quota, caps }, ref }) => {
                         )}
                     </button>
                 )}
-            </Actions>
+            </div>
         </div>
     );
 };
-
-const secondaryColor = "#aaa";
-
-const SessionId = styled.div`
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    flex-basis: 140px;
-    padding-right: 5px;
-
-    .quota {
-        color: ${secondaryColor};
-        margin-right: 3px;
-    }
-
-    .id {
-        margin-left: 3px;
-    }
-`;
-
-const Capabilities = styled.div`
-    display: flex;
-    align-items: center;
-    flex: 1;
-    gap: 0.5em;
-    flex-wrap: wrap;
-`;
-
-const Actions = styled.div`
-    display: flex;
-    align-items: center;
-`;
 
 export default Sessions;
