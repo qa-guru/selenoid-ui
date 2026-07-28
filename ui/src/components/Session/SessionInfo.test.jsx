@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, afterEach } from "vitest";
 import SessionInfo from "./SessionInfo";
 
 const browser = {
@@ -82,5 +83,39 @@ describe("SessionInfo", () => {
         expect(screen.getByText("VIDEO")).toBeInTheDocument();
         expect(screen.getByText("LOG")).toBeInTheDocument();
         expect(screen.getByText("HAR")).toBeInTheDocument();
+        expect(screen.queryByTestId("session-kill")).toBeNull();
+    });
+
+    it("live mode exposes Kill session in Session panel bar", () => {
+        render(
+            <MemoryRouter>
+                <SessionInfo session="abc-def-12345678" browser={browser} />
+            </MemoryRouter>
+        );
+
+        const kill = screen.getByTestId("session-kill");
+        expect(kill).toHaveClass("icon-btn", "panel__action");
+        expect(kill).toHaveAttribute("aria-label", "Kill session");
+        expect(kill.querySelector("svg")).toBeTruthy();
+    });
+
+    it("kill issues DELETE /wd/hub/session/{id}", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+        vi.stubGlobal("fetch", fetchMock);
+
+        render(
+            <MemoryRouter>
+                <SessionInfo session="abc-def-12345678" browser={browser} />
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByTestId("session-kill"));
+        expect(fetchMock).toHaveBeenCalledWith("/wd/hub/session/abc-def-12345678", { method: "DELETE" });
+        vi.unstubAllGlobals();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 });

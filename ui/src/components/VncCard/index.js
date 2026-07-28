@@ -1,20 +1,19 @@
-import React, { Component, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { VncWindow, WindowControl, IconClose } from "@zero-design-system/react";
 import "@zero-design-system/react/styles.css?v=segrule1";
 
 import VncScreen from "./VncScreen";
 import { parseScreenSize } from "../../util/capabilitiesLogic";
-import { deleteSession } from "../Sessions/service";
 
 /**
  * Selenoid VNC window — design-system `VncWindow` primitive wired to the noVNC
  * RFB screen and Selenoid clipboard endpoints. Chrome, states and fullscreen
  * collapse live in @zero-design-system/react (no local styled-components).
  * Screen height follows `caps.screenResolution` aspect (default 16/9 in CSS).
- * Kill (`onKill`) → DELETE /wd/hub/session/{id} (same as Stats trash).
+ * Session kill lives on SessionInfo panel (`Panel.actions` + IconTrash), not here.
  */
-class VncCard extends Component {
+export default class VncCard extends Component {
     state = { connection: "connecting", fullscreen: false, unlocked: false };
 
     connection = (connection) => {
@@ -34,7 +33,7 @@ class VncCard extends Component {
     };
 
     render() {
-        const { origin, session, browser = {}, onKill } = this.props;
+        const { origin, session, browser = {} } = this.props;
         const { connection, fullscreen, unlocked } = this.state;
 
         if (browser.caps && !browser.caps.enableVNC) {
@@ -58,8 +57,7 @@ class VncCard extends Component {
                 onToggleFullscreen={this.handleFullscreen}
                 onCopy={() => copyFromDocker(session)}
                 onPaste={() => pasteToDocker(session)}
-                onKill={onKill}
-                labels={{ copy: "Copy from Selenoid", paste: "Paste to Selenoid", kill: "Kill container" }}
+                labels={{ copy: "Copy from Selenoid", paste: "Paste to Selenoid" }}
             >
                 <VncScreen
                     ref={(instance) => {
@@ -72,18 +70,6 @@ class VncCard extends Component {
             </VncWindow>
         );
     }
-}
-
-/** Router shell: kill → DELETE session → home (same target as Back). */
-export default function VncCardWithKill(props) {
-    const navigate = useNavigate();
-    const onKill = useCallback(() => {
-        deleteSession(props.session)
-            .then(() => navigate("/"))
-            .catch((e) => console.error("Can't delete session", props.session, e));
-    }, [props.session, navigate]);
-
-    return <VncCard {...props} onKill={onKill} />;
 }
 
 function copyFromDocker(sessionId) {
