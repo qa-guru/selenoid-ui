@@ -94,6 +94,8 @@ const Session = ({ id, session: { quota, caps }, ref }) => {
     const href = deleting ? `#` : `/sessions/${id}`;
     const manual = Boolean(caps.labels && caps.labels.manual);
     const name = caps.name || "";
+    // Default Create Session name duplicates the MANUAL badge — keep title for e2e, hide label.
+    const displayName = manual && name.trim().toLowerCase() === "manual session" ? "" : name;
 
     return (
         <div ref={ref} className={`session${manual ? " session_manual" : ""}`}>
@@ -108,8 +110,8 @@ const Session = ({ id, session: { quota, caps }, ref }) => {
                     <span className="name">{caps.browserName}</span>
                     {caps.version && <span className="version">{caps.version}</span>}
                 </span>
-                <span className={`session-name${name ? "" : " session-name_empty"}`} title={name || undefined}>
-                    {name || "—"}
+                <span className={`session-name${displayName ? "" : " session-name_empty"}`} title={name || undefined}>
+                    {displayName || "—"}
                 </span>
             </Link>
 

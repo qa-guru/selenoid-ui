@@ -50,6 +50,10 @@ describe("Sessions", () => {
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("firefox")).toBeInTheDocument();
         expect(screen.getByText("MANUAL")).toBeInTheDocument();
+        // Default Create Session name is hidden — it only duplicates the MANUAL badge.
+        expect(screen.queryByText("Manual session")).not.toBeInTheDocument();
+        expect(document.querySelector(".session-name[title='Manual session']")).toBeTruthy();
+        expect(screen.getByText("Smoke test")).toBeInTheDocument();
     });
 
     it("filters sessions by browser name", () => {
