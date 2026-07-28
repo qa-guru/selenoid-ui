@@ -108,7 +108,7 @@ function EntryDetail({ entry, tab, onTabChange }) {
     const mime = content.mimeType || "—";
     const size = formatSize(content.size);
     const bodyText = typeof content.text === "string" ? content.text : "";
-    const bodyNote = bodyText ? bodyText : "Body not captured (headers + size only).";
+    const bodyNote = bodyText ? bodyText : "Body not captured (meta / headers + size only).";
 
     return (
         <div className="har-detail" data-testid="session-har-detail">

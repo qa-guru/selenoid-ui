@@ -7,6 +7,8 @@ export const DEFAULT_PLAYWRIGHT_SESSION = {
     enableVideo: true,
     /** Hub CDP → /har/<id>.har — not Playwright client recordHar. */
     enableHar: false,
+    /** Hub harContent meta|bodies — only sent when enableHAR; meta = omit. */
+    harContent: "meta",
     enableLog: false,
     timeZone: "UTC",
     env: "",
@@ -55,7 +57,7 @@ const parseLabelsMap = (raw) => {
  * both flow through here so the terminal mirrors what gets launched.
  *
  * Hub parse: capsFromQuery in playwright.go (name, screenResolution, sessionTimeout,
- * enableVNC/Video/HAR/Log, videoName, logName, harName, timeZone, env.*, labels.*,
+ * enableVNC/Video/HAR/Log, harContent, videoName, logName, harName, timeZone, env.*, labels.*,
  * socksProxy → PW_PROXY for image launchServer / headed VNC).
  */
 export const playwrightSelenoidOptions = (accessKey = "", session = {}) => {
@@ -99,6 +101,10 @@ export const playwrightSelenoidOptions = (accessKey = "", session = {}) => {
     }
     if (boolStr(s.enableLog) === "true" && log) {
         options.logName = log;
+    }
+    // harContent only with enableHAR; omit/meta ≡ hub default; bodies is opt-in.
+    if (boolStr(s.enableHar) === "true" && String(s.harContent || "").trim() === "bodies") {
+        options.harContent = "bodies";
     }
 
     const proxy = String(s.socksProxy || "").trim();

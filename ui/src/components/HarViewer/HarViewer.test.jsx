@@ -155,6 +155,6 @@ describe("HarViewer", () => {
 
         await user.click(screen.getByTestId("session-har-tab-response"));
         expect(screen.getByTestId("session-har-panel-response")).toBeInTheDocument();
-        expect(screen.getByText("Body not captured (headers + size only).")).toBeInTheDocument();
+        expect(screen.getByText("Body not captured (meta / headers + size only).")).toBeInTheDocument();
     });
 });

@@ -154,6 +154,7 @@ describe("Capabilities Playwright Create Session", () => {
         expect(screen.getByTestId("caps-playwright-enable-har")).toHaveAttribute("data-param-id", "enableHar");
         expect(screen.getByTestId("caps-playwright-enable-log")).toHaveAttribute("data-param-id", "enableLog");
         expect(screen.getByTestId("caps-playwright-headless")).toHaveAttribute("data-param-id", "headless");
+        expect(screen.queryByTestId("capabilities-playwright-har")).toBeNull();
         expect(screen.getByTestId("caps-playwright-time-zone")).toHaveAttribute("data-param-id", "timeZone");
         expect(screen.getByTestId("caps-playwright-env").closest("label")).toHaveAttribute("data-param-id", "env");
         expect(screen.getByTestId("caps-playwright-labels")).toHaveValue("manual=true");
@@ -231,5 +232,43 @@ describe("Capabilities Playwright Create Session", () => {
         await waitFor(() => expect(openedSockets).toHaveLength(1));
         const wsUrl = new URL(openedSockets[0].url);
         expect(wsUrl.searchParams.get("socksProxy")).toBe("proxy.qaguru.school:7777");
+    });
+
+    it("wires harContent=bodies into Playwright WS query only when enableHar is on", async () => {
+        const user = userEvent.setup();
+        renderCapabilities(ACCESS_KEY);
+        await selectPlaywrightChrome(user);
+
+        const har = screen.getByTestId("caps-playwright-enable-har");
+        await user.click(within(har).getByRole("button", { name: "true" }));
+        expect(screen.getByTestId("capabilities-playwright-har")).toBeInTheDocument();
+        const content = screen.getByTestId("caps-playwright-har-content");
+        await user.click(within(content).getByRole("button", { name: "bodies" }));
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("enableHAR")).toBe("true");
+        expect(wsUrl.searchParams.get("harContent")).toBe("bodies");
+    });
+
+    it("omits harContent from Playwright WS query when enableHar is on with default meta", async () => {
+        const user = userEvent.setup();
+        renderCapabilities(ACCESS_KEY);
+        await selectPlaywrightChrome(user);
+
+        const har = screen.getByTestId("caps-playwright-enable-har");
+        await user.click(within(har).getByRole("button", { name: "true" }));
+        expect(
+            within(screen.getByTestId("caps-playwright-har-content")).getByRole("button", { name: "meta" })
+        ).toHaveAttribute("aria-pressed", "true");
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(openedSockets).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("enableHAR")).toBe("true");
+        expect(wsUrl.searchParams.get("harContent")).toBeNull();
     });
 });

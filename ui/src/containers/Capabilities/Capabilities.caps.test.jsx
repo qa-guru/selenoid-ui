@@ -215,12 +215,43 @@ describe("Capabilities boolean caps (seg canon)", () => {
 
         // Toggle enableHar on → real enableHAR flows to hub caps (no longer a no-op).
         await user.click(segButton("caps-enable-har", "true"));
+        // Default harContent=meta → omit from caps (hub default).
+        expect(screen.getByTestId("capabilities-caps-har")).toBeInTheDocument();
+        expect(segButton("caps-har-content", "meta")).toHaveAttribute("aria-pressed", "true");
         await user.click(screen.getByTestId("capabilities-create-session"));
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
         const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
         const body = JSON.parse(sessionCall[1].body);
         expect(body.capabilities.alwaysMatch["selenoid:options"].enableHAR).toBe(true);
         expect(body.desiredCapabilities.enableHAR).toBe(true);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].harContent).toBeUndefined();
+        expect(body.desiredCapabilities.harContent).toBeUndefined();
+
+        fetchMock.mockRestore();
+    });
+
+    it("wires harContent=bodies into desired caps / selenoid:options only when opt-in", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ value: { sessionId: "sess-har-bodies" } }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+
+        expect(screen.queryByTestId("capabilities-caps-har")).toBeNull();
+        await user.click(segButton("caps-enable-har", "true"));
+        await user.click(segButton("caps-har-content", "bodies"));
+        await user.click(screen.getByTestId("capabilities-create-session"));
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
+        const body = JSON.parse(sessionCall[1].body);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableHAR).toBe(true);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].harContent).toBe("bodies");
+        expect(body.desiredCapabilities.harContent).toBe("bodies");
 
         fetchMock.mockRestore();
     });
@@ -237,12 +268,15 @@ describe("Capabilities boolean caps (seg canon)", () => {
         await selectChrome(user);
         await screen.findByTestId("capabilities-caps");
 
+        expect(screen.queryByTestId("capabilities-caps-har")).toBeNull();
         await user.click(screen.getByTestId("capabilities-create-session"));
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
         const sessionCall = fetchMock.mock.calls.find(([url]) => String(url).includes("/wd/hub/session"));
         const body = JSON.parse(sessionCall[1].body);
         expect(body.capabilities.alwaysMatch["selenoid:options"].enableHAR).toBe(false);
         expect(body.desiredCapabilities.enableHAR).toBe(false);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].harContent).toBeUndefined();
+        expect(body.desiredCapabilities.harContent).toBeUndefined();
 
         fetchMock.mockRestore();
     });

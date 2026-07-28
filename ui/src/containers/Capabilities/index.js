@@ -61,6 +61,7 @@ import "@zero-design-system/react/styles.css?v=segrule1";
  * | enableVnc        | PlaqueFieldSeg | solo | enableVNC / selenoid:options      |
  * | enableVideo      | PlaqueFieldSeg | solo | enableVideo                       |
  * | enableHar        | PlaqueFieldSeg | solo | enableHAR → hub CDP → /har/<id>.har|
+ * | harContent       | PlaqueFieldSeg | solo | harContent meta|bodies (cond enableHAR; default meta = omit)|
  * | enableLog        | PlaqueFieldSeg | solo | enableLog                         |
  * | headless         | PlaqueFieldSeg | solo | headless (Playwright only)        |
  * | timeZone         | PlaqueSelect | solo   | selenoid:options.timeZone         |
@@ -108,6 +109,18 @@ const TIME_ZONE_OPTIONS = [
 const ORIENTATION_OPTIONS = [
     { value: "PORTRAIT", label: "PORTRAIT" },
     { value: "LANDSCAPE", label: "LANDSCAPE" },
+];
+
+/** Hub HAR content depth — only meaningful with enableHAR (ADR 009 / HQ-HAR-CONTENT). */
+const HAR_CONTENT_OPTIONS = [
+    {
+        value: "meta",
+        title: "Headers/status/size/mimeType only — no content.text (hub default)",
+    },
+    {
+        value: "bodies",
+        title: "Opt-in best-effort response bodies via CDP Network.getResponseBody (≠ recordHar)",
+    },
 ];
 
 /** Aerokube emulator skins — selenoid:options.skin (hub → SKIN env). */
@@ -249,6 +262,7 @@ const buildSelenoidOptions = ({
     videoName,
     logName,
     harName,
+    harContent,
 }) => {
     const opts = {
         enableVNC: Boolean(enableVnc),
@@ -277,6 +291,10 @@ const buildSelenoidOptions = ({
     }
     if (opts.enableHAR && har) {
         opts.harName = har;
+    }
+    // harContent only when enableHAR; omit or meta ≡ hub default meta; bodies is opt-in.
+    if (opts.enableHAR && String(harContent || "").trim() === "bodies") {
+        opts.harContent = "bodies";
     }
     return opts;
 };
@@ -487,6 +505,8 @@ const DEFAULT_SESSION_OPTS = {
     enableVnc: true,
     enableVideo: true,
     enableHar: false,
+    /** Hub harContent — only sent when enableHAR; meta default = omit from caps. */
+    harContent: "meta",
     enableLog: false,
     timeZone: "UTC",
     env: "",
@@ -584,6 +604,9 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             proxyPort: sessionOpts.proxyPort || "",
             proxyEndpoint: proxyEndpoint || "",
         });
+        if (sessionOpts.enableHar) {
+            payload.harContent = sessionOpts.harContent || "meta";
+        }
     } else if (family === "playwright") {
         Object.assign(payload, {
             screenResolution: sessionOpts.screenResolution,
@@ -600,6 +623,9 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             proxyPort: sessionOpts.proxyPort || "",
             proxyEndpoint: proxyEndpoint || "",
         });
+        if (sessionOpts.enableHar) {
+            payload.harContent = sessionOpts.harContent || "meta";
+        }
     } else if (family === "android") {
         Object.assign(payload, {
             app: sessionOpts.androidApp || "",
@@ -636,6 +662,9 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
                 `- timeZone: **${payload.timeZone}**`,
                 `- enableVnc / enableVideo / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableLog}**`,
                 `- enableHar: **${payload.enableHar}** (hub CDP → /har/<id>.har)`,
+                ...(payload.enableHar === "true"
+                    ? [`- harContent: **${payload.harContent || "meta"}** (meta default / bodies opt-in)`]
+                    : []),
                 `- headless: **${payload.headless}**`,
                 `- env: **${payload.env || "—"}**`,
                 `- labels: **${payload.labels || "—"}**`,
@@ -678,6 +707,9 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             `- timeZone: **${payload.timeZone}**`,
             `- enableVnc / enableVideo / enableLog: **${payload.enableVnc}** / **${payload.enableVideo}** / **${payload.enableLog}**`,
             `- enableHar: **${payload.enableHar}** (hub CDP → /har/<id>.har; WebDriver Chromium)`,
+            ...(payload.enableHar === "true"
+                ? [`- harContent: **${payload.harContent || "meta"}** (meta default / bodies opt-in)`]
+                : []),
             `- env: **${payload.env || "—"}**`,
             `- labels: **${payload.labels || "—"}**`,
             `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
@@ -828,6 +860,7 @@ const code = (browser = "UNKNOWN", version = "", origin = "", session = {}) => {
         labels = DEFAULT_SESSION_OPTS.labels,
         videoName = DEFAULT_SESSION_OPTS.videoName,
         logName = DEFAULT_SESSION_OPTS.logName,
+        harContent = DEFAULT_SESSION_OPTS.harContent,
         proxyPreset = DEFAULT_SESSION_OPTS.proxyPreset,
         proxyServer: customProxyHost = DEFAULT_SESSION_OPTS.proxyServer,
         proxyPort: customProxyPort = DEFAULT_SESSION_OPTS.proxyPort,
@@ -850,12 +883,14 @@ const code = (browser = "UNKNOWN", version = "", origin = "", session = {}) => {
         labels,
         videoName,
         logName,
+        harContent,
     });
     const envList = selenoidOpts.env || [];
     const labelsMap = selenoidOpts.labels || {};
     const timeZoneJson = JSON.stringify(selenoidOpts.timeZone);
     const videoNameJson = selenoidOpts.videoName ? JSON.stringify(selenoidOpts.videoName) : null;
     const logNameJson = selenoidOpts.logName ? JSON.stringify(selenoidOpts.logName) : null;
+    const harContentJson = selenoidOpts.harContent ? JSON.stringify(selenoidOpts.harContent) : null;
     const curlProxyBlock = proxy
         ? `"proxy": {
                 "proxyType": "manual",
@@ -975,52 +1010,62 @@ caps["proxy"] = {
         javaEnvPut(envList) +
         javaLabelsPut(labelsMap) +
         (videoNameJson ? `    put("videoName", ${videoNameJson});\n` : "") +
-        (logNameJson ? `    put("logName", ${logNameJson});\n` : "");
+        (logNameJson ? `    put("logName", ${logNameJson});\n` : "") +
+        (harContentJson ? `    put("harContent", ${harContentJson});\n` : "");
     const kotlinOptional =
         kotlinEnvEntry(envList) +
         kotlinLabelsEntry(labelsMap) +
         (videoNameJson ? `\n        "videoName" to ${videoNameJson},` : "") +
-        (logNameJson ? `\n        "logName" to ${logNameJson},` : "");
+        (logNameJson ? `\n        "logName" to ${logNameJson},` : "") +
+        (harContentJson ? `\n        "harContent" to ${harContentJson},` : "");
     const goOptional =
         goEnvBlock(envList) +
         goLabelsBlock(labelsMap) +
         (videoNameJson ? `\n                "videoName": ${videoNameJson},` : "") +
-        (logNameJson ? `\n                "logName": ${logNameJson},` : "");
+        (logNameJson ? `\n                "logName": ${logNameJson},` : "") +
+        (harContentJson ? `\n                "harContent": ${harContentJson},` : "");
     const rustOptional =
         rustEnvBlock(envList) +
         rustLabelsBlock(labelsMap) +
         (videoNameJson ? `\n            "videoName": ${videoNameJson},` : "") +
-        (logNameJson ? `\n            "logName": ${logNameJson},` : "");
+        (logNameJson ? `\n            "logName": ${logNameJson},` : "") +
+        (harContentJson ? `\n            "harContent": ${harContentJson},` : "");
     const csharpOptional =
         csharpEnvBlock(envList) +
         csharpLabelsBlock(labelsMap) +
         (videoNameJson ? `\n    ["videoName"] = ${videoNameJson},` : "") +
-        (logNameJson ? `\n    ["logName"] = ${logNameJson},` : "");
+        (logNameJson ? `\n    ["logName"] = ${logNameJson},` : "") +
+        (harContentJson ? `\n    ["harContent"] = ${harContentJson},` : "");
     const pythonOptional =
         pythonEnvBlock(envList) +
         pythonLabelsBlock(labelsMap) +
         (videoNameJson ? `\n        "videoName": ${videoNameJson},` : "") +
-        (logNameJson ? `\n        "logName": ${logNameJson},` : "");
+        (logNameJson ? `\n        "logName": ${logNameJson},` : "") +
+        (harContentJson ? `\n        "harContent": ${harContentJson},` : "");
     const jsOptional =
         jsEnvBlock(envList) +
         jsLabelsBlock(labelsMap) +
         (videoNameJson ? `\n            videoName: ${videoNameJson},` : "") +
-        (logNameJson ? `\n            logName: ${logNameJson},` : "");
+        (logNameJson ? `\n            logName: ${logNameJson},` : "") +
+        (harContentJson ? `\n            harContent: ${harContentJson},` : "");
     const phpOptional =
         phpEnvBlock(envList) +
         phpLabelsBlock(labelsMap) +
         (videoNameJson ? `\n        "videoName"=>${videoNameJson},` : "") +
-        (logNameJson ? `\n        "logName"=>${logNameJson},` : "");
+        (logNameJson ? `\n        "logName"=>${logNameJson},` : "") +
+        (harContentJson ? `\n        "harContent"=>${harContentJson},` : "");
     const rubyOptional =
         rubyEnvBlock(envList) +
         rubyLabelsBlock(labelsMap) +
         (videoNameJson ? `\n  'videoName' => ${videoNameJson},` : "") +
-        (logNameJson ? `\n  'logName' => ${logNameJson},` : "");
+        (logNameJson ? `\n  'logName' => ${logNameJson},` : "") +
+        (harContentJson ? `\n  'harContent' => ${harContentJson},` : "");
     const swiftOptional =
         swiftEnvBlock(envList) +
         swiftLabelsBlock(labelsMap) +
         (videoNameJson ? `\n        "videoName": ${videoNameJson},` : "") +
-        (logNameJson ? `\n        "logName": ${logNameJson},` : "");
+        (logNameJson ? `\n        "logName": ${logNameJson},` : "") +
+        (harContentJson ? `\n        "harContent": ${harContentJson},` : "");
     return {
         curl: `curl ${hubAuthCurlFlag(accessKey)}-H 'Content-Type: application/json' ${hubSessionEndpoint} -d '{
     "capabilities": {
@@ -1041,6 +1086,7 @@ ${javaProxyBlock}options.setCapability("selenoid:options", new HashMap<String, O
     put("timeZone", ${timeZoneJson});
 ${javaOptionalPuts}    put("enableVNC", ${enableVnc});
     put("enableVideo", ${enableVideo});
+    put("enableHAR", ${Boolean(enableHar)});
     put("enableLog", ${enableLog});
 }});
 RemoteWebDriver driver = new RemoteWebDriver(new URL("${hubUrl}"), options);
@@ -1056,6 +1102,7 @@ ${kotlinProxyBlock}options.setCapability(
         "timeZone" to ${timeZoneJson},${kotlinOptional}
         "enableVNC" to ${enableVnc},
         "enableVideo" to ${enableVideo},
+        "enableHAR" to ${Boolean(enableHar)},
         "enableLog" to ${enableLog}
     )
 )
@@ -1073,6 +1120,7 @@ caps := selenium.Capabilities{
                 "timeZone": ${timeZoneJson},${goOptional}
                 "enableVNC": ${enableVnc},
                 "enableVideo": ${enableVideo},
+                "enableHAR": ${Boolean(enableHar)},
                 "enableLog": ${enableLog},
         },
 }
@@ -1099,6 +1147,7 @@ ${version != "" ? '    caps.set_browser_version("' + version + '")?;\n' : ""}   
             "timeZone": ${timeZoneJson},${rustOptional}
             "enableVNC": ${enableVnc},
             "enableVideo": ${enableVideo},
+            "enableHAR": ${Boolean(enableHar)},
             "enableLog": ${enableLog}
         }),
     )?;${rustProxyBlock}
@@ -1117,6 +1166,7 @@ ${csharpProxyBlock}options.AddAdditionalOption("selenoid:options", new Dictionar
     ["timeZone"] = ${timeZoneJson},${csharpOptional}
     ["enableVNC"] = ${enableVnc},
     ["enableVideo"] = ${enableVideo},
+    ["enableHAR"] = ${Boolean(enableHar)},
     ["enableLog"] = ${enableLog}
 });
 IWebDriver driver = new RemoteWebDriver(new Uri("${hubUrl}"), options);
@@ -1133,6 +1183,7 @@ capabilities = {
         "timeZone": ${timeZoneJson},${pythonOptional}
         "enableVNC": ${enableVnc ? "True" : "False"},
         "enableVideo": ${enableVideo ? "True" : "False"},
+        "enableHAR": ${enableHar ? "True" : "False"},
         "enableLog": ${enableLog ? "True" : "False"}
     }
 }
@@ -1157,6 +1208,7 @@ var options = {
             timeZone: ${timeZoneJson},${jsOptional}
             enableVNC: ${enableVnc},
             enableVideo: ${enableVideo},
+            enableHAR: ${Boolean(enableHar)},
             enableLog: ${enableLog}
         }      
     } 
@@ -1179,6 +1231,7 @@ const options: RemoteOptions = {
             timeZone: ${timeZoneJson},${jsOptional}
             enableVNC: ${enableVnc},
             enableVideo: ${enableVideo},
+            enableHAR: ${Boolean(enableHar)},
             enableLog: ${enableLog}
         }
     }
@@ -1196,6 +1249,7 @@ array(
         "timeZone"=>${timeZoneJson},${phpOptional}
         "enableVNC"=>${enableVnc ? "true" : "false"},
         "enableVideo"=>${enableVideo ? "true" : "false"},
+        "enableHAR"=>${enableHar ? "true" : "false"},
         "enableLog"=>${enableLog ? "true" : "false"}
     )
 )
@@ -1211,6 +1265,7 @@ caps["selenoid:options"] = {
   'timeZone' => ${timeZoneJson},${rubyOptional}
   'enableVNC' => ${enableVnc},
   'enableVideo' => ${enableVideo},
+  'enableHAR' => ${Boolean(enableHar)},
   'enableLog' => ${enableLog}
 }
 
@@ -1231,6 +1286,7 @@ var caps: [String: Any] = [
         "timeZone": ${timeZoneJson},${swiftOptional}
         "enableVNC": ${enableVnc},
         "enableVideo": ${enableVideo},
+        "enableHAR": ${Boolean(enableHar)},
         "enableLog": ${enableLog}
     ]
 ]
@@ -1497,6 +1553,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const [enableVnc, setEnableVnc] = useState("true");
     const [enableVideo, setEnableVideo] = useState("true");
     const [enableHar, setEnableHar] = useState("false");
+    const [harContent, setHarContent] = useState(DEFAULT_SESSION_OPTS.harContent);
     const [enableLog, setEnableLog] = useState("false");
     const [sessionTimeout, setSessionTimeout] = useState(DEFAULT_SESSION_OPTS.sessionTimeout);
     const [sessionName, setSessionName] = useState(DEFAULT_SESSION_OPTS.name);
@@ -1555,6 +1612,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         enableVnc: enableVnc === "true",
         enableVideo: enableVideo === "true",
         enableHar: enableHar === "true",
+        harContent,
         enableLog: enableLog === "true",
         timeZone,
         env,
@@ -1589,6 +1647,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         enableVnc: enableVnc === "true",
         enableVideo: enableVideo === "true",
         enableHar: enableHar === "true",
+        harContent,
         enableLog: enableLog === "true",
         timeZone,
         env,
@@ -1616,6 +1675,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         enableVnc,
         enableVideo,
         enableHar,
+        harContent,
         enableLog,
         timeZone,
         env,
@@ -1698,6 +1758,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         setEnableVnc(next.enableVnc);
         setEnableVideo(next.enableVideo);
         setEnableHar(next.enableHar);
+        setHarContent(next.harContent || DEFAULT_SESSION_OPTS.harContent);
         setEnableLog(next.enableLog || "false");
         setTimeZone(next.timeZone || DEFAULT_SESSION_OPTS.timeZone);
         setEnv(next.env || "");
@@ -1743,6 +1804,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             enableVnc: "true",
             enableVideo: "true",
             enableHar: "false",
+            harContent: DEFAULT_SESSION_OPTS.harContent,
             enableLog: "false",
             timeZone: DEFAULT_SESSION_OPTS.timeZone,
             env: "",
@@ -2004,6 +2066,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                             touchOptions();
                             setEnableHar(v);
                         }}
+                        harContent={harContent}
+                        setHarContent={(v) => {
+                            touchOptions();
+                            setHarContent(v);
+                        }}
                         enableLog={enableLog}
                         setEnableLog={(v) => {
                             touchOptions();
@@ -2242,6 +2309,8 @@ const Launch = ({
     setEnableVideo,
     enableHar,
     setEnableHar,
+    harContent,
+    setHarContent,
     enableLog,
     setEnableLog,
     sessionTimeout,
@@ -2354,6 +2423,7 @@ const Launch = ({
             labels,
             videoName,
             logName,
+            harContent,
         });
         let desiredCapabilities = {
             browserName: `${name}`,
@@ -2376,6 +2446,9 @@ const Launch = ({
         }
         if (selenoidOptions.logName) {
             desiredCapabilities.logName = selenoidOptions.logName;
+        }
+        if (selenoidOptions.harContent) {
+            desiredCapabilities.harContent = selenoidOptions.harContent;
         }
 
         if (proxy) {
@@ -2456,6 +2529,7 @@ const Launch = ({
         enableVnc,
         enableVideo,
         enableHar,
+        harContent,
         enableLog,
         sessionTimeout,
         sessionName,
@@ -2622,7 +2696,8 @@ const Launch = ({
                     {/*
                       presets #remote-hub: magnet stack →
                       solo(remoteUrl) + duo(authUser|authPass) + duo(sessionTimeout|name) + solo(screenResolution) +
-                      solo(enableVnc|enableVideo|enableHar|enableLog) + solo(timeZone) +
+                      solo(enableVnc|enableVideo|enableHar|enableLog) +
+                      conditional solo(harContent) + solo(timeZone) +
                       solo(env) + solo(labels) + conditional duo(videoName|logName).
                     */}
                     <div
@@ -2736,6 +2811,25 @@ const Launch = ({
                                 data-testid="caps-enable-log"
                             />
                         </PlaqueFieldGrid>
+
+                        {enableHar === "true" ? (
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="HAR content depth"
+                                data-testid="capabilities-caps-har"
+                            >
+                                <PlaqueFieldSeg
+                                    label="harContent"
+                                    paramId="harContent"
+                                    value={harContent}
+                                    onValueChange={setHarContent}
+                                    stretch
+                                    data-testid="caps-har-content"
+                                    aria-label="harContent — meta (default) or bodies (opt-in response text)"
+                                    options={HAR_CONTENT_OPTIONS}
+                                />
+                            </PlaqueFieldGrid>
+                        ) : null}
 
                         <PlaqueFieldGrid layout="solo" aria-label="Time zone" data-testid="capabilities-caps-timezone">
                             <PlaqueSelect
@@ -2939,6 +3033,24 @@ const Launch = ({
                                 data-testid="caps-playwright-headless"
                             />
                         </PlaqueFieldGrid>
+                        {enableHar === "true" ? (
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="HAR content depth"
+                                data-testid="capabilities-playwright-har"
+                            >
+                                <PlaqueFieldSeg
+                                    label="harContent"
+                                    paramId="harContent"
+                                    value={harContent}
+                                    onValueChange={setHarContent}
+                                    stretch
+                                    data-testid="caps-playwright-har-content"
+                                    aria-label="harContent — meta (default) or bodies (opt-in response text)"
+                                    options={HAR_CONTENT_OPTIONS}
+                                />
+                            </PlaqueFieldGrid>
+                        ) : null}
                         <PlaqueFieldGrid
                             layout="solo"
                             aria-label="Time zone"

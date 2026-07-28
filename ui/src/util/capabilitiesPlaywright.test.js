@@ -76,9 +76,43 @@ describe("capabilitiesPlaywright", () => {
     it("defaults enableHAR to false in the WS query", () => {
         const parsed = new URL(playwrightEndpoint("playwright-chromium", "1.61.1"));
         expect(parsed.searchParams.get("enableHAR")).toBe("false");
+        expect(parsed.searchParams.get("harContent")).toBeNull();
         expect(parsed.searchParams.get("screenResolution")).toBe("1920x1080x24");
         expect(parsed.searchParams.get("enableLog")).toBe("false");
         expect(parsed.searchParams.get("timeZone")).toBe("UTC");
+    });
+
+    it("omits harContent when enableHAR is on with default meta", () => {
+        const parsed = new URL(
+            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+                enableHar: true,
+                harContent: "meta",
+            })
+        );
+        expect(parsed.searchParams.get("enableHAR")).toBe("true");
+        expect(parsed.searchParams.get("harContent")).toBeNull();
+    });
+
+    it("includes harContent=bodies in the WS query only when opt-in with enableHAR", () => {
+        const parsed = new URL(
+            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+                enableHar: true,
+                harContent: "bodies",
+            })
+        );
+        expect(parsed.searchParams.get("enableHAR")).toBe("true");
+        expect(parsed.searchParams.get("harContent")).toBe("bodies");
+    });
+
+    it("ignores harContent=bodies when enableHAR is off", () => {
+        const parsed = new URL(
+            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+                enableHar: false,
+                harContent: "bodies",
+            })
+        );
+        expect(parsed.searchParams.get("enableHAR")).toBe("false");
+        expect(parsed.searchParams.get("harContent")).toBeNull();
     });
 
     it("omits videoName/logName when flags are off", () => {
