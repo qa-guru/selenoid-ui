@@ -110,7 +110,7 @@ describe("Session detail page", () => {
         expect(empty.querySelector("svg")).toBeTruthy();
         expect(empty).toHaveTextContent("SESSION NOT FOUND");
         expect(screen.getByTestId("session-missing-panel")).toBeInTheDocument();
-        expect(screen.getByTestId("session-back-missing")).toHaveAttribute("href", "/sessions");
+        expect(screen.queryByTestId("session-back-missing")).not.toBeInTheDocument();
     });
 
     it("omits empty video/log placeholders when finished session has only HAR", async () => {

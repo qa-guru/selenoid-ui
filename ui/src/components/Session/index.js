@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 import { Panel } from "@zero-design-system/react";
 import SessionInfo from "./SessionInfo";
@@ -188,12 +187,7 @@ const Session = ({ origin, session, browser }) => {
                         <span className="icon" title="No any" aria-hidden="true">
                             <IconHourglass />
                         </span>
-                        <div className="nosession-any-text">
-                            {"SESSION NOT FOUND :'( "}
-                            <Link to="/sessions" className="session-missing__back" data-testid="session-back-missing">
-                                ← Sessions
-                            </Link>
-                        </div>
+                        <div className="nosession-any-text">{"SESSION NOT FOUND :'("}</div>
                     </div>
                 </Panel>
             )}

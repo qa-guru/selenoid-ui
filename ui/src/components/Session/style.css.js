@@ -168,16 +168,6 @@ export const StyledSession = styled.div`
             margin: 0;
         }
     }
-
-    .session-missing__back {
-        color: var(--color-accent, #6cb6ff);
-        text-decoration: none;
-        font-size: 0.9em;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
 `;
 
 export const StyledSessionVideo = styled.div`
