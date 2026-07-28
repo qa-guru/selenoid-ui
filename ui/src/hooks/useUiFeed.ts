@@ -8,6 +8,7 @@ import {
     reconnectDelayMs,
     refreshSseStatus,
 } from "../util/uiFeed";
+import { isMockSessionsEnabled, mergeMockLiveSessions } from "../lib/mockSessions";
 
 const EMPTY_FEED = {
     origin: undefined,
@@ -151,12 +152,13 @@ export function useUiFeed() {
     }, [applyPayload]);
 
     const feed = data || EMPTY_FEED;
+    const sessions = isMockSessionsEnabled() ? mergeMockLiveSessions(feed.sessions || {}) : feed.sessions || {};
 
     return {
         origin: feed.origin,
         state: feed.state || {},
         browsers: feed.browsers || {},
-        sessions: feed.sessions || {},
+        sessions,
         browserProtocols: feed.browserProtocols || {},
         version: feed.version || "unknown",
         sseStatus,
