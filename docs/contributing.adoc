@@ -10,7 +10,7 @@ WARNING: **Deprecated AsciiDoc.** Сборка и запуск — в корне
 ----
 $ yarn --cwd ui install
 $ yarn --cwd ui build
-$ go generate github.com/aerokube/selenoid-ui
+$ go generate github.com/qa-guru/selenoid-ui
 ----
 
 3) Build (requires Golang **1.26.5**, see `.go-version` / `go.mod`):

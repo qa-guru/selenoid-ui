@@ -43,7 +43,7 @@ _Вы на `main` / v3-dev — активная разработка (рубеж
 
 <!-- stack-branches-note:end -->
 
-Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) — форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) с поддержкой **Playwright-сессий** на странице New Session.
+Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) — форк [aerokube/selenoid-ui](https://github.com/qa-guru/selenoid-ui) с поддержкой **Playwright-сессий** на странице New Session.
 
 [![Build Status](https://github.com/qa-guru/selenoid-ui/workflows/build/badge.svg)](https://github.com/qa-guru/selenoid-ui/actions?query=workflow%3Abuild)
 [![Coverage](https://codecov.io/github/qa-guru/selenoid-ui/coverage.svg)](https://codecov.io/gh/qa-guru/selenoid-ui)
@@ -88,7 +88,7 @@ UI не заменяет hub — он **подключается к уже за�
 - Нужен тот же `browsers.json`, что у hub — иначе Playwright-версии в UI не совпадут с hub.
 - **SSE resilience:** immediate `GET /status`, fallback poll каждые 4s, reconnect с backoff, индикатор **STALE** вместо мгновенного сброса в UNKNOWN.
 
-Upstream docs: [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui) · [aerokube.com/selenoid-ui](https://aerokube.com/selenoid-ui/latest/). AsciiDoc `docs/*.adoc` — **deprecated** (оставлены как upstream history); канон — этот README + `docs/RELEASE_*.md`.
+Upstream docs: [aerokube/selenoid-ui](https://github.com/qa-guru/selenoid-ui) · [aerokube.com/selenoid-ui](https://aerokube.com/selenoid-ui/latest/). AsciiDoc `docs/*.adoc` — **deprecated** (оставлены как upstream history); канон — этот README + `docs/RELEASE_*.md`.
 
 ## Сборка и запуск
 

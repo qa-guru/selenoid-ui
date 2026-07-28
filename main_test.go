@@ -13,7 +13,7 @@ import (
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
-	"github.com/aerokube/selenoid-ui/selenoid"
+	"github.com/qa-guru/selenoid-ui/selenoid"
 	"github.com/aerokube/util/sse"
 	"github.com/koding/websocketproxy"
 )

@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	auth "github.com/abbot/go-http-auth"
-	"github.com/aerokube/selenoid-ui/selenoid"
+	"github.com/qa-guru/selenoid-ui/selenoid"
 	"github.com/aerokube/util/sse"
 	"github.com/gorilla/websocket"
 	"github.com/koding/websocketproxy"
@@ -21,7 +21,7 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/aerokube/selenoid-ui/statik"
+	_ "github.com/qa-guru/selenoid-ui/statik"
 )
 
 //go:generate statik -src=./ui/build

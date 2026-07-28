@@ -1,7 +1,7 @@
 # Release v2.0.0 — qa-guru/selenoid-ui
 
 **Дата:** 25 июня 2026  
-**База:** форк [aerokube/selenoid-ui](https://github.com/aerokube/selenoid-ui)  
+**База:** форк [aerokube/selenoid-ui](https://github.com/qa-guru/selenoid-ui)  
 **GitHub:** https://github.com/qa-guru/selenoid-ui/releases/tag/v2.0.0
 
 Первый публичный релиз UI для [qa-guru/selenoid](https://github.com/qa-guru/selenoid) v2.0.0 с поддержкой **Playwright-сессий**.
@@ -10,13 +10,13 @@
 
 ## Кратко
 
-| | |
-|---|---|
-| **WebDriver UI** | Capabilities, VNC, логи — как в upstream |
-| **Playwright UI** | Сниппеты WS, Create Session, прокси `/playwright/` |
-| **browsers.json** | Флаг `-browsers-conf` для различения WebDriver / Playwright |
-| **Docker Hub** | `qaguru/selenoid-ui:v2.0.0`, `qaguru/selenoid-ui:latest-release` |
-| **Бинарники** | `selenoid-ui_linux_amd64`, `selenoid-ui_darwin_arm64`, … |
+|                   |                                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| **WebDriver UI**  | Capabilities, VNC, логи — как в upstream                         |
+| **Playwright UI** | Сниппеты WS, Create Session, прокси `/playwright/`               |
+| **browsers.json** | Флаг `-browsers-conf` для различения WebDriver / Playwright      |
+| **Docker Hub**    | `qaguru/selenoid-ui:v2.0.0`, `qaguru/selenoid-ui:latest-release` |
+| **Бинарники**     | `selenoid-ui_linux_amd64`, `selenoid-ui_darwin_arm64`, …         |
 
 ---
 
