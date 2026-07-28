@@ -4,6 +4,11 @@
 Fills /sessions/?json so Finished sessions UI can show every column:
 id · date · duration · quota · name · video/log/har icons.
 
+Also writes viewable artifacts:
+  · .log — multiline session log text (Session logs panel)
+  · .har — valid HAR 1.2 JSON with log.entries (HarViewer)
+  · .mp4 — tiny stub unless a real showcase copy exists
+
 Usage (from selenoid-ui/):
   python scripts/seed-session-mocks.py
   python scripts/seed-session-mocks.py --clean
@@ -28,12 +33,159 @@ HAR_DIR = DEV_ROOT / "har"
 TZ = timezone(timedelta(hours=2))
 NOW = datetime(2026, 7, 28, 12, 50, 0, tzinfo=TZ)
 
-# Tiny valid-enough placeholders — UI only needs filenames for list icons.
-STUB_BYTES = b"mock"
+# Video: tiny placeholder (list icons only need the filename). Showcase copies a real mp4.
+VIDEO_STUB_BYTES = b"mock"
+
+# Session log text — readable in Session logs panel (not the literal "mock").
+MOCK_LOG = """\
+2026-07-28 12:44:01 INFO  [SESSION_CREATED] [chrome 148.0]
+2026-07-28 12:44:02 INFO  [PROXY_TO] [http://172.17.0.2:4444]
+2026-07-28 12:44:03 INFO  [INIT] capabilities: enableVNC=true enableVideo=true enableHAR=true
+2026-07-28 12:44:05 INFO  [NAVIGATE] https://example.com/
+2026-07-28 12:44:06 INFO  [HAR_CAPTURE_STARTED] CDP Network domain enabled
+2026-07-28 12:45:12 INFO  [CLICK] css=#submit
+2026-07-28 12:46:00 INFO  [SESSION_DELETED] reason=client
+2026-07-28 12:46:01 INFO  [VIDEO_RENAMED] done
+2026-07-28 12:46:01 INFO  [HAR_FLUSHED] entries=3
+"""
 
 
 def _iso(dt: datetime) -> str:
     return dt.isoformat()
+
+
+def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
+    """Minimal valid HAR 1.2 so HarViewer can parse log.entries."""
+    base = started or NOW - timedelta(minutes=5)
+    t0 = _iso(base)
+    t1 = _iso(base + timedelta(milliseconds=120))
+    t2 = _iso(base + timedelta(milliseconds=340))
+    return {
+        "log": {
+            "version": "1.2",
+            "creator": {"name": "selenoid", "version": "3.0.0-mock"},
+            "pages": [
+                {
+                    "startedDateTime": t0,
+                    "id": "page_1",
+                    "title": "Example Domain",
+                    "pageTimings": {"onContentLoad": 180.0, "onLoad": 420.0},
+                }
+            ],
+            "entries": [
+                {
+                    "pageref": "page_1",
+                    "startedDateTime": t0,
+                    "time": 42.0,
+                    "request": {
+                        "method": "GET",
+                        "url": "https://example.com/",
+                        "httpVersion": "HTTP/1.1",
+                        "cookies": [],
+                        "headers": [
+                            {"name": "Accept", "value": "text/html"},
+                            {"name": "User-Agent", "value": "selenoid-mock"},
+                        ],
+                        "queryString": [],
+                        "headersSize": 128,
+                        "bodySize": 0,
+                    },
+                    "response": {
+                        "status": 200,
+                        "statusText": "OK",
+                        "httpVersion": "HTTP/1.1",
+                        "cookies": [],
+                        "headers": [{"name": "Content-Type", "value": "text/html"}],
+                        "content": {
+                            "size": 1256,
+                            "mimeType": "text/html",
+                            "text": "<html><body>Example Domain</body></html>",
+                        },
+                        "redirectURL": "",
+                        "headersSize": 96,
+                        "bodySize": 1256,
+                    },
+                    "cache": {},
+                    "timings": {
+                        "blocked": 1,
+                        "dns": 2,
+                        "connect": 3,
+                        "ssl": 4,
+                        "send": 5,
+                        "wait": 20,
+                        "receive": 7,
+                    },
+                },
+                {
+                    "pageref": "page_1",
+                    "startedDateTime": t1,
+                    "time": 18.0,
+                    "request": {
+                        "method": "GET",
+                        "url": "https://example.com/styles.css",
+                        "httpVersion": "HTTP/1.1",
+                        "cookies": [],
+                        "headers": [{"name": "Accept", "value": "text/css"}],
+                        "queryString": [],
+                        "headersSize": 64,
+                        "bodySize": 0,
+                    },
+                    "response": {
+                        "status": 200,
+                        "statusText": "OK",
+                        "httpVersion": "HTTP/1.1",
+                        "cookies": [],
+                        "headers": [{"name": "Content-Type", "value": "text/css"}],
+                        "content": {"size": 412, "mimeType": "text/css"},
+                        "redirectURL": "",
+                        "headersSize": 80,
+                        "bodySize": 412,
+                    },
+                    "cache": {},
+                    "timings": {"send": 1, "wait": 12, "receive": 5},
+                },
+                {
+                    "pageref": "page_1",
+                    "startedDateTime": t2,
+                    "time": 55.0,
+                    "request": {
+                        "method": "POST",
+                        "url": f"https://api.example.com/sessions/{session_id}/events",
+                        "httpVersion": "HTTP/1.1",
+                        "cookies": [],
+                        "headers": [
+                            {"name": "Content-Type", "value": "application/json"},
+                            {"name": "Accept", "value": "application/json"},
+                        ],
+                        "queryString": [],
+                        "postData": {
+                            "mimeType": "application/json",
+                            "text": '{"event":"click","target":"#submit"}',
+                        },
+                        "headersSize": 140,
+                        "bodySize": 36,
+                    },
+                    "response": {
+                        "status": 201,
+                        "statusText": "Created",
+                        "httpVersion": "HTTP/1.1",
+                        "cookies": [],
+                        "headers": [{"name": "Content-Type", "value": "application/json"}],
+                        "content": {
+                            "size": 27,
+                            "mimeType": "application/json",
+                            "text": '{"ok":true,"id":"evt-1"}',
+                        },
+                        "redirectURL": "",
+                        "headersSize": 88,
+                        "bodySize": 27,
+                    },
+                    "cache": {},
+                    "timings": {"send": 2, "wait": 40, "receive": 13},
+                },
+            ],
+        }
+    }
 
 
 def _meta(
@@ -273,20 +425,37 @@ LEGACY_ENRICH = [
 ]
 
 
-def _write_stub(path: Path) -> None:
+def _write_video_stub(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
-        path.write_bytes(STUB_BYTES)
+        path.write_bytes(VIDEO_STUB_BYTES)
+
+
+def _write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
 
 
 def seed_one(entry: dict) -> None:
     sid = entry["id"]
     if entry.get("video") and entry.get("write_video", True):
-        _write_stub(VIDEO_DIR / f"{sid}.mp4")
+        _write_video_stub(VIDEO_DIR / f"{sid}.mp4")
     if entry.get("log"):
-        _write_stub(LOGS_DIR / f"{sid}.log")
+        _write_text(LOGS_DIR / f"{sid}.log", MOCK_LOG)
     if entry.get("har"):
-        _write_stub(HAR_DIR / f"{sid}.har")
+        started = None
+        meta = entry.get("meta") or {}
+        raw = meta.get("started")
+        if isinstance(raw, str):
+            try:
+                started = datetime.fromisoformat(raw)
+            except ValueError:
+                started = None
+        har = _mock_har(sid, started=started)
+        _write_text(
+            HAR_DIR / f"{sid}.har",
+            json.dumps(har, indent=2, ensure_ascii=False) + "\n",
+        )
     meta = entry.get("meta")
     if meta is not None:
         LOGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -335,7 +504,7 @@ def main() -> None:
     # Keep a real mp4 byte-size for one mock so /video/ open is not empty silence.
     real_mp4 = VIDEO_DIR / "83d74cf9-b841-4d2c-b89f-da665d3407b5.mp4"
     showcase = VIDEO_DIR / "mock-full-alice-01.mp4"
-    if real_mp4.is_file() and showcase.is_file() and showcase.stat().st_size <= len(STUB_BYTES):
+    if real_mp4.is_file() and showcase.is_file() and showcase.stat().st_size <= len(VIDEO_STUB_BYTES):
         shutil.copyfile(real_mp4, showcase)
 
     print(
