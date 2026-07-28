@@ -65,12 +65,17 @@ describe("VncCard", () => {
             "window-control",
             "window-control--success"
         );
+        expect(screen.getByRole("button", { name: "Kill container" })).toHaveClass(
+            "window-control",
+            "window-control--danger"
+        );
         expect(screen.getByRole("button", { name: "Copy from Selenoid" })).toHaveClass("window-control");
         expect(screen.getByRole("button", { name: "Paste to Selenoid" })).toHaveClass("window-control");
 
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
         expect(screen.getByRole("link", { name: "Back" }).querySelector("svg")).toBeTruthy();
         expect(screen.getByRole("button", { name: "Enter fullscreen" }).querySelector("svg")).toBeTruthy();
+        expect(screen.getByRole("button", { name: "Kill container" }).querySelector("svg")).toBeTruthy();
     });
 
     it("passes screenResolution as --vnc-aspect on VncWindow", () => {
@@ -112,6 +117,30 @@ describe("VncCard", () => {
         await user.click(screen.getByRole("button", { name: "Copy from Selenoid" }));
 
         expect(fetchMock).toHaveBeenCalledWith("/clipboard/sess-123", { method: "GET" });
+        vi.unstubAllGlobals();
+    });
+
+    it("kills session via DELETE and navigates home", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+        vi.stubGlobal("fetch", fetchMock);
+
+        render(
+            <MemoryRouter initialEntries={["/session/sess-123"]}>
+                <VncCard
+                    session="sess-123"
+                    origin="http://localhost"
+                    browser={{ caps: { enableVNC: true } }}
+                    onVNCFullscreenChange={vi.fn()}
+                />
+            </MemoryRouter>
+        );
+
+        const kill = screen.getByRole("button", { name: "Kill container" });
+        expect(kill).toHaveClass("window-control", "window-control--danger");
+        await user.click(kill);
+
+        expect(fetchMock).toHaveBeenCalledWith("/wd/hub/session/sess-123", { method: "DELETE" });
         vi.unstubAllGlobals();
     });
 });
