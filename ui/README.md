@@ -1,7 +1,20 @@
 ## selenoid-ui (React 19 + react-router 7)
 
-Current toolchain on `main` / v3-dev: **React 19.x** + **react-router-dom 7** (`HashRouter` / `Routes` / `useNavigate`) with Vite 6 + Vitest 3 + React Testing Library.
+Current toolchain on `main` / v3-dev: **React 19.x** + **react-router-dom 7** (`HashRouter` / `Routes` / `useNavigate`) with Vite 6 + Vitest 3 + React Testing Library + **TypeScript 7**.
 Component tests run via `yarn test` and emit Allure results (`allure-results/`).
+
+### TypeScript migration (DoD)
+
+Product source under `src/` targets full TypeScript (same bar as allure-notifications product packages):
+
+| Gate       | Target                                                                  |
+| ---------- | ----------------------------------------------------------------------- |
+| Extensions | `.ts` / `.tsx` only in `src/` (no `.js` / `.jsx`)                       |
+| `tsconfig` | `strict: true`, `allowJs: false`                                        |
+| CI         | `yarn typecheck` (already in `ci/test.sh`) + `yarn test` + `yarn build` |
+| Types      | domain in `src/types/`; ambient shims in `src/types/shims.d.ts`         |
+
+Vite remains the bundler (no `tsc → js/` emit). During phased migration `allowJs` may stay on until the last tighten step.
 
 ### Install note
 

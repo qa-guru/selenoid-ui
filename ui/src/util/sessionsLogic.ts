@@ -1,4 +1,6 @@
-export function matchesSessionQuery(id, sessions, query) {
+import type { SessionsMap } from "../types/hub";
+
+export function matchesSessionQuery(id: string, sessions: SessionsMap, query: string): boolean {
     if (id.includes(query)) {
         return true;
     }
@@ -19,19 +21,19 @@ export function matchesSessionQuery(id, sessions, query) {
     return query === "";
 }
 
-export function sortSessionIds(ids, sessions) {
-    return [...ids].sort((a) => (sessions[a]?.caps?.labels?.manual ? -1 : 1));
+export function sortSessionIds(ids: string[], sessions: SessionsMap): string[] {
+    return [...ids].sort((a: any) => (sessions[a]?.caps?.labels?.manual ? -1 : 1));
 }
 
-export function filterVideoFiles(videos, query) {
-    return videos.filter((fname) => fname.includes(query) && fname.includes("."));
+export function filterVideoFiles(videos: string[], query: string): string[] {
+    return videos.filter((fname: any) => fname.includes(query) && fname.includes("."));
 }
 
-export function videoPreloadMode(count) {
+export function videoPreloadMode(count: number): "none" | "auto" {
     return count > 100 ? "none" : "auto";
 }
 
-export function sessionIdShort(id) {
+export function sessionIdShort(id: string): string {
     const dash = id.indexOf("-");
     return id.substring(0, dash === -1 ? 8 : dash);
 }

@@ -1,0 +1,111 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, useNavigate } from "react-router-dom";
+import { afterEach, describe, expect, it } from "vitest";
+import SelenoidAppHeader from "./index";
+
+/**
+ * In production the canonical header markup is rendered by js/header.js (async,
+ * external module). Under jsdom that script does not execute, so we simulate its
+ * rendered nav inside the #app-header mount and assert the wrapper drives the
+ * active item from the HashRouter route.
+ */
+function injectHeaderNav() {
+    const mount = document.getElementById("app-header");
+    const nav = document.createElement("nav");
+    (nav as HTMLElement).dataset.testid = "header-nav";
+    const items = [
+        ["#/statistics", "header-nav-statistics", "Statistics"],
+        ["#/sessions", "header-nav-sessions", "Sessions"],
+        ["#/new-session", "header-nav-new-session", "New Session"],
+    ];
+    for (const [href, testid, label] of items) {
+        const link = document.createElement("a");
+        link.setAttribute("href", href);
+        link.className = "link link--nav";
+        (link as HTMLElement).dataset.testid = testid;
+        link.textContent = label;
+        nav.appendChild(link);
+    }
+    mount!.appendChild(nav);
+}
+
+function activeTestids() {
+    return Array.from(document.querySelectorAll('[data-testid="header-nav"] a.is-active')).map(
+        (link: any) => (link as HTMLElement).dataset.testid
+    );
+}
+
+function ariaCurrentTestids() {
+    return Array.from(document.querySelectorAll('[data-testid="header-nav"] a[aria-current="page"]')).map(
+        (link: any) => (link as HTMLElement).dataset.testid
+    );
+}
+
+function Navigator() {
+    const navigate = useNavigate();
+    return (
+        <button type="button" data-testid="go-sessions" onClick={() => navigate("/sessions")}>
+            go sessions
+        </button>
+    );
+}
+
+const renderHeader = (initialEntries = ["/"]) =>
+    render(
+        <MemoryRouter initialEntries={initialEntries}>
+            <SelenoidAppHeader />
+            <Navigator />
+        </MemoryRouter>
+    );
+
+afterEach(() => {
+    const mount = document.getElementById("app-header");
+    if (mount) {
+        mount!.replaceChildren();
+    }
+});
+
+describe("SelenoidAppHeader", () => {
+    it("renders the canonical #app-header mount", () => {
+        renderHeader();
+        expect(screen.getByTestId("app-header-mount")).toBeInTheDocument();
+        expect(document.getElementById("app-header")).not.toBeNull();
+    });
+
+    it("highlights the nav item matching the current hash route", async () => {
+        renderHeader(["/new-session"]);
+        injectHeaderNav();
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-new-session"]);
+        });
+        expect(ariaCurrentTestids()).toEqual(["header-nav-new-session"]);
+    });
+
+    it("highlights Statistics on the statistics route", async () => {
+        renderHeader(["/statistics"]);
+        injectHeaderNav();
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-statistics"]);
+        });
+    });
+
+    it("re-syncs the active item on SPA navigation", async () => {
+        const user = userEvent.setup();
+        renderHeader(["/statistics"]);
+        injectHeaderNav();
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-statistics"]);
+        });
+
+        await user.click(screen.getByTestId("go-sessions"));
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-sessions"]);
+        });
+        expect(ariaCurrentTestids()).toEqual(["header-nav-sessions"]);
+    });
+});

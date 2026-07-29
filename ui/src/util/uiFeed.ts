@@ -1,5 +1,7 @@
 /** SSE + /status feed constants for Selenoid UI. */
 
+import type { HealthStatus, UiStatusPayload } from "../types/hub";
+
 export const FALLBACK_POLL_MS = 4_000;
 export const RECONNECT_BASE_MS = 1_000;
 export const RECONNECT_MAX_MS = 30_000;
@@ -7,24 +9,29 @@ export const SSE_OK_MS = 4_000;
 export const SSE_STALE_MS = 16_000;
 export const SSE_WATCHDOG_MS = 2_000;
 
-export function isUiStatusPayload(payload) {
-    return Boolean(payload && typeof payload === "object" && payload.state);
+export function isUiStatusPayload(payload: unknown): payload is UiStatusPayload {
+    return Boolean(payload && typeof payload === "object" && (payload as UiStatusPayload).state);
 }
 
-export function deriveSelenoidStatus(payload) {
+export function deriveSelenoidStatus(payload: unknown): HealthStatus {
     if (!payload || typeof payload !== "object") {
         return "unknown";
     }
-    if (Array.isArray(payload.errors) && payload.errors.length > 0) {
+    const p = payload as UiStatusPayload;
+    if (Array.isArray(p.errors) && p.errors.length > 0) {
         return "error";
     }
-    if (payload.state) {
+    if (p.state) {
         return "ok";
     }
     return "unknown";
 }
 
-export function refreshSseStatus(lastSseAt, hasData, now = Date.now()) {
+export function refreshSseStatus(
+    lastSseAt: number | null | undefined,
+    hasData: boolean,
+    now = Date.now()
+): HealthStatus {
     if (lastSseAt == null) {
         return hasData ? "stale" : "unknown";
     }
@@ -39,6 +46,6 @@ export function refreshSseStatus(lastSseAt, hasData, now = Date.now()) {
     return hasData ? "stale" : "error";
 }
 
-export function reconnectDelayMs(attempt) {
+export function reconnectDelayMs(attempt: number): number {
     return Math.min(RECONNECT_BASE_MS * 2 ** attempt, RECONNECT_MAX_MS);
 }

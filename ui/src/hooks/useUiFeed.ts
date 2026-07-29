@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { BrowserProtocols, BrowsersMap, HealthStatus, HubState, SessionsMap, UiStatusPayload } from "../types/hub";
 import {
     FALLBACK_POLL_MS,
     SSE_WATCHDOG_MS,
@@ -10,7 +11,7 @@ import {
 } from "../util/uiFeed";
 import { isMockSessionsEnabled, mergeMockLiveSessions } from "../lib/mockSessions";
 
-const EMPTY_FEED = {
+const EMPTY_FEED: UiStatusPayload = {
     origin: undefined,
     state: {},
     browsers: {},
@@ -19,19 +20,31 @@ const EMPTY_FEED = {
     version: "unknown",
 };
 
-export function useUiFeed() {
-    const [data, setData] = useState(null);
-    const [sseStatus, setSseStatus] = useState("unknown");
-    const [selenoidStatus, setSelenoidStatus] = useState("unknown");
-    const [lastUpdate, setLastUpdate] = useState(null);
+export type UiFeed = {
+    origin: string | undefined;
+    state: HubState;
+    browsers: BrowsersMap;
+    sessions: SessionsMap;
+    browserProtocols: BrowserProtocols;
+    version: string;
+    sseStatus: HealthStatus;
+    selenoidStatus: HealthStatus;
+    lastUpdate: number | null;
+};
 
-    const dataRef = useRef(null);
-    const lastSseAtRef = useRef(null);
+export function useUiFeed(): UiFeed {
+    const [data, setData] = useState<UiStatusPayload | null>(null);
+    const [sseStatus, setSseStatus] = useState<HealthStatus>("unknown");
+    const [selenoidStatus, setSelenoidStatus] = useState<HealthStatus>("unknown");
+    const [lastUpdate, setLastUpdate] = useState<number | null>(null);
+
+    const dataRef = useRef<UiStatusPayload | null>(null);
+    const lastSseAtRef = useRef<number | null>(null);
     const reconnectAttemptRef = useRef(0);
-    const eventSourceRef = useRef(null);
-    const reconnectTimerRef = useRef(null);
+    const eventSourceRef = useRef<EventSource | null>(null);
+    const reconnectTimerRef = useRef<number | null>(null);
 
-    const applyPayload = useCallback((payload) => {
+    const applyPayload = useCallback((payload: unknown) => {
         if (!isUiStatusPayload(payload)) {
             return;
         }
@@ -44,8 +57,8 @@ export function useUiFeed() {
 
     useEffect(() => {
         let cancelled = false;
-        let fallbackTimer;
-        let watchdogTimer;
+        let fallbackTimer: number | undefined;
+        let watchdogTimer: number | undefined;
 
         const markSseActivity = () => {
             lastSseAtRef.current = Date.now();
@@ -54,7 +67,7 @@ export function useUiFeed() {
 
         const updateSseFromWatchdog = () => {
             const next = refreshSseStatus(lastSseAtRef.current, Boolean(dataRef.current));
-            setSseStatus((prev) => (prev === next ? prev : next));
+            setSseStatus((prev: any) => (prev === next ? prev : next));
         };
 
         const loadStatus = async () => {
@@ -100,7 +113,7 @@ export function useUiFeed() {
                 markSseActivity();
             };
 
-            es.onmessage = (event) => {
+            es.onmessage = (event: any) => {
                 markSseActivity();
                 try {
                     const payload = JSON.parse(event.data);

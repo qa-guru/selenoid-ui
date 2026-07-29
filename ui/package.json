@@ -9,7 +9,6 @@
         "ansi-256-colors": "^1.1.0",
         "event-source-polyfill": "^1.0.17",
         "highlight.js": "^11.11.1",
-        "prop-types": "^15.8.1",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
         "react-is": "^19.2.7",

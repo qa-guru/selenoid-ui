@@ -12,7 +12,7 @@ describe("registerServiceWorker", () => {
         vi.stubEnv("DEV", false);
         const register = vi.fn().mockResolvedValue(undefined);
         vi.stubGlobal("navigator", { serviceWorker: { register } });
-        const addEventListener = vi.fn((_event, handler) => {
+        const addEventListener = vi.fn((_event: any, handler: any) => {
             handler();
         });
         vi.stubGlobal("window", { addEventListener });

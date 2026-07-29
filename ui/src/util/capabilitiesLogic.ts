@@ -1,3 +1,5 @@
+import type { BrowserProtocols, LiveSession, SessionsMap } from "../types/hub";
+
 export const PLAYWRIGHT_BROWSER_NAMES = new Set([
     "playwright-chromium",
     "playwright-webkit",
@@ -5,12 +7,19 @@ export const PLAYWRIGHT_BROWSER_NAMES = new Set([
     "playwright-msedge",
 ]);
 
-export function sessionIdFrom({ response }) {
+type SessionCreateResponse = {
+    sessionId?: string;
+    value?: { sessionId?: string };
+};
+
+export function sessionIdFrom({ response }: { response?: SessionCreateResponse | null }): string {
     return response?.sessionId || response?.value?.sessionId || "";
 }
 
+export type ScreenSize = { width: number; height: number };
+
 /** Parse `1920x1080` / `1920x1080x24` → outer window size. */
-export function parseScreenSize(screenResolution) {
+export function parseScreenSize(screenResolution: unknown): ScreenSize | null {
     const match = String(screenResolution || "").match(/^(\d+)x(\d+)(?:x\d+)?$/i);
     if (!match) {
         return null;
@@ -24,7 +33,10 @@ export function parseScreenSize(screenResolution) {
 }
 
 /** Chromium-family launch args so the window opens already at screenResolution. */
-export function browserWindowOptions(browserName, screenResolution) {
+export function browserWindowOptions(
+    browserName: unknown,
+    screenResolution: unknown
+): Record<string, { args: string[] }> | null {
     const size = parseScreenSize(screenResolution);
     if (!size) {
         return null;
@@ -40,8 +52,14 @@ export function browserWindowOptions(browserName, screenResolution) {
     return null;
 }
 
-async function postSessionCommand(sessionId, path, body, fetchImpl, authToken) {
-    const headers = {
+async function postSessionCommand(
+    sessionId: string,
+    path: string,
+    body: unknown,
+    fetchImpl: typeof fetch,
+    authToken: string
+): Promise<Response | undefined> {
+    const headers: Record<string, string> = {
         "Content-Type": "application/json",
         ...(authToken ? { Authorization: `Basic ${btoa(String(authToken))}` } : {}),
     };
@@ -59,13 +77,13 @@ async function postSessionCommand(sessionId, path, body, fetchImpl, authToken) {
  * Fit browser window to screenResolution after Create Session.
  * screenResolution only sizes Xvfb; browsers often keep a default window.
  * Prefer explicit window/rect (maximize is deprecated / flaky in containers).
- *
- * @param {string} sessionId
- * @param {string} screenResolution
- * @param {typeof fetch} [fetchImpl]
- * @param {string} [authToken] WD Basic Auth `user:pass` (same as Create Session)
  */
-export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl = fetch, authToken = "") {
+export async function resizeSessionWindow(
+    sessionId: string,
+    screenResolution: unknown,
+    fetchImpl: typeof fetch = fetch,
+    authToken: any = ""
+): Promise<boolean> {
     const size = parseScreenSize(screenResolution);
     if (!sessionId || !size) {
         return false;
@@ -93,7 +111,11 @@ export async function resizeSessionWindow(sessionId, screenResolution, fetchImpl
     return Boolean(wire && wire.ok);
 }
 
-export function isPlaywrightBrowser(browserProtocols, name, version) {
+export function isPlaywrightBrowser(
+    browserProtocols: BrowserProtocols | undefined,
+    name: string | undefined,
+    version?: string
+): boolean {
     if (!name) {
         return false;
     }
@@ -103,18 +125,27 @@ export function isPlaywrightBrowser(browserProtocols, name, version) {
     return browserProtocols?.[name]?.[version || ""]?.protocol === "playwright";
 }
 
-export function browserProtocol(browserProtocols, name, version) {
+export function browserProtocol(
+    browserProtocols: BrowserProtocols | undefined,
+    name: string | undefined,
+    version?: string
+): "playwright" | "webdriver" {
     if (isPlaywrightBrowser(browserProtocols, name, version)) {
         return "playwright";
     }
     return browserProtocols?.[name || ""]?.[version || ""]?.protocol === "playwright" ? "playwright" : "webdriver";
 }
 
-function playwrightSessionCaps(session: any) {
+function playwrightSessionCaps(session: LiveSession | undefined) {
     return session?.caps || {};
 }
 
-export function findPlaywrightSession(sessions, existingIds, name, version) {
+export function findPlaywrightSession(
+    sessions: SessionsMap | undefined,
+    existingIds: Set<string>,
+    name: string,
+    version: string
+): string {
     for (const [id, session] of Object.entries(sessions || {})) {
         if (existingIds.has(id)) {
             continue;
