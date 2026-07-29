@@ -219,7 +219,7 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
             setUpdatedAt(new Date());
         } catch (err) {
             setPhase("error");
-            setError(err?.message || "Failed to load HAR");
+            setError(err instanceof Error ? err.message : "Failed to load HAR");
         }
     }, [enabled, href, session]);
 
