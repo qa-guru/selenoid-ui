@@ -7,7 +7,7 @@
 | Поле            | Значение                                                                       |
 | --------------- | ------------------------------------------------------------------------------ |
 | Линия           | Selenoid 3                                                                     |
-| Stack semver    | **v3.0.5** (UI cut; hub/cm Docker pin TBD)                                     |
+| Stack semver    | hub/cm **v3.0.5** / **v3.0.2**; UI cut **v3.0.15** (full TS)                   |
 | Docker API      | TBD (paired с hub)                                                             |
 | Docker Engine   | TBD (paired с hub)                                                             |
 | Go              | 1.26.5                                                                         |
@@ -15,7 +15,7 @@
 | React           | 19                                                                             |
 | Router          | react-router-dom 7                                                             |
 | UI              | Vite 6                                                                         |
-| TypeScript      | **7** (`typescript@^7.0.2`, native `tsc`; Vite bundler retained)               |
+| TypeScript      | **7** full `ui/src` (`strict`, `allowJs: false`; Vite bundler retained)        |
 | Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL      |
 | Typecheck       | `yarn --cwd ui typecheck` → `tsc -p tsconfig.json --noEmit` (CI: `ci/test.sh`) |
 | Node CI         | 24                                                                             |
