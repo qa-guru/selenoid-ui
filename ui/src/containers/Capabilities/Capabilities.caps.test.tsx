@@ -201,7 +201,7 @@ describe("Capabilities boolean caps (seg canon)", () => {
         fetchMock.mockRestore();
     });
 
-    it("wires enableHAR honestly — hub records network to /har when toggled on (WebDriver Chromium)", async () => {
+    it("wires enableHAR to WebDriver session caps when toggled on", async () => {
         const user = userEvent.setup();
         const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
             ok: true,

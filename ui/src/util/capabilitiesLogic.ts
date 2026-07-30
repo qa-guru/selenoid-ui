@@ -144,7 +144,8 @@ export function findPlaywrightSession(
     sessions: SessionsMap | undefined,
     existingIds: Set<string>,
     name: string,
-    version: string
+    version: string,
+    sessionName?: string
 ): string {
     for (const [id, session] of Object.entries(sessions || {})) {
         if (existingIds.has(id)) {
@@ -157,7 +158,7 @@ export function findPlaywrightSession(
         if (caps.version && caps.version !== version) {
             continue;
         }
-        if (caps.name && caps.name !== "Manual session") {
+        if (sessionName && caps.name && caps.name !== sessionName) {
             continue;
         }
         return id;

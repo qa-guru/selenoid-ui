@@ -136,7 +136,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(within(flags!).getByTestId("caps-enable-vnc")).toHaveAttribute("data-param-id", "enableVnc");
         expect(within(flags!).getByTestId("caps-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
         expect(within(flags!).getByTestId("caps-enable-har")).toHaveAttribute("data-param-id", "enableHar");
-        expect(within(flags!).getByTestId("caps-enable-log")).toHaveAttribute("data-param-id", "enableLog");
+        expect(within(caps!).getByTestId("caps-enable-log")).toHaveAttribute("data-param-id", "enableLog");
         expect(within(caps!).queryByTestId("capabilities-caps-har")).toBeNull();
 
         expect(within(caps!).getByTestId("capabilities-caps-timezone")).toHaveClass("plaque-field-grid--solo");

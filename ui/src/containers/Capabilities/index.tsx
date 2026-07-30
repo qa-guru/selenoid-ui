@@ -2588,7 +2588,7 @@ const Launch = ({
             if (navigated) {
                 return;
             }
-            const sessionId = findPlaywrightSession(data.sessions, existingIds, name, version);
+            const sessionId = findPlaywrightSession(data.sessions, existingIds, name, version, pwSession.name);
             if (!sessionId) {
                 return;
             }
@@ -2810,14 +2810,6 @@ const Launch = ({
                                     },
                                 ]}
                             />
-                            <PlaqueFieldSeg
-                                label="enableLog"
-                                paramId="enableLog"
-                                value={enableLog}
-                                onValueChange={setEnableLog}
-                                stretch
-                                data-testid="caps-enable-log"
-                            />
                         </PlaqueFieldGrid>
 
                         {enableHar === "true" ? (
@@ -2838,6 +2830,17 @@ const Launch = ({
                                 />
                             </PlaqueFieldGrid>
                         ) : null}
+
+                        <PlaqueFieldGrid layout="solo" aria-label="Browser log" data-testid="capabilities-caps-log">
+                            <PlaqueFieldSeg
+                                label="enableLog"
+                                paramId="enableLog"
+                                value={enableLog}
+                                onValueChange={setEnableLog}
+                                stretch
+                                data-testid="caps-enable-log"
+                            />
+                        </PlaqueFieldGrid>
 
                         <PlaqueFieldGrid layout="solo" aria-label="Time zone" data-testid="capabilities-caps-timezone">
                             <PlaqueSelect
@@ -3024,22 +3027,6 @@ const Launch = ({
                                     },
                                 ]}
                             />
-                            <PlaqueFieldSeg
-                                label="enableLog"
-                                paramId="enableLog"
-                                value={enableLog}
-                                onValueChange={setEnableLog}
-                                stretch
-                                data-testid="caps-playwright-enable-log"
-                            />
-                            <PlaqueFieldSeg
-                                label="headless"
-                                paramId="headless"
-                                value={headless}
-                                onValueChange={setHeadless}
-                                stretch
-                                data-testid="caps-playwright-headless"
-                            />
                         </PlaqueFieldGrid>
                         {enableHar === "true" ? (
                             <PlaqueFieldGrid
@@ -3059,6 +3046,28 @@ const Launch = ({
                                 />
                             </PlaqueFieldGrid>
                         ) : null}
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Browser log"
+                            data-testid="capabilities-playwright-log"
+                        >
+                            <PlaqueFieldSeg
+                                label="enableLog"
+                                paramId="enableLog"
+                                value={enableLog}
+                                onValueChange={setEnableLog}
+                                stretch
+                                data-testid="caps-playwright-enable-log"
+                            />
+                            <PlaqueFieldSeg
+                                label="headless"
+                                paramId="headless"
+                                value={headless}
+                                onValueChange={setHeadless}
+                                stretch
+                                data-testid="caps-playwright-headless"
+                            />
+                        </PlaqueFieldGrid>
                         <PlaqueFieldGrid
                             layout="solo"
                             aria-label="Time zone"
