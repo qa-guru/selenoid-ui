@@ -111,7 +111,16 @@ describe("SessionInfo", () => {
         );
 
         await user.click(screen.getByTestId("session-kill"));
-        expect(fetchMock!).toHaveBeenCalledWith("/wd/hub/session/abc-def-12345678", { method: "DELETE" });
+        expect(fetchMock!).toHaveBeenCalledWith(
+            "/wd/hub/session/abc-def-12345678",
+            expect.objectContaining({
+                method: "DELETE",
+                credentials: "omit",
+                headers: expect.objectContaining({
+                    Authorization: expect.stringMatching(/^Basic /),
+                }),
+            })
+        );
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
         vi.unstubAllGlobals();
     });

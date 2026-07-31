@@ -1,12 +1,17 @@
 import { useCallback, useState } from "react";
 
+import { hubFetchInit } from "../../config/hubAuth";
+import { resolveHubAuthToken } from "../../config/hubSessionAuth";
+
 /** DELETE /wd/hub/session/{id} — shared by Stats trash and VNC kill. */
 export function deleteSession(id: string) {
-    return fetch(`/wd/hub/session/${id}`, { method: "DELETE" }).then((response: any) => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+    return fetch(`/wd/hub/session/${id}`, hubFetchInit(resolveHubAuthToken(), { method: "DELETE" })).then(
+        (response: any) => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
         }
-    });
+    );
 }
 
 export function useSessionDelete(id: string): [boolean, () => void] {

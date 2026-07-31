@@ -30,6 +30,7 @@ import {
     parseAccessKey,
     primeHubAuth,
 } from "../../config/hubAuth";
+import { rememberHubAuthToken } from "../../config/hubSessionAuth";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -2418,6 +2419,7 @@ const Launch = ({
                 if (response.status === 200) {
                     const data = await response.json();
                     const sessionId = sessionIdFrom({ response: data });
+                    rememberHubAuthToken(wdAuthToken);
                     await waitForLiveSession(sessionId, { initialSessions: sessions });
                     navigate(`/sessions/${sessionId}`);
                     onLoading(false);
@@ -2524,6 +2526,7 @@ const Launch = ({
             if (response.status === 200) {
                 const data = await response.json();
                 const sessionId = sessionIdFrom({ response: data });
+                rememberHubAuthToken(wdAuthToken);
                 try {
                     // Chromium/Edge already get --window-size via browserWindowOptions; only
                     // POST window/rect for drivers that ignore launch args (e.g. Firefox).
@@ -2634,6 +2637,7 @@ const Launch = ({
                 return;
             }
             navigated = true;
+            rememberHubAuthToken(primeToken);
             retainPlaywrightSocket(sessionId, playwrightSocket.current!);
             navigate(`/sessions/${sessionId}`);
             onLoading(false);
