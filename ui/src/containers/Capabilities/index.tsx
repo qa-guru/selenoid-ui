@@ -12,9 +12,12 @@ import {
     browserWindowOptions,
     findPlaywrightSession,
     isPlaywrightBrowser,
+    pickDefaultWebdriverBrowser,
     resizeSessionWindow,
     sessionIdFrom,
+    hubSessionErrorMessage,
 } from "../../util/capabilitiesLogic";
+import { waitForLiveSession } from "../../util/waitForLiveSession";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
 import {
@@ -61,15 +64,15 @@ import "@zero-design-system/react/styles.css";
  * | screenResolution | PlaqueSelect | solo   | selenoid:options.screenResolution |
  * | enableVnc        | PlaqueFieldSeg | solo | enableVNC / selenoid:options      |
  * | enableVideo      | PlaqueFieldSeg | solo | enableVideo                       |
+ * | videoName        | PlaqueField  | solo   | selenoid:options.videoName (cond enableVideo) |
  * | enableHar        | PlaqueFieldSeg | solo | enableHAR → hub CDP → /har/<id>.har|
  * | harContent       | PlaqueFieldSeg | solo | harContent meta|bodies (cond enableHAR; default meta = omit)|
  * | enableLog        | PlaqueFieldSeg | solo | enableLog                         |
+ * | logName          | PlaqueField  | solo   | selenoid:options.logName (cond enableLog)   |
  * | headless         | PlaqueFieldSeg | solo | headless (Playwright only)        |
  * | timeZone         | PlaqueSelect | solo   | selenoid:options.timeZone         |
  * | env              | PlaqueField  | solo   | selenoid:options.env              |
  * | labels           | PlaqueField  | solo   | selenoid:options.labels           |
- * | videoName        | PlaqueField  | duo    | selenoid:options.videoName (cond) |
- * | logName          | PlaqueField  | duo    | selenoid:options.logName (cond)   |
  * | proxyPreset      | PlaqueSelect | solo   | WD: alwaysMatch.proxy / PW: socksProxy query |
  * | proxyServer      | PlaqueField  | duo    | host half of socksProxy                      |
  * | proxyPort        | PlaqueField  | duo    | port half of socksProxy                      |
@@ -1890,6 +1893,16 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         }
     };
 
+    useEffect(() => {
+        if (value || !webdriverAvailable.length) {
+            return;
+        }
+        const picked = pickDefaultWebdriverBrowser(available);
+        if (picked) {
+            onBrowserChange(picked);
+        }
+    }, [value, available, webdriverAvailable.length]);
+
     const driverStripAria = (groupItems: any, loadedLabel: any) =>
         groupItems.length ? loadedLabel : origin ? "No information about browsers" : "Loading browsers";
 
@@ -2402,7 +2415,13 @@ const Launch = ({
                 );
                 if (response.status === 200) {
                     const data = await response.json();
-                    navigate(`/sessions/${sessionIdFrom({ response: data })}`);
+                    const sessionId = sessionIdFrom({ response: data });
+                    await waitForLiveSession(sessionId, { initialSessions: sessions });
+                    navigate(`/sessions/${sessionId}`);
+                    onLoading(false);
+                } else {
+                    onError(await hubSessionErrorMessage(response));
+                    onLoading(false);
                 }
             } catch (err) {
                 console.error("Can't start Android session manually", err);
@@ -2504,17 +2523,36 @@ const Launch = ({
                 const data = await response.json();
                 const sessionId = sessionIdFrom({ response: data });
                 try {
-                    // Bound resize so a hung window/rect (auth challenge) cannot block navigate.
-                    await Promise.race([
-                        resizeSessionWindow(sessionId, screenResolution, fetch, wdAuthToken),
-                        new Promise((resolve: any) => setTimeout(resolve, 8000)),
-                    ]);
+                    // Chromium/Edge already get --window-size via browserWindowOptions; only
+                    // POST window/rect for drivers that ignore launch args (e.g. Firefox).
+                    if (!windowOpts) {
+                        const resizeController = new AbortController();
+                        await Promise.race([
+                            resizeSessionWindow(
+                                sessionId,
+                                screenResolution,
+                                fetch,
+                                wdAuthToken,
+                                resizeController.signal
+                            ),
+                            new Promise((resolve: any) =>
+                                setTimeout(() => {
+                                    resizeController.abort();
+                                    resolve(undefined);
+                                }, 8000)
+                            ),
+                        ]);
+                    }
                 } catch (resizeErr) {
-                    console.warn("Can't resize session window to screenResolution", resizeErr);
+                    if (!(resizeErr instanceof DOMException && resizeErr.name === "AbortError")) {
+                        console.warn("Can't resize session window to screenResolution", resizeErr);
+                    }
                 }
+                await waitForLiveSession(sessionId, { initialSessions: sessions });
                 navigate(`/sessions/${sessionId}`);
+                onLoading(false);
             } else {
-                onError(`Create Session failed: HTTP ${response.status}`);
+                onError(await hubSessionErrorMessage(response));
                 onLoading(false);
             }
         } catch (err) {
@@ -2553,6 +2591,7 @@ const Launch = ({
         authUser,
         authPass,
         wdAuthToken,
+        sessions,
     ]);
 
     const createPlaywrightSession = () => {
@@ -2704,9 +2743,9 @@ const Launch = ({
                     {/*
                       presets #remote-hub: magnet stack →
                       solo(remoteUrl) + duo(authUser|authPass) + duo(sessionTimeout|name) + solo(screenResolution) +
-                      solo(enableVnc|enableVideo|enableHar|enableLog) +
-                      conditional solo(harContent) + solo(timeZone) +
-                      solo(env) + solo(labels) + conditional duo(videoName|logName).
+                      solo(enableVnc|enableVideo|videoName?|enableHar) +
+                      conditional solo(harContent) + solo(enableLog|logName?) +
+                      solo(timeZone) + solo(env) + solo(labels).
                     */}
                     <div
                         className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
@@ -2790,6 +2829,18 @@ const Launch = ({
                                 stretch
                                 data-testid="caps-enable-video"
                             />
+                            {enableVideo === "true" ? (
+                                <PlaqueField
+                                    label="videoName"
+                                    paramId="videoName"
+                                    labelVariant="param"
+                                    type="text"
+                                    value={videoName}
+                                    placeholder="session.mp4"
+                                    onChange={(e: any) => setVideoName(e.target.value)}
+                                    data-testid="caps-video-name"
+                                />
+                            ) : null}
                             <PlaqueFieldSeg
                                 label="enableHar"
                                 paramId="enableHar"
@@ -2840,6 +2891,18 @@ const Launch = ({
                                 stretch
                                 data-testid="caps-enable-log"
                             />
+                            {enableLog === "true" ? (
+                                <PlaqueField
+                                    label="logName"
+                                    paramId="logName"
+                                    labelVariant="param"
+                                    type="text"
+                                    value={logName}
+                                    placeholder="session.log"
+                                    onChange={(e: any) => setLogName(e.target.value)}
+                                    data-testid="caps-log-name"
+                                />
+                            ) : null}
                         </PlaqueFieldGrid>
 
                         <PlaqueFieldGrid layout="solo" aria-label="Time zone" data-testid="capabilities-caps-timezone">
@@ -2882,39 +2945,6 @@ const Launch = ({
                                 data-testid="caps-labels"
                             />
                         </PlaqueFieldGrid>
-
-                        {enableVideo === "true" || enableLog === "true" ? (
-                            <PlaqueFieldGrid
-                                layout={enableVideo === "true" && enableLog === "true" ? "duo" : "solo"}
-                                aria-label="Artifact names"
-                                data-testid="capabilities-caps-names"
-                            >
-                                {enableVideo === "true" ? (
-                                    <PlaqueField
-                                        label="videoName"
-                                        paramId="videoName"
-                                        labelVariant="param"
-                                        type="text"
-                                        value={videoName}
-                                        placeholder="session.mp4"
-                                        onChange={(e: any) => setVideoName(e.target.value)}
-                                        data-testid="caps-video-name"
-                                    />
-                                ) : null}
-                                {enableLog === "true" ? (
-                                    <PlaqueField
-                                        label="logName"
-                                        paramId="logName"
-                                        labelVariant="param"
-                                        type="text"
-                                        value={logName}
-                                        placeholder="session.log"
-                                        onChange={(e: any) => setLogName(e.target.value)}
-                                        data-testid="caps-log-name"
-                                    />
-                                ) : null}
-                            </PlaqueFieldGrid>
-                        ) : null}
                     </div>
                 </Panel>
             ) : null}
@@ -3007,6 +3037,18 @@ const Launch = ({
                                 stretch
                                 data-testid="caps-playwright-enable-video"
                             />
+                            {enableVideo === "true" ? (
+                                <PlaqueField
+                                    label="videoName"
+                                    paramId="videoName"
+                                    labelVariant="param"
+                                    type="text"
+                                    value={videoName}
+                                    placeholder="session.mp4"
+                                    onChange={(e: any) => setVideoName(e.target.value)}
+                                    data-testid="caps-playwright-video-name"
+                                />
+                            ) : null}
                             <PlaqueFieldSeg
                                 label="enableHar"
                                 paramId="enableHar"
@@ -3059,6 +3101,18 @@ const Launch = ({
                                 stretch
                                 data-testid="caps-playwright-enable-log"
                             />
+                            {enableLog === "true" ? (
+                                <PlaqueField
+                                    label="logName"
+                                    paramId="logName"
+                                    labelVariant="param"
+                                    type="text"
+                                    value={logName}
+                                    placeholder="session.log"
+                                    onChange={(e: any) => setLogName(e.target.value)}
+                                    data-testid="caps-playwright-log-name"
+                                />
+                            ) : null}
                             <PlaqueFieldSeg
                                 label="headless"
                                 paramId="headless"
@@ -3114,38 +3168,6 @@ const Launch = ({
                                 data-testid="caps-playwright-labels"
                             />
                         </PlaqueFieldGrid>
-                        {enableVideo === "true" || enableLog === "true" ? (
-                            <PlaqueFieldGrid
-                                layout={enableVideo === "true" && enableLog === "true" ? "duo" : "solo"}
-                                aria-label="Artifact names"
-                                data-testid="capabilities-playwright-names"
-                            >
-                                {enableVideo === "true" ? (
-                                    <PlaqueField
-                                        label="videoName"
-                                        paramId="videoName"
-                                        labelVariant="param"
-                                        type="text"
-                                        value={videoName}
-                                        placeholder="session.mp4"
-                                        onChange={(e: any) => setVideoName(e.target.value)}
-                                        data-testid="caps-playwright-video-name"
-                                    />
-                                ) : null}
-                                {enableLog === "true" ? (
-                                    <PlaqueField
-                                        label="logName"
-                                        paramId="logName"
-                                        labelVariant="param"
-                                        type="text"
-                                        value={logName}
-                                        placeholder="session.log"
-                                        onChange={(e: any) => setLogName(e.target.value)}
-                                        data-testid="caps-playwright-log-name"
-                                    />
-                                ) : null}
-                            </PlaqueFieldGrid>
-                        ) : null}
                     </div>
                 </Panel>
             ) : null}

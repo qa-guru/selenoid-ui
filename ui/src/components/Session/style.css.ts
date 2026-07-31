@@ -30,11 +30,65 @@ export const StyledSession = styled.div`
         margin: 0;
     }
 
+    /* Stable VNC → video swap: one column, fixed flex footprint. */
+    .session-media-slot {
+        display: flex;
+        flex-direction: column;
+        height: min(48vh, 520px);
+        min-height: min(48vh, 520px);
+        max-height: min(48vh, 520px);
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .session-media-slot > .session-video-card,
+    .session-media-slot > [data-testid="session-video-panel-wrap"] {
+        flex: 1 1 auto;
+        width: 100%;
+        min-height: 0;
+        height: 100%;
+    }
+
+    .session-media-slot > .session-video-card,
+    .session-media-slot > [data-testid="session-video-panel-wrap"] .session-video-card {
+        /* Panel defaults to flex:1 — must stay inside the slot, not spill onto HAR. */
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+    }
+
+    .session-video-waiting {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3, 10px);
+        flex: 1 1 auto;
+        min-height: 0;
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.95em;
+    }
+
+    .session-video-waiting__icon {
+        display: inline-flex;
+        line-height: 0;
+
+        svg {
+            width: 1.1em;
+            height: 1.1em;
+        }
+    }
+
     /* Full-width HAR under the VNC + Log row (not a side card). */
     .session-har-slot {
         box-sizing: border-box;
         width: 100%;
         flex: 0 0 auto;
+        padding: 0 var(--wt-post-gap, 14px) var(--wt-post-gap, 14px);
+
+        .har-card {
+            flex: 0 0 auto;
+        }
     }
 
     .session-info-panel {
@@ -50,6 +104,13 @@ export const StyledSession = styled.div`
 
     .session-info-panel__body {
         padding: var(--space-3, 10px) var(--space-4, 15px);
+    }
+
+    .session-kill-placeholder {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        visibility: hidden;
     }
 
     .session-info {
@@ -90,6 +151,13 @@ export const StyledSession = styled.div`
                     font-size: 0.8em;
                     color: var(--color-text-muted, #999);
                 }
+            }
+
+            .session-browser__loader-slot {
+                display: inline-block;
+                width: 35px;
+                height: 5px;
+                flex-shrink: 0;
             }
         }
 
@@ -184,30 +252,15 @@ export const StyledSessionVideo = styled.div`
         display: flex;
         flex-direction: column;
         padding: 0;
-        min-height: 160px;
+        flex: 1 1 auto;
+        min-height: 0;
         background-color: var(--color-surface-deep, #131614);
-    }
-
-    .session-video-toolbar {
-        display: flex;
-        justify-content: flex-end;
-        padding: 8px 12px;
-        border-bottom: 1px solid var(--color-border, #3d444c);
-    }
-
-    .session-video-toolbar__link {
-        color: var(--color-accent, #6cb6ff);
-        text-decoration: none;
-        font-size: 12px;
-
-        &:hover {
-            text-decoration: underline;
-        }
     }
 
     video {
         width: 100%;
-        max-height: min(48vh, 520px);
+        flex: 1 1 auto;
+        min-height: 0;
         background: #000;
     }
 `;

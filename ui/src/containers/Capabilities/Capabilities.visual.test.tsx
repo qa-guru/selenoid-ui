@@ -135,6 +135,10 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(flags!).toHaveClass("plaque-field-grid--solo");
         expect(within(flags!).getByTestId("caps-enable-vnc")).toHaveAttribute("data-param-id", "enableVnc");
         expect(within(flags!).getByTestId("caps-enable-video")).toHaveAttribute("data-param-id", "enableVideo");
+        expect(within(flags!).getByTestId("caps-video-name").closest("label")).toHaveAttribute(
+            "data-param-id",
+            "videoName"
+        );
         expect(within(flags!).getByTestId("caps-enable-har")).toHaveAttribute("data-param-id", "enableHar");
         expect(within(caps!).getByTestId("caps-enable-log")).toHaveAttribute("data-param-id", "enableLog");
         expect(within(caps!).queryByTestId("capabilities-caps-har")).toBeNull();
@@ -145,11 +149,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(within(caps!).getByTestId("caps-env").closest("label")).toHaveAttribute("data-param-id", "env");
         expect(within(caps!).getByTestId("capabilities-caps-labels")).toHaveClass("plaque-field-grid--solo");
         expect(within(caps!).getByTestId("caps-labels").closest("label")).toHaveAttribute("data-param-id", "labels");
-        expect(within(caps!).getByTestId("capabilities-caps-names")).toHaveClass("plaque-field-grid--solo");
-        expect(within(caps!).getByTestId("caps-video-name").closest("label")).toHaveAttribute(
-            "data-param-id",
-            "videoName"
-        );
+        expect(within(caps!).queryByTestId("capabilities-caps-names")).toBeNull();
 
         // No builder-only fields.
         expect(within(remote!).queryByText("closeBrowserAfterEach")).toBeNull();

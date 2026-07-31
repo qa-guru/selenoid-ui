@@ -89,7 +89,7 @@ describe("SessionInfo", () => {
     it("live mode exposes Kill session in Session panel bar", () => {
         render(
             <MemoryRouter>
-                <SessionInfo session="abc-def-12345678" browser={browser} />
+                <SessionInfo session="abc-def-12345678" browser={browser} live />
             </MemoryRouter>
         );
 
@@ -99,19 +99,20 @@ describe("SessionInfo", () => {
         expect(kill.querySelector("svg")).toBeTruthy();
     });
 
-    it("kill issues DELETE /wd/hub/session/{id}", async () => {
+    it("kill issues DELETE /wd/hub/session/{id} and stays on the page", async () => {
         const user = userEvent.setup();
         const fetchMock = vi.fn().mockResolvedValue({ ok: true });
         vi.stubGlobal("fetch", fetchMock);
 
         render(
             <MemoryRouter>
-                <SessionInfo session="abc-def-12345678" browser={browser} />
+                <SessionInfo session="abc-def-12345678" browser={browser} live />
             </MemoryRouter>
         );
 
         await user.click(screen.getByTestId("session-kill"));
         expect(fetchMock!).toHaveBeenCalledWith("/wd/hub/session/abc-def-12345678", { method: "DELETE" });
+        expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
         vi.unstubAllGlobals();
     });
 

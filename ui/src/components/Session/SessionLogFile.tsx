@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Panel } from "@zero-design-system/react";
+import { IconDownload, Panel } from "@zero-design-system/react";
 
 import { StyledLog } from "../Log/style.css";
 
@@ -63,17 +63,20 @@ const SessionLogFile = ({ file }: any) => {
                 titleTestId="session-log-file-title"
                 className="log-card"
                 bodyClassName="log-card__body"
+                actions={[
+                    {
+                        icon: <IconDownload />,
+                        label: "Download",
+                        onClick: () => {
+                            const a = document.createElement("a");
+                            a.href = href!;
+                            a.download = file;
+                            a.click();
+                        },
+                        "data-testid": "session-log-download",
+                    },
+                ]}
             >
-                <div className="log-file-toolbar">
-                    <a
-                        className="log-file-toolbar__link"
-                        href={href ?? undefined}
-                        download={file}
-                        data-testid="session-log-download"
-                    >
-                        Download
-                    </a>
-                </div>
                 {phase === "ready" ? (
                     <pre className="log-file-pre" data-testid="session-log-file-body">
                         {text || "(empty log)"}

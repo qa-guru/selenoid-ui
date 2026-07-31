@@ -191,7 +191,7 @@ export default class Log extends Component<any, any> {
             <StyledLog className={`${className} hidden-${hidden}`}>
                 <Panel
                     variant="terminal"
-                    title="Log"
+                    title="Session logs"
                     testId="session-log-panel"
                     titleTestId="session-log-title"
                     className="log-card"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Panel } from "@zero-design-system/react";
 import SessionInfo from "./SessionInfo";
@@ -8,7 +8,11 @@ import VncCard from "../VncCard";
 import Log from "../Log";
 import HarViewer, { wantsHar } from "../HarViewer";
 import { fetchSessionById } from "../SessionArchive/api";
+import { LIVE_SESSION_GRACE_MS } from "../../util/waitForLiveSession";
 import { StyledSession } from "./style.css";
+
+const ARTIFACT_POLL_MS = 2500;
+const ARTIFACT_POLL_TIMEOUT_MS = 120_000;
 
 /** Empty-state hourglass — same composition as Sessions / Archive. */
 function IconHourglass() {
@@ -29,136 +33,207 @@ function IconHourglass() {
     );
 }
 
+function SessionVideoWaiting() {
+    return (
+        <Panel
+            title="Video"
+            testId="session-video-waiting-panel"
+            titleTestId="session-video-title"
+            className="session-video-card"
+            bodyClassName="session-video-card__body session-video-waiting"
+        >
+            <span className="session-video-waiting__icon" aria-hidden="true">
+                <IconHourglass />
+            </span>
+            <span data-testid="session-video-waiting">Waiting for recording…</span>
+        </Panel>
+    );
+}
+
 const Session = ({ origin, session, browser }: any) => {
+    const wasLiveRef = useRef(false);
     const [endedCaps, setEndedCaps] = useState<any>(null);
+    const [endedBrowser, setEndedBrowser] = useState<any>(null);
     const [artifacts, setArtifacts] = useState<any>(null);
     const [artifactsStatus, setArtifactsStatus] = useState(() => (browser ? "idle" : "loading"));
 
     useEffect(() => {
-        if (browser?.caps && wantsHar(browser.caps)) {
-            setEndedCaps(browser.caps);
+        if (browser) {
+            wasLiveRef.current = true;
+            setEndedBrowser(browser);
+            if (browser.caps) {
+                setEndedCaps(browser.caps);
+            }
         }
     }, [browser]);
 
-    // When the live session ends (or the route opens on a finished id), load
-    // video / log / har artifacts from the hub /sessions/ listing.
+    // Live sessions appear in SSE a moment after Create Session; finished ones live
+    // in /sessions/. After a live session ends, poll the archive for video/HAR.
     useEffect(() => {
         if (browser || !session) {
+            if (browser) {
+                setArtifactsStatus("idle");
+            }
             return undefined;
         }
 
         let cancelled = false;
         setArtifactsStatus("loading");
 
-        fetchSessionById(session)
-            .then((found: any) => {
-                if (cancelled) {
-                    return;
-                }
-                if (found) {
-                    setArtifacts(found);
-                    setArtifactsStatus("ready");
-                } else {
-                    setArtifacts(null);
-                    setArtifactsStatus("missing");
-                }
-            })
-            .catch((err: any) => {
-                console.error("Can't load session artifacts", err);
+        const resolveFromArchive = () =>
+            fetchSessionById(session)
+                .then((found: any) => {
+                    if (cancelled) {
+                        return found;
+                    }
+                    if (found) {
+                        setArtifacts(found);
+                        setArtifactsStatus("ready");
+                    }
+                    return found;
+                })
+                .catch((err: any) => {
+                    if (!cancelled) {
+                        setArtifactsStatus("error");
+                    }
+                    return null;
+                });
+
+        if (wasLiveRef.current) {
+            resolveFromArchive();
+            const pollId = window.setInterval(() => {
+                resolveFromArchive();
+            }, ARTIFACT_POLL_MS);
+            const timeoutId = window.setTimeout(() => {
+                window.clearInterval(pollId);
                 if (!cancelled) {
-                    setArtifacts(null);
-                    setArtifactsStatus("error");
+                    setArtifactsStatus((prev: any) => (prev === "loading" ? "missing" : prev));
                 }
-            });
+            }, ARTIFACT_POLL_TIMEOUT_MS);
+
+            return () => {
+                cancelled = true;
+                window.clearInterval(pollId);
+                window.clearTimeout(timeoutId);
+            };
+        }
+
+        // Cold open (/sessions/:id reload or deep link): look up archive immediately
+        // so finished sessions render without waiting for the live SSE grace window.
+        resolveFromArchive();
+
+        const graceTimer = window.setTimeout(() => {
+            if (!cancelled) {
+                resolveFromArchive().then((found: any) => {
+                    if (!cancelled && !found) {
+                        setArtifacts(null);
+                        setArtifactsStatus((prev: any) => (prev === "loading" ? "missing" : prev));
+                    }
+                });
+            }
+        }, LIVE_SESSION_GRACE_MS);
 
         return () => {
             cancelled = true;
+            window.clearTimeout(graceTimer);
         };
     }, [browser, session]);
 
     const [isLogHidden, onVNCFullscreenChange] = useState(false);
     const capsForHar = browser?.caps || endedCaps || {};
-    const sessionAlive = Boolean(browser);
-    const finished = !browser && artifactsStatus === "ready" && Boolean(artifacts);
     const showLive = Boolean(browser);
-    const showFinished = finished;
+    const showFinished = !browser && artifactsStatus === "ready" && Boolean(artifacts);
+    const wasLive = wasLiveRef.current;
+    const showSessionInfo = showLive || (wasLive && !browser) || showFinished;
+    const keepLiveLog = wasLive && !browser && !isLogHidden;
+    const displayBrowser = browser || endedBrowser || { caps: capsForHar };
     const harFile = artifacts?.har || null;
+    const showHar = Boolean(harFile || wantsHar(capsForHar));
+    const vncEnabled = displayBrowser?.caps?.enableVNC !== false;
+    const waitingForVideo = wasLive && !browser && vncEnabled && !artifacts?.video;
+    const hasMediaColumn = (showLive && vncEnabled) || Boolean(artifacts?.video) || waitingForVideo;
+    const hasLogColumn = showLive || keepLiveLog || (showFinished && !keepLiveLog && artifacts?.log);
+    const showInteractive = hasMediaColumn || hasLogColumn;
+    const showHarSlot = showHar && (showInteractive || showFinished);
+    const showColdLoading = !showLive && !wasLive && artifactsStatus === "loading";
+    const showNotFound =
+        !showLive && !wasLive && (artifactsStatus === "missing" || artifactsStatus === "error");
+    const showEndedNotFound = wasLive && !browser && artifactsStatus === "missing";
 
     return (
         <StyledSession data-testid="session-page">
-            {(showLive || showFinished) && (
+            {showSessionInfo && (
                 <SessionInfo
                     {...{
                         session,
-                        browser: browser || { caps: capsForHar },
+                        browser: displayBrowser,
+                        live: showLive,
+                        wasLive,
                         finished: showFinished,
                         artifacts: artifacts || {},
                     }}
                 />
             )}
 
-            {showLive && (
-                <>
-                    <div className="interactive">
-                        <VncContainer
-                            {...{
-                                origin,
-                                session,
-                                browser,
-                                onVNCFullscreenChange,
-                            }}
-                        />
-                        <div className="session-interactive-card">
-                            <Log
-                                {...{
-                                    origin,
-                                    session,
-                                    browser,
-                                }}
-                                hidden={isLogHidden}
-                            />
-                        </div>
-                    </div>
-                    <div className="session-har-slot">
-                        <HarViewer session={session} browser={{ caps: capsForHar }} sessionAlive={sessionAlive} />
-                    </div>
-                </>
-            )}
-
-            {showFinished && (
-                <>
-                    {(artifacts.video || artifacts.log) && (
-                        <div className="interactive">
-                            {artifacts.video && (
-                                <div className="session-interactive-card">
-                                    <SessionVideo file={artifacts.video} />
-                                </div>
-                            )}
-                            {artifacts.log && (
-                                <div className="session-interactive-card">
-                                    <SessionLogFile file={artifacts.log} />
-                                </div>
+            {showInteractive && (
+                <div className="interactive">
+                    {hasMediaColumn && (
+                        <div className="session-interactive-card session-media-slot" data-testid="session-media-slot">
+                            {showLive ? (
+                                <VncContainer
+                                    {...{
+                                        origin,
+                                        session,
+                                        browser,
+                                        onVNCFullscreenChange,
+                                    }}
+                                />
+                            ) : artifacts?.video ? (
+                                <SessionVideo file={artifacts.video} />
+                            ) : (
+                                <SessionVideoWaiting />
                             )}
                         </div>
                     )}
-                    <div className="session-har-slot">
-                        {harFile || wantsHar(capsForHar) ? (
-                            <HarViewer
-                                session={session}
-                                browser={{ caps: { ...capsForHar, enableHAR: true } }}
-                                sessionAlive={false}
-                                file={harFile || undefined}
-                            />
-                        ) : (
-                            <div className="session-missing" data-testid="session-no-har">
-                                No HAR
-                            </div>
-                        )}
-                    </div>
-                </>
+                    {hasLogColumn && (
+                        <div className="session-interactive-card">
+                            {keepLiveLog || showLive ? (
+                                <Log
+                                    {...{
+                                        origin,
+                                        session,
+                                        browser: displayBrowser,
+                                    }}
+                                    hidden={isLogHidden}
+                                />
+                            ) : (
+                                <SessionLogFile file={artifacts.log} />
+                            )}
+                        </div>
+                    )}
+                </div>
             )}
 
-            {!showLive && !showFinished && artifactsStatus === "loading" && (
+            {showHarSlot && (
+                <div className="session-har-slot">
+                    <HarViewer
+                        session={session}
+                        browser={{ caps: { ...capsForHar, enableHAR: true } }}
+                        sessionAlive={showLive}
+                        file={harFile || undefined}
+                    />
+                </div>
+            )}
+
+            {showFinished && !showHar && (
+                <div className="session-har-slot">
+                    <div className="session-missing" data-testid="session-no-har">
+                        No HAR
+                    </div>
+                </div>
+            )}
+
+            {showColdLoading && (
                 <Panel
                     title="Session"
                     testId="session-loading-panel"
@@ -175,7 +250,7 @@ const Session = ({ origin, session, browser }: any) => {
                 </Panel>
             )}
 
-            {!showLive && !showFinished && (artifactsStatus === "missing" || artifactsStatus === "error") && (
+            {showNotFound && (
                 <Panel
                     title="Session"
                     testId="session-missing-panel"
@@ -191,6 +266,23 @@ const Session = ({ origin, session, browser }: any) => {
                     </div>
                 </Panel>
             )}
+
+            {showEndedNotFound && (
+                <Panel
+                    title="Session"
+                    testId="session-ended-missing-panel"
+                    titleTestId="session-ended-missing-title"
+                    className="session-missing-panel"
+                    bodyClassName="session-missing-panel__body"
+                >
+                    <div className="no-any" data-testid="session-artifacts-not-found">
+                        <span className="icon" title="No any" aria-hidden="true">
+                            <IconHourglass />
+                        </span>
+                        <div className="nosession-any-text">ARTIFACTS NOT FOUND</div>
+                    </div>
+                </Panel>
+            )}
         </StyledSession>
     );
 };
@@ -203,15 +295,13 @@ function VncContainer({ origin, session, browser = {}, onVNCFullscreenChange }: 
     }
 
     return (
-        <div className="session-interactive-card">
-            <VncCard
-                {...{
-                    origin,
-                    session,
-                    browser,
-                    onVNCFullscreenChange,
-                }}
-            />
-        </div>
+        <VncCard
+            {...{
+                origin,
+                session,
+                browser,
+                onVNCFullscreenChange,
+            }}
+        />
     );
 }

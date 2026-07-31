@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { browserWindowOptions, parseScreenSize, resizeSessionWindow, sessionIdFrom } from "./capabilitiesLogic";
+import { browserWindowOptions, hubSessionErrorMessage, parseScreenSize, pickDefaultWebdriverBrowser, resizeSessionWindow, sessionIdFrom } from "./capabilitiesLogic";
 
 describe("capabilitiesLogic", () => {
     it("handles old selenium protocol versions", () => {
@@ -62,6 +62,7 @@ describe("capabilitiesLogic", () => {
             credentials: "omit",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ x: 0, y: 0, width: 1920, height: 1080 }),
+            signal: undefined,
         });
     });
 
@@ -79,10 +80,10 @@ describe("capabilitiesLogic", () => {
         );
     });
 
-    it("falls back to window/current/size when rect fails", async () => {
+    it("falls back to window/current/size when rect fails with unsupported status", async () => {
         const fetchImpl = vi
             .fn()
-            .mockResolvedValueOnce({ ok: false, status: 404 })
+            .mockResolvedValueOnce({ ok: false, status: 405 })
             .mockResolvedValueOnce({ ok: true, status: 200 });
         await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(true);
         expect(fetchImpl).toHaveBeenNthCalledWith(
@@ -94,10 +95,40 @@ describe("capabilitiesLogic", () => {
         );
     });
 
+    it("does not fall back when rect returns invalid session", async () => {
+        const fetchImpl = vi.fn().mockResolvedValueOnce({ ok: false, status: 404 });
+        await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(false);
+        expect(fetchImpl).toHaveBeenCalledTimes(1);
+    });
+
     it("skips resize when sessionId or resolution is missing", async () => {
         const fetchImpl = vi.fn();
         await expect(resizeSessionWindow("", "1920x1080x24", fetchImpl)).resolves.toBe(false);
         await expect(resizeSessionWindow("sess-1", "bad", fetchImpl)).resolves.toBe(false);
         expect(fetchImpl).not.toHaveBeenCalled();
+    });
+
+    it("formats hub session error message from W3C value", async () => {
+        const response = new Response(
+            JSON.stringify({
+                value: {
+                    error: "session not created",
+                    message: "Chrome instance exited",
+                },
+            }),
+            { status: 500 }
+        );
+        await expect(hubSessionErrorMessage(response)).resolves.toBe(
+            "Create Session failed: HTTP 500 — Chrome instance exited"
+        );
+    });
+
+    it("pickDefaultWebdriverBrowser prefers chrome 149.0", () => {
+        const picked = pickDefaultWebdriverBrowser([
+            { value: "chrome_148.0", name: "chrome", version: "148.0", protocol: "webdriver" },
+            { value: "chrome_149.0", name: "chrome", version: "149.0", protocol: "webdriver" },
+            { value: "playwright-chromium_1.61.1", name: "playwright-chromium", version: "1.61.1", protocol: "playwright" },
+        ]);
+        expect(picked?.value).toBe("chrome_149.0");
     });
 });

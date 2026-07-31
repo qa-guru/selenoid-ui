@@ -1,31 +1,41 @@
-import React, { useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader";
 import { Badge, IconTrash, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
 
-const SessionInfo = ({ session = "", browser = { caps: {} }, finished = false, artifacts = {} }: any) => {
+const SessionInfo = ({
+    session = "",
+    browser = { caps: {} },
+    live = false,
+    wasLive = false,
+    finished = false,
+    artifacts = {},
+}: any) => {
     const caps = browser.caps || {};
     const shortId = session ? session.substring(0, 8) : "";
-    const navigate = useNavigate();
     const [killing, setKilling] = useState(false);
+
+    useEffect(() => {
+        if (!live) {
+            setKilling(false);
+        }
+    }, [live]);
 
     const onKill = useCallback(() => {
         if (!session || killing) {
             return;
         }
         setKilling(true);
-        deleteSession(session)
-            .then(() => navigate("/"))
-            .catch((e: any) => {
-                console.error("Can't delete session", session, e);
-                setKilling(false);
-            });
-    }, [session, killing, navigate]);
+        deleteSession(session).catch((e: any) => {
+            console.error("Can't delete session", session, e);
+            setKilling(false);
+        });
+    }, [session, killing]);
 
     const killActions =
-        !finished && session
+        live && session
             ? [
                   {
                       icon: killing ? <BeatLoader size={2} color={"#fff"} /> : <IconTrash />,
@@ -35,7 +45,17 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, finished = false, a
                       "data-testid": "session-kill",
                   },
               ]
-            : undefined;
+            : wasLive && session
+              ? [
+                    {
+                        icon: <span className="session-kill-placeholder" aria-hidden="true" />,
+                        label: "Kill session",
+                        disabled: true,
+                        onClick: () => {},
+                        "data-testid": "session-kill-placeholder",
+                    },
+                ]
+              : undefined;
 
     return (
         <Panel
@@ -49,7 +69,13 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, finished = false, a
             <div className="session-info">
                 <div className="session-info__main">
                     <div className="session-browser">
-                        {!finished && <BeatLoader size={5} color={"#fff"} loading={!browser.quota} />}
+                        {live || wasLive ? (
+                            live && !browser.quota ? (
+                                <BeatLoader size={5} color={"#fff"} loading />
+                            ) : (
+                                <span className="session-browser__loader-slot" aria-hidden="true" />
+                            )
+                        ) : null}
                         {finished ? (
                             <Link to="/sessions" className="session-info__back" data-testid="session-back">
                                 ← Sessions

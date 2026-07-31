@@ -16,6 +16,24 @@ export function sessionIdFrom({ response }: { response?: SessionCreateResponse |
     return response?.sessionId || response?.value?.sessionId || "";
 }
 
+/** Hub / UI proxy error body → user-visible Create Session message. */
+export async function hubSessionErrorMessage(response: Response): Promise<string> {
+    const prefix = `Create Session failed: HTTP ${response.status}`;
+    try {
+        const data = await response.json();
+        const value = data?.value;
+        const detail =
+            (typeof value === "object" &&
+                value &&
+                (String(value.message || "").trim() || String(value.error || "").trim())) ||
+            String(data?.message || "").trim() ||
+            String(data?.error || "").trim();
+        return detail ? `${prefix} — ${detail}` : prefix;
+    } catch {
+        return prefix;
+    }
+}
+
 export type ScreenSize = { width: number; height: number };
 
 /** Parse `1920x1080` / `1920x1080x24` → outer window size. */
@@ -57,7 +75,8 @@ async function postSessionCommand(
     path: string,
     body: unknown,
     fetchImpl: typeof fetch,
-    authToken: string
+    authToken: string,
+    signal?: AbortSignal
 ): Promise<Response | undefined> {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -65,11 +84,10 @@ async function postSessionCommand(
     };
     return fetchImpl(`/wd/hub/session/${encodeURIComponent(sessionId)}${path}`, {
         method: "POST",
-        // Prefer explicit Basic Auth (prod nginx). credentials:include alone hangs headless
-        // browsers on auth challenges after Create Session succeeds.
         credentials: "omit",
         headers,
         body: body == null ? undefined : JSON.stringify(body),
+        signal,
     });
 }
 
@@ -82,7 +100,8 @@ export async function resizeSessionWindow(
     sessionId: string,
     screenResolution: unknown,
     fetchImpl: typeof fetch = fetch,
-    authToken: any = ""
+    authToken: any = "",
+    signal?: AbortSignal
 ): Promise<boolean> {
     const size = parseScreenSize(screenResolution);
     if (!sessionId || !size) {
@@ -94,10 +113,14 @@ export async function resizeSessionWindow(
         "/window/rect",
         { x: 0, y: 0, width: size.width, height: size.height },
         fetchImpl,
-        authToken
+        authToken,
+        signal
     );
     if (rect && rect.ok) {
         return true;
+    }
+    if (rect && (rect.status >= 500 || rect.status === 404)) {
+        return false;
     }
 
     // JSON Wire fallback (older drivers / some Firefox builds).
@@ -106,7 +129,8 @@ export async function resizeSessionWindow(
         "/window/current/size",
         { width: size.width, height: size.height },
         fetchImpl,
-        authToken
+        authToken,
+        signal
     );
     return Boolean(wire && wire.ok);
 }
@@ -164,4 +188,25 @@ export function findPlaywrightSession(
         return id;
     }
     return "";
+}
+
+type BrowserPick = { value: string; name: string; version: string; protocol?: string };
+
+/** First manual session default — chrome catalog default, else newest chrome, else first WD row. */
+export function pickDefaultWebdriverBrowser(available: BrowserPick[]): BrowserPick | undefined {
+    const webdriver = available.filter(
+        (item) => item.protocol !== "playwright" && item.name !== "android" && item.name !== "ios"
+    );
+    if (!webdriver.length) {
+        return undefined;
+    }
+    const preferredVersion = "149.0";
+    const chromeDefault = webdriver.find((item) => item.name === "chrome" && item.version === preferredVersion);
+    if (chromeDefault) {
+        return chromeDefault;
+    }
+    const chromeNewest = webdriver
+        .filter((item) => item.name === "chrome")
+        .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))[0];
+    return chromeNewest || webdriver[0];
 }
