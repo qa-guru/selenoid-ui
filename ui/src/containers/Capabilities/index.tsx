@@ -1804,11 +1804,13 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     };
 
     const resetCaps = () => {
+        const defaultBrowser = pickDefaultWebdriverBrowser(available);
         applyCapsSnap({
             authUser: DEFAULT_SESSION_OPTS.authUser,
             authPass: DEFAULT_SESSION_OPTS.authPass,
             accessKey: DEFAULT_SESSION_OPTS.accessKey,
-            browserValue: "",
+            // Match initial auto-pick: Сброс restores default chrome, not empty Driver.
+            browserValue: defaultBrowser?.value || "",
             sessionTimeout: DEFAULT_SESSION_OPTS.sessionTimeout,
             sessionName: DEFAULT_SESSION_OPTS.name,
             screenResolution: DEFAULT_SESSION_OPTS.screenResolution,

@@ -232,12 +232,10 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         const before = (vector as HTMLInputElement).value;
 
         await user.click(within(panel!).getByRole("button", { name: "Сброс" }));
-        expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
+        // Сброс restores default chrome (same as initial auto-pick), not an empty Driver.
+        await screen.findByTestId("capabilities-remote-panel");
         expect((vector as HTMLInputElement).value).toMatch(/^vector#[0-9a-f]{8}$/);
         expect((vector as HTMLInputElement).value).not.toBe(before);
-
-        await user.click(screen.getByRole("button", { name: "chrome: 149.0" }));
-        await screen.findByTestId("capabilities-remote-panel");
         expect(screen.getByRole("combobox", { name: "sessionTimeout" })).toHaveValue("60m");
         expect(screen.getByTestId("caps-session-name")).toHaveValue("Manual session");
     });

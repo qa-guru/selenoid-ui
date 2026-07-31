@@ -30,7 +30,10 @@ export function waitForLiveSession(sessionId: string, options: WaitOptions = {})
         return Promise.resolve(false);
     }
 
-    const { initialSessions = {}, timeoutMs = 30_000 } = options;
+    // Vitest has no live /events hub — keep an explicit short default so Create
+    // Session unit tests do not sit on the 30s production grace.
+    const defaultTimeoutMs = import.meta.env.MODE === "test" ? 50 : 30_000;
+    const { initialSessions = {}, timeoutMs = defaultTimeoutMs } = options;
     if (hasLiveSession(initialSessions, target)) {
         return Promise.resolve(true);
     }
@@ -66,6 +69,10 @@ export function waitForLiveSession(sessionId: string, options: WaitOptions = {})
             } catch (err) {
                 console.error("[sse] waitForLiveSession parse error", err);
             }
+        };
+        eventSource.onerror = () => {
+            // Offline / auth / test mock without a hub — navigate anyway.
+            finish(false);
         };
 
         const timer = window.setTimeout(() => finish(false), timeoutMs);

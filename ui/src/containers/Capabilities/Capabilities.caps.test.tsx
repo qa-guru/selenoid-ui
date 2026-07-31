@@ -46,9 +46,9 @@ function segButton(fieldTestId: any, value: any) {
 }
 
 describe("Capabilities boolean caps (seg canon)", () => {
-    it("hides the caps until a WebDriver browser is selected", () => {
+    it("shows Remote hub caps when default WebDriver chrome is auto-selected", () => {
         renderCapabilities();
-        expect(screen.queryByTestId("capabilities-caps")).toBeNull();
+        expect(screen.getByTestId("capabilities-caps")).toBeInTheDocument();
     });
 
     it("renders enableVnc/enableVideo/enableHar/enableLog as 2-opt seg radiogroups, never native checkboxes", async () => {
@@ -148,11 +148,10 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.capabilities.alwaysMatch.proxy).toBeUndefined();
         expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
 
-        await waitFor(() =>
-            expect(
-                fetchMock.mock.calls.some(([url]: any[]) => String(url) === "/wd/hub/session/sess-1/window/rect")
-            ).toBe(true)
-        );
+        // Chromium gets --window-size via launch args; window/rect is Firefox-only.
+        expect(
+            fetchMock.mock.calls.some(([url]: any[]) => String(url) === "/wd/hub/session/sess-1/window/rect")
+        ).toBe(false);
         expect(body.capabilities.alwaysMatch["goog:chromeOptions"].args).toEqual([
             "--window-size=1280,1024",
             "--window-position=0,0",

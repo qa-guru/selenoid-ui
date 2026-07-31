@@ -95,11 +95,18 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         // No iOS image yet → a single selectable "coming soon" chip surfaces the placeholder.
         const ios = screen.getByTestId("capabilities-browser-select-ios");
         expect(within(ios!).getByRole("button", { name: "iOS (coming soon)" })).toBeInTheDocument();
-        expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
+        // Default WebDriver chrome is auto-selected → Remote hub is visible on load.
+        expect(screen.getByTestId("capabilities-remote-panel")).toBeInTheDocument();
     });
 
-    it("keeps disabled Create Session as solid dark grey, not translucent", () => {
+    it("keeps disabled Create Session as solid dark grey, not translucent", async () => {
+        const user = userEvent.setup();
         renderCapabilities();
+
+        // iOS is catalog placeholder only — Create Session stays locked.
+        await user.click(within(screen.getByTestId("capabilities-browser-select-ios")).getByRole("button", {
+            name: "iOS (coming soon)",
+        }));
 
         const button = screen.getByTestId("capabilities-create-session");
         const style = window.getComputedStyle(button);
