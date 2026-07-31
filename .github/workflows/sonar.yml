@@ -1,0 +1,93 @@
+# SonarQube — qa-guru/selenoid-ui
+# Canon: docs/sonar/GITHUB-ACTIONS.md (monorepo) · projectKey: selenoid-ui
+# Report-first: Quality Gate soft unless vars.SONAR_REQUIRED=true
+
+name: sonar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GOTOOLCHAIN: auto
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+          cache-dependency-path: ui/yarn.lock
+
+      - name: UI install, typecheck, coverage, build
+        run: |
+          set -euo pipefail
+          ROOT="$(pwd)"
+          "$ROOT/scripts/sync-design-system-static.sh"
+          yarn --cwd ui install --frozen-lockfile
+          yarn --cwd ui typecheck
+          yarn --cwd ui test:coverage
+          test -f ui/coverage/lcov.info
+          test -d ui/allure-results
+          yarn --cwd ui build
+          test -f ui/build/index.html
+
+      - name: Go generate, test, coverage
+        run: |
+          set -euo pipefail
+          go install github.com/rakyll/statik@latest
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          go generate github.com/qa-guru/selenoid-ui
+          go test -race -coverprofile=coverage.txt -covermode=atomic \
+            github.com/qa-guru/selenoid-ui github.com/qa-guru/selenoid-ui/selenoid
+          GOTOOLCHAIN=go1.26.5 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonar.qa.guru' }}
+        with:
+          projectBaseDir: .
+
+      - name: SonarQube Quality Gate
+        id: quality-gate
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonar.qa.guru' }}
+        continue-on-error: ${{ vars.SONAR_REQUIRED != 'true' }}
+
+      - name: Fail job when gate required
+        if: vars.SONAR_REQUIRED == 'true' && steps.quality-gate.outcome == 'failure'
+        run: exit 1
+
+      - name: Job summary
+        if: always()
+        env:
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonar.qa.guru' }}
+        run: |
+          {
+            echo "## selenoid-ui sonar"
+            echo ""
+            echo "- projectKey: \`selenoid-ui\`"
+            echo "- dashboard: ${SONAR_HOST_URL%/}/dashboard?id=selenoid-ui"
+            echo "- commit: \`${GITHUB_SHA:0:7}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
