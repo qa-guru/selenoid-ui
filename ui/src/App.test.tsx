@@ -28,6 +28,7 @@ describe("App", () => {
             "Statistics",
             "Sessions",
             "New Session",
+            "Benchmarks",
         ]);
     });
 });

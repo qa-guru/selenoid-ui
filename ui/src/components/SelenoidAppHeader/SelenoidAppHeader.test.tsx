@@ -18,6 +18,7 @@ function injectHeaderNav() {
         ["#/statistics", "header-nav-statistics", "Statistics"],
         ["#/sessions", "header-nav-sessions", "Sessions"],
         ["#/new-session", "header-nav-new-session", "New Session"],
+        ["#/benchmarks", "header-nav-benchmarks", "Benchmarks"],
     ];
     for (const [href, testid, label] of items) {
         const link = document.createElement("a");
@@ -90,6 +91,16 @@ describe("SelenoidAppHeader", () => {
         await waitFor(() => {
             expect(activeTestids()).toEqual(["header-nav-statistics"]);
         });
+    });
+
+    it("highlights Benchmarks on the benchmarks route", async () => {
+        renderHeader(["/benchmarks"]);
+        injectHeaderNav();
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-benchmarks"]);
+        });
+        expect(ariaCurrentTestids()).toEqual(["header-nav-benchmarks"]);
     });
 
     it("re-syncs the active item on SPA navigation", async () => {

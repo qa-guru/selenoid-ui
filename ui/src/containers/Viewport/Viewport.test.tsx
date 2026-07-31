@@ -91,4 +91,12 @@ describe("Viewport", () => {
         expect(screen.getByTestId("capabilities-create-session")).toBeInTheDocument();
         expect(screen.getByTestId("capabilities-create-session")).toHaveTextContent("Create Session");
     });
+
+    it("shows Benchmarks catalog on the benchmarks route", () => {
+        injectHeaderSlots();
+        renderViewport(["/benchmarks"]);
+
+        expect(screen.getByTestId("benchmarks-page")).toBeInTheDocument();
+        expect(screen.getByTestId("benchmarks-catalog")).toBeInTheDocument();
+    });
 });

@@ -19,6 +19,7 @@ export const headerConfig: HeaderConfig = {
         { href: "#/statistics", label: "Statistics", testid: "header-nav-statistics" },
         { href: "#/sessions", label: "Sessions", testid: "header-nav-sessions" },
         { href: "#/new-session", label: "New Session", testid: "header-nav-new-session" },
+        { href: "#/benchmarks", label: "Benchmarks", testid: "header-nav-benchmarks" },
     ],
     lang: {
         default: "en",
