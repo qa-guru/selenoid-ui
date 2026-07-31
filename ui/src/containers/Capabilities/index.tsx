@@ -2637,7 +2637,9 @@ const Launch = ({
                 return;
             }
             navigated = true;
-            rememberHubAuthToken(primeToken);
+            // Prefer Playwright accessKey when it is user:pass — WD duo state may
+            // still hold bake-time defaults while the form only edited accessKey.
+            rememberHubAuthToken(parseAccessKey(accessKey) ? accessKey : primeToken);
             retainPlaywrightSocket(sessionId, playwrightSocket.current!);
             navigate(`/sessions/${sessionId}`);
             onLoading(false);
