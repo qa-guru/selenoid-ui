@@ -8,42 +8,39 @@ describe("registerServiceWorker", () => {
         vi.stubEnv("DEV", true);
     });
 
-    it("registers /sw.js on load when supported in production", () => {
+    it("registers /sw.js immediately via DS primitive in production", async () => {
         vi.stubEnv("DEV", false);
-        const register = vi.fn().mockResolvedValue(undefined);
-        vi.stubGlobal("navigator", { serviceWorker: { register } });
-        const addEventListener = vi.fn((_event: any, handler: any) => {
-            handler();
+        const update = vi.fn().mockResolvedValue(undefined);
+        const register = vi.fn().mockResolvedValue({ update });
+        const swAddEventListener = vi.fn();
+        vi.stubGlobal("navigator", {
+            serviceWorker: { register, addEventListener: swAddEventListener },
         });
-        vi.stubGlobal("window", { addEventListener });
 
         registerServiceWorker();
 
-        expect(addEventListener).toHaveBeenCalledWith("load", expect.any(Function));
         expect(register).toHaveBeenCalledWith("/sw.js");
+        expect(swAddEventListener).toHaveBeenCalledWith("controllerchange", expect.any(Function));
+        await Promise.resolve();
+        expect(update).toHaveBeenCalled();
     });
 
     it("skips registration in Vite dev (no sw.js emitted)", () => {
         vi.stubEnv("DEV", true);
         const register = vi.fn().mockResolvedValue(undefined);
-        vi.stubGlobal("navigator", { serviceWorker: { register } });
-        const addEventListener = vi.fn();
-        vi.stubGlobal("window", { addEventListener });
+        vi.stubGlobal("navigator", {
+            serviceWorker: { register, addEventListener: vi.fn() },
+        });
 
         registerServiceWorker();
 
-        expect(addEventListener).not.toHaveBeenCalled();
         expect(register).not.toHaveBeenCalled();
     });
 
     it("skips registration when serviceWorker is unavailable", () => {
         vi.stubEnv("DEV", false);
         vi.stubGlobal("navigator", {});
-        const addEventListener = vi.fn();
-        vi.stubGlobal("window", { addEventListener });
 
         registerServiceWorker();
-
-        expect(addEventListener).not.toHaveBeenCalled();
     });
 });

@@ -23,9 +23,12 @@ for f in tokens header link input icon icon-btn lang-toggle button badge status-
   cp "$DS/css/${f}.css" "$UI_PUBLIC/css/"
 done
 
-for f in header header-metrics-wrap dom-utils theme-icons plaque-field-magnet; do
+for f in header header-metrics-wrap dom-utils theme-icons plaque-field-magnet pwa-register; do
   cp "$DS/js/${f}.js" "$UI_PUBLIC/js/"
 done
+
+# PWA register SSOT → src (bundled heir wrapper) + public (static embed parity).
+cp "$DS/js/pwa-register.js" "$ROOT/ui/src/pwa/pwa-register.js"
 
 cp "$DS/templates/header.html" "$UI_PUBLIC/templates/header.html"
 

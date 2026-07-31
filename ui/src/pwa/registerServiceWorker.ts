@@ -1,14 +1,12 @@
+import { registerServiceWorker as registerPwa } from "./pwa-register.js";
+
+/**
+ * Heir wrapper around design-system `js/pwa-register.js` (synced copy in this
+ * folder / `public/js/`). Vite DEV has no real `/sw.js` — skip registration.
+ */
 export function registerServiceWorker() {
-    // vite-plugin-pwa keeps `devOptions.enabled: false`, so `/sw.js` is not
-    // emitted in Vite dev — registering would hit the SPA HTML fallback and
-    // spam the console (MIME text/html). Production build serves real SW.
-    if (import.meta.env.DEV || !("serviceWorker" in navigator)) {
+    if (import.meta.env.DEV) {
         return;
     }
-
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch((err: any) => {
-            console.warn("service worker registration failed", err);
-        });
-    });
+    registerPwa({ immediate: true });
 }
