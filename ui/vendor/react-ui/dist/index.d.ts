@@ -550,6 +550,51 @@ interface VncWindowProps {
  */
 declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, kill, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, onKill, children, labels, className, 'data-testid': dataTestId, }: VncWindowProps): react.JSX.Element;
 
+declare const HAR_TIMING_KEYS: readonly ["blocked", "dns", "connect", "ssl", "send", "wait", "receive"];
+type HarDetailTab = 'headers' | 'timings' | 'response';
+interface HarHeader {
+    name?: string;
+    value?: string;
+}
+interface HarContent {
+    size?: number;
+    mimeType?: string;
+    text?: string;
+    encoding?: string;
+}
+interface HarEntry {
+    time?: number;
+    startedDateTime?: string;
+    request?: {
+        method?: string;
+        url?: string;
+        headers?: HarHeader[];
+    };
+    response?: {
+        status?: number;
+        statusText?: string;
+        headers?: HarHeader[];
+        content?: HarContent;
+    };
+    timings?: Partial<Record<(typeof HAR_TIMING_KEYS)[number], number>>;
+}
+declare function formatSize(n: unknown): string;
+declare function formatTiming(n: unknown): string;
+declare function harStatusClass(status: unknown): string;
+interface HarViewerProps {
+    entries: HarEntry[];
+    expandedIndex?: number | null;
+    detailTab?: HarDetailTab;
+    onToggleRow?: (index: number) => void;
+    onDetailTabChange?: (tab: HarDetailTab) => void;
+    /** Shown when entries is empty (loading / recording / error). */
+    empty?: ReactNode;
+    className?: string;
+    testId?: string;
+}
+/** Presentational HAR table. Poll / Panel / download stay in the app shell. */
+declare function HarViewer({ entries, expandedIndex, detailTab, onToggleRow, onDetailTabChange, empty, className, testId, }: HarViewerProps): react.JSX.Element;
+
 declare function IconClose(): react.JSX.Element;
 /** Trash / kill session — same glyph as Stats `session-delete` (Sessions / Archive). */
 declare function IconTrash(): react.JSX.Element;
@@ -584,4 +629,4 @@ declare function highlightOutput(text: string, kind: HighlightKind): string;
 /** Mount highlighted terminal output — always colored (`.ch-code` + tokens). */
 declare function mountHighlightedOutput(el: Element | null | undefined, text: string, kind?: HighlightKind): void;
 
-export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type ConnectionState, ConnectionStatus, type ConnectionStatusProps, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconChevronDown, IconChevronUp, IconClose, IconCopy, IconDocumentRemove, IconDotsHorizontal, IconDownload, IconLock, IconReset, IconTrash, IconUnlock, IconUpload, IconVncCopy, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, type VncScreenSize, VncWindow, type VncWindowLabels, type VncWindowProps, type VncWindowState, WindowControl, type WindowControlProps, type WindowControlTone, escapeHtml, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, mountHighlightedOutput, trimOutputBlankLines, usePlaqueFieldMagnet };
+export { AppHeader, type AppHeaderProps, Badge, type BadgeProps, type BadgeVariant, Button, type ButtonProps, type ButtonVariant, type ConnectionState, ConnectionStatus, type ConnectionStatusProps, HAR_TIMING_KEYS, type HarContent, type HarDetailTab, type HarEntry, type HarHeader, HarViewer, type HarViewerProps, type HeaderBrandConfig, type HeaderBrandLeadingConfig, type HeaderConfig, type HeaderLangConfig, type HeaderNavItem, type HeaderThemeConfig, type HighlightKind, type HighlightOptions, IconChevronDown, IconChevronUp, IconClose, IconCopy, IconDocumentRemove, IconDotsHorizontal, IconDownload, IconLock, IconReset, IconTrash, IconUnlock, IconUpload, IconVncCopy, Input, type InputProps, type LangCode, LangIcon, LangToggle, type LangToggleProps, Link, type LinkProps, type LinkVariant, Panel, type PanelAction, type PanelProps, type PanelTone, type PanelVariant, PlaqueField, PlaqueFieldGrid, type PlaqueFieldGridLayout, type PlaqueFieldGridProps, type PlaqueFieldLabelVariant, type PlaqueFieldProps, PlaqueFieldSeg, PlaqueFieldSegGrid, type PlaqueFieldSegGridProps, type PlaqueFieldSegOption, type PlaqueFieldSegProps, PlaqueSelect, type PlaqueSelectOption, type PlaqueSelectProps, PlaqueTagstrip, type PlaqueTagstripOption, type PlaqueTagstripProps, SelenoidMetrics, type SelenoidMetricsProps, type SelenoidMetricsVariant, StatusTile, type StatusTileModifier, type StatusTileProps, type StatusTileStatus, type StatusTileVariant, ThemeIconMoon, ThemeIconSun, ThemeToggle, type ThemeToggleProps, type UsePlaqueFieldMagnetOptions, type VncScreenSize, VncWindow, type VncWindowLabels, type VncWindowProps, type VncWindowState, WindowControl, type WindowControlProps, type WindowControlTone, escapeHtml, formatSize, formatTiming, harStatusClass, highlightCurlHeredoc, highlightJson, highlightMarkdown, highlightOutput, highlightShell, mountHighlightedOutput, trimOutputBlankLines, usePlaqueFieldMagnet };

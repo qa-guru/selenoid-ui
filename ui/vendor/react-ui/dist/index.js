@@ -1114,6 +1114,226 @@ function VncWindow({
   ] });
 }
 
+// src/HarViewer.tsx
+import { Fragment } from "react";
+import { jsx as jsx23, jsxs as jsxs13 } from "react/jsx-runtime";
+var HAR_TIMING_KEYS = [
+  "blocked",
+  "dns",
+  "connect",
+  "ssl",
+  "send",
+  "wait",
+  "receive"
+];
+function formatSize(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v <= 0) {
+    return "\u2014";
+  }
+  if (v < 1024) {
+    return `${v} B`;
+  }
+  if (v < 1024 * 1024) {
+    return `${(v / 1024).toFixed(1)} KB`;
+  }
+  return `${(v / (1024 * 1024)).toFixed(1)} MB`;
+}
+function formatTiming(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v) || v < 0) {
+    return "\u2014";
+  }
+  return `${Math.round(v)} ms`;
+}
+function harStatusClass(status) {
+  const s = Number(status);
+  if (s >= 500) {
+    return "har-status--err";
+  }
+  if (s >= 400) {
+    return "har-status--warn";
+  }
+  if (s >= 300) {
+    return "har-status--redir";
+  }
+  if (s > 0) {
+    return "har-status--ok";
+  }
+  return "har-status--muted";
+}
+function headerPairs(headers) {
+  if (!Array.isArray(headers)) {
+    return [];
+  }
+  return headers.filter((h) => h && (h.name != null || h.value != null)).map((h) => ({ name: String(h.name || ""), value: String(h.value ?? "") }));
+}
+function HeaderKv({ title, headers }) {
+  const pairs = headerPairs(headers);
+  return /* @__PURE__ */ jsxs13("div", { className: "har-section", children: [
+    /* @__PURE__ */ jsx23("div", { className: "har-section__title", children: title }),
+    pairs.length === 0 ? /* @__PURE__ */ jsx23("div", { className: "har-muted", children: "No headers captured." }) : /* @__PURE__ */ jsx23("div", { className: "har-kv", children: pairs.map((h, i) => /* @__PURE__ */ jsxs13(Fragment, { children: [
+      /* @__PURE__ */ jsx23("div", { className: "har-kv__k", children: h.name }),
+      /* @__PURE__ */ jsx23("div", { className: "har-kv__v", children: h.value || "\u2014" })
+    ] }, `${h.name}-${i}`)) })
+  ] });
+}
+var TABS = [
+  { id: "headers", label: "Headers" },
+  { id: "timings", label: "Timings" },
+  { id: "response", label: "Response" }
+];
+function EntryDetail({
+  entry,
+  tab,
+  onTabChange
+}) {
+  const req = entry.request || {};
+  const resp = entry.response || {};
+  const content = resp.content || {};
+  const timings = entry.timings || {};
+  const status = Number(resp.status) || 0;
+  const statusText = resp.statusText || "";
+  const mime = content.mimeType || "\u2014";
+  const size = formatSize(content.size);
+  const bodyText = typeof content.text === "string" ? content.text : "";
+  const bodyNote = bodyText ? bodyText : "Body not captured (meta / headers + size only).";
+  return /* @__PURE__ */ jsxs13("div", { className: "har-detail", "data-testid": "session-har-detail", children: [
+    /* @__PURE__ */ jsx23("div", { className: "har-tabs", role: "tablist", "aria-label": "HAR entry details", children: TABS.map((t) => /* @__PURE__ */ jsx23(
+      "button",
+      {
+        type: "button",
+        role: "tab",
+        className: tab === t.id ? "har-tab har-tab--active" : "har-tab",
+        "aria-selected": tab === t.id,
+        "data-testid": `session-har-tab-${t.id}`,
+        onClick: (e) => {
+          e.stopPropagation();
+          onTabChange(t.id);
+        },
+        children: t.label
+      },
+      t.id
+    )) }),
+    tab === "headers" && /* @__PURE__ */ jsxs13("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-headers", children: [
+      /* @__PURE__ */ jsx23(HeaderKv, { title: "Response Headers", headers: resp.headers }),
+      /* @__PURE__ */ jsx23(HeaderKv, { title: "Request Headers", headers: req.headers })
+    ] }),
+    tab === "timings" && /* @__PURE__ */ jsx23("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-timings", children: /* @__PURE__ */ jsxs13("div", { className: "har-kv", children: [
+      HAR_TIMING_KEYS.map((key) => /* @__PURE__ */ jsxs13(Fragment, { children: [
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__k", children: key }),
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__v", children: formatTiming(timings[key]) })
+      ] }, key)),
+      /* @__PURE__ */ jsx23("div", { className: "har-kv__k", children: "total" }),
+      /* @__PURE__ */ jsx23("div", { className: "har-kv__v", children: formatTiming(entry.time) })
+    ] }) }),
+    tab === "response" && /* @__PURE__ */ jsxs13("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-response", children: [
+      /* @__PURE__ */ jsxs13("div", { className: "har-kv", children: [
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__k", children: "status" }),
+        /* @__PURE__ */ jsxs13("div", { className: "har-kv__v", children: [
+          status || "\u2014",
+          statusText ? ` ${statusText}` : ""
+        ] }),
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__k", children: "mimeType" }),
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__v", children: mime }),
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__k", children: "size" }),
+        /* @__PURE__ */ jsx23("div", { className: "har-kv__v", children: size })
+      ] }),
+      /* @__PURE__ */ jsxs13("div", { className: "har-section", children: [
+        /* @__PURE__ */ jsx23("div", { className: "har-section__title", children: "Body" }),
+        /* @__PURE__ */ jsx23("pre", { className: bodyText ? "har-body" : "har-body har-muted", children: bodyNote })
+      ] })
+    ] })
+  ] });
+}
+function HarViewer({
+  entries,
+  expandedIndex = null,
+  detailTab = "headers",
+  onToggleRow,
+  onDetailTabChange,
+  empty,
+  className,
+  testId = "har-viewer"
+}) {
+  if (!entries.length) {
+    return /* @__PURE__ */ jsx23("div", { className: cn("har-viewer", className), "data-testid": testId, children: /* @__PURE__ */ jsx23("div", { className: "har-empty", "data-testid": "session-har-empty", children: empty ?? "No network entries." }) });
+  }
+  return /* @__PURE__ */ jsx23("div", { className: cn("har-viewer", className), "data-testid": testId, children: /* @__PURE__ */ jsx23("div", { className: "har-table-wrap", children: /* @__PURE__ */ jsxs13("table", { className: "har-table", children: [
+    /* @__PURE__ */ jsx23("thead", { children: /* @__PURE__ */ jsxs13("tr", { children: [
+      /* @__PURE__ */ jsx23("th", { children: "Method" }),
+      /* @__PURE__ */ jsx23("th", { children: "Status" }),
+      /* @__PURE__ */ jsx23("th", { children: "URL" }),
+      /* @__PURE__ */ jsx23("th", { children: "Type" }),
+      /* @__PURE__ */ jsx23("th", { children: "Size" }),
+      /* @__PURE__ */ jsx23("th", { children: "Time" })
+    ] }) }),
+    /* @__PURE__ */ jsx23("tbody", { children: entries.map((entry, idx) => {
+      const req = entry.request || {};
+      const resp = entry.response || {};
+      const content = resp.content || {};
+      const status = Number(resp.status) || 0;
+      const open = expandedIndex === idx;
+      const rowId = `har-row-${idx}`;
+      return /* @__PURE__ */ jsxs13(Fragment, { children: [
+        /* @__PURE__ */ jsxs13(
+          "tr",
+          {
+            id: rowId,
+            className: open ? "har-row har-row--open" : "har-row",
+            tabIndex: 0,
+            role: "button",
+            "aria-expanded": open,
+            "aria-controls": `har-detail-${idx}`,
+            "data-testid": `session-har-row-${idx}`,
+            onClick: () => onToggleRow?.(idx),
+            onKeyDown: (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onToggleRow?.(idx);
+              }
+            },
+            children: [
+              /* @__PURE__ */ jsx23("td", { className: "har-method", children: req.method || "" }),
+              /* @__PURE__ */ jsx23("td", { className: harStatusClass(status), children: status || "\u2014" }),
+              /* @__PURE__ */ jsx23("td", { className: "har-url", title: req.url, children: req.url || "" }),
+              /* @__PURE__ */ jsx23("td", { className: "har-mime", children: content.mimeType || "\u2014" }),
+              /* @__PURE__ */ jsx23("td", { children: formatSize(content.size) }),
+              /* @__PURE__ */ jsxs13("td", { children: [
+                Math.round(Number(entry.time) || 0),
+                " ms"
+              ] })
+            ]
+          }
+        ),
+        open && /* @__PURE__ */ jsx23(
+          "tr",
+          {
+            id: `har-detail-${idx}`,
+            className: "har-detail-row",
+            "data-testid": `session-har-detail-row-${idx}`,
+            children: /* @__PURE__ */ jsx23(
+              "td",
+              {
+                colSpan: 6,
+                onClick: (e) => e.stopPropagation(),
+                children: /* @__PURE__ */ jsx23(
+                  EntryDetail,
+                  {
+                    entry,
+                    tab: detailTab,
+                    onTabChange: (t) => onDetailTabChange?.(t)
+                  }
+                )
+              }
+            )
+          }
+        )
+      ] }, `${req.method || "GET"}-${req.url || ""}-${idx}`);
+    }) })
+  ] }) }) });
+}
+
 // src/code-highlight.ts
 var JSON_TOKEN = /("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g;
 function escapeHtmlKeepQuotes(value) {
@@ -1361,6 +1581,8 @@ export {
   Badge,
   Button,
   ConnectionStatus,
+  HAR_TIMING_KEYS,
+  HarViewer,
   IconChevronDown,
   IconChevronUp,
   IconClose,
@@ -1393,6 +1615,9 @@ export {
   VncWindow,
   WindowControl,
   escapeHtml,
+  formatSize,
+  formatTiming,
+  harStatusClass,
   highlightCurlHeredoc,
   highlightJson,
   highlightMarkdown,

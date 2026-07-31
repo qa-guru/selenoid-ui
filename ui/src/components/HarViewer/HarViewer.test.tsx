@@ -92,7 +92,7 @@ describe("HarViewer", () => {
             expect(screen.getByText("https://example.com/")).toBeInTheDocument();
         });
         expect(fetch!).toHaveBeenCalledWith("/har/sess-1.har", { cache: "no-store" });
-        expect(screen.getByTestId("session-har-download")).toHaveAttribute("href", "/har/sess-1.har");
+        expect(screen.getByTestId("session-har-download")).toHaveAttribute("aria-label", "Download");
     });
 
     it("renders when an explicit finished-session file is provided without caps", async () => {
