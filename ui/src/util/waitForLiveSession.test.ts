@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sources } from "eventsourcemock";
 
+import { sameOriginURL } from "./uiFeed";
 import { waitForLiveSession } from "./waitForLiveSession";
 
 describe("waitForLiveSession", () => {
@@ -25,7 +26,7 @@ describe("waitForLiveSession", () => {
             initialSessions: {},
             fetchStatus: async () => ({ state: {}, sessions: {} }),
         });
-        const source = sources["/events"];
+        const source = sources[sameOriginURL("/events")];
         expect(source).toBeTruthy();
 
         source.emitMessage(
@@ -76,7 +77,7 @@ describe("waitForLiveSession", () => {
                 };
             },
         });
-        const source = sources["/events"];
+        const source = sources[sameOriginURL("/events")];
         expect(source).toBeTruthy();
         source.emitError();
 

@@ -1,5 +1,5 @@
 import type { SessionsMap } from "../types/hub";
-import { isUiStatusPayload } from "./uiFeed";
+import { isUiStatusPayload, sameOriginURL } from "./uiFeed";
 
 /** Grace before Session page treats a missing live feed entry as not-found. */
 export const LIVE_SESSION_GRACE_MS = 15_000;
@@ -26,9 +26,9 @@ function sessionsFromPayload(payload: unknown): SessionsMap | undefined {
 
 async function defaultFetchStatus(): Promise<unknown> {
     // UI-shaped payload lives on /ui/status; /status is a standalone-ui fallback.
-    let response = await fetch("/ui/status", { cache: "no-store" });
+    let response = await fetch(sameOriginURL("/ui/status"), { cache: "no-store" });
     if (response.status === 404) {
-        response = await fetch("/status", { cache: "no-store" });
+        response = await fetch(sameOriginURL("/status"), { cache: "no-store" });
     }
     if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -105,7 +105,7 @@ export function waitForLiveSession(sessionId: string, options: WaitOptions = {})
         pollTimer = window.setInterval(poll, POLL_MS);
 
         try {
-            eventSource = new EventSource("/events");
+            eventSource = new EventSource(sameOriginURL("/events"));
             eventSource.onmessage = (event) => {
                 try {
                     const raw = typeof event === "string" ? event : event.data;

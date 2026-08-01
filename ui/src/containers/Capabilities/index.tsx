@@ -18,6 +18,7 @@ import {
     hubSessionErrorMessage,
 } from "../../util/capabilitiesLogic";
 import { waitForLiveSession } from "../../util/waitForLiveSession";
+import { sameOriginURL } from "../../util/uiFeed";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
 import {
@@ -2403,7 +2404,7 @@ const Launch = ({
             try {
                 await primeHubAuth(wdAuthToken);
                 const response = await fetch(
-                    "/wd/hub/session",
+                    sameOriginURL("/wd/hub/session"),
                     hubFetchInit(wdAuthToken, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -2506,7 +2507,7 @@ const Launch = ({
         try {
             await primeHubAuth(wdAuthToken);
             const response = await fetch(
-                "/wd/hub/session",
+                sameOriginURL("/wd/hub/session"),
                 hubFetchInit(wdAuthToken, {
                     method: "POST",
                     headers: {
@@ -2662,10 +2663,10 @@ const Launch = ({
         };
 
         const pollStatus = () => {
-            void fetch("/ui/status", { cache: "no-store" })
+            void fetch(sameOriginURL("/ui/status"), { cache: "no-store" })
                 .then(async (response) => {
                     if (response.status === 404) {
-                        return fetch("/status", { cache: "no-store" });
+                        return fetch(sameOriginURL("/status"), { cache: "no-store" });
                     }
                     return response;
                 })
@@ -2681,7 +2682,7 @@ const Launch = ({
         };
 
         try {
-            eventSource = new EventSource("/events");
+            eventSource = new EventSource(sameOriginURL("/events"));
             eventSource.onmessage = (e: any) => {
                 try {
                     tryNavigate(JSON.parse(e.data));
@@ -2708,14 +2709,21 @@ const Launch = ({
             playwrightSocket.current = ws;
 
             ws.onerror = () => {
-                if (!navigated) {
-                    finish("Failed to start Playwright session", true);
-                }
+                // Do not abort immediately — transient proxy blips happen while the
+                // hub still registers the session; /ui/status poll remains in charge.
+                console.warn("Playwright WebSocket error while starting session");
             };
             ws.onclose = () => {
-                if (!navigated) {
-                    finish("Playwright session closed before it was ready", true);
+                if (navigated) {
+                    return;
                 }
+                // Grace: session often appears in /ui/status a moment after the
+                // browser WS handshake; aborting here caused flaky Create Session.
+                window.setTimeout(() => {
+                    if (!navigated) {
+                        finish("Playwright session closed before it was ready", true);
+                    }
+                }, 15_000);
             };
         };
 

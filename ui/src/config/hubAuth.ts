@@ -104,7 +104,10 @@ export const primeHubAuth = (authToken: unknown): Promise<Response | void> => {
     if (!headers.Authorization) {
         return Promise.resolve();
     }
-    return fetch("/wd/hub/status", {
+    // Absolute origin avoids Chromium rejecting relative fetch when the
+    // document URL embeds basic auth (https://user:pass@host/…).
+    const statusURL = new URL("/wd/hub/status", window.location.origin).href;
+    return fetch(statusURL, {
         method: "GET",
         headers,
         credentials: "omit",

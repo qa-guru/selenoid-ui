@@ -2,6 +2,18 @@
 
 import type { HealthStatus, UiStatusPayload } from "../types/hub";
 
+/**
+ * Absolute same-origin URL for fetch/EventSource.
+ * Chromium rejects relative fetch() when the document URL embeds basic auth
+ * (`https://user:pass@host/…` → "URL that includes credentials").
+ */
+export function sameOriginURL(path: string): string {
+    if (typeof window === "undefined" || !window.location?.origin) {
+        return path;
+    }
+    return new URL(path, window.location.origin).href;
+}
+
 export const FALLBACK_POLL_MS = 4_000;
 export const RECONNECT_BASE_MS = 1_000;
 export const RECONNECT_MAX_MS = 30_000;

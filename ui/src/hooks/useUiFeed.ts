@@ -8,6 +8,7 @@ import {
     isUiStatusPayload,
     reconnectDelayMs,
     refreshSseStatus,
+    sameOriginURL,
 } from "../util/uiFeed";
 import { isMockSessionsEnabled, mergeMockLiveSessions } from "../lib/mockSessions";
 
@@ -74,10 +75,10 @@ export function useUiFeed(): UiFeed {
             try {
                 // UI-shaped payload ({state,...}) lives on /ui/status; public /status
                 // is the flat upstream-selenoid hub contract (student autotests).
-                let response = await fetch("/ui/status", { cache: "no-store" });
+                let response = await fetch(sameOriginURL("/ui/status"), { cache: "no-store" });
                 // Dev fallback: older selenoid-ui binaries expose UI feed on /status only.
                 if (response.status === 404) {
-                    response = await fetch("/status", { cache: "no-store" });
+                    response = await fetch(sameOriginURL("/status"), { cache: "no-store" });
                 }
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -105,7 +106,7 @@ export function useUiFeed(): UiFeed {
                 eventSourceRef.current = null;
             }
 
-            const es = new EventSource("/events");
+            const es = new EventSource(sameOriginURL("/events"));
             eventSourceRef.current = es;
 
             es.onopen = () => {
