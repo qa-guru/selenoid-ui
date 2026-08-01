@@ -11,7 +11,7 @@ jobs:
     env:
       GOTOOLCHAIN: auto
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set Golang
         uses: actions/setup-go@v6
@@ -36,14 +36,6 @@ jobs:
           VITE_HUB_ACCESS_KEY: ${{ secrets.HUB_ACCESS_KEY }}
           VITE_HUB_AUTH_USER: ${{ secrets.HUB_AUTH_USER }}
           VITE_HUB_AUTH_PASS: ${{ secrets.HUB_AUTH_PASS }}
-
-      - name: Latest image
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
-        run: ci/docker-push.sh latest
 
       - uses: release-drafter/release-drafter@v5
         env:
