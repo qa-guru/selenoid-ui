@@ -97,7 +97,7 @@ jobs:
       contents: read
     uses: ./.github/workflows/deploy-prod-dispatch.yml
     secrets:
-      SELENOID_DEPLOY_DISPATCH_TOKEN: ${{ secrets.SELENOID_DEPLOY_DISPATCH_TOKEN }}
+      SELENOID_TESTS_DISPATCH_TOKEN: ${{ secrets.SELENOID_TESTS_DISPATCH_TOKEN }}
     with:
       ui_version: ${{ needs.selenoid-ui.outputs.release_version }}
       pull_browsers: never
