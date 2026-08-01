@@ -89,13 +89,25 @@ jobs:
           DOCKER_IMAGE: qaguru/selenoid-ui
         run: ci/docker-push.sh latest-release
 
+  deploy-prod:
+    name: Deploy prod pin → selenoid.qa.guru
+    needs: selenoid-ui
+    if: success()
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy-prod-dispatch.yml
+    secrets:
+      SELENOID_DEPLOY_DISPATCH_TOKEN: ${{ secrets.SELENOID_DEPLOY_DISPATCH_TOKEN }}
+    with:
+      ui_version: ${{ needs.selenoid-ui.outputs.release_version }}
+      pull_browsers: never
+      skip_inline_browser_smoke: true
+
   # Gate of record for prod UI: wait until selenoid.qa.guru pin matches the
-  # release tag, then run api+smoke. Image publish alone is not a deploy —
-  # without wait_for_prod_ui_version this races the transitional / old pin
-  # (see v3.0.11 release-smoke red → post-deploy green).
+  # release tag, then run api+smoke Go dispatch (selenoid_qa_guru_api + test_tags=api,smoke).
   deploy-smoke:
     name: Release smoke → selenoid-tests
-    needs: selenoid-ui
+    needs: [selenoid-ui, deploy-prod]
     if: success()
     permissions:
       actions: read
@@ -105,8 +117,9 @@ jobs:
       SELENOID_TESTS_DISPATCH_TOKEN: ${{ secrets.SELENOID_TESTS_DISPATCH_TOKEN }}
     with:
       test_tags: api,smoke
+      env_profile: selenoid_qa_guru_api
       source_version: ${{ needs.selenoid-ui.outputs.release_version }}
       source_ref: ${{ github.ref }}
       summary_title: Release smoke → selenoid-tests
       wait_for_prod_ui_version: true
-      wait_timeout_minutes: 25
+      wait_timeout_minutes: 10
