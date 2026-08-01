@@ -2613,15 +2613,30 @@ const Launch = ({
         const primeToken = wdAuthToken || (parseAccessKey(accessKey) ? accessKey : "");
         let navigated = false;
         let eventSource: EventSource | undefined;
+        let pollTimer: number | undefined;
+        let timeoutTimer: number | undefined;
+
+        const stopWatching = () => {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = undefined;
+            }
+            if (pollTimer != null) {
+                window.clearInterval(pollTimer);
+                pollTimer = undefined;
+            }
+            if (timeoutTimer != null) {
+                window.clearTimeout(timeoutTimer);
+                timeoutTimer = undefined;
+            }
+        };
 
         const finish = (message: any, closeSocket: any) => {
             if (closeSocket && playwrightSocket.current) {
                 playwrightSocket.current.close();
                 playwrightSocket.current = null;
             }
-            if (eventSource) {
-                eventSource.close();
-            }
+            stopWatching();
             onLoading(false);
             if (message) {
                 onError(message);
@@ -2637,6 +2652,7 @@ const Launch = ({
                 return;
             }
             navigated = true;
+            stopWatching();
             // Prefer Playwright accessKey when it is user:pass — WD duo state may
             // still hold bake-time defaults while the form only edited accessKey.
             rememberHubAuthToken(parseAccessKey(accessKey) ? accessKey : primeToken);
@@ -2645,21 +2661,47 @@ const Launch = ({
             onLoading(false);
         };
 
-        eventSource = new EventSource("/events");
-        eventSource.onmessage = (e: any) => {
-            try {
-                tryNavigate(JSON.parse(e.data));
-            } catch (err) {
-                console.error("Can't parse SSE event", err);
-            }
-        };
-        eventSource.onerror = () => {
-            if (!navigated) {
-                finish("Lost connection to events stream", true);
-            }
+        const pollStatus = () => {
+            void fetch("/ui/status", { cache: "no-store" })
+                .then(async (response) => {
+                    if (response.status === 404) {
+                        return fetch("/status", { cache: "no-store" });
+                    }
+                    return response;
+                })
+                .then((response) => (response.ok ? response.json() : null))
+                .then((payload) => {
+                    if (payload) {
+                        tryNavigate(payload);
+                    }
+                })
+                .catch(() => {
+                    // Keep polling until timeout — second EventSource is flaky under nginx.
+                });
         };
 
+        try {
+            eventSource = new EventSource("/events");
+            eventSource.onmessage = (e: any) => {
+                try {
+                    tryNavigate(JSON.parse(e.data));
+                } catch (err) {
+                    console.error("Can't parse SSE event", err);
+                }
+            };
+            // Do not abort on EventSource error — /ui/status poll is the source of truth.
+        } catch (err) {
+            console.error("Playwright EventSource unavailable", err);
+        }
+
         tryNavigate({ sessions });
+        pollStatus();
+        pollTimer = window.setInterval(pollStatus, 500);
+        timeoutTimer = window.setTimeout(() => {
+            if (!navigated) {
+                finish("Timed out waiting for Playwright session", true);
+            }
+        }, 120_000);
 
         const openWebSocket = () => {
             const ws = new WebSocket(wsUrl);
