@@ -33,9 +33,7 @@ Prod **v2.x** pin branches (`selenoid2-…-react16` / `selenoid2-…-react18`) s
 -   Header/navigation unification and sessions/layout redesign.
 
 <!-- stack-branches-note:start -->
-
-**Stack pin:** этот checkout (`main` / v3-dev) — [`STACK-PIN.md`](../STACK-PIN.md) = Selenoid 3 / React 19 / react-router 7. Стабильные **v2** сборки — отдельные ветки [`selenoid2-…-react16`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.45-engine26.1-go1.26-react16) (**v2.2.1**) и [`selenoid2-…-react18`](https://github.com/qa-guru/selenoid-ui/tree/selenoid2-1.55-engine29.6-go1.26-react18) (**v2.3.0**, React 18); на них свой `STACK-PIN.md`. См. [корневой README](../README.md) · [monorepo SSOT](https://github.com/qa-guru/zero-design-system/blob/master/projects/selenoid-home/README.md).
-
+> **Stack pin:** этот checkout (`main` / v3-dev) — [`STACK-PIN.md`](../STACK-PIN.md) = Selenoid 3 / React 19. Pin-ветки 2.x (**v2.3.0** / **v2.2.1**) — frozen rollback; prod UI — [selenoid.qa.guru](https://selenoid.qa.guru) на **`main`** only.
 <!-- stack-branches-note:end -->
 
 ## Available Scripts
