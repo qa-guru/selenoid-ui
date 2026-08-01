@@ -398,7 +398,7 @@ function VersionsTable({ runs }: { runs: PerfRun[] }) {
     for (const run of base) {
         byHub.set(run.versions.hub, run);
     }
-    const hubs = Array.from(byHub.keys()).sort();
+    const hubs = Array.from(byHub.keys()).sort((a, b) => a.localeCompare(b));
 
     return (
         <div className="benchmarks__scroll">

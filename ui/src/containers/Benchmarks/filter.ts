@@ -58,7 +58,7 @@ export function filterRuns(runs: PerfRun[], filters: BenchmarkFilters): PerfRun[
 }
 
 export function uniqueSorted(values: string[]): string[] {
-    return Array.from(new Set(values)).sort();
+    return Array.from(new Set(values)).sort((a, b) => a.localeCompare(b));
 }
 
 export function fmt(value: number | null | undefined, suffix = ""): string {
