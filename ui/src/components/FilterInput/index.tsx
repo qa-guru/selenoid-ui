@@ -38,6 +38,8 @@ export const FilterInput = forwardRef<HTMLInputElement, any>(function FilterInpu
         >
             <Input
                 ref={ref}
+                id="session-filter-input"
+                name="session-filter"
                 placeholder="Filter..."
                 value={value}
                 data-testid="session-filter-input"

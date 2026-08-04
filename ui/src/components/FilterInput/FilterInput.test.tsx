@@ -10,6 +10,8 @@ describe("FilterInput", () => {
         const input = screen.getByPlaceholderText("Filter...");
         expect(input!).toHaveClass("input");
         expect(input!).toHaveAttribute("data-testid", "session-filter-input");
+        expect(input!).toHaveAttribute("id", "session-filter-input");
+        expect(input!).toHaveAttribute("name", "session-filter");
     });
 
     it("forwards value changes and clear action", async () => {

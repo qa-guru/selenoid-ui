@@ -1469,6 +1469,28 @@ select.plaque-field__control option {
   pointer-events: none;
 }
 
+/* src/styles/poll-toggle.css */
+.poll-toggle {
+  position: relative;
+  display: inline-block;
+}
+.poll-toggle__label {
+  position: absolute;
+  bottom: var(--lang-label-inset);
+  right: var(--lang-label-inset);
+  font-size: var(--lang-label-font-size);
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.poll-toggle--on .icon-btn {
+  color: var(--color-primary);
+}
+.poll-toggle:not(.poll-toggle--on) {
+  opacity: 0.72;
+}
+
 /* src/styles/badge.css */
 .badge {
   display: inline-flex;
