@@ -11,7 +11,14 @@ describe("SessionArchive api", () => {
     });
 
     it("builds paginated list url with default page size 10", () => {
-        expect(buildSessionListUrl({ page: 1 })).toBe(`/sessions/?json=&limit=${SESSION_PAGE_SIZE}&offset=10`);
+        expect(buildSessionListUrl({ page: 1 })).toBe(
+            `/sessions/?json=&limit=${SESSION_PAGE_SIZE}&offset=10&sort=finished&order=desc`
+        );
+    });
+
+    it("includes sort params when provided", () => {
+        expect(buildSessionListUrl({ sort: "duration", order: "asc" })).toContain("sort=duration");
+        expect(buildSessionListUrl({ sort: "duration", order: "asc" })).toContain("order=asc");
     });
 
     it("includes search query when provided", () => {
@@ -30,7 +37,7 @@ describe("SessionArchive api", () => {
         });
 
         const page = await fetchSessionPage({ page: 0 });
-        expect(fetch).toHaveBeenCalledWith(`/sessions/?json=&limit=10&offset=0`);
+        expect(fetch).toHaveBeenCalledWith(`/sessions/?json=&limit=10&offset=0&sort=finished&order=desc`);
         expect(page).toEqual({
             sessions: [{ id: "a", video: "a.mp4", har: "a.har" }],
             total: 11,
@@ -63,6 +70,8 @@ describe("SessionArchive api", () => {
         const found = await fetchSessionById("abc-1");
         expect(found).toEqual({ id: "abc-1", video: "abc-1.mp4" });
         expect(fetch).toHaveBeenCalledWith(expect.stringContaining("q=abc-1"));
+        expect(fetch).toHaveBeenCalledWith(expect.stringContaining("sort=id"));
+        expect(fetch).toHaveBeenCalledWith(expect.stringContaining("order=asc"));
     });
 
     it("fetchSessionById returns null when no exact id", async () => {

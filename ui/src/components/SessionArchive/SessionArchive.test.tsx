@@ -1,12 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import SessionArchive from "./index";
 
-function renderArchive(ui: any = <SessionArchive />) {
-    return render(<MemoryRouter>{ui}</MemoryRouter>);
+function renderArchive(ui: any = <SessionArchive />, { route = "/sessions" }: { route?: string } = {}) {
+    const router = createMemoryRouter(
+        [
+            { path: "/sessions", element: ui },
+            { path: "/sessions/:session", element: <div data-testid="session-detail-page" /> },
+        ],
+        { initialEntries: [route] }
+    );
+    const view = render(<RouterProvider router={router} />);
+    return { ...view, router };
 }
 
 describe("SessionArchive", () => {
@@ -31,7 +39,7 @@ describe("SessionArchive", () => {
             expect(screen.getByTestId("archive-pager")).toBeInTheDocument();
         });
         expect(screen.getByTestId("archive-pager-status")).toHaveTextContent("1 / 2");
-        expect(fetch!).toHaveBeenCalledWith("/sessions/?json=&limit=10&offset=0");
+        expect(fetch!).toHaveBeenCalledWith("/sessions/?json=&limit=10&offset=0&sort=finished&order=desc");
     });
 
     it("requests next page with offset=10", async () => {
@@ -64,9 +72,28 @@ describe("SessionArchive", () => {
         await user.click(screen.getByTestId("archive-pager-next"));
 
         await waitFor(() => {
-            expect(fetch!).toHaveBeenLastCalledWith("/sessions/?json=&limit=10&offset=10");
+            expect(fetch!).toHaveBeenLastCalledWith("/sessions/?json=&limit=10&offset=10&sort=finished&order=desc");
         });
         expect(screen.getByTestId("archive-pager-status")).toHaveTextContent("2 / 2");
+    });
+
+    it("renders semantic table with aligned header and body columns", async () => {
+        (fetch as any).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                sessions: [{ id: "sess-1", video: "sess-1.mp4" }],
+                total: 1,
+                limit: 10,
+                offset: 0,
+            }),
+        });
+
+        renderArchive();
+
+        await waitFor(() => expect(screen.getByTestId("session-card")).toBeInTheDocument());
+        expect(screen.getAllByRole("columnheader")).toHaveLength(6);
+        expect(screen.getByTestId("archive-table").querySelectorAll("colgroup col")).toHaveLength(6);
+        expect(screen.getByTestId("session-card").querySelectorAll("td")).toHaveLength(6);
     });
 
     it("renders a list row with meta, artifact icons, and detail link (no video preview)", async () => {
@@ -106,15 +133,9 @@ describe("SessionArchive", () => {
         // 24h clock with zero-padded hours (01:00, not 1:00); no AM/PM.
         expect(screen.getByTestId("session-date")).toHaveTextContent(/^\d{1,2}\/\d{1,2}\/\d{2}, \d{2}:\d{2}$/);
         expect(screen.getByTestId("session-date").textContent).not.toMatch(/AM|PM/i);
-        // Left fields: session → date → duration → owner → name; actions stay on the right.
-        const fields = screen.getByTestId("session-detail-link");
-        expect([...fields.children].map((el: any) => el.className.split(" ")[0])).toEqual([
-            "archive__id",
-            "archive__date",
-            "archive__duration",
-            "archive__quota",
-            "archive__name",
-        ]);
+        const row = screen.getByTestId("session-card");
+        expect(row.querySelectorAll("td")).toHaveLength(6);
+        expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-1");
         expect(screen.getByTestId("artifact-video")).toHaveAttribute("title", "VIDEO");
         expect(screen.getByTestId("artifact-log")).toHaveAttribute("title", "LOG");
         expect(screen.getByTestId("artifact-har")).toHaveAttribute("title", "HAR");
@@ -194,5 +215,43 @@ describe("SessionArchive", () => {
         const empty = screen.getByText("NO FINISHED SESSIONS YET :'(").closest(".no-any");
         expect(empty!).toBeTruthy();
         expect(empty!.querySelector("svg")).toBeTruthy();
+    });
+
+    it("sorts by finished desc by default and toggles sort on header click", async () => {
+        const user = userEvent.setup();
+        (fetch as any).mockResolvedValue({
+            ok: true,
+            json: async () => ({ sessions: [], total: 0, limit: 10, offset: 0 }),
+        });
+
+        const { router } = renderArchive();
+        await waitFor(() => expect(fetch!).toHaveBeenCalled());
+
+        expect(fetch!).toHaveBeenCalledWith("/sessions/?json=&limit=10&offset=0&sort=finished&order=desc");
+        expect(screen.getByTestId("archive-sort-finished")).toHaveAttribute("aria-sort", "descending");
+
+        await user.click(screen.getByTestId("archive-sort-duration"));
+        await waitFor(() => {
+            expect(fetch!).toHaveBeenLastCalledWith("/sessions/?json=&limit=10&offset=0&sort=duration&order=desc");
+        });
+
+        await user.click(screen.getByTestId("archive-sort-duration"));
+        await waitFor(() => {
+            expect(fetch!).toHaveBeenLastCalledWith("/sessions/?json=&limit=10&offset=0&sort=duration&order=asc");
+        });
+    });
+
+    it("restores sort and page from the url", async () => {
+        (fetch as any).mockResolvedValue({
+            ok: true,
+            json: async () => ({ sessions: [], total: 0, limit: 10, offset: 0 }),
+        });
+
+        renderArchive(<SessionArchive />, { route: "/sessions?sort=name&order=asc&page=2" });
+
+        await waitFor(() => {
+            expect(fetch!).toHaveBeenCalledWith("/sessions/?json=&limit=10&offset=20&sort=name&order=asc");
+        });
+        expect(screen.getByTestId("archive-sort-name")).toHaveAttribute("aria-sort", "ascending");
     });
 });

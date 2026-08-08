@@ -16,46 +16,153 @@ export const StyledArchive = styled.div`
         min-height: 52px;
     }
 
-    .archive__list {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
+    .archive__table-wrap {
         padding: 0 var(--space-5, 16px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         box-sizing: border-box;
     }
 
-    .archive__row {
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        gap: var(--space-4, 15px);
-        border-bottom: 1px dashed ${colorBorder};
-        color: var(--color-text, #fff);
-        padding: 8px 0;
-        min-width: 280px;
+    .archive__table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        table-layout: fixed;
         font-size: 0.82em;
     }
 
-    .archive__fields {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4, 15px);
-        flex: 1;
-        min-width: 0;
+    .archive__col_id {
+        width: 76px;
+    }
+
+    .archive__col_date {
+        width: 8.75em;
+    }
+
+    .archive__col_duration {
+        width: 7.5em;
+    }
+
+    .archive__col_quota {
+        width: 96px;
+    }
+
+    .archive__col_name {
+        width: auto;
+    }
+
+    .archive__col_actions {
+        /* video + log + har (3×22px) + gaps + delete — 72px clipped the trash icon */
+        width: 104px;
+    }
+
+    .archive__table thead th {
+        padding: 10px 0 8px;
+        border-bottom: 1px solid ${colorBorder};
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        text-align: left;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .archive__table tbody td {
+        padding: 8px 0;
+        border-bottom: 1px dashed ${colorBorder};
+        color: var(--color-text, #fff);
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .archive__table tbody tr:hover .archive__id,
+    .archive__table tbody tr:hover .archive__name {
+        color: var(--color-success, #59a781);
+    }
+
+    .archive__row_clickable {
+        cursor: pointer;
+    }
+
+    .archive__row_clickable:focus {
+        outline: none;
+    }
+
+    .archive__row_clickable:focus-visible {
+        box-shadow: inset 0 0 0 1px var(--color-success, #59a781);
+    }
+
+    .archive__row-link {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         text-decoration: none;
         color: inherit;
+    }
 
-        &:hover .archive__id,
-        &:hover .archive__name {
+    .archive__sort {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        color: inherit;
+        cursor: pointer;
+        text-align: left;
+        white-space: nowrap;
+
+        &:hover {
+            color: var(--color-text, #fff);
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        &:focus-visible {
+            box-shadow: inset 0 0 0 1px var(--color-success, #59a781);
+            border-radius: 2px;
+        }
+
+        &::after {
+            content: "↕";
+            flex-shrink: 0;
+            font-size: 0.62rem;
+            opacity: 0.35;
+        }
+
+        &[aria-sort="ascending"] {
             color: var(--color-success, #59a781);
+
+            &::after {
+                content: "↑";
+                opacity: 1;
+            }
+        }
+
+        &[aria-sort="descending"] {
+            color: var(--color-success, #59a781);
+
+            &::after {
+                content: "↓";
+                opacity: 1;
+            }
         }
     }
 
     .archive__id {
-        flex: 0 0 76px;
         color: var(--color-text, #fff);
         font-weight: 300;
-        font-size: 1em;
         font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
         font-variant-numeric: tabular-nums;
     }
@@ -63,64 +170,44 @@ export const StyledArchive = styled.div`
     .archive__date,
     .archive__duration,
     .archive__quota {
-        flex: 0 0 auto;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         color: var(--color-text-muted, #aaa);
         font-size: 0.95em;
         font-weight: 300;
-    }
-
-    .archive__date {
-        flex: 0 0 8.75em;
         font-variant-numeric: tabular-nums;
     }
 
-    .archive__duration {
-        flex: 0 0 4.5em;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .archive__quota {
-        flex: 0 1 96px;
-        max-width: 120px;
-    }
-
-    .archive__quota_empty {
-        flex: 0 0 auto;
+    .archive__quota_empty,
+    .archive__name_empty {
+        color: var(--color-text-muted, #aaa);
     }
 
     .archive__name {
-        flex: 1 1 180px;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         font-weight: 300;
         color: var(--color-text, #fff);
     }
 
-    .archive__name_empty {
-        flex: 0 0 auto;
-        color: var(--color-text-muted, #aaa);
+    .archive__table tbody td.archive__col_actions {
+        overflow: visible;
+    }
+
+    .archive__col_actions {
+        text-align: right;
     }
 
     .archive__actions {
-        display: flex;
+        display: inline-flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 0.35em;
         flex-shrink: 0;
-        margin-left: auto;
     }
 
     .archive__artifacts {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 0.25em;
         text-decoration: none;
         color: var(--color-text-muted, #aaa);
-        min-width: 0;
 
         &:hover {
             color: var(--color-text, #fff);
@@ -245,29 +332,5 @@ export const StyledArchive = styled.div`
         min-width: 64px;
         text-align: center;
         color: var(--color-text, #fff);
-    }
-
-    @media (max-width: 720px) {
-        .archive__row {
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .archive__fields {
-            flex: 1 1 100%;
-            flex-wrap: wrap;
-            gap: 4px 12px;
-            order: 3;
-        }
-
-        .archive__date,
-        .archive__duration,
-        .archive__quota {
-            flex: 0 0 auto;
-        }
-
-        .archive__actions {
-            margin-left: auto;
-        }
     }
 `;

@@ -1,13 +1,19 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useCallback, useEffect, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import { StyledArchive } from "./style.css";
 import { IconTrash, Panel } from "@zero-design-system/react";
 import { useDeleteSession } from "./service";
-import { fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
+import {
+    fetchSessionPage,
+    SESSION_PAGE_SIZE,
+    type SessionArchiveSortField,
+    type SessionArchiveSortOrder,
+} from "./api";
 import { sessionIdShort } from "../../util/sessionsLogic";
+import { buildArchiveSearchParams, parseArchiveUrlState, type ArchiveUrlState } from "./archiveUrlState";
 
 /** Empty-state hourglass — composition only; dripicons off. */
 function IconHourglass() {
@@ -119,22 +125,57 @@ function formatDuration(started: any, finished: any) {
 }
 
 const SessionArchive = ({ query = "" }: any) => {
-    const [page, setPage] = useState(0);
-    const [sessions, setSessions] = useState([]);
-    const [total, setTotal] = useState(0);
-    const [limit, setLimit] = useState(SESSION_PAGE_SIZE);
-    const [loading, setLoading] = useState(true);
-    const [reloadToken, setReloadToken] = useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [listState, setListState] = React.useState<ArchiveUrlState>(() => parseArchiveUrlState(searchParams));
+    const { sort: sortBy, order: sortOrder, page } = listState;
+    const [sessions, setSessions] = React.useState([]);
+    const [total, setTotal] = React.useState(0);
+    const [limit, setLimit] = React.useState(SESSION_PAGE_SIZE);
+    const [loading, setLoading] = React.useState(true);
+    const [reloadToken, setReloadToken] = React.useState(0);
     const noAnyRef = useRef(null);
+    const queryRef = useRef(query);
 
     useEffect(() => {
-        setPage(0);
-    }, [query]);
+        setListState(parseArchiveUrlState(searchParams));
+    }, [searchParams]);
+
+    useEffect(() => {
+        if (import.meta.env.MODE === "test") {
+            return;
+        }
+        const mirrored = parseArchiveUrlState(
+            buildArchiveSearchParams(new URLSearchParams(), listState)
+        );
+        const current = parseArchiveUrlState(searchParams);
+        if (
+            mirrored.sort === current.sort &&
+            mirrored.order === current.order &&
+            mirrored.page === current.page
+        ) {
+            return;
+        }
+        setSearchParams(
+            Object.fromEntries(buildArchiveSearchParams(new URLSearchParams(), listState).entries()),
+            { replace: true }
+        );
+    }, [listState, searchParams, setSearchParams]);
+
+    const patchListState = useCallback((patch: Partial<ArchiveUrlState>) => {
+        setListState((current) => ({ ...current, ...patch }));
+    }, []);
+
+    useEffect(() => {
+        if (queryRef.current !== query) {
+            queryRef.current = query;
+            patchListState({ page: 0 });
+        }
+    }, [query, patchListState]);
 
     useEffect(() => {
         let cancelled = false;
         setLoading(true);
-        fetchSessionPage({ page, q: query })
+        fetchSessionPage({ page, q: query, sort: sortBy, order: sortOrder })
             .then((payload: any) => {
                 if (cancelled) {
                     return;
@@ -158,10 +199,34 @@ const SessionArchive = ({ query = "" }: any) => {
         return () => {
             cancelled = true;
         };
-    }, [page, query, reloadToken]);
+    }, [page, query, reloadToken, sortBy, sortOrder]);
+
+    const onSort = useCallback((field: SessionArchiveSortField) => {
+        setListState((current) => {
+            if (current.sort === field) {
+                return {
+                    ...current,
+                    order: current.order === "asc" ? "desc" : "asc",
+                    page: 0,
+                };
+            }
+            return {
+                sort: field,
+                order: field === "finished" || field === "duration" ? "desc" : "asc",
+                page: 0,
+            };
+        });
+    }, []);
 
     const onDeleted = useCallback(() => {
         setReloadToken((token: any) => token + 1);
+    }, []);
+
+    const setPage = useCallback((nextPage: number | ((current: number) => number)) => {
+        setListState((current) => {
+            const resolved = typeof nextPage === "function" ? nextPage(current.page) : nextPage;
+            return { ...current, page: Math.max(0, resolved) };
+        });
     }, []);
 
     const pageCount = Math.max(1, Math.ceil(total / limit) || 1);
@@ -177,10 +242,72 @@ const SessionArchive = ({ query = "" }: any) => {
                 bodyClassName="archive-panel__body"
             >
                 {/* No TransitionGroup: page swaps would stack exit+enter and double list height. */}
-                <div className="archive__list">
-                    {sessions.map((session: any) => (
-                        <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
-                    ))}
+                <div className="archive__table-wrap">
+                    <table className="archive__table" data-testid="archive-table">
+                        <colgroup>
+                            <col className="archive__col_id" />
+                            <col className="archive__col_date" />
+                            <col className="archive__col_duration" />
+                            <col className="archive__col_quota" />
+                            <col className="archive__col_name" />
+                            <col className="archive__col_actions" />
+                        </colgroup>
+                        <thead data-testid="archive-head">
+                            <tr>
+                                <th scope="col" className="archive__col_id">
+                                    <SortHeader
+                                        label="Session"
+                                        field="id"
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
+                                        onSort={onSort}
+                                    />
+                                </th>
+                                <th scope="col" className="archive__col_date">
+                                    <SortHeader
+                                        label="Finished"
+                                        field="finished"
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
+                                        onSort={onSort}
+                                    />
+                                </th>
+                                <th scope="col" className="archive__col_duration">
+                                    <SortHeader
+                                        label="Duration"
+                                        field="duration"
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
+                                        onSort={onSort}
+                                    />
+                                </th>
+                                <th scope="col" className="archive__col_quota">
+                                    <SortHeader
+                                        label="User"
+                                        field="quota"
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
+                                        onSort={onSort}
+                                    />
+                                </th>
+                                <th scope="col" className="archive__col_name">
+                                    <SortHeader
+                                        label="Name"
+                                        field="name"
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
+                                        onSort={onSort}
+                                    />
+                                </th>
+                                <th scope="col" className="archive__col_actions" aria-label="Actions" />
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sessions.map((session: any) => (
+                                <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
 
                 {showPager && (
@@ -229,7 +356,35 @@ const SessionArchive = ({ query = "" }: any) => {
     );
 };
 
+const SortHeader = ({
+    label,
+    field,
+    sortBy,
+    sortOrder,
+    onSort,
+}: {
+    label: string;
+    field: SessionArchiveSortField;
+    sortBy: SessionArchiveSortField;
+    sortOrder: SessionArchiveSortOrder;
+    onSort: (field: SessionArchiveSortField) => void;
+}) => {
+    const active = sortBy === field;
+    return (
+        <button
+            type="button"
+            className="archive__sort"
+            data-testid={`archive-sort-${field}`}
+            aria-sort={active ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+            onClick={() => onSort(field)}
+        >
+            {label}
+        </button>
+    );
+};
+
 const SessionRow = ({ session, onDeleted }: any) => {
+    const navigate = useNavigate();
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
     const detailHref = `/sessions/${session.id}`;
     const name = session.name || "";
@@ -238,35 +393,76 @@ const SessionRow = ({ session, onDeleted }: any) => {
     const durationLabel = formatDuration(session.started, session.finished);
     const hasArtifacts = Boolean(session.video || session.log || session.har);
 
+    const openDetail = useCallback(() => {
+        if (!deleting) {
+            navigate(detailHref);
+        }
+    }, [deleting, detailHref, navigate]);
+
+    const onRowKeyDown = useCallback(
+        (event: React.KeyboardEvent<HTMLTableRowElement>) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openDetail();
+            }
+        },
+        [openDetail]
+    );
+
+    const stopRowAction = useCallback((event: React.MouseEvent) => {
+        event.stopPropagation();
+    }, []);
+
     return (
-        <div className="archive__row" data-testid="session-card" data-session={session.id}>
-            <Link to={detailHref} className="archive__fields" data-testid="session-detail-link">
-                <span className="archive__id" title={session.id}>
+        <tr
+            className="archive__row archive__row_clickable"
+            data-testid="session-card"
+            data-session={session.id}
+            tabIndex={0}
+            onClick={openDetail}
+            onKeyDown={onRowKeyDown}
+        >
+            <td className="archive__col_id">
+                <Link
+                    to={detailHref}
+                    className="archive__id archive__row-link"
+                    data-testid="session-detail-link"
+                    title={session.id}
+                    onClick={stopRowAction}
+                >
                     {sessionIdShort(session.id)}
-                </span>
+                </Link>
+            </td>
+            <td className="archive__col_date">
                 <span className="archive__date" data-testid="session-date">
                     {dateLabel}
                 </span>
+            </td>
+            <td className="archive__col_duration">
                 <span className="archive__duration" data-testid="session-duration">
                     {durationLabel}
                 </span>
+            </td>
+            <td className="archive__col_quota">
                 <span
                     className={`archive__quota${quota ? "" : " archive__quota_empty"}`}
                     data-testid="session-quota"
                     title={quota || undefined}
                 >
-                    {quota}
+                    {quota || "—"}
                 </span>
+            </td>
+            <td className="archive__col_name">
                 <span
                     className={`archive__name${name ? "" : " archive__name_empty"}`}
-                    title={name || undefined}
                     data-testid="session-name"
+                    title={name || undefined}
                 >
                     {name || "—"}
                 </span>
-            </Link>
-
-            <div className="archive__actions">
+            </td>
+            <td className="archive__col_actions" onClick={stopRowAction}>
+                <div className="archive__actions">
                 <Link
                     to={detailHref}
                     className="archive__artifacts"
@@ -308,8 +504,9 @@ const SessionRow = ({ session, onDeleted }: any) => {
                         </span>
                     )}
                 </button>
-            </div>
-        </div>
+                </div>
+            </td>
+        </tr>
     );
 };
 
