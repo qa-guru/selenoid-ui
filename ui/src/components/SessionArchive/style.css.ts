@@ -123,6 +123,11 @@ export const StyledArchive = styled.div`
 
         &:hover {
             color: var(--color-text, #fff);
+
+            &::after {
+                color: var(--color-text, #fff);
+                opacity: 1;
+            }
         }
 
         &:focus {
@@ -137,8 +142,10 @@ export const StyledArchive = styled.div`
         &::after {
             content: "↕";
             flex-shrink: 0;
-            font-size: 0.62rem;
-            opacity: 0.35;
+            font-size: 0.68rem;
+            line-height: 1;
+            color: var(--color-text-muted, #aaa);
+            opacity: 0.9;
         }
 
         &[aria-sort="ascending"] {
@@ -146,6 +153,7 @@ export const StyledArchive = styled.div`
 
             &::after {
                 content: "↑";
+                color: var(--color-success, #59a781);
                 opacity: 1;
             }
         }
@@ -155,6 +163,7 @@ export const StyledArchive = styled.div`
 
             &::after {
                 content: "↓";
+                color: var(--color-success, #59a781);
                 opacity: 1;
             }
         }
