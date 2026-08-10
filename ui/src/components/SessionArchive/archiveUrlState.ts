@@ -36,7 +36,7 @@ export function buildArchiveSearchParams(
 ): URLSearchParams {
     const base = typeof current === "string" ? new URLSearchParams(current) : new URLSearchParams(current);
     const next = new URLSearchParams(base);
-    const state = { ...parseArchiveUrlState(current), ...patch };
+    const state = { ...parseArchiveUrlState(base), ...patch };
 
     if (state.sort === DEFAULT_SESSION_ARCHIVE_SORT) {
         next.delete("sort");
