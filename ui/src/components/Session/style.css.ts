@@ -36,6 +36,8 @@ export const StyledSession = styled.div`
 
     /* Stable VNC → video swap: one column, fixed flex footprint. */
     .session-media-slot {
+        display: flex;
+        flex-direction: column;
         height: var(--session-media-height);
         min-height: var(--session-media-height);
         max-height: var(--session-media-height);
