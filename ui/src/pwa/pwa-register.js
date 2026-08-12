@@ -23,7 +23,7 @@
  */
 
 /** @type {string} */
-export const DEFAULT_SW_URL = "/sw.js";
+export const DEFAULT_SW_URL = '/sw.js';
 
 /**
  * Icon paths heirs put in `manifest.webmanifest` + precache.
@@ -31,7 +31,11 @@ export const DEFAULT_SW_URL = "/sw.js";
  *
  * @type {readonly string[]}
  */
-export const PWA_ICON_PATHS = Object.freeze(["icons/pwa-192.png", "icons/pwa-512.png", "icons/pwa-maskable-512.png"]);
+export const PWA_ICON_PATHS = Object.freeze([
+  'icons/pwa-192.png',
+  'icons/pwa-512.png',
+  'icons/pwa-maskable-512.png',
+]);
 
 /**
  * Contract the heir-generated service worker must satisfy.
@@ -47,11 +51,11 @@ export const PWA_ICON_PATHS = Object.freeze(["icons/pwa-192.png", "icons/pwa-512
  * }>}
  */
 export const PWA_SW_CONTRACT = Object.freeze({
-    registerType: "autoUpdate",
-    skipWaiting: true,
-    clientsClaim: true,
-    cleanupOutdatedCaches: true,
-    navigateFallback: "index.html",
+  registerType: 'autoUpdate',
+  skipWaiting: true,
+  clientsClaim: true,
+  cleanupOutdatedCaches: true,
+  navigateFallback: 'index.html',
 });
 
 /**
@@ -59,54 +63,54 @@ export const PWA_SW_CONTRACT = Object.freeze({
  * @returns {void}
  */
 export function registerServiceWorker(options = {}) {
-    const {
-        swUrl = DEFAULT_SW_URL,
-        immediate = true,
-        reloadOnControllerChange = true,
-        onRegistered,
-        onRegisterError,
-    } = options;
+  const {
+    swUrl = DEFAULT_SW_URL,
+    immediate = true,
+    reloadOnControllerChange = true,
+    onRegistered,
+    onRegisterError,
+  } = options;
 
-    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    return;
+  }
+
+  if (reloadOnControllerChange) {
+    // Capture before register(): first clientsClaim also fires controllerchange.
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || refreshing) {
         return;
-    }
+      }
+      refreshing = true;
+      window.location.reload();
+    });
+  }
 
-    if (reloadOnControllerChange) {
-        // Capture before register(): first clientsClaim also fires controllerchange.
-        const hadController = Boolean(navigator.serviceWorker.controller);
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (!hadController || refreshing) {
-                return;
-            }
-            refreshing = true;
-            window.location.reload();
-        });
-    }
+  const run = () => {
+    navigator.serviceWorker
+      .register(swUrl)
+      .then((reg) => {
+        if (typeof reg.update === 'function') {
+          reg.update().catch(() => {});
+        }
+        if (typeof onRegistered === 'function') {
+          onRegistered(reg);
+        }
+      })
+      .catch((err) => {
+        console.warn('service worker registration failed', err);
+        if (typeof onRegisterError === 'function') {
+          onRegisterError(err);
+        }
+      });
+  };
 
-    const run = () => {
-        navigator.serviceWorker
-            .register(swUrl)
-            .then((reg) => {
-                if (typeof reg.update === "function") {
-                    reg.update().catch(() => {});
-                }
-                if (typeof onRegistered === "function") {
-                    onRegistered(reg);
-                }
-            })
-            .catch((err) => {
-                console.warn("service worker registration failed", err);
-                if (typeof onRegisterError === "function") {
-                    onRegisterError(err);
-                }
-            });
-    };
+  if (immediate) {
+    run();
+    return;
+  }
 
-    if (immediate) {
-        run();
-        return;
-    }
-
-    window.addEventListener("load", run);
+  window.addEventListener('load', run);
 }
