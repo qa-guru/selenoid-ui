@@ -47,7 +47,7 @@ export default class VncScreen extends Component<any, any> {
         const prevOrigin = prevProps.origin;
         const { session, origin } = this.props;
 
-        if (origin && session && prevOrigin !== origin) {
+        if (origin && session && (prevOrigin !== origin || prevProps.session !== session)) {
             const link = urlTo(window.location.href);
             const port = VncScreen.defaultPort(link);
 
@@ -89,7 +89,7 @@ export default class VncScreen extends Component<any, any> {
     }
 
     disconnect(rfb: any) {
-        if (rfb && rfb._rfb_connection_state && rfb._rfb_connection_state !== "disconnected") {
+        if (rfb) {
             rfb.disconnect();
         }
     }
