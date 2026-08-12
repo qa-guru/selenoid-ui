@@ -48,11 +48,12 @@ describe("Log chrome → Panel terminal", () => {
     });
 
     it("decorates xterm helper textarea for DevTools form hints", () => {
-        xtermState.textarea = null;
         render(<Log />);
 
-        expect(xtermState.textarea?.id).toBe("session-log-input");
-        expect(xtermState.textarea?.name).toBe("session-log");
-        expect(xtermState.textarea?.getAttribute("autocomplete")).toBe("off");
+        const textarea = xtermState.textarea;
+        expect(textarea).toBeInstanceOf(HTMLTextAreaElement);
+        expect(textarea!.id).toBe("session-log-input");
+        expect(textarea!.name).toBe("session-log");
+        expect(textarea!.getAttribute("autocomplete")).toBe("off");
     });
 });
