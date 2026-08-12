@@ -46,6 +46,32 @@ describe("SessionInfo", () => {
         expect(name!).not.toHaveClass("badge--primary");
     });
 
+    it("live mode shows HAR VIDEO LOG from caps", () => {
+        render(
+            <MemoryRouter>
+                <SessionInfo
+                    session="abc-def-12345678"
+                    live
+                    browser={{
+                        quota: "max.user",
+                        caps: {
+                            browserName: "chrome",
+                            version: "149.0",
+                            name: "FullSuite.loginAndCheckout",
+                            enableHAR: true,
+                            enableVideo: true,
+                            enableLog: true,
+                        },
+                    }}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText("HAR")).toHaveClass("badge");
+        expect(screen.getByText("VIDEO")).toHaveClass("badge");
+        expect(screen.getByText("LOG")).toHaveClass("badge");
+    });
+
     it("omits resolution Badge when screenResolution is missing", () => {
         render(
             <MemoryRouter>

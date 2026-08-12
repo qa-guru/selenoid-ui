@@ -178,12 +178,19 @@ export const StyledSessions = styled.div`
         border-color: ${manualColor};
     }
 
+    .session__quota_starting {
+        display: inline-flex;
+        align-items: center;
+        min-width: 2.5em;
+    }
+
     .session__caps {
         display: flex;
         align-items: center;
         gap: 0.4em;
-        flex-shrink: 0;
-        flex-wrap: nowrap;
+        flex-shrink: 1;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
     .session__resolution {

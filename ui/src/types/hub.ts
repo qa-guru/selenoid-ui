@@ -26,6 +26,8 @@ export type LiveSession = {
     container?: string;
     quota?: string;
     caps?: SessionCaps;
+    /** Hub feed entry exists, container/quota not ready yet (Create Session freeze). */
+    starting?: boolean;
     [key: string]: unknown;
 };
 

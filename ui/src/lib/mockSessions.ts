@@ -8,32 +8,75 @@ import type { LiveSession, SessionsMap } from "../types/hub";
 const container = "mock-container-deadbeef";
 
 type MockSessionOpts = {
-    quota: string;
+    quota?: string;
     browserName: string;
-    version: string;
-    name: string;
+    version?: string;
+    name?: string;
     enableVNC?: boolean;
+    enableVideo?: boolean;
+    enableHAR?: boolean;
+    enableLog?: boolean;
     manual?: boolean;
     screenResolution?: string;
+    timeZone?: string;
+    sessionTimeout?: string;
+    /** Empty quota + spinner: session is in the hub feed but not yet fully started. */
+    starting?: boolean;
 };
 
 function session(id: string, opts: MockSessionOpts): LiveSession {
-    const { quota, browserName, version, name, enableVNC = false, manual = false, screenResolution } = opts;
+    const {
+        quota = "",
+        browserName,
+        version = "",
+        name = "",
+        enableVNC = false,
+        enableVideo = false,
+        enableHAR = false,
+        enableLog = false,
+        manual = false,
+        screenResolution,
+        timeZone,
+        sessionTimeout,
+        starting = false,
+    } = opts;
     const caps = {
         browserName,
-        version,
-        name,
         enableVNC,
+        ...(version ? { version } : {}),
+        ...(name ? { name } : {}),
+        ...(enableVideo ? { enableVideo: true } : {}),
+        ...(enableHAR ? { enableHAR: true } : {}),
+        ...(enableLog ? { enableLog: true } : {}),
         ...(screenResolution ? { screenResolution } : {}),
+        ...(timeZone ? { timeZone } : {}),
+        ...(sessionTimeout ? { sessionTimeout } : {}),
         ...(manual ? { labels: { manual: "true" } } : {}),
     };
     return {
         id,
         container,
         quota,
+        ...(starting ? { starting: true } : {}),
         caps,
     };
 }
+
+/** Every Create Session toggle on — layout stress for Live row + session page. */
+const MOCK_MAX_CAPS: MockSessionOpts = {
+    quota: "max.user",
+    browserName: "chrome",
+    version: "149.0",
+    name: "FullSuite.loginAndCheckout",
+    enableVNC: true,
+    enableVideo: true,
+    enableHAR: true,
+    enableLog: true,
+    manual: true,
+    screenResolution: "1920x1080x24",
+    timeZone: "Europe/Moscow",
+    sessionTimeout: "60m",
+};
 
 /** Variety covering every Live sessions column / badge combo. */
 export const MOCK_LIVE_SESSIONS: SessionsMap = {
@@ -84,6 +127,16 @@ export const MOCK_LIVE_SESSIONS: SessionsMap = {
         name: "",
         enableVNC: false,
         manual: true,
+    }),
+    "mockmax-aaaaaaaaaaaaaaaaaaaaaaa": session("mockmax-aaaaaaaaaaaaaaaaaaaaaaa", MOCK_MAX_CAPS),
+    "mockmin-aaaaaaaaaaaaaaaaaaaaaaa": session("mockmin-aaaaaaaaaaaaaaaaaaaaaaa", {
+        browserName: "chrome",
+        version: "149.0",
+    }),
+    "mockfrz-aaaaaaaaaaaaaaaaaaaaaaa": session("mockfrz-aaaaaaaaaaaaaaaaaaaaaaa", {
+        ...MOCK_MAX_CAPS,
+        quota: "",
+        starting: true,
     }),
 };
 

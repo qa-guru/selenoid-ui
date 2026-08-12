@@ -91,6 +91,54 @@ describe("Sessions", () => {
         expect(document.querySelector(".dripicons-hourglass")).toBeNull();
     });
 
+    it("renders max caps badges, min empty quota, and starting spinner", () => {
+        renderSessions({
+            sessions: {
+                "mockmax-aaa": {
+                    quota: "max.user",
+                    caps: {
+                        browserName: "chrome",
+                        version: "149.0",
+                        name: "FullSuite.loginAndCheckout",
+                        enableVNC: true,
+                        enableVideo: true,
+                        enableHAR: true,
+                        enableLog: true,
+                        labels: { manual: "true" },
+                        screenResolution: "1920x1080x24",
+                    },
+                },
+                "mockmin-aaa": {
+                    quota: "",
+                    caps: { browserName: "chrome", version: "149.0" },
+                },
+                "mockfrz-aaa": {
+                    quota: "",
+                    starting: true,
+                    caps: {
+                        browserName: "chrome",
+                        version: "149.0",
+                        name: "FullSuite.loginAndCheckout",
+                        enableVNC: true,
+                        enableVideo: true,
+                        enableHAR: true,
+                        enableLog: true,
+                        labels: { manual: "true" },
+                        screenResolution: "1920x1080x24",
+                    },
+                },
+            },
+        });
+
+        expect(screen.getAllByText("HAR").length).toBeGreaterThanOrEqual(2);
+        expect(screen.getAllByText("LOG").length).toBeGreaterThanOrEqual(2);
+        expect(screen.getAllByText("VIDEO").length).toBeGreaterThanOrEqual(2);
+        expect(screen.getByTitle("Starting…")).toHaveClass("session__quota_starting");
+        expect(screen.getByText("max.user")).toBeInTheDocument();
+        const minQuota = screen.getAllByText("—").find((el) => el.classList.contains("session__quota"));
+        expect(minQuota).toBeTruthy();
+    });
+
     it("links session id and identity to /sessions/:id", () => {
         renderSessions();
 

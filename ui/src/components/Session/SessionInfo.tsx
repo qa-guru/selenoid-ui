@@ -100,8 +100,8 @@ const SessionInfo = ({
                             {finished && <Badge variant="primary">FINISHED</Badge>}
                             {caps.name && <Badge>{caps.name}</Badge>}
                             {(caps.enableHAR || caps.enableHar || artifacts.har) && <Badge>HAR</Badge>}
-                            {artifacts.video && <Badge>VIDEO</Badge>}
-                            {artifacts.log && <Badge>LOG</Badge>}
+                            {(caps.enableVideo || artifacts.video) && <Badge>VIDEO</Badge>}
+                            {(caps.enableLog || artifacts.log) && <Badge>LOG</Badge>}
                         </div>
                     </div>
 

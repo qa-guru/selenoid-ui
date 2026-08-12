@@ -89,21 +89,25 @@ const Sessions = ({ sessions = {}, query = "" }: any) => {
     );
 };
 
-const Session = ({ id, session: { quota, caps }, ref }: any) => {
+const Session = ({ id, session: { quota, caps, starting }, ref }: any) => {
     const [deleting, deleteSession] = useSessionDelete(id);
     const href = deleting ? `#` : `/sessions/${id}`;
     const manual = Boolean(caps.labels && caps.labels.manual);
     const name = caps.name || "";
     // Default Create Session name duplicates the MANUAL badge — keep title for e2e, hide label.
     const displayName = manual && name.trim().toLowerCase() === "manual session" ? "" : name;
+    const startingRow = Boolean(starting);
 
     return (
         <div ref={ref} className={`session${manual ? " session_manual" : ""}`}>
             <Link to={href} className="link id session__id" title={id}>
                 {sessionIdShort(id)}
             </Link>
-            <span className="session__quota" title={quota || undefined}>
-                {quota || "—"}
+            <span
+                className={`session__quota${startingRow ? " session__quota_starting" : ""}`}
+                title={startingRow ? "Starting…" : quota || undefined}
+            >
+                {startingRow ? <BeatLoader size={4} color={"#fff"} loading /> : quota || "—"}
             </span>
             <Link className="link identity session__fields" to={href}>
                 <span className="browser">
@@ -118,6 +122,9 @@ const Session = ({ id, session: { quota, caps }, ref }: any) => {
             <div className="session__caps">
                 {manual && <Badge variant="primary">MANUAL</Badge>}
                 {caps.enableVNC && <Badge variant="primary">VNC</Badge>}
+                {caps.enableVideo && <Badge>VIDEO</Badge>}
+                {(caps.enableHAR || caps.enableHar) && <Badge>HAR</Badge>}
+                {caps.enableLog && <Badge>LOG</Badge>}
                 {caps.screenResolution && <span className="session__resolution">{caps.screenResolution}</span>}
             </div>
             <div className="session__actions">
