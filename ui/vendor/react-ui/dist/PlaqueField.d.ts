@@ -19,5 +19,5 @@ export interface PlaqueFieldProps extends Omit<InputHTMLAttributes<HTMLInputElem
  * - human caption + input → `plaque-field-caption-input`
  * Thin wrapper — label / divider / control slots stay SSOT in `plaque-field.css`.
  */
-export declare function PlaqueField({ label, className, divided, stretch, paramId, labelVariant, id, name, ...inputProps }: PlaqueFieldProps): import("react").JSX.Element;
+export declare function PlaqueField({ label, className, divided, stretch, paramId, labelVariant, id, name, autoComplete, ...inputProps }: PlaqueFieldProps): import("react").JSX.Element;
 //# sourceMappingURL=PlaqueField.d.ts.map

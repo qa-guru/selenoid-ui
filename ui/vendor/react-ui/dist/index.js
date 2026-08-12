@@ -507,6 +507,25 @@ function Panel({
 
 // src/PlaqueField.tsx
 import { jsx as jsx11, jsxs as jsxs6 } from "react/jsx-runtime";
+var PARAM_AUTOCOMPLETE = {
+  authUser: "username",
+  authPass: "current-password"
+};
+function resolveAutoComplete(autoComplete, paramId, labelVariant) {
+  if (autoComplete !== void 0) {
+    return autoComplete;
+  }
+  if (!paramId) {
+    return void 0;
+  }
+  if (PARAM_AUTOCOMPLETE[paramId]) {
+    return PARAM_AUTOCOMPLETE[paramId];
+  }
+  if (labelVariant === "param") {
+    return "off";
+  }
+  return void 0;
+}
 function PlaqueField({
   label,
   className,
@@ -516,11 +535,17 @@ function PlaqueField({
   labelVariant = "caption",
   id,
   name,
+  autoComplete,
   ...inputProps
 }) {
   const labelClass = labelVariant === "param" ? "plaque-field__label" : "plaque-field__text";
   const controlId = id ?? paramId;
   const controlName = name ?? paramId ?? id;
+  const resolvedAutoComplete = resolveAutoComplete(
+    autoComplete,
+    paramId,
+    labelVariant
+  );
   return /* @__PURE__ */ jsxs6(
     "label",
     {
@@ -540,7 +565,8 @@ function PlaqueField({
             className: "plaque-field__control",
             ...inputProps,
             id: controlId,
-            name: controlName
+            name: controlName,
+            autoComplete: resolvedAutoComplete
           }
         )
       ]
@@ -594,6 +620,7 @@ function PlaqueSelect({
             onChange: handleChange,
             id: controlId,
             name: controlName,
+            autoComplete: paramId ? "off" : void 0,
             children: options.map((option) => /* @__PURE__ */ jsx12("option", { value: option.value, children: option.label ?? option.value }, option.value))
           }
         )
