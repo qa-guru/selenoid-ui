@@ -12,6 +12,9 @@ describe("FilterInput", () => {
         expect(input!).toHaveAttribute("data-testid", "session-filter-input");
         expect(input!).toHaveAttribute("id", "session-filter-input");
         expect(input!).toHaveAttribute("name", "session-filter");
+        expect(input!).toHaveAttribute("type", "search");
+        expect(input!).toHaveAttribute("autocomplete", "off");
+        expect(input!).toHaveAttribute("aria-label", "Filter sessions");
     });
 
     it("forwards value changes and clear action", async () => {

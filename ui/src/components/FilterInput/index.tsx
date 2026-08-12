@@ -40,9 +40,12 @@ export const FilterInput = forwardRef<HTMLInputElement, any>(function FilterInpu
                 ref={ref}
                 id="session-filter-input"
                 name="session-filter"
+                type="search"
+                autoComplete="off"
                 placeholder="Filter..."
                 value={value}
                 data-testid="session-filter-input"
+                aria-label="Filter sessions"
                 onChange={onChange}
             />
             <button

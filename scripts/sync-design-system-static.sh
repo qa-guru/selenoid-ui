@@ -83,7 +83,7 @@ node -e '
     types: "./dist/index.d.ts",
     exports: {
       ".": { types: "./dist/index.d.ts", import: "./dist/index.js" },
-      "./styles.css": "./dist/index.css",
+      "./styles.css": "./dist/styles.css",
     },
     files: ["dist"],
     peerDependencies: src.peerDependencies,

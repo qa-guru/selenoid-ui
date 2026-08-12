@@ -211,6 +211,9 @@ describe("Capabilities CodeHighlight → Panel terminal", () => {
         const panel = screen.getByTestId("capabilities-terminal-panel");
         const vector = within(panel!).getByRole("textbox", { name: "Vector id" });
         expect(vector!).toHaveAttribute("data-testid", "capabilities-terminal-vector");
+        expect(vector!).toHaveAttribute("id", "capabilities-terminal-vector");
+        expect(vector!).toHaveAttribute("name", "capabilities-terminal-vector");
+        expect(vector!).toHaveAttribute("autocomplete", "off");
         expect((vector as HTMLInputElement).value).toMatch(/^vector#[0-9a-f]{8}$/);
 
         expect(within(panel!).getByRole("button", { name: "Сброс" })).toHaveAttribute(

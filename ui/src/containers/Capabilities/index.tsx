@@ -2231,6 +2231,8 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         barEnd={
                             <input
                                 type="text"
+                                id="capabilities-terminal-vector"
+                                name="capabilities-terminal-vector"
                                 className={
                                     "badge badge--primary capabilities-vector-input" +
                                     (vectorMiss ? " capabilities-vector-input--miss" : "")
