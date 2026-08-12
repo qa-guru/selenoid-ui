@@ -19,7 +19,7 @@ fi
 # Consumer-only: selenoid-header-bridge.js (not synced).
 mkdir -p "$UI_PUBLIC/css" "$UI_PUBLIC/js" "$UI_PUBLIC/templates"
 
-for f in tokens header link input icon icon-btn lang-toggle button badge status-tile selenoid-metrics plaque-divider plaque-field plaque-field-seg panel sticky tab; do
+for f in tokens header link input icon icon-btn lang-toggle button badge status-tile selenoid-metrics plaque-divider plaque-field plaque-field-seg panel sticky tab window-control connection-status vnc-window har-viewer; do
   cp "$DS/css/${f}.css" "$UI_PUBLIC/css/"
 done
 

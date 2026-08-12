@@ -196,7 +196,7 @@ const Session = ({ origin, session, browser }: any) => {
                         </div>
                     )}
                     {hasLogColumn && (
-                        <div className="session-interactive-card">
+                        <div className="session-interactive-card session-log-slot">
                             {keepLiveLog || showLive ? (
                                 <Log
                                     {...{

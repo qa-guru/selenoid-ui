@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
 export const StyledSession = styled.div`
+    --session-media-height: min(48vh, 520px);
+
     flex: 1;
     width: 100%;
     display: flex;
@@ -15,8 +17,7 @@ export const StyledSession = styled.div`
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        /* Content heights independent — Log hugs buffer; do not magnet to VNC screen. */
-        align-items: start;
+        align-items: stretch;
         box-sizing: border-box;
         width: 100%;
         padding: 0 var(--wt-post-gap, 14px) var(--wt-post-gap, 14px);
@@ -28,17 +29,65 @@ export const StyledSession = styled.div`
         flex: 1 1 45%;
         min-width: min(450px, 100%);
         margin: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
 
     /* Stable VNC → video swap: one column, fixed flex footprint. */
     .session-media-slot {
-        display: flex;
-        flex-direction: column;
-        height: min(48vh, 520px);
-        min-height: min(48vh, 520px);
-        max-height: min(48vh, 520px);
+        height: var(--session-media-height);
+        min-height: var(--session-media-height);
+        max-height: var(--session-media-height);
         min-width: 0;
         overflow: hidden;
+    }
+
+    /* Log column matches Video/VNC row height; body scrolls when content overflows. */
+    .session-log-slot {
+        min-height: var(--session-media-height);
+
+        > * {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            width: 100%;
+        }
+
+        .log-card {
+            flex: 1 1 auto;
+            height: 100%;
+            min-height: 0;
+            align-self: stretch;
+        }
+
+        .log-card__body {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .term {
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        .log-file-pre {
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: none;
+            overflow: auto;
+        }
+
+        .log-file-empty {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
     }
 
     .session-media-slot > .session-video-card,
@@ -93,10 +142,9 @@ export const StyledSession = styled.div`
 
     .session-info-panel {
         box-sizing: border-box;
-        width: calc(100% - 2 * var(--wt-post-gap, 14px));
-        max-width: 1000px;
-        /* Bottom was 0 → Session info stuck to VNC/Video; keep mosaic gutter. */
-        margin: var(--wt-post-gap, 14px);
+        width: 100%;
+        padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
+        margin: 0;
         /* Content height only — Panel default flex:1 ate the viewport and
            clipped VNC + Log. Same override as Capabilities .setup .panel. */
         flex: 0 0 auto;
