@@ -140,11 +140,11 @@ export default class Log extends Component<any, any> {
         if (!(props && props.session && props.origin && props.browser)) {
             return;
         }
-        // Reconnect only when origin changes (was distinctUntilChanged on origin).
-        if (props.origin === this.currentOrigin) {
+        const key = `${props.origin}|${props.session}`;
+        if (key === this.currentOrigin) {
             return;
         }
-        this.currentOrigin = props.origin;
+        this.currentOrigin = key;
 
         const wsProxyUrl = urlTo(window.location.href);
         const wsUrl = `${isSecure(wsProxyUrl) ? "wss" : "ws"}://${wsProxyUrl.host}/ws/logs/${props.session}`;
