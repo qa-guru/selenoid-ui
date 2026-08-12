@@ -102,7 +102,11 @@ func ws(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/ws")
-	ws := &url.URL{Scheme: "ws", Host: statusURI.Host, Path: r.URL.Path}
+	scheme := "ws"
+	if statusURI.Scheme == "https" {
+		scheme = "wss"
+	}
+	ws := &url.URL{Scheme: scheme, Host: statusURI.Host, Path: r.URL.Path}
 	log.Printf("[WS_PROXY] [/ws%s] [%s]", r.URL.Path, ws)
 	wsProxy := websocketproxy.NewProxy(ws)
 	configureWsProxy(wsProxy)
