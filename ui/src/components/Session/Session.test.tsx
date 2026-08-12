@@ -48,6 +48,8 @@ describe("Session detail page", () => {
 
         expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
         expect(screen.getByTestId("live-log")).toBeInTheDocument();
+        expect(document.querySelector(".session-media-slot")).toBeTruthy();
+        expect(document.querySelector(".session-log-slot")).toBeTruthy();
         expect(screen.queryByTestId("session-detail-video")).toBeNull();
     });
 

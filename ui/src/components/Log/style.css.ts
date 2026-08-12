@@ -13,36 +13,36 @@ export const StyledLog = styled.div`
 
     &.session-peer {
         align-items: stretch;
-        flex: 1 1 auto;
-        min-height: 0;
-        height: 100%;
+        flex: 1 0 auto;
+        min-height: var(--session-media-height);
+        height: auto;
 
         .log-card {
-            flex: 1 1 auto;
-            height: 100%;
-            min-height: 0;
+            flex: 1 0 auto;
+            min-height: var(--session-media-height);
+            height: auto;
             align-self: stretch;
 
             .log-card__body {
                 flex: 1 1 auto;
-                height: 100%;
                 min-height: 0;
+                height: auto;
                 display: flex;
                 flex-direction: column;
-                overflow: hidden;
+                overflow: visible;
             }
 
             .term {
-                flex: 1 1 auto;
+                flex: 0 0 auto;
                 min-height: 0;
-                overflow: auto;
+                overflow: visible;
             }
 
             .log-file-pre {
-                flex: 1 1 auto;
+                flex: 0 0 auto;
                 min-height: 0;
                 max-height: none;
-                overflow: auto;
+                overflow: visible;
             }
 
             .log-file-empty {
@@ -110,8 +110,8 @@ export const StyledLog = styled.div`
     .log-file-pre {
         margin: 0;
         padding: var(--space-3, 12px);
-        max-height: min(48vh, 520px);
-        overflow: auto;
+        max-height: none;
+        overflow: visible;
         white-space: pre-wrap;
         word-break: break-word;
         color: var(--panel-code-color, var(--color-text, #fff));

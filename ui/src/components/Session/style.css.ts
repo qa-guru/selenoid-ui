@@ -20,7 +20,7 @@ export const StyledSession = styled.div`
         display: grid;
         grid-template-columns: repeat(2, minmax(min(450px, 100%), 1fr));
         justify-content: center;
-        align-items: stretch;
+        align-items: start;
         box-sizing: border-box;
         width: 100%;
         padding: 0 0 var(--wt-post-gap, 14px);
@@ -46,6 +46,7 @@ export const StyledSession = styled.div`
     .session-media-slot {
         display: flex;
         flex-direction: column;
+        align-self: start;
         min-height: var(--session-media-height);
         height: var(--session-media-height);
         max-height: var(--session-media-height);
@@ -82,17 +83,18 @@ export const StyledSession = styled.div`
         }
     }
 
-    /* Log column matches Video/VNC row height; body scrolls when content overflows. */
+    /* Log floor = VNC height; grows down with content. VNC stays fixed. */
     .session-log-slot {
+        align-self: start;
         min-height: var(--session-media-height);
-        height: 100%;
+        height: auto;
 
         > * {
-            flex: 1 1 auto;
+            flex: 1 0 auto;
             display: flex;
             flex-direction: column;
-            min-height: 0;
-            height: 100%;
+            min-height: var(--session-media-height);
+            height: auto;
             width: 100%;
         }
     }
