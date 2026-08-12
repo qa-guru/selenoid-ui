@@ -1771,9 +1771,10 @@ select.plaque-field__control option {
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   min-width: 0;
+  width: 100%;
 }
 .vnc-window-frame--fullscreen {
   position: absolute;
@@ -1785,7 +1786,7 @@ select.plaque-field__control option {
 .panel--vnc {
   --panel-bg: #000;
   --panel-border: rgba(255, 255, 255, 0.1);
-  --panel-bar-bg: #3d444c;
+  --panel-bar-bg: #1a1917;
   --vnc-aspect: 16 / 9;
   flex: 0 1 100%;
   width: 100%;
@@ -1799,7 +1800,8 @@ select.plaque-field__control option {
   min-height: var(--panel-bar-height-chrome);
   gap: 0;
   padding: 0;
-  border-bottom: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--panel-bar-bg);
 }
 .vnc-window__controls,
 .vnc-window__actions {
@@ -1809,6 +1811,21 @@ select.plaque-field__control option {
 }
 .vnc-window__actions {
   margin-left: auto;
+}
+.vnc-window__status-label {
+  margin-left: var(--space-1, 4px);
+  color: var(--window-control-info);
+  font-size: var(--font-size-sm, 12px);
+  line-height: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.vnc-window--disconnecting .vnc-window__status-label {
+  color: var(--connection-status-disconnecting);
+}
+.vnc-window--disconnected .vnc-window__status-label {
+  color: var(--window-control-danger);
 }
 .vnc-window--connected .window-control {
   margin-inline-end: -6px;
@@ -1827,25 +1844,16 @@ select.plaque-field__control option {
   width: 100%;
   height: 100%;
 }
-.vnc-window--connecting,
-.vnc-window--disconnecting,
-.vnc-window--disconnected {
-  flex-basis: 60px;
-  width: 60px;
-  height: 30px;
-}
 .vnc-window--connecting .vnc-window__session-control,
 .vnc-window--disconnecting .vnc-window__session-control,
 .vnc-window--disconnected .vnc-window__session-control,
 .vnc-window--connecting .vnc-window__actions,
 .vnc-window--disconnecting .vnc-window__actions,
-.vnc-window--disconnected .vnc-window__actions,
-.vnc-window--connecting .vnc-window__screen,
-.vnc-window--disconnecting .vnc-window__screen,
-.vnc-window--disconnected .vnc-window__screen {
+.vnc-window--disconnected .vnc-window__actions {
   display: none;
 }
-.vnc-window--connected .connection-status {
+.vnc-window--connected .connection-status,
+.vnc-window--connected .vnc-window__status-label {
   display: none;
 }
 .vnc-window--fullscreen {
@@ -1859,32 +1867,6 @@ select.plaque-field__control option {
   aspect-ratio: auto;
   height: auto;
   min-height: 0;
-}
-.vnc-window__external-status {
-  position: relative;
-  margin-left: 55px;
-  color: var(--window-control-info);
-  font-size: var(--font-size-sm);
-  line-height: 20px;
-  text-transform: uppercase;
-}
-.vnc-window__external-status::before {
-  content: "";
-  position: absolute;
-  top: 10px;
-  right: calc(100% + 10px);
-  width: 35px;
-  border-bottom: 1px solid currentColor;
-}
-.vnc-window--disconnecting + .vnc-window__external-status {
-  color: var(--connection-status-disconnecting);
-}
-.vnc-window--disconnected + .vnc-window__external-status {
-  color: var(--window-control-danger);
-}
-.vnc-window--connected + .vnc-window__external-status,
-.vnc-window--fullscreen + .vnc-window__external-status {
-  display: none;
 }
 
 /* src/styles/har-viewer.css */

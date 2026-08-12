@@ -1175,7 +1175,6 @@ function VncWindow({
   "data-testid": dataTestId = "vnc-window"
 }) {
   const l = { ...defaultLabels, ...labels };
-  const external = state === "connected" ? "" : `VNC ${state}`;
   const aspectStyle = screenSize && screenSize.width > 0 && screenSize.height > 0 ? {
     ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
   } : void 0;
@@ -1191,61 +1190,59 @@ function VncWindow({
       children: /* @__PURE__ */ jsx23(IconTrash, {})
     }
   ) : null);
-  return /* @__PURE__ */ jsxs13("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: [
-    /* @__PURE__ */ jsxs13(
-      "div",
-      {
-        className: cn(
-          "panel",
-          "panel--vnc",
-          "vnc-window",
-          `vnc-window--${state}`,
-          fullscreen && "vnc-window--fullscreen",
-          className
-        ),
-        style: aspectStyle,
-        "data-state": state,
-        "data-testid": dataTestId,
-        children: [
-          /* @__PURE__ */ jsxs13("div", { className: "panel__bar", children: [
-            /* @__PURE__ */ jsxs13("div", { className: "vnc-window__controls", children: [
-              backControl,
-              /* @__PURE__ */ jsx23(ConnectionStatus, { state }),
-              /* @__PURE__ */ jsx23(
-                WindowControl,
-                {
-                  tone: "info",
-                  sessionControl: true,
-                  "aria-label": unlocked ? l.lock : l.unlock,
-                  title: unlocked ? l.lock : l.unlock,
-                  onClick: onToggleLock,
-                  children: unlocked ? /* @__PURE__ */ jsx23(IconUnlock, {}) : /* @__PURE__ */ jsx23(IconLock, {})
-                }
-              ),
-              /* @__PURE__ */ jsx23(
-                WindowControl,
-                {
-                  tone: "success",
-                  sessionControl: true,
-                  "aria-label": fullscreen ? l.exitFullscreen : l.enterFullscreen,
-                  title: fullscreen ? l.exitFullscreen : l.enterFullscreen,
-                  onClick: onToggleFullscreen,
-                  children: fullscreen ? /* @__PURE__ */ jsx23(IconChevronDown, {}) : /* @__PURE__ */ jsx23(IconChevronUp, {})
-                }
-              )
-            ] }),
-            /* @__PURE__ */ jsxs13("div", { className: "vnc-window__actions", children: [
-              killControl,
-              /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.copy, title: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
-              /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.paste, title: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) })
-            ] })
+  return /* @__PURE__ */ jsx23("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: /* @__PURE__ */ jsxs13(
+    "div",
+    {
+      className: cn(
+        "panel",
+        "panel--vnc",
+        "vnc-window",
+        `vnc-window--${state}`,
+        fullscreen && "vnc-window--fullscreen",
+        className
+      ),
+      style: aspectStyle,
+      "data-state": state,
+      "data-testid": dataTestId,
+      children: [
+        /* @__PURE__ */ jsxs13("div", { className: "panel__bar", children: [
+          /* @__PURE__ */ jsxs13("div", { className: "vnc-window__controls", children: [
+            backControl,
+            /* @__PURE__ */ jsx23(ConnectionStatus, { state }),
+            state !== "connected" ? /* @__PURE__ */ jsx23("span", { className: "vnc-window__status-label", "aria-hidden": "true", children: state }) : null,
+            /* @__PURE__ */ jsx23(
+              WindowControl,
+              {
+                tone: "info",
+                sessionControl: true,
+                "aria-label": unlocked ? l.lock : l.unlock,
+                title: unlocked ? l.lock : l.unlock,
+                onClick: onToggleLock,
+                children: unlocked ? /* @__PURE__ */ jsx23(IconUnlock, {}) : /* @__PURE__ */ jsx23(IconLock, {})
+              }
+            ),
+            /* @__PURE__ */ jsx23(
+              WindowControl,
+              {
+                tone: "success",
+                sessionControl: true,
+                "aria-label": fullscreen ? l.exitFullscreen : l.enterFullscreen,
+                title: fullscreen ? l.exitFullscreen : l.enterFullscreen,
+                onClick: onToggleFullscreen,
+                children: fullscreen ? /* @__PURE__ */ jsx23(IconChevronDown, {}) : /* @__PURE__ */ jsx23(IconChevronUp, {})
+              }
+            )
           ] }),
-          /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsx23("div", { className: "vnc-window__external-status", role: "status", "aria-live": "polite", children: external })
-  ] });
+          /* @__PURE__ */ jsxs13("div", { className: "vnc-window__actions", children: [
+            killControl,
+            /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.copy, title: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
+            /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.paste, title: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })
+      ]
+    }
+  ) });
 }
 
 // src/HarViewer.tsx

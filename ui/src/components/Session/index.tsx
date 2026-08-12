@@ -204,6 +204,7 @@ const Session = ({ origin, session, browser }: any) => {
                                         session,
                                         browser: displayBrowser,
                                     }}
+                                    className="session-peer"
                                     hidden={isLogHidden}
                                 />
                             ) : (

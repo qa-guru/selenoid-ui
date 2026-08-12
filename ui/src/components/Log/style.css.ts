@@ -11,6 +11,50 @@ export const StyledLog = styled.div`
         display: none;
     }
 
+    &.session-peer {
+        align-items: stretch;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+
+        .log-card {
+            flex: 1 1 auto;
+            height: 100%;
+            min-height: 0;
+            align-self: stretch;
+
+            .log-card__body {
+                flex: 1 1 auto;
+                height: 100%;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .term {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow: auto;
+            }
+
+            .log-file-pre {
+                flex: 1 1 auto;
+                min-height: 0;
+                max-height: none;
+                overflow: auto;
+            }
+
+            .log-file-empty {
+                flex: 1 1 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 0;
+            }
+        }
+    }
+
     .log-card {
         /* Terminal canon: content-height (no fixed VNC screen magnet / inner scroll). */
         height: auto;

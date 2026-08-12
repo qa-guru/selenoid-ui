@@ -55,7 +55,7 @@ const SessionLogFile = ({ file }: any) => {
     }
 
     return (
-        <StyledLog data-testid="session-log-file">
+        <StyledLog className="session-peer" data-testid="session-log-file">
             <Panel
                 variant="terminal"
                 title="Session logs"

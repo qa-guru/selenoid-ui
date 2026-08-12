@@ -3,31 +3,39 @@ import styled from "styled-components";
 export const StyledSession = styled.div`
     --session-media-height: min(48vh, 520px);
 
+    box-sizing: border-box;
     flex: 1;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: flex-start;
+    /* Page shell gutter — same as Sessions list (.sessions-page). */
+    padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
 
     /* Edge inset = inter-panel gap — same 14px gutter as widget-mosaic
        (--wt-post-gap). flex:1 alone used to eat margins and collapse the
        gutter between VncWindow and Log. */
     .interactive {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(min(450px, 100%), 1fr));
         justify-content: center;
         align-items: stretch;
         box-sizing: border-box;
         width: 100%;
-        padding: 0 var(--wt-post-gap, 14px) var(--wt-post-gap, 14px);
+        padding: 0 0 var(--wt-post-gap, 14px);
         gap: var(--wt-post-gap, 14px);
+    }
+
+    @media (max-width: 999px) {
+        .interactive {
+            grid-template-columns: minmax(0, 1fr);
+        }
     }
 
     .session-interactive-card {
         max-width: 1000px;
-        flex: 1 1 45%;
-        min-width: min(450px, 100%);
+        min-width: 0;
         margin: 0;
         display: flex;
         flex-direction: column;
@@ -38,57 +46,54 @@ export const StyledSession = styled.div`
     .session-media-slot {
         display: flex;
         flex-direction: column;
-        height: var(--session-media-height);
         min-height: var(--session-media-height);
+        height: var(--session-media-height);
         max-height: var(--session-media-height);
         min-width: 0;
         overflow: hidden;
+
+        > * {
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: 100%;
+            width: 100%;
+        }
+
+        .panel--vnc {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: 100%;
+            height: 100%;
+        }
+
+        .panel--vnc > .panel__bar {
+            flex: 0 0 var(--panel-bar-height-chrome, 36px);
+            min-height: var(--panel-bar-height-chrome, 36px);
+        }
+
+        .vnc-window__screen {
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+        }
     }
 
     /* Log column matches Video/VNC row height; body scrolls when content overflows. */
     .session-log-slot {
         min-height: var(--session-media-height);
+        height: 100%;
 
         > * {
             flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             min-height: 0;
-            width: 100%;
-        }
-
-        .log-card {
-            flex: 1 1 auto;
             height: 100%;
-            min-height: 0;
-            align-self: stretch;
-        }
-
-        .log-card__body {
-            flex: 1 1 auto;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .term {
-            flex: 1 1 auto;
-            min-height: 0;
-        }
-
-        .log-file-pre {
-            flex: 1 1 auto;
-            min-height: 0;
-            max-height: none;
-            overflow: auto;
-        }
-
-        .log-file-empty {
-            flex: 1 1 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 0;
+            width: 100%;
         }
     }
 
@@ -135,7 +140,7 @@ export const StyledSession = styled.div`
         box-sizing: border-box;
         width: 100%;
         flex: 0 0 auto;
-        padding: 0 var(--wt-post-gap, 14px) var(--wt-post-gap, 14px);
+        padding: 0 0 var(--wt-post-gap, 14px);
 
         .har-card {
             flex: 0 0 auto;
@@ -145,8 +150,8 @@ export const StyledSession = styled.div`
     .session-info-panel {
         box-sizing: border-box;
         width: 100%;
-        padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
-        margin: 0;
+        padding: 0;
+        margin: 0 0 var(--wt-post-gap, 14px);
         /* Content height only — Panel default flex:1 ate the viewport and
            clipped VNC + Log. Same override as Capabilities .setup .panel. */
         flex: 0 0 auto;
@@ -247,9 +252,8 @@ export const StyledSession = styled.div`
     /* Same empty-state shell as Sessions / Archive (.no-any inside Panel). */
     .session-missing-panel {
         box-sizing: border-box;
-        width: calc(100% - 2 * var(--wt-post-gap, 14px));
-        max-width: 1000px;
-        margin: var(--wt-post-gap, 14px);
+        width: 100%;
+        margin: 0 0 var(--wt-post-gap, 14px);
         flex: 0 0 auto;
     }
 
