@@ -122,7 +122,10 @@ export default class Log extends Component<any, any> {
 
         const proposed = this.fitAddon.proposeDimensions?.();
         const cols = proposed?.cols || this.term.cols || 80;
-        const rows = Math.max(this.term.buffer.active.length, MIN_ROWS);
+        // buffer.length is the viewport (default 24 rows), not written lines.
+        const buf = this.term.buffer?.active;
+        const written = buf ? (buf.baseY || 0) + (buf.cursorY || 0) + 1 : MIN_ROWS;
+        const rows = Math.max(written, MIN_ROWS);
 
         this.term.resize(cols, rows);
         this.termel.style.height = `${rows * this.cellHeightPx()}px`;
