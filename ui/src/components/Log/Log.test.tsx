@@ -7,15 +7,21 @@ const xtermState = { textarea: null as HTMLTextAreaElement | null };
 vi.mock("xterm", () => ({
     Terminal: class {
         textarea: HTMLTextAreaElement | undefined;
+        rows = 24;
+        cols = 80;
+        element: HTMLDivElement | undefined;
+        buffer = { active: { length: 0, baseY: 0, cursorY: 0 } };
         loadAddon() {}
         open() {
             this.textarea = document.createElement("textarea");
+            this.element = document.createElement("div");
             xtermState.textarea = this.textarea;
         }
         writeln() {}
         write() {}
         clear() {}
         dispose() {}
+        resize() {}
     },
 }));
 
@@ -55,5 +61,19 @@ describe("Log chrome → Panel terminal", () => {
         expect(textarea!.id).toBe("session-log-input");
         expect(textarea!.name).toBe("session-log");
         expect(textarea!.getAttribute("autocomplete")).toBe("off");
+    });
+
+    it("does not open WebSocket for an active mock session", () => {
+        const ws = vi.fn();
+        vi.stubGlobal("WebSocket", ws);
+        render(
+            <Log
+                session="mockmax-aaaaaaaaaaaaaaaaaaaaaaa"
+                origin="http://localhost"
+                browser={{ caps: { enableLog: true } }}
+            />
+        );
+        expect(ws).not.toHaveBeenCalled();
+        vi.unstubAllGlobals();
     });
 });

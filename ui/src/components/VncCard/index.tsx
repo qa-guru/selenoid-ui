@@ -66,6 +66,7 @@ export default class VncCard extends Component<any, any> {
                     }}
                     session={session}
                     origin={origin}
+                    browser={browser}
                     onUpdateState={(state: any) => this.connection(state)}
                 />
             </VncWindow>

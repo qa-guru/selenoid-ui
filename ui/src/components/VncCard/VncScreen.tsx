@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import RFB from "@novnc/novnc/lib/rfb.js";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
+import { mockLivePreview } from "../../lib/mockSessions";
+import { MockVncDesktop } from "./MockVncDesktop";
 
 export default class VncScreen extends Component<any, any> {
     rfb: any;
@@ -31,28 +33,13 @@ export default class VncScreen extends Component<any, any> {
     };
 
     componentDidMount() {
-        const { session, origin } = this.props;
-        this.connection("connecting");
-
-        if (origin && session) {
-            const link = urlTo(window.location.href);
-            const port = VncScreen.defaultPort(link);
-
-            this.disconnect(this.rfb);
-            this.rfb = this.createRFB(link, port, session, isSecure(link));
-        }
+        this.syncConnection(this.props);
     }
 
     componentDidUpdate(prevProps: any) {
-        const prevOrigin = prevProps.origin;
         const { session, origin } = this.props;
-
-        if (origin && session && (prevOrigin !== origin || prevProps.session !== session)) {
-            const link = urlTo(window.location.href);
-            const port = VncScreen.defaultPort(link);
-
-            this.disconnect(this.rfb);
-            this.rfb = this.createRFB(link, port, session, isSecure(link));
+        if (prevProps.origin !== origin || prevProps.session !== session) {
+            this.syncConnection(this.props);
         }
     }
 
@@ -60,6 +47,33 @@ export default class VncScreen extends Component<any, any> {
         this.rfb && this.rfb.removeEventListener("disconnect", this.onVNCDisconnect);
         this.rfb && this.rfb.removeEventListener("connect", this.onVNCConnect);
         this.disconnect(this.rfb);
+    }
+
+    syncConnection(props: any) {
+        const preview = mockLivePreview(props.session);
+        this.disconnect(this.rfb);
+        this.rfb = null;
+
+        if (preview === "active") {
+            this.connection("connected");
+            return;
+        }
+        if (preview === "starting") {
+            this.connection("connecting");
+            return;
+        }
+        if (preview === "stub") {
+            this.connection("disconnected");
+            return;
+        }
+
+        this.connection("connecting");
+        const { session, origin } = props;
+        if (origin && session) {
+            const link = urlTo(window.location.href);
+            const port = VncScreen.defaultPort(link);
+            this.rfb = this.createRFB(link, port, session, isSecure(link));
+        }
     }
 
     createRFB(link: any, port: any, session: any, secure: boolean) {
@@ -95,6 +109,15 @@ export default class VncScreen extends Component<any, any> {
     }
 
     render() {
+        const preview = mockLivePreview(this.props.session);
+        if (preview === "active") {
+            return (
+                <div className="vnc-screen" style={{ width: "100%", height: "100%" }}>
+                    <MockVncDesktop caps={this.props.browser?.caps} />
+                </div>
+            );
+        }
+
         return (
             <div
                 className="vnc-screen"

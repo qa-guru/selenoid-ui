@@ -28,6 +28,8 @@ export type LiveSession = {
     caps?: SessionCaps;
     /** Hub feed entry exists, container/quota not ready yet (Create Session freeze). */
     starting?: boolean;
+    /** Dev mock: fake connected VNC/logs instead of real sockets. */
+    preview?: "active";
     [key: string]: unknown;
 };
 

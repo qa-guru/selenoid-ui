@@ -22,6 +22,8 @@ type MockSessionOpts = {
     sessionTimeout?: string;
     /** Empty quota + spinner: session is in the hub feed but not yet fully started. */
     starting?: boolean;
+    /** Fake connected VNC desktop + live logs (no hub sockets). */
+    preview?: "active";
 };
 
 function session(id: string, opts: MockSessionOpts): LiveSession {
@@ -39,6 +41,7 @@ function session(id: string, opts: MockSessionOpts): LiveSession {
         timeZone,
         sessionTimeout,
         starting = false,
+        preview,
     } = opts;
     const caps = {
         browserName,
@@ -58,6 +61,7 @@ function session(id: string, opts: MockSessionOpts): LiveSession {
         container,
         quota,
         ...(starting ? { starting: true } : {}),
+        ...(preview ? { preview } : {}),
         caps,
     };
 }
@@ -128,7 +132,10 @@ export const MOCK_LIVE_SESSIONS: SessionsMap = {
         enableVNC: false,
         manual: true,
     }),
-    "mockmax-aaaaaaaaaaaaaaaaaaaaaaa": session("mockmax-aaaaaaaaaaaaaaaaaaaaaaa", MOCK_MAX_CAPS),
+    "mockmax-aaaaaaaaaaaaaaaaaaaaaaa": session("mockmax-aaaaaaaaaaaaaaaaaaaaaaa", {
+        ...MOCK_MAX_CAPS,
+        preview: "active",
+    }),
     "mockmin-aaaaaaaaaaaaaaaaaaaaaaa": session("mockmin-aaaaaaaaaaaaaaaaaaaaaaa", {
         browserName: "chrome",
         version: "149.0",
@@ -139,6 +146,23 @@ export const MOCK_LIVE_SESSIONS: SessionsMap = {
         starting: true,
     }),
 };
+
+export type MockLivePreview = "active" | "starting" | "stub";
+
+/** How a `?mock=1` session should drive VNC/logs. `null` = real hub sockets. */
+export function mockLivePreview(sessionId: string | undefined): MockLivePreview | null {
+    if (!sessionId || !MOCK_LIVE_SESSIONS[sessionId]) {
+        return null;
+    }
+    const live = MOCK_LIVE_SESSIONS[sessionId];
+    if (live.starting) {
+        return "starting";
+    }
+    if (live.preview === "active") {
+        return "active";
+    }
+    return "stub";
+}
 
 export function isMockSessionsEnabled(): boolean {
     if (typeof window === "undefined") {

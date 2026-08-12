@@ -4,6 +4,7 @@ import { FitAddon } from "xterm-addon-fit";
 import { Panel } from "@zero-design-system/react";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
+import { mockLivePreview } from "../../lib/mockSessions";
 
 import "xterm/css/xterm.css";
 import { StyledLog } from "./style.css";
@@ -13,6 +14,22 @@ const RESIZE_DEBOUNCE_MS = 100;
 /** Matches `.term .terminal { line-height: 20px }` — fallback if cell metrics unavailable. */
 const FALLBACK_CELL_HEIGHT_PX = 20;
 const MIN_ROWS = 2;
+
+const MOCK_LIVE_LOG = [
+    "[selenoid] attached chrome 149.0 session",
+    "[chromedriver] ChromeDriver was started successfully.",
+    "POST /session 200",
+    "POST /session/url https://shop.example/login 200",
+    "POST /session/element {using: css selector, value: #email}",
+    "POST /session/element/value alice@shop.example",
+    "POST /session/element {using: css selector, value: #password}",
+];
+
+const MOCK_LIVE_TICKS = [
+    "GET https://shop.example/api/session 200 18ms",
+    "GET https://shop.example/api/cart 200 42ms",
+    "[devtools] Runtime.consoleAPICalled",
+];
 
 /** xterm creates a helper textarea without id/name/autocomplete — DevTools Issues noise. */
 function decorateXtermTextarea(term: Terminal) {
@@ -34,6 +51,7 @@ export default class Log extends Component<any, any> {
     fitTimer: ReturnType<typeof setTimeout> | null;
     decoder: TextDecoder;
     termel: HTMLDivElement | null | undefined;
+    mockTimer: ReturnType<typeof setInterval> | null;
 
     constructor(props: any) {
         super(props);
@@ -59,6 +77,7 @@ export default class Log extends Component<any, any> {
         this.resizeTimer = null;
         this.fitTimer = null;
         this.decoder = new TextDecoder("utf8");
+        this.mockTimer = null;
     }
 
     componentDidMount() {
@@ -87,6 +106,7 @@ export default class Log extends Component<any, any> {
             this.fitTimer = null;
         }
         this.closeSocket();
+        this.stopMockLog();
         this.term.dispose();
     }
 
@@ -152,7 +172,27 @@ export default class Log extends Component<any, any> {
     }
 
     connect(props: any) {
-        if (!(props && props.session && props.origin && props.browser)) {
+        if (!(props && props.session)) {
+            return;
+        }
+        const preview = mockLivePreview(props.session);
+        if (preview) {
+            const key = `mock|${props.session}|${preview}`;
+            if (key === this.currentOrigin) {
+                return;
+            }
+            this.currentOrigin = key;
+            this.closeSocket();
+            this.stopMockLog();
+            if (preview === "active") {
+                this.playMockLiveLog(props.session);
+            } else if (preview === "starting") {
+                this.writeAndFit(`Connecting to ws://localhost/ws/logs/${props.session}...\n\r`);
+            }
+            return;
+        }
+
+        if (!(props.origin && props.browser)) {
             return;
         }
         const key = `${props.origin}|${props.session}`;
@@ -164,6 +204,30 @@ export default class Log extends Component<any, any> {
         const wsProxyUrl = urlTo(window.location.href);
         const wsUrl = `${isSecure(wsProxyUrl) ? "wss" : "ws"}://${wsProxyUrl.host}/ws/logs/${props.session}`;
         this.openSocket(wsUrl);
+    }
+
+    playMockLiveLog(sessionId: string) {
+        this.writeAndFit(`Connecting to ws://localhost/ws/logs/${sessionId}...\n\r`);
+        this.writeAndFit(colors.fg.getRgb(0, 2, 0) + "Connected!\n\r" + colors.reset);
+        for (const line of MOCK_LIVE_LOG) {
+            this.writeAndFit(`${line}\n\r`);
+        }
+        if (import.meta.env.MODE === "test") {
+            return;
+        }
+        let tick = 0;
+        this.mockTimer = setInterval(() => {
+            const line = MOCK_LIVE_TICKS[tick % MOCK_LIVE_TICKS.length];
+            tick += 1;
+            this.writeAndFit(`${line}\n\r`);
+        }, 2500);
+    }
+
+    stopMockLog() {
+        if (this.mockTimer) {
+            clearInterval(this.mockTimer);
+            this.mockTimer = null;
+        }
     }
 
     openSocket(wsUrl: any) {
