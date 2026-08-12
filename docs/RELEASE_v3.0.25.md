@@ -14,7 +14,6 @@
 | **Log session switch** | Log WS reconnect по ключу `origin\|session` — без чужих логов при смене `/sessions/:id` |
 | **`/ws/` TLS** | Прокси `/ws/` выбирает `wss`, если `status-uri` — `https` (как `/playwright/`) |
 | **a11y / DS sync** | autocomplete на session filter; sync design-system static + vendor react-ui |
-| **DevTools console** | xterm helper textarea: `id`/`name`/`autocomplete`; noVNC `willReadFrequently` — чистая консоль на Session |
 
 ## Обновление
 
