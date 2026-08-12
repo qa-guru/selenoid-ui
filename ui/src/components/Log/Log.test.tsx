@@ -2,10 +2,16 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+const xtermState = { textarea: null as HTMLTextAreaElement | null };
+
 vi.mock("xterm", () => ({
     Terminal: class {
+        textarea: HTMLTextAreaElement | undefined;
         loadAddon() {}
-        open() {}
+        open() {
+            this.textarea = document.createElement("textarea");
+            xtermState.textarea = this.textarea;
+        }
         writeln() {}
         write() {}
         clear() {}
@@ -39,5 +45,14 @@ describe("Log chrome → Panel terminal", () => {
 
         expect(container.firstChild).toHaveClass("hidden-true");
         expect(screen.getByTestId("session-log-panel")).toBeInTheDocument();
+    });
+
+    it("decorates xterm helper textarea for DevTools form hints", () => {
+        xtermState.textarea = null;
+        render(<Log />);
+
+        expect(xtermState.textarea?.id).toBe("session-log-input");
+        expect(xtermState.textarea?.name).toBe("session-log");
+        expect(xtermState.textarea?.getAttribute("autocomplete")).toBe("off");
     });
 });

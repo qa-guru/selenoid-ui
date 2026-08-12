@@ -14,6 +14,17 @@ const RESIZE_DEBOUNCE_MS = 100;
 const FALLBACK_CELL_HEIGHT_PX = 20;
 const MIN_ROWS = 2;
 
+/** xterm creates a helper textarea without id/name/autocomplete — DevTools Issues noise. */
+function decorateXtermTextarea(term: Terminal) {
+    const textarea = (term as any).textarea as HTMLTextAreaElement | undefined;
+    if (!textarea) {
+        return;
+    }
+    textarea.id = "session-log-input";
+    textarea.name = "session-log";
+    textarea.setAttribute("autocomplete", "off");
+}
+
 export default class Log extends Component<any, any> {
     term: Terminal;
     fitAddon: FitAddon;
@@ -52,6 +63,7 @@ export default class Log extends Component<any, any> {
 
     componentDidMount() {
         this.term.open(this.termel as HTMLElement);
+        decorateXtermTextarea(this.term);
         this.fitToContent();
         this.term.writeln(colors.fg.getRgb(2, 3, 4) + "Initialize...\n\r" + colors.reset);
         this.fitToContent();

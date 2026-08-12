@@ -21,6 +21,7 @@
         "xterm-addon-fit": "^0.5.0"
     },
     "scripts": {
+        "postinstall": "node scripts/patch-novnc-display.mjs",
         "start": "vite",
         "build": "vite build",
         "typecheck": "tsc -p tsconfig.json --noEmit",
