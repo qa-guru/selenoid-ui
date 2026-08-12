@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 const PUBLIC_JS = resolve(__dirname, "../../public/js");
 const HEADER_JS = resolve(PUBLIC_JS, "header.js");
+const HEADER_CSS = resolve(__dirname, "../../public/css/header.css");
 const METRICS_WRAP_JS = resolve(PUBLIC_JS, "header-metrics-wrap.js");
 const SYNC_SCRIPT = resolve(__dirname, "../../../scripts/sync-design-system-static.sh");
 
@@ -33,5 +34,12 @@ describe("header metrics-wrap wiring (synced from design-system)", () => {
         expect(sync).toMatch(/\bheader\b.*\bheader-metrics-wrap\b|\bheader-metrics-wrap\b.*\bheader\b/);
         expect(sync).toContain("observeHeaderMetricsWrap");
         expect(sync).toContain('cp "$DS/js/${f}.js"');
+    });
+
+    it("hides .header__burger with specificity above .icon-btn", () => {
+        // Vite injects @zero-design-system/react/styles.css after <link href="/css/header.css">.
+        // `.header__burger { display: none }` (0,1,0) loses to `.icon-btn { display: inline-flex }`.
+        const css = readFileSync(HEADER_CSS, "utf8");
+        expect(css).toMatch(/\.header\s+\.header__burger\s*\{[^}]*display:\s*none/);
     });
 });
