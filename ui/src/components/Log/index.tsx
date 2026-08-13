@@ -48,7 +48,6 @@ export default class Log extends Component<any, any> {
     socket: WebSocket | null;
     currentOrigin: string | null;
     resizeTimer: ReturnType<typeof setTimeout> | null;
-    fitTimer: ReturnType<typeof setTimeout> | null;
     decoder: TextDecoder;
     termel: HTMLDivElement | null | undefined;
     mockTimer: ReturnType<typeof setInterval> | null;
@@ -75,7 +74,6 @@ export default class Log extends Component<any, any> {
         this.socket = null;
         this.currentOrigin = null;
         this.resizeTimer = null;
-        this.fitTimer = null;
         this.decoder = new TextDecoder("utf8");
         this.mockTimer = null;
     }
@@ -84,7 +82,7 @@ export default class Log extends Component<any, any> {
         this.term.open(this.termel as HTMLElement);
         decorateXtermTextarea(this.term);
         this.fitToContent();
-        this.term.writeln(colors.fg.getRgb(2, 3, 4) + "Initialize...\n\r" + colors.reset);
+        this.term.writeln(colors.fg.getRgb(2, 3, 4) + "Initialize..." + colors.reset);
         this.fitToContent();
 
         window.addEventListener("resize", this.onResize);
@@ -100,10 +98,6 @@ export default class Log extends Component<any, any> {
         if (this.resizeTimer) {
             clearTimeout(this.resizeTimer);
             this.resizeTimer = null;
-        }
-        if (this.fitTimer) {
-            clearTimeout(this.fitTimer);
-            this.fitTimer = null;
         }
         this.closeSocket();
         this.stopMockLog();
@@ -140,15 +134,45 @@ export default class Log extends Component<any, any> {
         // that flashes the first line ("Initialize...") and jitters the panel.
         const proposed = this.fitAddon.proposeDimensions?.();
         const cols = proposed?.cols || this.term.cols || 80;
-        // buffer.length is the viewport (default 24 rows), not written lines.
-        const buf = this.term.buffer?.active;
-        const written = buf ? (buf.baseY || 0) + (buf.cursorY || 0) + 1 : MIN_ROWS;
-        const rows = Math.max(written, MIN_ROWS);
+        const rows = this.cursorInclusiveRows();
 
         this.term.resize(cols, rows);
         this.term.scrollToTop();
-        this.syncTermHostHeight(rows);
+        this.syncTermHostHeight(this.visualRows(rows));
     };
+
+    /** Viewport rows that include the cursor (xterm must keep this or it scrolls the top line away). */
+    cursorInclusiveRows() {
+        const buf = this.term.buffer?.active;
+        if (!buf) {
+            return MIN_ROWS;
+        }
+        return Math.max((buf.baseY || 0) + (buf.cursorY || 0) + 1, MIN_ROWS);
+    }
+
+    /**
+     * After a trailing newline the cursor sits on an empty next line.
+     * Keep that row in xterm, but do not size the host around it.
+     */
+    visualRows(cursorInclusive: number) {
+        const buf = this.term.buffer?.active;
+        if (!buf) {
+            return Math.max(cursorInclusive, MIN_ROWS);
+        }
+        const last = (buf.baseY || 0) + (buf.cursorY || 0);
+        for (let y = last; y >= 0 && y >= last - 3; y--) {
+            const line = typeof buf.getLine === "function" ? buf.getLine(y) : undefined;
+            const text = line ? line.translateToString(true) : "";
+            if (text.trim().length > 0) {
+                return Math.max(y + 1, MIN_ROWS);
+            }
+        }
+        const cursorX = buf.cursorX || 0;
+        if (cursorX === 0 && cursorInclusive > MIN_ROWS) {
+            return cursorInclusive - 1;
+        }
+        return cursorInclusive;
+    }
 
     syncTermHostHeight(rows: number) {
         if (!this.termel || !this.term.element) {
@@ -159,34 +183,25 @@ export default class Log extends Component<any, any> {
         const screen = this.term.element.querySelector(".xterm-screen") as HTMLElement | null;
         const screenH =
             (screen && parseFloat(screen.style.height)) || screen?.getBoundingClientRect().height || 0;
-        const contentH = screenH > 0 ? screenH : rows * this.cellHeightPx();
+        const termRows = this.term.rows || rows;
+        const rowH = screenH > 0 && termRows > 0 ? screenH / termRows : this.cellHeightPx();
+        const contentH = rows * rowH;
         const cs = getComputedStyle(this.termel);
         const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
         this.termel.style.height = `${contentH + pad}px`;
     }
 
-    scheduleFitToContent() {
-        if (this.fitTimer) {
-            clearTimeout(this.fitTimer);
-        }
-        this.fitTimer = setTimeout(() => {
-            this.fitTimer = null;
-            this.fitToContent();
-        }, RESIZE_DEBOUNCE_MS);
-    }
-
     writeAndFit(chunk: any) {
-        const buf = this.term.buffer?.active;
-        const written = buf ? (buf.baseY || 0) + (buf.cursorY || 0) + 1 : MIN_ROWS;
+        const written = this.cursorInclusiveRows();
         // Grow a spare row before write so xterm does not scroll the first
         // line ("Initialize...") into scrollback while the chunk is parsed.
         if (written >= this.term.rows) {
             const rows = written + 1;
             this.term.resize(this.term.cols || 80, rows);
-            this.syncTermHostHeight(rows);
+            this.syncTermHostHeight(this.visualRows(rows));
         }
         this.term.write(chunk, () => {
-            this.scheduleFitToContent();
+            this.fitToContent();
         });
     }
 
