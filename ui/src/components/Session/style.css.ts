@@ -14,8 +14,8 @@ export const StyledSession = styled.div`
     /* Page shell gutter — same as Sessions list (.sessions-page). */
     padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
 
-    /* VNC | Log flush (no column gap). Row height follows VncWindow aspect-ratio.
-       Log must not contribute to row size — otherwise page scroll moves VNC. */
+    /* Mosaic gutter between VNC and Log — same --wt-post-gap as page shell / HAR.
+       Screen height still follows VncWindow aspect-ratio (no 520px letterbox). */
     .interactive {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -27,8 +27,7 @@ export const StyledSession = styled.div`
         flex: 0 1 auto;
         min-height: 0;
         padding: 0 0 var(--wt-post-gap, 14px);
-        column-gap: 0;
-        row-gap: var(--wt-post-gap, 14px);
+        gap: var(--wt-post-gap, 14px);
     }
 
     @media (max-width: 999px) {
