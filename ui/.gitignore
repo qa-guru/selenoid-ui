@@ -9,6 +9,10 @@
 /coverage
 /allure-results
 /allure-report
+/test-results
+/playwright-report
+/visual/test-results
+/visual/playwright-report
 
 # production
 /build

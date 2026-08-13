@@ -26,12 +26,15 @@
         "build": "vite build",
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "test": "ALLURE_LABEL_epic=selenoid-ui ALLURE_LABEL_layer=component ALLURE_LABEL_scope=react ALLURE_LABEL_framework=react-testing-library vitest run",
+        "test:visual": "playwright test -c visual/playwright.config.ts",
+        "test:visual:update": "playwright test -c visual/playwright.config.ts --update-snapshots",
         "test:coverage": "ALLURE_LABEL_epic=selenoid-ui ALLURE_LABEL_layer=component ALLURE_LABEL_scope=react ALLURE_LABEL_framework=react-testing-library vitest run --coverage",
         "test:watch": "vitest",
         "preview": "vite preview",
         "format": "prettier --write '{,!(node_modules|.git|build|coverage|scripts)/**/}*.{js,ts,tsx,json,jsx,md}'"
     },
     "devDependencies": {
+        "@playwright/test": "^1.62.1",
         "@testing-library/dom": "^10.4.0",
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/react": "^16.2.0",
