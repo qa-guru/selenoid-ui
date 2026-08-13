@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AppHeader } from "@zero-design-system/react";
 
+import { useMockSessionsEnabled } from "../../hooks/useMockSessionsEnabled";
 import { headerConfig } from "../../lib/headerConfig";
+import { syncHeaderMockToggle } from "../../lib/headerMockToggle";
+import "./mock-toggle.css";
 
 const MOUNT_SELECTOR = "#app-header";
 const NAV_LINK_SELECTOR = '[data-testid="header-nav"] a, [data-testid="header-menu-nav"] a';
@@ -73,26 +76,26 @@ function syncActiveNav(pathname: any) {
  * Selenoid UI v3 header: the canonical design-system <AppHeader> (embed →
  * js/header.js SSOT) rendered above the Viewport. The header markup, burger
  * menu, theme and lang toggles stay owned by js/header.js; this wrapper only
- * publishes the config (via <AppHeader>) and keeps the active nav item in sync
- * with the HashRouter route.
+ * publishes the config (via <AppHeader>), keeps the active nav item in sync
+ * with the HashRouter route, and injects the `?mock=1` toggle next to Sessions.
  */
 export function SelenoidAppHeader() {
     const { pathname } = useLocation();
+    const mockEnabled = useMockSessionsEnabled();
 
     useEffect(() => {
-        if (syncActiveNav(pathname)) {
-            return undefined;
-        }
-        // header.js mounts asynchronously (fetches the template); wait for the
-        // nav to appear, then sync once.
-        const observer = new MutationObserver(() => {
-            if (syncActiveNav(pathname)) {
-                observer.disconnect();
-            }
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
+        const apply = () => {
+            syncActiveNav(pathname);
+            syncHeaderMockToggle(mockEnabled);
+        };
+        apply();
+        // Keep watching: header.js fetches the template asynchronously and may
+        // remount, which would wipe the chip if we disconnected after first paint.
+        const observer = new MutationObserver(apply);
+        const mount = document.querySelector(MOUNT_SELECTOR);
+        observer.observe(mount || document.body, { childList: true, subtree: true });
         return () => observer.disconnect();
-    }, [pathname]);
+    }, [pathname, mockEnabled]);
 
     return <AppHeader config={headerConfig} />;
 }

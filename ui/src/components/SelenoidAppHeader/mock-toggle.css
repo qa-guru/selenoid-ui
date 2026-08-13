@@ -1,0 +1,52 @@
+/* Compact `?mock=1` chip next to Sessions (header nav + burger row).
+   Always in layout so press/unpress does not shift the bar. */
+
+.header-mock-toggle {
+  appearance: none;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 2px 6px;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.18));
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.45));
+  font: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    color var(--duration-fast, 120ms) ease,
+    border-color var(--duration-fast, 120ms) ease,
+    background-color var(--duration-fast, 120ms) ease;
+}
+
+.header-mock-toggle:hover {
+  color: var(--color-text, #fff);
+  border-color: var(--color-border-strong, rgba(255, 255, 255, 0.35));
+}
+
+.header-mock-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.header-mock-toggle[aria-pressed="true"],
+.header-mock-toggle.is-pressed {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.header-mock-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+.header-mock-toggle-row .link--nav {
+  flex: 1 1 auto;
+}

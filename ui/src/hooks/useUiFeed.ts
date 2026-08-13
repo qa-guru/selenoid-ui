@@ -10,7 +10,8 @@ import {
     refreshSseStatus,
     sameOriginURL,
 } from "../util/uiFeed";
-import { isMockSessionsEnabled, mergeMockLiveSessions } from "../lib/mockSessions";
+import { mergeMockLiveSessions } from "../lib/mockSessions";
+import { useMockSessionsEnabled } from "./useMockSessionsEnabled";
 
 const EMPTY_FEED: UiStatusPayload = {
     origin: undefined,
@@ -34,6 +35,7 @@ export type UiFeed = {
 };
 
 export function useUiFeed(): UiFeed {
+    const mockEnabled = useMockSessionsEnabled();
     const [data, setData] = useState<UiStatusPayload | null>(null);
     const [sseStatus, setSseStatus] = useState<HealthStatus>("unknown");
     const [selenoidStatus, setSelenoidStatus] = useState<HealthStatus>("unknown");
@@ -166,7 +168,7 @@ export function useUiFeed(): UiFeed {
     }, [applyPayload]);
 
     const feed = data || EMPTY_FEED;
-    const sessions = isMockSessionsEnabled() ? mergeMockLiveSessions(feed.sessions || {}) : feed.sessions || {};
+    const sessions = mockEnabled ? mergeMockLiveSessions(feed.sessions || {}) : feed.sessions || {};
 
     return {
         origin: feed.origin,

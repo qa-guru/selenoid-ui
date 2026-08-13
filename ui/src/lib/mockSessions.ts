@@ -1,6 +1,8 @@
 /**
  * Dev-only live-session fixtures for UI layout checks.
- * Activate: open UI with `?mock=1` (before or after hash).
+ * Activate: open UI with `?mock=1` (before or after hash), or the header
+ * toggle next to Sessions. The toggle uses `history.replaceState` so the
+ * HashRouter route stays put and the live list can fade in place.
  *
  * The set is a pairwise covering of live-row factors (badges, quota, name,
  * browser, freeze/active) plus stable seeds mockmax / mockmin / mockfrz.
@@ -54,6 +56,56 @@ export function isMockSessionsEnabled(): boolean {
         /* ignore */
     }
     return false;
+}
+
+/** Fired after `setMockSessionsEnabled` (and on `popstate`) so React can re-render without a reload. */
+export const MOCK_SESSIONS_CHANGE = "selenoid-ui:mock-sessions";
+
+function hashWithoutMock(hash: string): string {
+    const qIndex = hash.indexOf("?");
+    if (qIndex < 0) {
+        return hash;
+    }
+    const path = hash.slice(0, qIndex);
+    const params = new URLSearchParams(hash.slice(qIndex + 1));
+    params.delete("mock");
+    const rest = params.toString();
+    return rest ? `${path}?${rest}` : path;
+}
+
+/**
+ * Turn mock live sessions on or off. Updates `?mock=1` via `replaceState`
+ * (no navigation, no reload) and notifies subscribers.
+ */
+export function setMockSessionsEnabled(enabled: boolean): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+    const url = new URL(window.location.href);
+    if (enabled) {
+        url.searchParams.set("mock", "1");
+    } else {
+        url.searchParams.delete("mock");
+    }
+    url.hash = hashWithoutMock(url.hash || "");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (next !== current) {
+        window.history.replaceState(window.history.state, "", next);
+    }
+    window.dispatchEvent(new Event(MOCK_SESSIONS_CHANGE));
+}
+
+export function subscribeMockSessions(listener: () => void): () => void {
+    if (typeof window === "undefined") {
+        return () => undefined;
+    }
+    window.addEventListener(MOCK_SESSIONS_CHANGE, listener);
+    window.addEventListener("popstate", listener);
+    return () => {
+        window.removeEventListener(MOCK_SESSIONS_CHANGE, listener);
+        window.removeEventListener("popstate", listener);
+    };
 }
 
 /** Merge mock live sessions on top of real feed (mock ids win). */

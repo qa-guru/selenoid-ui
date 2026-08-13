@@ -14,21 +14,31 @@ function injectHeaderNav() {
     const mount = document.getElementById("app-header");
     const nav = document.createElement("nav");
     (nav as HTMLElement).dataset.testid = "header-nav";
+    const menuNav = document.createElement("nav");
+    (menuNav as HTMLElement).dataset.testid = "header-menu-nav";
     const items = [
-        ["#/statistics", "header-nav-statistics", "Statistics"],
-        ["#/sessions", "header-nav-sessions", "Sessions"],
-        ["#/new-session", "header-nav-new-session", "New Session"],
-        ["#/benchmarks", "header-nav-benchmarks", "Benchmarks"],
+        ["#/statistics", "header-nav-statistics", "header-menu-nav-statistics", "Statistics"],
+        ["#/sessions", "header-nav-sessions", "header-menu-nav-sessions", "Sessions"],
+        ["#/new-session", "header-nav-new-session", "header-menu-nav-new-session", "New Session"],
+        ["#/benchmarks", "header-nav-benchmarks", "header-menu-nav-benchmarks", "Benchmarks"],
     ];
-    for (const [href, testid, label] of items) {
+    for (const [href, testid, menuTestid, label] of items) {
         const link = document.createElement("a");
         link.setAttribute("href", href);
         link.className = "link link--nav";
         (link as HTMLElement).dataset.testid = testid;
         link.textContent = label;
         nav.appendChild(link);
+
+        const menuLink = document.createElement("a");
+        menuLink.setAttribute("href", href);
+        menuLink.className = "link link--nav";
+        (menuLink as HTMLElement).dataset.testid = menuTestid;
+        menuLink.textContent = label;
+        menuNav.appendChild(menuLink);
     }
     mount!.appendChild(nav);
+    mount!.appendChild(menuNav);
 }
 
 function activeTestids() {
@@ -65,6 +75,7 @@ afterEach(() => {
     if (mount) {
         mount!.replaceChildren();
     }
+    window.history.replaceState(null, "", "/");
 });
 
 describe("SelenoidAppHeader", () => {
@@ -118,5 +129,46 @@ describe("SelenoidAppHeader", () => {
             expect(activeTestids()).toEqual(["header-nav-sessions"]);
         });
         expect(ariaCurrentTestids()).toEqual(["header-nav-sessions"]);
+    });
+
+    it("injects an unpressed ?mock=1 toggle next to Sessions in header and burger", async () => {
+        renderHeader(["/sessions"]);
+        injectHeaderNav();
+
+        const headerBtn = await waitFor(() => {
+            const btn = document.querySelector('[data-testid="header-nav-mock"]');
+            expect(btn).toBeTruthy();
+            return btn as HTMLButtonElement;
+        });
+        const menuBtn = document.querySelector('[data-testid="header-menu-nav-mock"]') as HTMLButtonElement;
+        expect(headerBtn.textContent).toBe("?mock=1");
+        expect(headerBtn.getAttribute("aria-pressed")).toBe("false");
+        expect(menuBtn.getAttribute("aria-pressed")).toBe("false");
+        expect(document.querySelector('[data-testid="header-nav-sessions"]')?.nextElementSibling).toBe(
+            headerBtn
+        );
+    });
+
+    it("presses the toggle via replaceState without leaving the route", async () => {
+        const user = userEvent.setup();
+        renderHeader(["/sessions"]);
+        injectHeaderNav();
+
+        const headerBtn = await waitFor(() => {
+            const btn = document.querySelector('[data-testid="header-nav-mock"]');
+            expect(btn).toBeTruthy();
+            return btn as HTMLButtonElement;
+        });
+
+        await user.click(headerBtn);
+
+        await waitFor(() => {
+            expect(headerBtn.getAttribute("aria-pressed")).toBe("true");
+        });
+        expect(window.location.search).toBe("?mock=1");
+        expect(document.querySelector('[data-testid="header-menu-nav-mock"]')?.getAttribute("aria-pressed")).toBe(
+            "true"
+        );
+        expect(activeTestids()).toEqual(["header-nav-sessions"]);
     });
 });
