@@ -12,6 +12,10 @@ export const StyledSessions = styled.div`
 
     .sessions-panel {
         width: 100%;
+
+        .panel__title {
+            font-size: 0.625rem;
+        }
     }
 
     .sessions-panel__body {
@@ -27,7 +31,7 @@ export const StyledSessions = styled.div`
         align-items: center;
         justify-content: center;
         gap: var(--space-3, 10px);
-        font-size: 1.2em;
+        font-size: 1em;
         min-height: 60px;
         padding: 10px var(--space-5, 16px);
         box-sizing: border-box;
