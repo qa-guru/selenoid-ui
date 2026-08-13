@@ -14,7 +14,8 @@ export const StyledBrowsers = styled.div`
     }
 
     .browsers-table-wrap {
-        overflow: auto;
+        overflow-x: auto;
+        overflow-y: auto;
         width: 100%;
     }
 

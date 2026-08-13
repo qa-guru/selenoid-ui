@@ -209,7 +209,7 @@ export const StyledCapabilities = styled.div`
       white-space: pre-wrap;
       word-break: break-word;
       overflow-wrap: anywhere;
-      overflow-x: hidden;
+      min-width: 0;
       max-width: 100%;
       box-sizing: border-box;
     }

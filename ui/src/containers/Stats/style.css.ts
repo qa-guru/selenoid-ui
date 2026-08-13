@@ -8,6 +8,6 @@ export const StyledStats = styled.div`
     justify-content: center;
     align-items: flex-start;
     flex-shrink: 0;
-    overflow: auto;
+    overflow-y: auto;
     padding: var(--wt-post-gap, 14px);
 `;

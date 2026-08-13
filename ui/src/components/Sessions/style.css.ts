@@ -7,7 +7,7 @@ const manualColor = "#F0A202";
 export const StyledSessions = styled.div`
     box-sizing: border-box;
     width: 100%;
-    overflow: auto;
+    overflow-y: auto;
     padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
 
     .sessions-panel {
