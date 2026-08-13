@@ -14,6 +14,8 @@ const RESIZE_DEBOUNCE_MS = 100;
 /** Matches `.term .terminal { line-height: 20px }` — fallback if cell metrics unavailable. */
 const FALLBACK_CELL_HEIGHT_PX = 20;
 const MIN_ROWS = 2;
+/** Grow the xterm viewport in chunks so a long session does not resize every line. */
+const GROW_ROWS = 16;
 
 const MOCK_LIVE_LOG = [
     "[selenoid] attached chrome 149.0 session",
@@ -123,23 +125,33 @@ export default class Log extends Component<any, any> {
     }
 
     /**
-     * Width → cols via FitAddon; height → buffer line count (content hug, no inner scroll).
+     * Width → cols via FitAddon; host height hugs written lines.
+     * Never shrink xterm.rows: a per-line resize rebuilds the canvas
+     * and flashes the whole buffer while the first lines appear.
      */
     fitToContent = () => {
         if (!this.termel || !this.term.element) {
             return;
         }
 
-        // Measure cols from current width. Do not collapse height first —
-        // that flashes the first line ("Initialize...") and jitters the panel.
         const proposed = this.fitAddon.proposeDimensions?.();
         const cols = proposed?.cols || this.term.cols || 80;
-        const rows = this.cursorInclusiveRows();
+        const needed = this.cursorInclusiveRows();
+        const rows = Math.max(needed, this.term.rows || MIN_ROWS);
 
-        this.term.resize(cols, rows);
-        this.term.scrollToTop();
-        this.syncTermHostHeight(this.visualRows(rows));
+        if (cols !== this.term.cols || rows !== this.term.rows) {
+            this.term.resize(cols, rows);
+        }
+        this.scrollLogToTop();
+        this.syncTermHostHeight(this.visualRows(needed));
     };
+
+    scrollLogToTop() {
+        const viewportY = this.term.buffer?.active?.viewportY || 0;
+        if (viewportY > 0) {
+            this.term.scrollToTop();
+        }
+    }
 
     /** Viewport rows that include the cursor (xterm must keep this or it scrolls the top line away). */
     cursorInclusiveRows() {
@@ -188,20 +200,27 @@ export default class Log extends Component<any, any> {
         const contentH = rows * rowH;
         const cs = getComputedStyle(this.termel);
         const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-        this.termel.style.height = `${contentH + pad}px`;
+        const next = `${contentH + pad}px`;
+        if (this.termel.style.height !== next) {
+            this.termel.style.height = next;
+        }
     }
 
     writeAndFit(chunk: any) {
         const written = this.cursorInclusiveRows();
-        // Grow a spare row before write so xterm does not scroll the first
-        // line ("Initialize...") into scrollback while the chunk is parsed.
+        // Grow before write so xterm does not scroll the first line into
+        // scrollback. Do not fit/resize after every chunk — that flashes
+        // the whole buffer while the opening lines stream in.
         if (written >= this.term.rows) {
-            const rows = written + 1;
-            this.term.resize(this.term.cols || 80, rows);
-            this.syncTermHostHeight(this.visualRows(rows));
+            this.term.resize(this.term.cols || 80, written + GROW_ROWS);
         }
         this.term.write(chunk, () => {
-            this.fitToContent();
+            const needed = this.cursorInclusiveRows();
+            if (needed > this.term.rows) {
+                this.term.resize(this.term.cols || 80, needed + GROW_ROWS);
+            }
+            this.scrollLogToTop();
+            this.syncTermHostHeight(this.visualRows(needed));
         });
     }
 

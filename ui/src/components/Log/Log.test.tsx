@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-const xtermState = { textarea: null as HTMLTextAreaElement | null };
+const xtermState = { textarea: null as HTMLTextAreaElement | null, resizeCalls: 0 };
 
 vi.mock("xterm", () => ({
     Terminal: class {
@@ -10,7 +10,7 @@ vi.mock("xterm", () => ({
         rows = 24;
         cols = 80;
         element: HTMLDivElement | undefined;
-        buffer = { active: { length: 0, baseY: 0, cursorY: 0 } };
+        buffer = { active: { length: 0, baseY: 0, cursorY: 0, viewportY: 0 } };
         loadAddon() {}
         open() {
             this.textarea = document.createElement("textarea");
@@ -23,7 +23,9 @@ vi.mock("xterm", () => ({
         }
         clear() {}
         dispose() {}
-        resize() {}
+        resize() {
+            xtermState.resizeCalls += 1;
+        }
         scrollToTop() {}
     },
 }));
@@ -78,5 +80,19 @@ describe("Log chrome → Panel terminal", () => {
         );
         expect(ws).not.toHaveBeenCalled();
         vi.unstubAllGlobals();
+    });
+
+    it("does not resize xterm for each mock live log line", () => {
+        xtermState.resizeCalls = 0;
+        render(
+            <Log
+                session="mockmax-aaaaaaaaaaaaaaaaaaaaaaa"
+                origin="http://localhost"
+                browser={{ caps: { enableLog: true } }}
+            />
+        );
+        // Default viewport is 24 rows; the mock dump is shorter. Hug-to-content
+        // must not rebuild the screen on every writeln (that flashes the buffer).
+        expect(xtermState.resizeCalls).toBe(0);
     });
 });
