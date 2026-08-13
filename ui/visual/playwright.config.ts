@@ -1,14 +1,19 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+import { visualOsFolder } from "../src/lib/visualOs";
 
 const PORT = 4174;
 const BASE = `http://127.0.0.1:${PORT}`;
 const uiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const osFolder = visualOsFolder();
 
 /**
  * Visual snapshots of ?mock=1 Live sessions / session pages.
  * Runs against Vite dev (no production build) — early CI gate.
+ *
+ * Baselines: visual/snapshots/<os>/  (macos | linux | windows)
+ * Override folder: VISUAL_OS=linux yarn test:visual
  */
 export default defineConfig({
     testDir: ".",
@@ -19,6 +24,7 @@ export default defineConfig({
     workers: 1,
     reporter: process.env.CI ? [["github"], ["list"]] : "list",
     timeout: 30_000,
+    snapshotPathTemplate: `{testDir}/snapshots/${osFolder}/{arg}{ext}`,
     expect: {
         toHaveScreenshot: {
             maxDiffPixelRatio: 0.02,

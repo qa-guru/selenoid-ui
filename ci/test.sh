@@ -12,11 +12,8 @@ yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
 yarn --cwd ui typecheck
 yarn --cwd ui test
 test -d ui/allure-results
-# Optional: SELENOID_UI_VISUAL=1 yarn --cwd ui test:visual  (vite-dev, before this build)
-if [ "${SELENOID_UI_VISUAL:-}" = "1" ]; then
-  yarn --cwd ui playwright install chromium
-  yarn --cwd ui test:visual
-fi
+yarn --cwd ui playwright install --with-deps chromium
+yarn --cwd ui test:visual
 yarn --cwd ui build
 test -f ui/build/index.html
 
