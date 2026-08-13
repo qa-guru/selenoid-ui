@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
     isMockSessionsEnabled,
     MOCK_SESSIONS_CHANGE,
+    mockDetailsSession,
     mockLivePreview,
     setMockSessionsEnabled,
     subscribeMockSessions,
@@ -102,5 +103,32 @@ describe("mockLivePreview overlay on a hub session", () => {
         expect(mockLivePreview("mockmax-aaaaaaaaaaaaaaaaaaaaaaa")).toBe("active");
         expect(mockLivePreview("mockfrz-aaaaaaaaaaaaaaaaaaaaaaa")).toBe("starting");
         expect(mockLivePreview("mockmin-aaaaaaaaaaaaaaaaaaaaaaa")).toBe("stub");
+    });
+});
+
+describe("mockDetailsSession", () => {
+    it("prefers the live hub session", () => {
+        const live = { id: "hub-1", caps: { browserName: "firefox", enableVNC: true } };
+        expect(mockDetailsSession("hub-1", live, { video: "x.mp4" })).toBe(live);
+    });
+
+    it("rebuilds caps from finished archive artifacts", () => {
+        const overlay = mockDetailsSession("fin-1", undefined, {
+            quota: "alice",
+            name: "LoginTest",
+            video: "fin-1.mp4",
+            log: "fin-1.log",
+        });
+        expect(overlay?.quota).toBe("alice");
+        expect(overlay?.caps?.browserName).toBe("chrome");
+        expect(overlay?.caps?.name).toBe("LoginTest");
+        expect(overlay?.caps?.enableVNC).toBe(true);
+        expect(overlay?.caps?.enableVideo).toBe(true);
+        expect(overlay?.caps?.enableLog).toBe(true);
+        expect(overlay?.caps?.enableHAR).toBe(false);
+    });
+
+    it("returns null when there is nothing to overlay", () => {
+        expect(mockDetailsSession("missing", undefined, null, null)).toBeNull();
     });
 });

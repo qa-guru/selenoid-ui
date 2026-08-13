@@ -8,7 +8,7 @@
  * browser, freeze/active) plus stable seeds mockmax / mockmin / mockfrz.
  */
 
-import type { LiveSession, SessionsMap } from "../types/hub";
+import type { LiveSession, SessionCaps, SessionsMap } from "../types/hub";
 import { buildMockLiveSessions, MOCK_SESSION_ID } from "./mockSessionMatrix";
 
 export { MOCK_SESSION_ID } from "./mockSessionMatrix";
@@ -64,6 +64,58 @@ export function mockLivePreview(
         return null;
     }
     return previewFromLiveSession(live);
+}
+
+/** Finished-session row from GET /sessions/?json — enough to rebuild caps for mock details. */
+export type SessionArchiveEntry = {
+    id?: string;
+    quota?: string;
+    name?: string;
+    video?: string;
+    log?: string;
+    har?: string;
+    caps?: SessionCaps;
+    browserName?: string;
+    version?: string;
+};
+
+/**
+ * Session object for the details page in mock mode: hub live entry wins,
+ * otherwise ended live caps, otherwise archive artifacts (video/log/har/name).
+ */
+export function mockDetailsSession(
+    sessionId: string | undefined,
+    live?: LiveSession | null,
+    archive?: SessionArchiveEntry | null,
+    ended?: LiveSession | null
+): LiveSession | null {
+    if (live) {
+        return live;
+    }
+    const archiveCaps = archive?.caps || {};
+    const endedCaps = ended?.caps || {};
+    const hasArchive = Boolean(archive && (archive.video || archive.log || archive.har || archive.name || archive.quota));
+    if (!ended && !hasArchive) {
+        return null;
+    }
+    const vncOff = endedCaps.enableVNC === false || endedCaps.enableVNC === "false";
+    const caps: SessionCaps = {
+        ...archiveCaps,
+        ...endedCaps,
+        browserName: endedCaps.browserName || archiveCaps.browserName || archive?.browserName || "chrome",
+        version: endedCaps.version || archiveCaps.version || archive?.version,
+        name: endedCaps.name || archiveCaps.name || archive?.name,
+        enableVNC: vncOff ? false : true,
+        enableVideo: Boolean(endedCaps.enableVideo) || Boolean(archive?.video),
+        enableLog: Boolean(endedCaps.enableLog) || Boolean(archive?.log),
+        enableHAR: Boolean(endedCaps.enableHAR) || Boolean(archive?.har),
+    };
+    return {
+        ...(ended || {}),
+        id: sessionId,
+        quota: ended?.quota || archive?.quota || "",
+        caps,
+    };
 }
 
 export function isMockSessionsEnabled(): boolean {

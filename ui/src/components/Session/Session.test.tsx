@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
@@ -11,6 +11,7 @@ vi.mock("../../util/waitForLiveSession", async (importOriginal) => {
 });
 
 import Session from "./index";
+import { setMockSessionsEnabled } from "../../lib/mockSessions";
 
 vi.mock("../VncCard", () => ({
     default: () => <div data-testid="vnc-card">VNC</div>,
@@ -35,6 +36,7 @@ describe("Session detail page", () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+        window.history.replaceState(null, "", "/");
     });
 
     it("shows live VNC + log when browser is present", () => {
@@ -321,5 +323,68 @@ describe("Session detail page", () => {
         expect(screen.queryByTestId("session-no-log")).toBeNull();
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
         expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR Viewer");
+    });
+
+    it("swaps finished video and log file for mock VNC + logs when mock is toggled", async () => {
+        (fetch as any).mockImplementation(async (url: any) => {
+            if (String(url).startsWith("/sessions/?")) {
+                return {
+                    ok: true,
+                    json: async () => ({
+                        sessions: [
+                            {
+                                id: "fin-toggle-1",
+                                quota: "alice",
+                                name: "LoginTest",
+                                video: "fin-toggle-1.mp4",
+                                log: "fin-toggle-1.log",
+                            },
+                        ],
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                    }),
+                };
+            }
+            if (String(url) === "/logs/fin-toggle-1.log") {
+                return { ok: true, text: async () => "Starting ChromeDriver 149.0\n" };
+            }
+            if (String(url) === "/video/fin-toggle-1.mp4") {
+                return { ok: true, status: 200 };
+            }
+            return { ok: false, status: 404, json: async () => ({}), text: async () => "" };
+        });
+
+        renderSession({ session: "fin-toggle-1", browser: undefined });
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-detail-video")).toBeInTheDocument();
+        });
+        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+        expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("Starting ChromeDriver");
+        expect(screen.queryByTestId("vnc-card")).toBeNull();
+
+        act(() => {
+            setMockSessionsEnabled(true);
+        });
+
+        await waitFor(() => {
+            expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
+        });
+        expect(screen.getByTestId("live-log")).toBeInTheDocument();
+        expect(screen.queryByTestId("session-detail-video")).toBeNull();
+        expect(screen.queryByText("FINISHED")).toBeNull();
+        expect(screen.getByText("alice")).toBeInTheDocument();
+        expect(screen.getByText("LoginTest")).toBeInTheDocument();
+
+        act(() => {
+            setMockSessionsEnabled(false);
+        });
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-detail-video")).toBeInTheDocument();
+        });
+        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+        expect(screen.queryByTestId("vnc-card")).toBeNull();
     });
 });

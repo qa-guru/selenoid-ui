@@ -10,6 +10,7 @@ import HarViewer, { wantsHar } from "../HarViewer";
 import { fetchSessionById } from "../SessionArchive/api";
 import { LIVE_SESSION_GRACE_MS } from "../../util/waitForLiveSession";
 import { useMockSessionsEnabled } from "../../hooks/useMockSessionsEnabled";
+import { mockDetailsSession } from "../../lib/mockSessions";
 import { StyledSession } from "./style.css";
 
 const ARTIFACT_POLL_MS = 2500;
@@ -142,25 +143,32 @@ const Session = ({ origin, session, browser }: any) => {
     }, [browser, session]);
 
     const [isLogHidden, onVNCFullscreenChange] = useState(false);
-    const capsForHar = browser?.caps || endedCaps || {};
-    const showLive = Boolean(browser);
-    const showFinished = !browser && artifactsStatus === "ready" && Boolean(artifacts);
+    const hubLive = Boolean(browser);
+    const detailsBrowser = mockEnabled
+        ? mockDetailsSession(session, browser, artifacts, endedBrowser)
+        : browser;
+    const showMockPreview = Boolean(mockEnabled && detailsBrowser);
+    const capsForHar = browser?.caps || endedCaps || artifacts?.caps || {};
+    const showLive = hubLive;
+    const showFinished = !hubLive && !showMockPreview && artifactsStatus === "ready" && Boolean(artifacts);
     const wasLive = wasLiveRef.current;
-    const showSessionInfo = showLive || (wasLive && !browser) || showFinished;
-    const keepLiveLog = wasLive && !browser && !isLogHidden;
-    const displayBrowser = browser || endedBrowser || { caps: capsForHar };
+    const showSessionInfo = showLive || showMockPreview || (wasLive && !browser) || showFinished;
+    const keepLiveLog = wasLive && !hubLive && !showMockPreview && !isLogHidden;
+    const displayBrowser = detailsBrowser || endedBrowser || { caps: capsForHar };
     const harFile = artifacts?.har || null;
     const showHar = Boolean(harFile || wantsHar(capsForHar));
     const vncEnabled = displayBrowser?.caps?.enableVNC !== false;
-    const waitingForVideo = wasLive && !browser && vncEnabled && !artifacts?.video;
-    const hasMediaColumn = (showLive && vncEnabled) || Boolean(artifacts?.video) || waitingForVideo;
-    const hasLogColumn = showLive || keepLiveLog || (showFinished && !keepLiveLog && artifacts?.log);
+    const waitingForVideo = wasLive && !hubLive && !showMockPreview && vncEnabled && !artifacts?.video;
+    const hasMediaColumn =
+        ((showLive || showMockPreview) && vncEnabled) || Boolean(artifacts?.video) || waitingForVideo;
+    const hasLogColumn =
+        showLive || showMockPreview || keepLiveLog || (showFinished && !keepLiveLog && artifacts?.log);
     const showInteractive = hasMediaColumn || hasLogColumn;
     const showHarSlot = showHar && (showInteractive || showFinished);
-    const showColdLoading = !showLive && !wasLive && artifactsStatus === "loading";
+    const showColdLoading = !hubLive && !showMockPreview && !wasLive && artifactsStatus === "loading";
     const showNotFound =
-        !showLive && !wasLive && (artifactsStatus === "missing" || artifactsStatus === "error");
-    const showEndedNotFound = wasLive && !browser && artifactsStatus === "missing";
+        !hubLive && !showMockPreview && !wasLive && (artifactsStatus === "missing" || artifactsStatus === "error");
+    const showEndedNotFound = wasLive && !hubLive && !showMockPreview && artifactsStatus === "missing";
 
     return (
         <StyledSession data-testid="session-page">
@@ -170,9 +178,9 @@ const Session = ({ origin, session, browser }: any) => {
                         session,
                         browser: displayBrowser,
                         live: showLive,
-                        wasLive,
+                        wasLive: wasLive && !showMockPreview,
                         finished: showFinished,
-                        artifacts: artifacts || {},
+                        artifacts: showMockPreview ? {} : artifacts || {},
                     }}
                 />
             )}
@@ -181,12 +189,12 @@ const Session = ({ origin, session, browser }: any) => {
                 <div className="interactive">
                     {hasMediaColumn && (
                         <div className="session-interactive-card session-media-slot" data-testid="session-media-slot">
-                            {showLive ? (
+                            {showLive || showMockPreview ? (
                                 <VncContainer
                                     {...{
                                         origin,
                                         session,
-                                        browser,
+                                        browser: displayBrowser,
                                         mockEnabled,
                                         onVNCFullscreenChange,
                                     }}
@@ -200,7 +208,7 @@ const Session = ({ origin, session, browser }: any) => {
                     )}
                     {hasLogColumn && (
                         <div className="session-interactive-card session-log-slot">
-                            {keepLiveLog || showLive ? (
+                            {keepLiveLog || showLive || showMockPreview ? (
                                 <Log
                                     {...{
                                         origin,
