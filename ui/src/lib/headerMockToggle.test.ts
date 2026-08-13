@@ -46,6 +46,10 @@ describe("syncHeaderMockToggle", () => {
         const row = document.querySelector('[data-testid="header-menu-nav-sessions-row"]');
         expect(row).toContainElement(document.querySelector('[data-testid="header-menu-nav-sessions"]') as HTMLElement);
         expect(row).toContainElement(menuBtn as HTMLElement);
+        expect(row?.classList.contains("header-mock-toggle-row")).toBe(true);
+        expect(document.querySelector('[data-testid="header-menu-nav-sessions"]')?.nextElementSibling).toBe(
+            menuBtn
+        );
     });
 
     it("is idempotent across remount-style re-syncs", () => {
