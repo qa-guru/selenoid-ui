@@ -11,7 +11,14 @@ export function MockVncDesktop({ caps = {} }: { caps?: SessionCaps }) {
     const url = "https://shop.example/login";
 
     return (
-        <StyledMockDesktop data-testid="mock-vnc-desktop" aria-label="Mock VNC desktop">
+        <StyledMockDesktop
+            data-testid="mock-vnc-desktop"
+            aria-label={
+                caps.browserName
+                    ? `Mock VNC desktop (${caps.browserName} ${version})`
+                    : "Mock VNC desktop"
+            }
+        >
             <div className="vnc-mock-chrome">
                 <div className="vnc-mock-tabs">
                     <span className="vnc-mock-tab vnc-mock-tab--active">

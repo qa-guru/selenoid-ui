@@ -8,7 +8,7 @@
  * browser, freeze/active) plus stable seeds mockmax / mockmin / mockfrz.
  */
 
-import type { SessionsMap } from "../types/hub";
+import type { LiveSession, SessionsMap } from "../types/hub";
 import { buildMockLiveSessions, MOCK_SESSION_ID } from "./mockSessionMatrix";
 
 export { MOCK_SESSION_ID } from "./mockSessionMatrix";
@@ -17,22 +17,53 @@ export const MOCK_LIVE_SESSIONS: SessionsMap = buildMockLiveSessions();
 
 export type MockLivePreview = "active" | "starting" | "stub";
 
-/** How a `?mock=1` session should drive VNC/logs. `null` = real hub sockets. */
-export function mockLivePreview(sessionId: string | undefined): MockLivePreview | null {
-    if (!sessionId) {
-        return null;
-    }
-    const live = MOCK_LIVE_SESSIONS[sessionId];
-    if (!live) {
-        return null;
-    }
-    if (live.starting) {
+function capOn(value: unknown): boolean {
+    return value !== false && value !== "false";
+}
+
+function previewFromFixture(session: LiveSession): MockLivePreview {
+    if (session.starting) {
         return "starting";
     }
-    if (live.preview === "active") {
+    if (session.preview === "active") {
         return "active";
     }
     return "stub";
+}
+
+/** Hub session on the details page: mock VNC/logs from that session's caps. */
+function previewFromLiveSession(session: LiveSession): MockLivePreview {
+    if (session.starting) {
+        return "starting";
+    }
+    if (!capOn(session.caps?.enableVNC)) {
+        return "stub";
+    }
+    return "active";
+}
+
+/**
+ * How mock mode should drive VNC/logs. `null` = real hub sockets.
+ * Pairwise fixture ids always mock (visual snapshots). Any other live session
+ * mocks only when `?mock=1` is on, using that session's caps — so details of a
+ * hub session can toggle in place without changing the route.
+ */
+export function mockLivePreview(
+    sessionId: string | undefined,
+    live?: LiveSession | null,
+    mockEnabled: boolean = isMockSessionsEnabled()
+): MockLivePreview | null {
+    if (!sessionId) {
+        return null;
+    }
+    const fixture = MOCK_LIVE_SESSIONS[sessionId];
+    if (fixture) {
+        return previewFromFixture(fixture);
+    }
+    if (!mockEnabled || !live) {
+        return null;
+    }
+    return previewFromLiveSession(live);
 }
 
 export function isMockSessionsEnabled(): boolean {

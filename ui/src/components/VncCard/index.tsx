@@ -67,6 +67,7 @@ export default class VncCard extends Component<any, any> {
                     session={session}
                     origin={origin}
                     browser={browser}
+                    mockEnabled={this.props.mockEnabled}
                     onUpdateState={(state: any) => this.connection(state)}
                 />
             </VncWindow>

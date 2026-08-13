@@ -9,6 +9,7 @@ import Log from "../Log";
 import HarViewer, { wantsHar } from "../HarViewer";
 import { fetchSessionById } from "../SessionArchive/api";
 import { LIVE_SESSION_GRACE_MS } from "../../util/waitForLiveSession";
+import { useMockSessionsEnabled } from "../../hooks/useMockSessionsEnabled";
 import { StyledSession } from "./style.css";
 
 const ARTIFACT_POLL_MS = 2500;
@@ -51,6 +52,7 @@ function SessionVideoWaiting() {
 }
 
 const Session = ({ origin, session, browser }: any) => {
+    const mockEnabled = useMockSessionsEnabled();
     const wasLiveRef = useRef(false);
     const [endedCaps, setEndedCaps] = useState<any>(null);
     const [endedBrowser, setEndedBrowser] = useState<any>(null);
@@ -185,6 +187,7 @@ const Session = ({ origin, session, browser }: any) => {
                                         origin,
                                         session,
                                         browser,
+                                        mockEnabled,
                                         onVNCFullscreenChange,
                                     }}
                                 />
@@ -203,6 +206,7 @@ const Session = ({ origin, session, browser }: any) => {
                                         origin,
                                         session,
                                         browser: displayBrowser,
+                                        mockEnabled,
                                     }}
                                     className="session-peer"
                                     hidden={isLogHidden}
@@ -290,7 +294,7 @@ const Session = ({ origin, session, browser }: any) => {
 
 export default Session;
 
-function VncContainer({ origin, session, browser = {}, onVNCFullscreenChange }: any) {
+function VncContainer({ origin, session, browser = {}, mockEnabled, onVNCFullscreenChange }: any) {
     if (browser.caps && !browser.caps.enableVNC) {
         return <span />;
     }
@@ -301,6 +305,7 @@ function VncContainer({ origin, session, browser = {}, onVNCFullscreenChange }: 
                 origin,
                 session,
                 browser,
+                mockEnabled,
                 onVNCFullscreenChange,
             }}
         />

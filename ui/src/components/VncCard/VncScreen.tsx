@@ -38,7 +38,9 @@ export default class VncScreen extends Component<any, any> {
 
     componentDidUpdate(prevProps: any) {
         const { session, origin } = this.props;
-        if (prevProps.origin !== origin || prevProps.session !== session) {
+        const prevPreview = mockLivePreview(prevProps.session, prevProps.browser, prevProps.mockEnabled);
+        const nextPreview = mockLivePreview(session, this.props.browser, this.props.mockEnabled);
+        if (prevProps.origin !== origin || prevProps.session !== session || prevPreview !== nextPreview) {
             this.syncConnection(this.props);
         }
     }
@@ -50,7 +52,7 @@ export default class VncScreen extends Component<any, any> {
     }
 
     syncConnection(props: any) {
-        const preview = mockLivePreview(props.session);
+        const preview = mockLivePreview(props.session, props.browser, props.mockEnabled);
         this.disconnect(this.rfb);
         this.rfb = null;
 
@@ -109,7 +111,7 @@ export default class VncScreen extends Component<any, any> {
     }
 
     render() {
-        const preview = mockLivePreview(this.props.session);
+        const preview = mockLivePreview(this.props.session, this.props.browser, this.props.mockEnabled);
         if (preview === "active") {
             return (
                 <div className="vnc-screen" style={{ width: "100%", height: "100%" }}>

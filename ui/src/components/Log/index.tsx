@@ -18,7 +18,6 @@ const MIN_ROWS = 2;
 const GROW_ROWS = 16;
 
 const MOCK_LIVE_LOG = [
-    "[selenoid] attached chrome 149.0 session",
     "[chromedriver] ChromeDriver was started successfully.",
     "POST /session 200",
     "POST /session/url https://shop.example/login 200",
@@ -32,6 +31,12 @@ const MOCK_LIVE_TICKS = [
     "GET https://shop.example/api/cart 200 42ms",
     "[devtools] Runtime.consoleAPICalled",
 ];
+
+function mockAttachLine(caps: any = {}) {
+    const browser = caps.browserName || "chrome";
+    const version = caps.version || "149.0";
+    return `[selenoid] attached ${browser} ${version} session`;
+}
 
 /** xterm creates a helper textarea without id/name/autocomplete — DevTools Issues noise. */
 function decorateXtermTextarea(term: Terminal) {
@@ -228,17 +233,21 @@ export default class Log extends Component<any, any> {
         if (!(props && props.session)) {
             return;
         }
-        const preview = mockLivePreview(props.session);
+        const preview = mockLivePreview(props.session, props.browser, props.mockEnabled);
         if (preview) {
             const key = `mock|${props.session}|${preview}`;
             if (key === this.currentOrigin) {
                 return;
             }
+            const wasLiveSocket = Boolean(this.currentOrigin && !String(this.currentOrigin).startsWith("mock|"));
             this.currentOrigin = key;
             this.closeSocket();
             this.stopMockLog();
+            if (wasLiveSocket && this.term) {
+                this.term.clear();
+            }
             if (preview === "active") {
-                this.playMockLiveLog(props.session);
+                this.playMockLiveLog(props.browser?.caps);
             } else if (preview === "starting") {
                 this.writeAndFit(`Connecting to ws://localhost/ws/logs/${props.session}...\n\r`);
             }
@@ -253,15 +262,17 @@ export default class Log extends Component<any, any> {
             return;
         }
         this.currentOrigin = key;
+        this.stopMockLog();
 
         const wsProxyUrl = urlTo(window.location.href);
         const wsUrl = `${isSecure(wsProxyUrl) ? "wss" : "ws"}://${wsProxyUrl.host}/ws/logs/${props.session}`;
         this.openSocket(wsUrl);
     }
 
-    playMockLiveLog(sessionId: string) {
-        this.writeAndFit(`Connecting to ws://localhost/ws/logs/${sessionId}...\n\r`);
+    playMockLiveLog(caps: any = {}) {
+        this.writeAndFit(`Connecting to ws://localhost/ws/logs/${this.props.session}...\n\r`);
         this.writeAndFit(colors.fg.getRgb(0, 2, 0) + "Connected!\n\r" + colors.reset);
+        this.writeAndFit(`${mockAttachLine(caps)}\n\r`);
         for (const line of MOCK_LIVE_LOG) {
             this.writeAndFit(`${line}\n\r`);
         }

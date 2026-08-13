@@ -95,4 +95,19 @@ describe("Log chrome → Panel terminal", () => {
         // must not rebuild the screen on every writeln (that flashes the buffer).
         expect(xtermState.resizeCalls).toBe(0);
     });
+
+    it("does not open WebSocket for a hub session when mock is on", () => {
+        const ws = vi.fn();
+        vi.stubGlobal("WebSocket", ws);
+        render(
+            <Log
+                session="hub-sess-1"
+                origin="http://localhost"
+                mockEnabled
+                browser={{ caps: { browserName: "firefox", version: "150.0", enableLog: true } }}
+            />
+        );
+        expect(ws).not.toHaveBeenCalled();
+        vi.unstubAllGlobals();
+    });
 });

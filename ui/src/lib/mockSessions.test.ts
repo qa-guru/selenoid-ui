@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
     isMockSessionsEnabled,
     MOCK_SESSIONS_CHANGE,
+    mockLivePreview,
     setMockSessionsEnabled,
     subscribeMockSessions,
 } from "./mockSessions";
@@ -66,5 +67,40 @@ describe("mockSessions URL flag", () => {
 
     it("exports a stable change event name", () => {
         expect(MOCK_SESSIONS_CHANGE).toBe("selenoid-ui:mock-sessions");
+    });
+});
+
+describe("mockLivePreview overlay on a hub session", () => {
+    const hub = {
+        id: "hub-sess-1",
+        quota: "alice",
+        caps: { browserName: "firefox", version: "150.0", enableVNC: true, name: "LoginTest" },
+    };
+
+    it("does not mock a hub session while the flag is off", () => {
+        resetUrl();
+        expect(mockLivePreview("hub-sess-1", hub, false)).toBeNull();
+        expect(mockLivePreview("hub-sess-1", hub)).toBeNull();
+    });
+
+    it("uses the hub session caps when mock is on (VNC → active desktop)", () => {
+        expect(mockLivePreview("hub-sess-1", hub, true)).toBe("active");
+    });
+
+    it("stays stub when that session has VNC off", () => {
+        expect(
+            mockLivePreview("hub-sess-1", { ...hub, caps: { ...hub.caps, enableVNC: false } }, true)
+        ).toBe("stub");
+    });
+
+    it("stays starting when that session is still freezing", () => {
+        expect(mockLivePreview("hub-sess-1", { ...hub, starting: true }, true)).toBe("starting");
+    });
+
+    it("keeps pairwise fixture behaviour without the flag", () => {
+        resetUrl();
+        expect(mockLivePreview("mockmax-aaaaaaaaaaaaaaaaaaaaaaa")).toBe("active");
+        expect(mockLivePreview("mockfrz-aaaaaaaaaaaaaaaaaaaaaaa")).toBe("starting");
+        expect(mockLivePreview("mockmin-aaaaaaaaaaaaaaaaaaaaaaa")).toBe("stub");
     });
 });
