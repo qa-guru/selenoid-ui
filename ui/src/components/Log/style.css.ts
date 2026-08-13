@@ -101,7 +101,7 @@ export const StyledLog = styled.div`
                 -moz-osx-font-smoothing: grayscale;
             }
 
-            /* Page scrolls; Log chrome must not grow inner scrollbars. */
+            /* Panel body is the column scrollport; xterm canvas hugs lines. */
             .xterm-viewport {
                 background-color: transparent !important;
                 overflow: hidden !important;

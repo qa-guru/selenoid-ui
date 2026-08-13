@@ -52,6 +52,9 @@ describe("Session detail page", () => {
         expect(screen.getByTestId("live-log")).toBeInTheDocument();
         expect(document.querySelector(".session-media-slot")).toBeTruthy();
         expect(document.querySelector(".session-log-slot")).toBeTruthy();
+        const row = document.querySelector(".interactive");
+        expect(row?.contains(document.querySelector(".session-media-slot"))).toBe(true);
+        expect(row?.contains(document.querySelector(".session-log-slot"))).toBe(true);
         expect(screen.queryByTestId("session-detail-video")).toBeNull();
     });
 

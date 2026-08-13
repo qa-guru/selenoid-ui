@@ -82,6 +82,18 @@ export const StyledSession = styled.div`
         }
     }
 
+    /* Log-only (no VNC): nothing to size the row — hug content. */
+    .interactive:not(:has(.session-media-slot)) .session-log-slot {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+
+        > * {
+            flex: 1 0 auto;
+            height: auto;
+        }
+    }
+
     @media (max-width: 999px) {
         .session-log-slot {
             height: auto;
