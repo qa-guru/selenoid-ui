@@ -18,10 +18,13 @@ vi.mock("xterm", () => ({
             xtermState.textarea = this.textarea;
         }
         writeln() {}
-        write() {}
+        write(_data: unknown, callback?: () => void) {
+            callback?.();
+        }
         clear() {}
         dispose() {}
         resize() {}
+        scrollToTop() {}
     },
 }));
 

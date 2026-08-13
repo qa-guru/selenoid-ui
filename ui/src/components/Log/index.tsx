@@ -136,10 +136,8 @@ export default class Log extends Component<any, any> {
             return;
         }
 
-        const cellH = this.cellHeightPx();
-        // Seed height so proposeDimensions / fit can measure cols from width.
-        this.termel.style.height = `${MIN_ROWS * cellH}px`;
-
+        // Measure cols from current width. Do not collapse height first —
+        // that flashes the first line ("Initialize...") and jitters the panel.
         const proposed = this.fitAddon.proposeDimensions?.();
         const cols = proposed?.cols || this.term.cols || 80;
         // buffer.length is the viewport (default 24 rows), not written lines.
@@ -148,7 +146,14 @@ export default class Log extends Component<any, any> {
         const rows = Math.max(written, MIN_ROWS);
 
         this.term.resize(cols, rows);
+        this.term.scrollToTop();
+        this.syncTermHostHeight(rows);
+    };
 
+    syncTermHostHeight(rows: number) {
+        if (!this.termel || !this.term.element) {
+            return;
+        }
         // xterm sizes `.xterm-screen` from its own cell metrics; rows * cellHeightPx()
         // can disagree and leave empty space under the last line (border-box + padding).
         const screen = this.term.element.querySelector(".xterm-screen") as HTMLElement | null;
@@ -158,7 +163,7 @@ export default class Log extends Component<any, any> {
         const cs = getComputedStyle(this.termel);
         const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
         this.termel.style.height = `${contentH + pad}px`;
-    };
+    }
 
     scheduleFitToContent() {
         if (this.fitTimer) {
@@ -171,13 +176,18 @@ export default class Log extends Component<any, any> {
     }
 
     writeAndFit(chunk: any) {
-        this.term.write(chunk);
-        // Grow immediately when buffer outruns rows; debounce for bursty ws frames.
-        if (this.term.buffer.active.length > this.term.rows) {
-            this.fitToContent();
-        } else {
-            this.scheduleFitToContent();
+        const buf = this.term.buffer?.active;
+        const written = buf ? (buf.baseY || 0) + (buf.cursorY || 0) + 1 : MIN_ROWS;
+        // Grow a spare row before write so xterm does not scroll the first
+        // line ("Initialize...") into scrollback while the chunk is parsed.
+        if (written >= this.term.rows) {
+            const rows = written + 1;
+            this.term.resize(this.term.cols || 80, rows);
+            this.syncTermHostHeight(rows);
         }
+        this.term.write(chunk, () => {
+            this.scheduleFitToContent();
+        });
     }
 
     connect(props: any) {
