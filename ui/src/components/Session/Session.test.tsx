@@ -361,6 +361,7 @@ describe("Session detail page", () => {
             expect(screen.getByTestId("session-detail-video")).toBeInTheDocument();
         });
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
+        expect(screen.getByText("LoginTest")).toBeInTheDocument();
         expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("Starting ChromeDriver");
         expect(screen.queryByTestId("vnc-card")).toBeNull();
 
@@ -373,8 +374,9 @@ describe("Session detail page", () => {
         });
         expect(screen.getByTestId("live-log")).toBeInTheDocument();
         expect(screen.queryByTestId("session-detail-video")).toBeNull();
-        expect(screen.queryByText("FINISHED")).toBeNull();
-        expect(screen.getByText("alice")).toBeInTheDocument();
+        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+        expect(screen.getByTestId("session-back")).toBeInTheDocument();
+        expect(screen.queryByText("alice")).toBeNull();
         expect(screen.getByText("LoginTest")).toBeInTheDocument();
 
         act(() => {

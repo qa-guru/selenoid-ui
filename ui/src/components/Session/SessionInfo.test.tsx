@@ -24,6 +24,8 @@ describe("SessionInfo", () => {
 
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
         expect(screen.getByTestId("session-info-title")).toHaveTextContent("Session details");
+        expect(screen.getByTestId("session-back")).toHaveClass("btn", "btn--secondary");
+        expect(screen.getByTestId("session-back")).toHaveAttribute("href", "/sessions");
         expect(screen.getByText("alice")).toBeInTheDocument();
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("120.0")).toBeInTheDocument();
@@ -104,12 +106,33 @@ describe("SessionInfo", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByTestId("session-back")).toHaveAttribute("href", "/sessions");
+        const back = screen.getByTestId("session-back");
+        expect(back).toHaveAttribute("href", "/sessions");
+        expect(back).toHaveClass("btn", "btn--secondary");
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
         expect(screen.getByText("VIDEO")).toBeInTheDocument();
         expect(screen.getByText("LOG")).toBeInTheDocument();
         expect(screen.getByText("HAR")).toBeInTheDocument();
         expect(screen.queryByTestId("session-kill")).toBeNull();
+        expect(screen.getByText("FINISHED").closest(".session-info__additional")).toBeTruthy();
+        expect(screen.getByText("LOG").closest(".session-info__additional")).toBeTruthy();
+    });
+
+    it("keeps list filters on the back button", () => {
+        render(
+            <MemoryRouter initialEntries={["/sessions/fin-sess-1?sort=duration&order=asc&page=2"]}>
+                <SessionInfo
+                    session="fin-sess-1"
+                    finished
+                    artifacts={{ video: "fin-sess-1.mp4", log: "fin-sess-1.log" }}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByTestId("session-back")).toHaveAttribute(
+            "href",
+            "/sessions?sort=duration&order=asc&page=2"
+        );
     });
 
     it("live mode exposes Kill session in Session panel bar", () => {

@@ -150,11 +150,19 @@ const Session = ({ origin, session, browser }: any) => {
     const showMockPreview = Boolean(mockEnabled && detailsBrowser);
     const capsForHar = browser?.caps || endedCaps || artifacts?.caps || {};
     const showLive = hubLive;
-    const showFinished = !hubLive && !showMockPreview && artifactsStatus === "ready" && Boolean(artifacts);
+    const hasArchive = artifactsStatus === "ready" && Boolean(artifacts);
+    const showFinished = !hubLive && !showMockPreview && hasArchive;
+    const finishedInfo = !hubLive && hasArchive;
     const wasLive = wasLiveRef.current;
-    const showSessionInfo = showLive || showMockPreview || (wasLive && !browser) || showFinished;
+    const showSessionInfo = showLive || showMockPreview || (wasLive && !browser) || finishedInfo;
     const keepLiveLog = wasLive && !hubLive && !showMockPreview && !isLogHidden;
-    const displayBrowser = detailsBrowser || endedBrowser || { caps: capsForHar };
+    const displayBrowser = detailsBrowser || endedBrowser || {
+        quota: artifacts?.quota || "",
+        caps: {
+            ...capsForHar,
+            name: capsForHar.name || artifacts?.name,
+        },
+    };
     const harFile = artifacts?.har || null;
     const showHar = Boolean(harFile || wantsHar(capsForHar));
     const vncEnabled = displayBrowser?.caps?.enableVNC !== false;
@@ -179,8 +187,8 @@ const Session = ({ origin, session, browser }: any) => {
                         browser: displayBrowser,
                         live: showLive,
                         wasLive: wasLive && !showMockPreview,
-                        finished: showFinished,
-                        artifacts: showMockPreview ? {} : artifacts || {},
+                        finished: finishedInfo,
+                        artifacts: artifacts || {},
                     }}
                 />
             )}

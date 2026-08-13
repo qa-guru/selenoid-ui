@@ -33,9 +33,9 @@ const sessions = {
     },
 };
 
-function renderSessions(props = {}) {
+function renderSessions(props = {}, { route = "/sessions" }: { route?: string } = {}) {
     return render(
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[route]}>
             <Sessions sessions={sessions} query="" {...props} />
         </MemoryRouter>
     );
@@ -150,6 +150,16 @@ describe("Sessions", () => {
         const identity = screen.getByText("chrome").closest("a.identity");
         expect(identity!).toHaveAttribute("href", "/sessions/abc-def-123");
         expect(identity!).toHaveClass("link", "identity");
+    });
+
+    it("keeps list search on session detail links", () => {
+        renderSessions({}, { route: "/sessions?sort=duration&page=2" });
+
+        const shortId = sessionIdShort("abc-def-123");
+        expect(screen.getByRole("link", { name: shortId })).toHaveAttribute(
+            "href",
+            "/sessions/abc-def-123?sort=duration&page=2"
+        );
     });
 
     it("invokes delete for manual sessions", async () => {

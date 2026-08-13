@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader";
 import { Badge, IconTrash, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
+import { sessionsListTo } from "../../lib/sessionNav";
 
 const SessionInfo = ({
     session = "",
@@ -13,6 +14,8 @@ const SessionInfo = ({
     finished = false,
     artifacts = {},
 }: any) => {
+    const location = useLocation();
+    const backTo = sessionsListTo(location.search);
     const caps = browser.caps || {};
     const shortId = session ? session.substring(0, 8) : "";
     const [killing, setKilling] = useState(false);
@@ -69,6 +72,13 @@ const SessionInfo = ({
             <div className="session-info">
                 <div className="session-info__main">
                     <div className="session-browser">
+                        <Link
+                            to={backTo}
+                            className="btn btn--secondary session-info__back"
+                            data-testid="session-back"
+                        >
+                            ← Sessions
+                        </Link>
                         {live || wasLive ? (
                             live && !browser.quota ? (
                                 <BeatLoader size={5} color={"#fff"} loading />
@@ -76,11 +86,7 @@ const SessionInfo = ({
                                 <span className="session-browser__loader-slot" aria-hidden="true" />
                             )
                         ) : null}
-                        {finished ? (
-                            <Link to="/sessions" className="session-info__back" data-testid="session-back">
-                                ← Sessions
-                            </Link>
-                        ) : (
+                        {!finished && (
                             <>
                                 <span className="session-browser__quota">{browser.quota}</span>
                                 {browser.quota && <span className="session-browser__version-separator">/</span>}

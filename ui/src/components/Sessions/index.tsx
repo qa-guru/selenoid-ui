@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
@@ -7,6 +7,7 @@ import BeatLoader from "react-spinners/BeatLoader";
 import { Badge, IconTrash, Panel } from "@zero-design-system/react";
 import { useSessionDelete } from "./service";
 import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
+import { sessionDetailTo } from "../../lib/sessionNav";
 
 /** Empty-state hourglass — composition only; dripicons off. */
 function IconHourglass() {
@@ -90,8 +91,9 @@ const Sessions = ({ sessions = {}, query = "" }: any) => {
 };
 
 const Session = ({ id, session: { quota, caps, starting }, ref }: any) => {
+    const location = useLocation();
     const [deleting, deleteSession] = useSessionDelete(id);
-    const href = deleting ? `#` : `/sessions/${id}`;
+    const href = deleting ? "#" : sessionDetailTo(id, location.search);
     const manual = Boolean(caps.labels && caps.labels.manual);
     const name = caps.name || "";
     // Default Create Session name duplicates the MANUAL badge — keep title for e2e, hide label.

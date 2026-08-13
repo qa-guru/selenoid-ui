@@ -254,4 +254,25 @@ describe("SessionArchive", () => {
         });
         expect(screen.getByTestId("archive-sort-name")).toHaveAttribute("aria-sort", "ascending");
     });
+
+    it("keeps sort and page on the detail link", async () => {
+        (fetch as any).mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                sessions: [{ id: "sess-1", video: "sess-1.mp4" }],
+                total: 1,
+                limit: 10,
+                offset: 20,
+            }),
+        });
+
+        renderArchive(<SessionArchive />, { route: "/sessions?sort=name&order=asc&page=2" });
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-detail-link")).toHaveAttribute(
+                "href",
+                "/sessions/sess-1?sort=name&order=asc&page=2"
+            );
+        });
+    });
 });

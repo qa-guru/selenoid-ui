@@ -13,6 +13,7 @@ import {
     type SessionArchiveSortOrder,
 } from "./api";
 import { sessionIdShort } from "../../util/sessionsLogic";
+import { sessionDetailTo } from "../../lib/sessionNav";
 import { buildArchiveSearchParams, parseArchiveUrlState, type ArchiveUrlState } from "./archiveUrlState";
 
 /** Empty-state hourglass — composition only; dripicons off. */
@@ -385,8 +386,9 @@ const SortHeader = ({
 
 const SessionRow = ({ session, onDeleted }: any) => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
-    const detailHref = `/sessions/${session.id}`;
+    const detailTo = sessionDetailTo(session.id, searchParams.toString());
     const name = session.name || "";
     const quota = session.quota || "";
     const dateLabel = formatSessionDate(session.finished || session.started);
@@ -395,9 +397,9 @@ const SessionRow = ({ session, onDeleted }: any) => {
 
     const openDetail = useCallback(() => {
         if (!deleting) {
-            navigate(detailHref);
+            navigate(detailTo);
         }
-    }, [deleting, detailHref, navigate]);
+    }, [deleting, detailTo, navigate]);
 
     const onRowKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLTableRowElement>) => {
@@ -424,7 +426,7 @@ const SessionRow = ({ session, onDeleted }: any) => {
         >
             <td className="archive__col_id">
                 <Link
-                    to={detailHref}
+                    to={detailTo}
                     className="archive__id archive__row-link"
                     data-testid="session-detail-link"
                     title={session.id}
@@ -464,7 +466,7 @@ const SessionRow = ({ session, onDeleted }: any) => {
             <td className="archive__col_actions" onClick={stopRowAction}>
                 <div className="archive__actions">
                 <Link
-                    to={detailHref}
+                    to={detailTo}
                     className="archive__artifacts"
                     data-testid="session-detail-artifacts"
                     aria-label="Session artifacts"

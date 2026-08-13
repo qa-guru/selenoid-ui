@@ -221,10 +221,13 @@ export const StyledSession = styled.div`
         &__additional {
             flex: 1 1 auto;
             min-width: 0;
+            display: flex;
+            justify-content: flex-end;
 
             .custom-capabilities {
                 display: flex;
                 align-items: center;
+                justify-content: flex-end;
                 gap: var(--space-2, 8px);
                 flex-wrap: nowrap;
             }
@@ -235,12 +238,16 @@ export const StyledSession = styled.div`
         }
 
         &__back {
-            color: var(--color-accent, #6cb6ff);
             text-decoration: none;
-            font-size: 0.9em;
+            flex-shrink: 0;
+            min-height: var(--plaque-control-height, 32px);
+            padding: var(--space-1, 4px) var(--space-3, 10px);
+            font-size: var(--font-size-sm, 12px);
+            line-height: 1.2;
+            color: var(--color-text, #fff);
 
             &:hover {
-                text-decoration: underline;
+                text-decoration: none;
             }
         }
     }
