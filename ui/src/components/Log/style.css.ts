@@ -13,23 +13,28 @@ export const StyledLog = styled.div`
 
     &.session-peer {
         align-items: stretch;
-        flex: 1 0 auto;
-        min-height: var(--session-media-height);
-        height: auto;
+        flex: 1 1 auto;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        min-height: 0;
+        height: 100%;
 
         .log-card {
-            flex: 1 0 auto;
-            min-height: var(--session-media-height);
-            height: auto;
+            flex: 1 1 auto;
+            min-height: 0;
+            height: 100%;
             align-self: stretch;
 
-            .log-card__body {
+            /* Column scrollport — beats .panel--terminal > .panel__body clip. */
+            &.panel--terminal > .log-card__body {
                 flex: 1 1 auto;
                 min-height: 0;
                 height: auto;
                 display: flex;
                 flex-direction: column;
-                overflow: visible;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                overscroll-behavior-y: contain;
             }
 
             .term {
