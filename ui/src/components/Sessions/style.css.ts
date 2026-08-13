@@ -12,10 +12,6 @@ export const StyledSessions = styled.div`
 
     .sessions-panel {
         width: 100%;
-
-        .panel__title {
-            font-size: 0.625rem;
-        }
     }
 
     .sessions-panel__body {
