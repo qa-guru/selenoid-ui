@@ -657,7 +657,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         JSON.stringify(payload, null, 2),
         "```",
         "",
-        "## Driver",
+        "## Browser / device image",
         `- browser: **${browserLabel}**`,
         `- protocol: **${payload.protocol}**`,
         "",
@@ -666,7 +666,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
     if (family === "playwright") {
         return head
             .concat([
-                "## Playwright session",
+                "## Session options",
                 `- remoteUrl: \`${remoteUrl}\``,
                 `- accessKey: \`${sessionOpts.accessKey || ""}\``,
                 `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
@@ -683,7 +683,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
                 `- labels: **${payload.labels || "—"}**`,
                 `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
                 "",
-                "## Browser capabilities",
+                "## Browser proxy",
                 `- proxyPreset: **${payload.proxyPreset}**`,
                 `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
                 `- socksProxy: **${payload.proxyEndpoint || "—"}** (hub → PW_PROXY → launchServer)`,
@@ -693,7 +693,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
     if (family === "android") {
         return head
             .concat([
-                "## Android device",
+                "## Session options",
                 `- remoteUrl: \`${remoteUrl}\``,
                 `- authUser / authPass: \`${sessionOpts.authUser || ""}\` / \`${sessionOpts.authPass || ""}\``,
                 `- name: **${sessionOpts.name}**`,
@@ -707,11 +707,11 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             .join("\n");
     }
     if (family === "ios") {
-        return head.concat(["## iOS session", "- статус: **coming soon** (образ iOS ещё не поднят)"]).join("\n");
+        return head.concat(["## Session options", "- статус: **coming soon** (образ iOS ещё не поднят)"]).join("\n");
     }
     return head
         .concat([
-            "## Remote hub",
+            "## Session options",
             `- remoteUrl: \`${remoteUrl}\``,
             `- authUser / authPass: \`${sessionOpts.authUser || ""}\` / \`${sessionOpts.authPass || ""}\``,
             `- sessionTimeout: **${sessionOpts.sessionTimeout}**`,
@@ -727,7 +727,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             `- labels: **${payload.labels || "—"}**`,
             `- videoName / logName: **${payload.videoName || "—"}** / **${payload.logName || "—"}**`,
             "",
-            "## Browser capabilities",
+            "## Browser proxy",
             `- proxyPreset: **${payload.proxyPreset}**`,
             `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
             `- socksProxy: **${payload.proxyEndpoint || "—"}**`,
@@ -1957,7 +1957,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             <div className="capabilities-body">
                 <div className="setup" data-testid="capabilities-setup">
                     <Panel
-                        title="Driver"
+                        title="Browser / device image"
                         testId="capabilities-driver-panel"
                         titleTestId="capabilities-driver-title"
                         className="capabilities-config-panel"
@@ -1975,17 +1975,17 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         >
                             <PlaqueFieldGrid
                                 layout="solo"
-                                aria-label="Webdriver"
+                                aria-label="WebDriver"
                                 data-testid="capabilities-driver-webdriver"
                             >
                                 <PlaqueTagstrip
-                                    label="Webdriver"
+                                    label="WebDriver"
                                     paramId="webdriver"
                                     className="capabilities-browser-select"
                                     options={webdriverOptions}
                                     values={value ? [value] : []}
                                     onToggle={onBrowserToggle}
-                                    aria-label={driverStripAria(webdriverAvailable, "Webdriver browsers")}
+                                    aria-label={driverStripAria(webdriverAvailable, "WebDriver browsers")}
                                     data-testid="capabilities-browser-select"
                                 />
                             </PlaqueFieldGrid>
@@ -2795,7 +2795,7 @@ const Launch = ({
         <div className="capabilities-launch">
             {isWebdriver ? (
                 <Panel
-                    title="Remote hub"
+                    title="Session options"
                     testId="capabilities-remote-panel"
                     titleTestId="capabilities-remote-title"
                     className="capabilities-config-panel"
@@ -2870,7 +2870,7 @@ const Launch = ({
 
                         <PlaqueFieldGrid
                             layout="solo"
-                            aria-label="Remote hub flags"
+                            aria-label="Session options flags"
                             data-testid="capabilities-caps-flags"
                         >
                             <PlaqueFieldSeg
@@ -3010,7 +3010,7 @@ const Launch = ({
             ) : null}
             {isPlaywright && name ? (
                 <Panel
-                    title="Playwright session"
+                    title="Session options"
                     testId="capabilities-playwright-panel"
                     titleTestId="capabilities-playwright-title"
                     className="capabilities-config-panel"
@@ -3233,7 +3233,7 @@ const Launch = ({
             ) : null}
             {isWebdriver || isPlaywright ? (
                 <Panel
-                    title="Browser capabilities"
+                    title="Browser proxy"
                     testId="capabilities-browser-panel"
                     titleTestId="capabilities-browser-title"
                     className="capabilities-config-panel"
@@ -3291,7 +3291,7 @@ const Launch = ({
             ) : null}
             {isAndroid ? (
                 <Panel
-                    title="Android device"
+                    title="Session options"
                     testId="capabilities-android-panel"
                     titleTestId="capabilities-android-title"
                     className="capabilities-config-panel"
@@ -3425,7 +3425,7 @@ const Launch = ({
             ) : null}
             {isIos ? (
                 <Panel
-                    title="iOS session"
+                    title="Session options"
                     testId="capabilities-ios-panel"
                     titleTestId="capabilities-ios-title"
                     className="capabilities-config-panel capabilities-config-panel--placeholder"

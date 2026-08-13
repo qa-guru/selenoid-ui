@@ -152,7 +152,7 @@ describe("Capabilities Playwright Create Session", () => {
         await selectPlaywrightChrome(user);
 
         const panel = screen.getByTestId("capabilities-playwright-panel");
-        expect(within(panel!).getByTestId("capabilities-playwright-title")).toHaveTextContent("Playwright session");
+        expect(within(panel!).getByTestId("capabilities-playwright-title")).toHaveTextContent("Session options");
         expect(screen.getByTestId("caps-playwright-session-timeout")).toHaveAttribute(
             "data-param-id",
             "sessionTimeout"

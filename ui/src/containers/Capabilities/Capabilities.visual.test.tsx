@@ -74,7 +74,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
 
         const driver = screen.getByTestId("capabilities-driver-panel");
         expect(driver!).toHaveClass("panel", "panel--content");
-        expect(screen.getByTestId("capabilities-driver-title")).toHaveTextContent("Driver");
+        expect(screen.getByTestId("capabilities-driver-title")).toHaveTextContent("Browser / device image");
 
         const stack = screen.getByTestId("capabilities-driver-browsers");
         expect(stack!).toHaveClass("plaque-field-grid-stack", "plaque-field-grid-stack--magnet");
@@ -128,7 +128,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
 
         const remote = await screen.findByTestId("capabilities-remote-panel");
         expect(remote!).toHaveClass("panel", "panel--content");
-        expect(screen.getByTestId("capabilities-remote-title")).toHaveTextContent("Remote hub");
+        expect(screen.getByTestId("capabilities-remote-title")).toHaveTextContent("Session options");
 
         // presets #remote-hub: magnet stack → solo/duo/pair rows, not 3-in-one.
         const caps = within(remote!).getByTestId("capabilities-caps");
@@ -164,7 +164,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
 
         const browserCaps = await screen.findByTestId("capabilities-browser-panel");
         expect(browserCaps!).toHaveClass("panel", "panel--content");
-        expect(screen.getByTestId("capabilities-browser-title")).toHaveTextContent("Browser capabilities");
+        expect(screen.getByTestId("capabilities-browser-title")).toHaveTextContent("Browser proxy");
         expect(within(browserCaps!).getByTestId("capabilities-browser-proxy-preset")).toHaveClass(
             "plaque-field-grid--solo"
         );

@@ -57,7 +57,7 @@ describe("Capabilities Android device panel", () => {
         await selectAndroid(user);
 
         const panel = screen.getByTestId("capabilities-android-panel");
-        expect(within(panel!).getByTestId("capabilities-android-title")).toHaveTextContent("Android device");
+        expect(within(panel!).getByTestId("capabilities-android-title")).toHaveTextContent("Session options");
         expect(screen.getByTestId("caps-android-session-name")).toHaveValue("Manual session");
         expect(screen.getByTestId("caps-android-app")).toBeInTheDocument();
         expect(screen.getByTestId("caps-android-no-reset")).toHaveAttribute("data-param-id", "noReset");
