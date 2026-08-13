@@ -25,6 +25,7 @@
   --panel-bar-bg: #1a1917;
   /* Remote desktop aspect — override via --vnc-aspect (e.g. 1280 / 1024). */
   --vnc-aspect: 16 / 9;
+  --panel-title-color: rgba(255, 255, 255, 0.55);
   flex: 0 1 100%;
   width: 100%;
   height: auto;
@@ -51,6 +52,13 @@
 
 .vnc-window__actions {
   margin-left: auto;
+}
+
+.vnc-window__title {
+  margin-inline-start: var(--space-3, 12px);
+  padding-inline-end: var(--space-2, 8px);
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .vnc-window__status-label {

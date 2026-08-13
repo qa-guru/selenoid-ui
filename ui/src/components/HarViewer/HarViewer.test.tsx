@@ -92,6 +92,7 @@ describe("HarViewer", () => {
             expect(screen.getByText("https://example.com/")).toBeInTheDocument();
         });
         expect(fetch!).toHaveBeenCalledWith("/har/sess-1.har", { cache: "no-store" });
+        expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR Viewer");
         expect(screen.getByTestId("session-har-download")).toHaveAttribute("aria-label", "Download");
     });
 

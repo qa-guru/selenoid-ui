@@ -57,6 +57,7 @@ describe("VncCard", () => {
         expect(container.querySelector(".vnc-window--connected")).toBeInTheDocument();
 
         expect(screen.getByRole("link", { name: "Back" })).toHaveClass("window-control", "window-control--danger");
+        expect(screen.getByTestId("vnc-window-title")).toHaveTextContent("VNC window (view)");
         expect(screen.getByRole("button", { name: "Unlock screen" })).toHaveClass(
             "window-control",
             "window-control--info"
@@ -99,6 +100,7 @@ describe("VncCard", () => {
         await user.click(screen.getByRole("button", { name: "Unlock screen" }));
         expect(lockSpy!).toHaveBeenCalledWith(true);
         expect(screen.getByRole("button", { name: "Lock screen" })).toBeInTheDocument();
+        expect(screen.getByTestId("vnc-window-title")).toHaveTextContent("VNC window (control)");
     });
 
     it("invokes clipboard fetch on copy control", async () => {

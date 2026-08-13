@@ -1154,7 +1154,10 @@ var defaultLabels = {
   exitFullscreen: "Exit fullscreen",
   copy: "Copy from Selenoid",
   paste: "Paste to Selenoid",
-  kill: "Kill container"
+  kill: "Kill container",
+  title: "VNC window",
+  view: "view",
+  control: "control"
 };
 function VncWindow({
   state,
@@ -1172,9 +1175,11 @@ function VncWindow({
   children,
   labels,
   className,
-  "data-testid": dataTestId = "vnc-window"
+  "data-testid": dataTestId = "vnc-window",
+  titleTestId = "vnc-window-title"
 }) {
   const l = { ...defaultLabels, ...labels };
+  const titleText = state === "connected" ? `${l.title} (${unlocked ? l.control : l.view})` : l.title;
   const aspectStyle = screenSize && screenSize.width > 0 && screenSize.height > 0 ? {
     ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
   } : void 0;
@@ -1204,6 +1209,8 @@ function VncWindow({
       style: aspectStyle,
       "data-state": state,
       "data-testid": dataTestId,
+      role: "region",
+      "aria-label": titleText,
       children: [
         /* @__PURE__ */ jsxs13("div", { className: "panel__bar", children: [
           /* @__PURE__ */ jsxs13("div", { className: "vnc-window__controls", children: [
@@ -1233,6 +1240,7 @@ function VncWindow({
               }
             )
           ] }),
+          /* @__PURE__ */ jsx23("span", { className: "panel__title vnc-window__title", "data-testid": titleTestId, children: titleText }),
           /* @__PURE__ */ jsxs13("div", { className: "vnc-window__actions", children: [
             killControl,
             /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.copy, title: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),

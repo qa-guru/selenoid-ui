@@ -23,7 +23,7 @@ describe("SessionInfo", () => {
         );
 
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
-        expect(screen.getByTestId("session-info-title")).toHaveTextContent("Session");
+        expect(screen.getByTestId("session-info-title")).toHaveTextContent("Session details");
         expect(screen.getByText("alice")).toBeInTheDocument();
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("120.0")).toBeInTheDocument();

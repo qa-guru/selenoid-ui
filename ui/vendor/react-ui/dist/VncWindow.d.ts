@@ -11,6 +11,12 @@ export interface VncWindowLabels {
     paste: string;
     /** Destructive: DELETE session / kill container. */
     kill: string;
+    /** Panel name in the bar. */
+    title: string;
+    /** Locked screen — watch only. */
+    view: string;
+    /** Unlocked screen — interactive. */
+    control: string;
 }
 /** Remote desktop pixels — drives flexible screen `aspect-ratio` via `--vnc-aspect`. */
 export interface VncScreenSize {
@@ -51,11 +57,12 @@ export interface VncWindowProps {
     labels?: Partial<VncWindowLabels>;
     className?: string;
     'data-testid'?: string;
+    titleTestId?: string;
 }
 /**
  * Selenoid VNC window: base panel + chrome (back, connection status, lock,
  * fullscreen, clipboard) over a black noVNC screen. Composes the `vnc-window`
  * primitive with `WindowControl` / `ConnectionStatus`.
  */
-export declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, kill, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, onKill, children, labels, className, 'data-testid': dataTestId, }: VncWindowProps): import("react").JSX.Element;
+export declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, kill, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, onKill, children, labels, className, 'data-testid': dataTestId, titleTestId, }: VncWindowProps): import("react").JSX.Element;
 //# sourceMappingURL=VncWindow.d.ts.map

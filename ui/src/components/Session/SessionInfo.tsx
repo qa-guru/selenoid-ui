@@ -59,7 +59,7 @@ const SessionInfo = ({
 
     return (
         <Panel
-            title="Session"
+            title="Session details"
             testId="session-info-panel"
             titleTestId="session-info-title"
             className="session-info-panel"

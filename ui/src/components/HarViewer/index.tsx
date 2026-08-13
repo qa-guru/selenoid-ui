@@ -128,7 +128,7 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
         <div className="har-viewer" data-testid="session-har-viewer">
             <Panel
                 variant="terminal"
-                title="HAR"
+                title="HAR Viewer"
                 testId="session-har-panel"
                 titleTestId="session-har-title"
                 className="har-card"

@@ -320,6 +320,6 @@ describe("Session detail page", () => {
         expect(screen.queryByTestId("session-no-video")).toBeNull();
         expect(screen.queryByTestId("session-no-log")).toBeNull();
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
-        expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR");
+        expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR Viewer");
     });
 });

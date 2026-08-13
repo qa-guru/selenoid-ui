@@ -885,7 +885,10 @@ select.plaque-field__control option {
     position: sticky;
     top: var(--space-6);
     max-height: calc(100vh - 2 * var(--space-6));
-    overflow: auto;
+  }
+  .section--sticky {
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
   :has(#app-header) .panel--sticky,
   :has(#app-header) .section--sticky {
@@ -1058,13 +1061,15 @@ select.plaque-field__control option {
   flex: 1 1 auto;
   min-height: 0;
   padding: var(--space-4);
-  overflow: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 .panel--terminal > .panel__body {
   padding: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 .panel__code {
   flex: 1 1 auto;
@@ -1072,7 +1077,8 @@ select.plaque-field__control option {
   margin: 0;
   padding: var(--space-3);
   padding-bottom: calc(var(--space-3) + 0.25em);
-  overflow: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
   font-family:
     ui-monospace,
     SFMono-Regular,
@@ -1112,7 +1118,8 @@ select.plaque-field__control option {
   padding: var(--space-3) var(--space-2);
   border-top: none;
   border-left: 1px solid var(--panel-border);
-  overflow: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 .panel--terminal.panel--foot-rail .panel__foot > .tabs {
   flex-direction: column;
@@ -1270,7 +1277,8 @@ select.plaque-field__control option {
   --ch-code-fg: #e6edf3;
   margin: 0;
   padding: var(--space-3);
-  overflow: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
   font-family: var(--ch-mono);
   font-size: var(--font-size-sm);
   line-height: 1.55;
@@ -1788,6 +1796,7 @@ select.plaque-field__control option {
   --panel-border: rgba(255, 255, 255, 0.1);
   --panel-bar-bg: #1a1917;
   --vnc-aspect: 16 / 9;
+  --panel-title-color: rgba(255, 255, 255, 0.55);
   flex: 0 1 100%;
   width: 100%;
   height: auto;
@@ -1811,6 +1820,12 @@ select.plaque-field__control option {
 }
 .vnc-window__actions {
   margin-left: auto;
+}
+.vnc-window__title {
+  margin-inline-start: var(--space-3, 12px);
+  padding-inline-end: var(--space-2, 8px);
+  min-width: 0;
+  flex: 1 1 auto;
 }
 .vnc-window__status-label {
   margin-left: var(--space-1, 4px);
@@ -1902,7 +1917,9 @@ select.plaque-field__control option {
   text-align: center;
 }
 .har-table-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
   flex: 1;
 }
 .har-table {
@@ -2060,7 +2077,8 @@ select.plaque-field__control option {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   max-height: 180px;
-  overflow: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
   color: var(--color-text, #ccc);
 }
 .har-detail details {
