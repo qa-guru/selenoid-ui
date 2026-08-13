@@ -148,7 +148,16 @@ export default class Log extends Component<any, any> {
         const rows = Math.max(written, MIN_ROWS);
 
         this.term.resize(cols, rows);
-        this.termel.style.height = `${rows * this.cellHeightPx()}px`;
+
+        // xterm sizes `.xterm-screen` from its own cell metrics; rows * cellHeightPx()
+        // can disagree and leave empty space under the last line (border-box + padding).
+        const screen = this.term.element.querySelector(".xterm-screen") as HTMLElement | null;
+        const screenH =
+            (screen && parseFloat(screen.style.height)) || screen?.getBoundingClientRect().height || 0;
+        const contentH = screenH > 0 ? screenH : rows * this.cellHeightPx();
+        const cs = getComputedStyle(this.termel);
+        const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+        this.termel.style.height = `${contentH + pad}px`;
     };
 
     scheduleFitToContent() {

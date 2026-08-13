@@ -13,18 +13,18 @@ export const StyledLog = styled.div`
 
     &.session-peer {
         align-items: stretch;
-        flex: 1 0 auto;
-        min-height: var(--session-media-height);
+        flex: 0 0 auto;
+        min-height: 0;
         height: auto;
 
         .log-card {
-            flex: 1 0 auto;
-            min-height: var(--session-media-height);
+            flex: 0 0 auto;
+            min-height: 0;
             height: auto;
-            align-self: stretch;
+            align-self: start;
 
             .log-card__body {
-                flex: 1 1 auto;
+                flex: 0 0 auto;
                 min-height: 0;
                 height: auto;
                 display: flex;
@@ -46,7 +46,7 @@ export const StyledLog = styled.div`
             }
 
             .log-file-empty {
-                flex: 1 1 auto;
+                flex: 0 0 auto;
                 display: flex;
                 align-items: center;
                 justify-content: center;

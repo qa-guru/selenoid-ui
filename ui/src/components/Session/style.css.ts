@@ -83,17 +83,17 @@ export const StyledSession = styled.div`
         }
     }
 
-    /* Log floor = VNC height; grows down with content. VNC stays fixed. */
+    /* Log hugs written lines. VNC stays --session-media-height. */
     .session-log-slot {
         align-self: start;
-        min-height: var(--session-media-height);
+        min-height: 0;
         height: auto;
 
         > * {
-            flex: 1 0 auto;
+            flex: 0 0 auto;
             display: flex;
             flex-direction: column;
-            min-height: var(--session-media-height);
+            min-height: 0;
             height: auto;
             width: 100%;
         }
