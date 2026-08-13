@@ -35,7 +35,7 @@ cp "$DS/templates/header.html" "$UI_PUBLIC/templates/header.html"
 # Wiring guard: metrics adaptive must stay hooked in the synced header.js.
 # Prevents the CSS-without-observe drift that killed wrap on narrow viewports.
 HEADER_JS="$UI_PUBLIC/js/header.js"
-for needle in "header-metrics-wrap.js" "observeHeaderMetricsWrap" "getMount" "__designSystemRemountHeader"; do
+for needle in "header-metrics-wrap.js" "observeHeaderMetricsWrap" "getMount" "__designSystemRemountHeader" "data-keyboard-intent"; do
   if ! grep -qF "$needle" "$HEADER_JS"; then
     echo "sync-design-system-static: ERROR — $HEADER_JS missing required wiring: $needle" >&2
     exit 1
