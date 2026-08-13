@@ -31,9 +31,10 @@ function ensureToggleButton(sessionsLink: HTMLElement, testid: string, enabled: 
     if (!host) {
         return;
     }
-    let btn = host.querySelector(`[data-testid="${testid}"]`);
-    if (!(btn instanceof HTMLButtonElement)) {
-        btn = document.createElement("button");
+    const existing = host.querySelector(`[data-testid="${testid}"]`);
+    const btn =
+        existing instanceof HTMLButtonElement ? existing : document.createElement("button");
+    if (!(existing instanceof HTMLButtonElement)) {
         btn.type = "button";
         btn.className = "header-mock-toggle";
         btn.dataset.testid = testid;
