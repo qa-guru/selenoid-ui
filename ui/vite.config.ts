@@ -22,9 +22,31 @@ const LIVE_NAV_DENYLIST = [
     /^\/log/,
 ];
 
+function devSwNotHtml() {
+    return {
+        name: "dev-sw-not-html",
+        configureServer(server: { middlewares: { use: (fn: any) => void } }) {
+            server.middlewares.use((req: { url?: string }, res: any, next: () => void) => {
+                const path = (req.url || "").split("?")[0];
+                if (path !== "/sw.js") {
+                    next();
+                    return;
+                }
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+                res.setHeader("Cache-Control", "no-store");
+                res.end("/* no service worker in Vite dev */");
+            });
+        },
+    };
+}
+
 export default defineConfig({
     // Plugin types diverge when vitest nests a different vite major than the app.
     plugins: [
+        // Vite SPA fallback would otherwise serve index.html as /sw.js (text/html) —
+        // DevTools MIME warning and a stale SW can leave localhost as a blank page.
+        devSwNotHtml(),
         react(),
         // PWA baseline (canon: reference-app / stacks java-spring frontend-react):
         // emit manifest.webmanifest + sw.js next to the Vite `build/` shell.
