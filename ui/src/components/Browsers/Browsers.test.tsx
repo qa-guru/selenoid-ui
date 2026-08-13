@@ -28,7 +28,7 @@ describe("Browsers", () => {
         );
 
         expect(screen.getByTestId("browsers-panel")).toBeInTheDocument();
-        expect(screen.getByTestId("browsers-title")).toHaveTextContent("Browsers");
+        expect(screen.getByTestId("browsers-title")).toHaveTextContent("Browser usage");
 
         const rows = screen.getAllByTestId("browser-row");
         expect(rows!).toHaveLength(3);

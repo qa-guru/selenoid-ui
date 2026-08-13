@@ -21,7 +21,7 @@ const Browsers = ({ totalUsed, browsers }: any) => {
     return (
         <StyledBrowsers>
             <Panel
-                title="Browsers"
+                title="Browser usage"
                 testId="browsers-panel"
                 titleTestId="browsers-title"
                 className="browsers-panel"
