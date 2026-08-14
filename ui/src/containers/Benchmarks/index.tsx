@@ -80,7 +80,10 @@ function JenkinsJobLink({ url }: { url?: string }) {
         const path = new URL(url).pathname.replace(/\/+$/, "");
         const name = path.split("/").filter(Boolean).pop();
         if (name) {
-            label = name.replace("autotests-ai-multistack-tests-pipeline-java-", "");
+            label = name
+                .replace("autotests-ai-multistack-tests-pipeline-java-", "")
+                .replace("autotests-ai-multistack-tests-pipeline-python-", "python-")
+                .replace("autotests-ai-multistack-tests-pipeline-js-", "js-");
         }
     } catch {
         /* keep default */
@@ -98,6 +101,14 @@ function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
         "jenkins-java-wd-cold-1-p1-full-attachments",
         "jenkins-java-wd-warm-1-p1-none",
         "jenkins-java-wd-hot-1-p1-none",
+        "jenkins-python-wd-cold-1-p1-headless-none",
+        "jenkins-python-wd-cold-1-p1-full-attachments",
+        "jenkins-python-wd-warm-1-p1-none",
+        "jenkins-python-wd-hot-1-p1-none",
+        "jenkins-js-pw-cold-1-p1-headless-none",
+        "jenkins-js-pw-cold-1-p1-full-attachments",
+        "jenkins-js-pw-warm-1-p1-none",
+        "jenkins-js-pw-hot-1-p1-none",
     ];
     const byId = new Map(runs.map((r) => [r.id, r]));
     const rows = order.map((id) => byId.get(id)).filter((r): r is PerfRun => Boolean(r));
@@ -109,6 +120,7 @@ function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
             <table className="benchmarks__table" data-testid="benchmarks-jenkins">
                 <thead>
                     <tr>
+                        <th>language</th>
                         <th>pool</th>
                         <th>variant</th>
                         <th>status</th>
@@ -120,6 +132,7 @@ function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
                 <tbody>
                     {rows.map((run) => (
                         <tr key={run.id} data-status={run.status} data-run-id={run.id}>
+                            <td>{run.language}</td>
                             <td>{run.pool}</td>
                             <td>{run.note ?? run.id}</td>
                             <td>{run.status}</td>
@@ -604,7 +617,7 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
             <section className="benchmarks__section">
                 <h2>0. Jenkins login-test</h2>
                 <p className="benchmarks__hint">
-                    One Java Selenide login on{" "}
+                    One Java Selenide, Python Selenium, and JS Playwright login on{" "}
                     <a href="https://jenkins.qa.guru/" target="_blank" rel="noreferrer">
                         jenkins.qa.guru
                     </a>

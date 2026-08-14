@@ -99,6 +99,7 @@ describe("Benchmarks", () => {
                 {
                     ...fixture.runs[0],
                     id: "jenkins-java-wd-warm-1-p1-none",
+                    language: "java",
                     pool: "warm-pool",
                     jenkins_url:
                         "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/",
@@ -115,6 +116,7 @@ describe("Benchmarks", () => {
             "href",
             "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/"
         );
+        expect(within(table).getByText("java")).toBeInTheDocument();
     });
 
     it("exposes filter controls for shared axes", () => {
