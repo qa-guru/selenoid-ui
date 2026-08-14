@@ -8,6 +8,10 @@ export interface SelenoidMetricsProps extends Omit<HTMLAttributes<HTMLDivElement
     warmReady: number;
     /** Configured warm-pool size. */
     warmTotal: number;
+    /** Ready hot-pool slots (shown as `ready / total`). Missing data → `0 / 0`, slot stays visible. */
+    hotReady?: number;
+    /** Configured hot-pool size. */
+    hotTotal?: number;
     quotaUsed: number;
     quotaPending: number;
     quotaTotal: number;
@@ -15,5 +19,5 @@ export interface SelenoidMetricsProps extends Omit<HTMLAttributes<HTMLDivElement
     variant?: SelenoidMetricsVariant;
     'data-testid'?: string;
 }
-export declare function SelenoidMetrics({ usedPercent, queued, warmReady, warmTotal, quotaUsed, quotaPending, quotaTotal, variant, className, 'aria-label': ariaLabel, 'data-testid': dataTestId, ...rest }: SelenoidMetricsProps): import("react").JSX.Element;
+export declare function SelenoidMetrics({ usedPercent, queued, warmReady, warmTotal, hotReady, hotTotal, quotaUsed, quotaPending, quotaTotal, variant, className, 'aria-label': ariaLabel, 'data-testid': dataTestId, ...rest }: SelenoidMetricsProps): import("react").JSX.Element;
 //# sourceMappingURL=SelenoidMetrics.d.ts.map

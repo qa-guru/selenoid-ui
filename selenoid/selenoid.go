@@ -54,6 +54,8 @@ type State struct {
 	Pending   int      `json:"pending"`
 	WarmReady int      `json:"warmReady"`
 	WarmTotal int      `json:"warmTotal"`
+	HotReady  int      `json:"hotReady"`
+	HotTotal  int      `json:"hotTotal"`
 	Browsers  Browsers `json:"browsers"`
 	Videos    Videos   `json:"videos"`
 }

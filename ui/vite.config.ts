@@ -177,6 +177,8 @@ export default defineConfig({
     },
     optimizeDeps: {
         include: ["@novnc/novnc/lib/rfb.js"],
+        // file: vendor — pick up sync-design-system-static.sh dist without a stale prebundle
+        exclude: ["@zero-design-system/react"],
         esbuildOptions: {
             loader: {
                 ".js": "jsx",

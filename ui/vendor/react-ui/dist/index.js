@@ -265,6 +265,8 @@ function SelenoidMetrics({
   queued,
   warmReady,
   warmTotal,
+  hotReady = 0,
+  hotTotal = 0,
   quotaUsed,
   quotaPending,
   quotaTotal,
@@ -302,6 +304,15 @@ function SelenoidMetrics({
             warmReady,
             /* @__PURE__ */ jsx7("span", { className: "selenoid-metrics__quota-sep", children: " / " }),
             warmTotal
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx7("span", { className: "plaque-divider", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsxs4("div", { className: "selenoid-metrics__item", "data-testid": "selenoid-metrics-hot", children: [
+          /* @__PURE__ */ jsx7("span", { className: "selenoid-metrics__label", children: "Hot" }),
+          /* @__PURE__ */ jsxs4("span", { className: "selenoid-metrics__value", children: [
+            hotReady,
+            /* @__PURE__ */ jsx7("span", { className: "selenoid-metrics__quota-sep", children: " / " }),
+            hotTotal
           ] })
         ] }),
         /* @__PURE__ */ jsx7("span", { className: "plaque-divider", "aria-hidden": "true" }),

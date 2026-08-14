@@ -68,6 +68,9 @@ describe("Viewport", () => {
         expect(screen.getByTestId("sse-status-badge")).toHaveClass("status-tile--connected");
         expect(screen.getAllByText("Connected").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByTestId("selenoid-metrics")).toBeInTheDocument();
+        const hot = screen.getByTestId("selenoid-metrics-hot");
+        expect(hot).toHaveTextContent("Hot");
+        expect(hot.querySelector(".selenoid-metrics__value")?.textContent).toBe("0 / 0");
     });
 
     it("portals the filter into the header search slot and filters sessions", async () => {

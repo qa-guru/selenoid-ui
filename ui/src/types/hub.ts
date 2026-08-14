@@ -51,6 +51,10 @@ export type HubState = {
     used?: number;
     queued?: number;
     pending?: number;
+    warmReady?: number;
+    warmTotal?: number;
+    hotReady?: number;
+    hotTotal?: number;
     [key: string]: unknown;
 };
 

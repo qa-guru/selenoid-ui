@@ -1676,7 +1676,8 @@ select.plaque-field__control option {
 .selenoid-metrics__item[data-testid=selenoid-metrics-queued] {
   min-width: 3.25rem;
 }
-.selenoid-metrics__item[data-testid=selenoid-metrics-warm] {
+.selenoid-metrics__item[data-testid=selenoid-metrics-warm],
+.selenoid-metrics__item[data-testid=selenoid-metrics-hot] {
   min-width: 4rem;
 }
 .selenoid-metrics__item[data-testid=selenoid-metrics-quota] {

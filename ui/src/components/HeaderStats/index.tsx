@@ -31,7 +31,7 @@ function usedPercent(total: any, used: any, pending: any) {
 
 /**
  * @param {object} props
- * @param {{ total?: number, used?: number, pending?: number, queued?: number, warmReady?: number, warmTotal?: number }} props.state
+ * @param {{ total?: number, used?: number, pending?: number, queued?: number, warmReady?: number, warmTotal?: number, hotReady?: number, hotTotal?: number }} props.state
  * @param {string} props.sseStatus
  * @param {string} props.selenoidStatus
  * @param {string} props.version
@@ -47,6 +47,8 @@ const HeaderStats = ({ state, sseStatus, selenoidStatus, version, statusTitle }:
     const queued = state.queued ?? 0;
     const warmReady = state.warmReady ?? 0;
     const warmTotal = state.warmTotal ?? 0;
+    const hotReady = state.hotReady ?? 0;
+    const hotTotal = state.hotTotal ?? 0;
 
     return (
         <div className="selenoid-header-group" data-testid="header-live-stats">
@@ -78,6 +80,8 @@ const HeaderStats = ({ state, sseStatus, selenoidStatus, version, statusTitle }:
                 queued={queued}
                 warmReady={warmReady}
                 warmTotal={warmTotal}
+                hotReady={hotReady}
+                hotTotal={hotTotal}
                 quotaUsed={used}
                 quotaPending={pending}
                 quotaTotal={total}
