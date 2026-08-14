@@ -107,12 +107,16 @@ export const StyledBenchmarks = styled.div`
         color: var(--color-text-muted, #888);
     }
 
-    .benchmarks__har a {
+    .benchmarks__har a,
+    .benchmarks__table a,
+    .benchmarks__hint a {
         color: var(--color-success, #59a781);
         text-decoration: none;
     }
 
-    .benchmarks__har a:hover {
+    .benchmarks__har a:hover,
+    .benchmarks__table a:hover,
+    .benchmarks__hint a:hover {
         text-decoration: underline;
     }
 

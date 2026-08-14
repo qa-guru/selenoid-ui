@@ -92,6 +92,31 @@ describe("Benchmarks", () => {
         expect(section).not.toHaveTextContent("withContentText");
     });
 
+    it("renders Jenkins login-test rows with job links", () => {
+        const withJobs: PerfBenchmarkDoc = {
+            ...fixture,
+            runs: [
+                {
+                    ...fixture.runs[0],
+                    id: "jenkins-java-wd-warm-1-p1-none",
+                    pool: "warm-pool",
+                    jenkins_url:
+                        "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/",
+                    note: "hub-attach",
+                    wall_time_s: 4.216,
+                },
+            ],
+        };
+        render(<Benchmarks data={withJobs} />);
+        const table = screen.getByTestId("benchmarks-jenkins");
+        expect(table.querySelector('[data-run-id="jenkins-java-wd-warm-1-p1-none"]')).not.toBeNull();
+        const link = within(table).getByRole("link", { name: "warm-pool" });
+        expect(link).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/"
+        );
+    });
+
     it("exposes filter controls for shared axes", () => {
         render(<Benchmarks data={fixture} />);
 

@@ -71,6 +71,71 @@ const ARTIFACT_PRESETS: { key: string; label: string; match: (r: PerfRun) => boo
     },
 ];
 
+function JenkinsJobLink({ url }: { url?: string }) {
+    if (!url) {
+        return "—";
+    }
+    let label = "job";
+    try {
+        const path = new URL(url).pathname.replace(/\/+$/, "");
+        const name = path.split("/").filter(Boolean).pop();
+        if (name) {
+            label = name.replace("autotests-ai-multistack-tests-pipeline-java-", "");
+        }
+    } catch {
+        /* keep default */
+    }
+    return (
+        <a href={url} target="_blank" rel="noreferrer">
+            {label}
+        </a>
+    );
+}
+
+function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
+    const order = [
+        "jenkins-java-wd-cold-1-p1-headless-none",
+        "jenkins-java-wd-cold-1-p1-full-attachments",
+        "jenkins-java-wd-warm-1-p1-none",
+        "jenkins-java-wd-hot-1-p1-none",
+    ];
+    const byId = new Map(runs.map((r) => [r.id, r]));
+    const rows = order.map((id) => byId.get(id)).filter((r): r is PerfRun => Boolean(r));
+    if (!rows.length) {
+        return null;
+    }
+    return (
+        <div className="benchmarks__scroll">
+            <table className="benchmarks__table" data-testid="benchmarks-jenkins">
+                <thead>
+                    <tr>
+                        <th>pool</th>
+                        <th>variant</th>
+                        <th>status</th>
+                        <th>wall_s</th>
+                        <th>artifacts</th>
+                        <th>jenkins</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((run) => (
+                        <tr key={run.id} data-status={run.status} data-run-id={run.id}>
+                            <td>{run.pool}</td>
+                            <td>{run.note ?? run.id}</td>
+                            <td>{run.status}</td>
+                            <td>{fmt(run.wall_time_s)}</td>
+                            <td>{artifactsKey(run)}</td>
+                            <td>
+                                <JenkinsJobLink url={run.jenkins_url} />
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
 function FilterSelect({
     label,
     name,
@@ -132,6 +197,7 @@ function CatalogTable({ runs }: { runs: PerfRun[] }) {
                         <th>log_kb</th>
                         <th>har_kb</th>
                         <th>total_kb</th>
+                        <th>jenkins</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -156,6 +222,9 @@ function CatalogTable({ runs }: { runs: PerfRun[] }) {
                             <td>{fmt(run.log_kb)}</td>
                             <td>{fmt(run.har_kb)}</td>
                             <td>{fmt(run.artifacts_total_kb)}</td>
+                            <td>
+                                <JenkinsJobLink url={run.jenkins_url} />
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -531,6 +600,18 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     onChange={set("artifacts")}
                 />
             </div>
+
+            <section className="benchmarks__section">
+                <h2>0. Jenkins login-test</h2>
+                <p className="benchmarks__hint">
+                    One Java Selenide login on{" "}
+                    <a href="https://jenkins.qa.guru/" target="_blank" rel="noreferrer">
+                        jenkins.qa.guru
+                    </a>
+                    : cold headless, cold full-attachments, warm hub-attach, hot stub.
+                </p>
+                <JenkinsLoginTable runs={runs} />
+            </section>
 
             <section className="benchmarks__section">
                 <h2>1. Catalog</h2>

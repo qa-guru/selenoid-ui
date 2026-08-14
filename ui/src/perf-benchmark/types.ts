@@ -1,7 +1,7 @@
 export type Language = "java" | "go" | "python" | "js" | "kotlin";
 export type Protocol = "webdriver" | "playwright";
 export type ImageFlavor = "warm" | "min";
-export type Pool = "cold" | "warm-pool";
+export type Pool = "cold" | "warm-pool" | "hot-pool";
 export type SuiteSize = "1" | "few" | "many";
 export type HarMode = "off" | "meta" | "bodies";
 export type RunStatus = "ok" | "pending" | "failed";
@@ -56,6 +56,7 @@ export type PerfRun = {
     passed: number | null;
     failed: number | null;
     note?: string;
+    jenkins_url?: string;
 };
 
 export type PerfBenchmarkDoc = {
