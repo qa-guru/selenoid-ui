@@ -129,12 +129,6 @@ const HAR_CONTENT_OPTIONS = [
     },
 ];
 
-/** Aerokube emulator skins — selenoid:options.skin (hub → SKIN env). */
-const ANDROID_SKIN_OPTIONS = [
-    { value: "QVGA", label: "QVGA (240×320)" },
-    { value: "HVGA", label: "HVGA (320×480)" },
-];
-
 /** Android hub sessionTimeout — anti-flake default (cold start still bounded by hub service timeout). */
 const ANDROID_DEFAULT_SESSION_TIMEOUT = "2m";
 
@@ -144,7 +138,6 @@ const DEFAULT_ANDROID_OPTS: Record<string, any> = {
     noReset: "false",
     autoGrantPermissions: "true",
     orientation: "PORTRAIT",
-    skin: "QVGA",
 };
 
 /**
@@ -308,20 +301,15 @@ const buildSelenoidOptions = ({
 /** Coerce "true"/"false" strings or booleans → boolean. */
 const asBool = (value: any) => value === true || value === "true";
 
-/** Minimal selenoid:options for a mobile (Android) session — no proxy/har/log/env. */
-const buildAndroidSelenoidOptions = ({ name, sessionTimeout, enableVnc, enableVideo, skin }: any) => {
-    const opts: Record<string, any> = {
-        enableVNC: asBool(enableVnc),
-        enableVideo: asBool(enableVideo),
-        name,
-        sessionTimeout,
-    };
-    const skinValue = String(skin || "").trim();
-    if (skinValue) {
-        opts.skin = skinValue;
-    }
-    return opts;
-};
+/** Minimal selenoid:options for a mobile (Android) session — no proxy/har/log/env/skin.
+ * Skin is the image default (qaguru/android SKIN=1080x1920). Sending QVGA/HVGA
+ * overrides that via hub SKIN env and crops the emulator window. */
+const buildAndroidSelenoidOptions = ({ name, sessionTimeout, enableVnc, enableVideo }: any) => ({
+    enableVNC: asBool(enableVnc),
+    enableVideo: asBool(enableVideo),
+    name,
+    sessionTimeout,
+});
 
 /**
  * W3C alwaysMatch for Selenoid Android (appium:* caps). Image entrypoint sets
@@ -534,7 +522,6 @@ const DEFAULT_SESSION_OPTS: Record<string, any> = {
     androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
     androidAutoGrantPermissions: DEFAULT_ANDROID_OPTS.autoGrantPermissions,
     androidOrientation: DEFAULT_ANDROID_OPTS.orientation,
-    androidSkin: DEFAULT_ANDROID_OPTS.skin,
 };
 
 /** Tab order in the terminal language rail (Object.keys order is not the UI SSOT). */
@@ -645,7 +632,6 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             noReset: String(sessionOpts.androidNoReset),
             autoGrantPermissions: String(sessionOpts.androidAutoGrantPermissions),
             orientation: sessionOpts.androidOrientation,
-            skin: sessionOpts.androidSkin || DEFAULT_ANDROID_OPTS.skin,
         });
     }
 
@@ -702,7 +688,6 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
                 `- app: **${payload.app || "—"}**`,
                 `- noReset / autoGrantPermissions: **${payload.noReset}** / **${payload.autoGrantPermissions}**`,
                 `- orientation: **${payload.orientation}**`,
-                `- skin: **${payload.skin}**`,
             ])
             .join("\n");
     }
@@ -1467,7 +1452,6 @@ const androidCode = (version = "", origin = "", session: any = {}, android: any 
         noReset = DEFAULT_ANDROID_OPTS.noReset,
         autoGrantPermissions = DEFAULT_ANDROID_OPTS.autoGrantPermissions,
         orientation = DEFAULT_ANDROID_OPTS.orientation,
-        skin = DEFAULT_ANDROID_OPTS.skin,
     } = android;
 
     const selenoidOptions = buildAndroidSelenoidOptions({
@@ -1475,7 +1459,6 @@ const androidCode = (version = "", origin = "", session: any = {}, android: any 
         sessionTimeout,
         enableVnc,
         enableVideo,
-        skin,
     });
     const alwaysMatch = buildAndroidCapabilities({
         version,
@@ -1587,7 +1570,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         DEFAULT_SESSION_OPTS.androidAutoGrantPermissions
     );
     const [androidOrientation, setAndroidOrientation] = useState(DEFAULT_SESSION_OPTS.androidOrientation);
-    const [androidSkin, setAndroidSkin] = useState(DEFAULT_SESSION_OPTS.androidSkin);
     const [vectorDraft, setVectorDraft] = useState<any>(null);
     const [vectorMiss, setVectorMiss] = useState(false);
     const registryRef = useRef<any>(null);
@@ -1648,7 +1630,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         noReset: androidNoReset,
         autoGrantPermissions: androidAutoGrantPermissions,
         orientation: androidOrientation,
-        skin: androidSkin,
     };
     const sessionOpts = {
         authUser,
@@ -1675,7 +1656,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         androidNoReset: androidNoReset === "true",
         androidAutoGrantPermissions: androidAutoGrantPermissions === "true",
         androidOrientation,
-        androidSkin,
     };
     const capsSnap = {
         authUser,
@@ -1703,7 +1683,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         androidNoReset,
         androidAutoGrantPermissions,
         androidOrientation,
-        androidSkin,
     };
     const vectorId = fingerprint(capsSnap);
     const displayVector = vectorDraft ?? vectorId;
@@ -1794,7 +1773,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         setAndroidNoReset(next.androidNoReset || DEFAULT_ANDROID_OPTS.noReset);
         setAndroidAutoGrantPermissions(next.androidAutoGrantPermissions || DEFAULT_ANDROID_OPTS.autoGrantPermissions);
         setAndroidOrientation(next.androidOrientation || DEFAULT_ANDROID_OPTS.orientation);
-        setAndroidSkin(next.androidSkin || DEFAULT_ANDROID_OPTS.skin);
         if (next.browserValue) {
             const found = selectableBrowsers.find((item: any) => item.value === next.browserValue);
             onBrowserChange(found || {});
@@ -1834,7 +1812,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
             androidAutoGrantPermissions: DEFAULT_ANDROID_OPTS.autoGrantPermissions,
             androidOrientation: DEFAULT_ANDROID_OPTS.orientation,
-            androidSkin: DEFAULT_ANDROID_OPTS.skin,
         });
     };
 
@@ -2070,11 +2047,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         setAndroidOrientation={(v: any) => {
                             touchOptions();
                             setAndroidOrientation(v);
-                        }}
-                        androidSkin={androidSkin}
-                        setAndroidSkin={(v: any) => {
-                            touchOptions();
-                            setAndroidSkin(v);
                         }}
                         enableVnc={enableVnc}
                         setEnableVnc={(v: any) => {
@@ -2328,8 +2300,6 @@ const Launch = ({
     setAndroidAutoGrantPermissions,
     androidOrientation,
     setAndroidOrientation,
-    androidSkin,
-    setAndroidSkin,
     enableVnc,
     setEnableVnc,
     enableVideo,
@@ -2391,7 +2361,6 @@ const Launch = ({
                 sessionTimeout,
                 enableVnc: vnc,
                 enableVideo: video,
-                skin: androidSkin,
             });
             const androidAlwaysMatch = buildAndroidCapabilities({
                 version,
@@ -2579,7 +2548,6 @@ const Launch = ({
         androidNoReset,
         androidAutoGrantPermissions,
         androidOrientation,
-        androidSkin,
         enableVnc,
         enableVideo,
         enableHar,
@@ -3408,16 +3376,6 @@ const Launch = ({
                                 options={ORIENTATION_OPTIONS}
                                 onChange={setAndroidOrientation}
                                 data-testid="caps-android-orientation"
-                            />
-                        </PlaqueFieldGrid>
-                        <PlaqueFieldGrid layout="solo" aria-label="Skin" data-testid="capabilities-android-skin">
-                            <PlaqueSelect
-                                label="skin"
-                                paramId="skin"
-                                value={androidSkin}
-                                options={ANDROID_SKIN_OPTIONS}
-                                onChange={setAndroidSkin}
-                                data-testid="caps-android-skin"
                             />
                         </PlaqueFieldGrid>
                     </div>

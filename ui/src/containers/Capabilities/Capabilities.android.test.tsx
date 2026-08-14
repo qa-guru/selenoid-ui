@@ -63,7 +63,7 @@ describe("Capabilities Android device panel", () => {
         expect(screen.getByTestId("caps-android-no-reset")).toHaveAttribute("data-param-id", "noReset");
         expect(screen.getByTestId("caps-android-auto-grant")).toHaveAttribute("data-param-id", "autoGrantPermissions");
         expect(screen.getByTestId("caps-android-orientation")).toHaveAttribute("data-param-id", "orientation");
-        expect(screen.getByTestId("caps-android-skin")).toHaveAttribute("data-param-id", "skin");
+        expect(screen.queryByTestId("caps-android-skin")).toBeNull();
 
         expect(within(panel!).getByTestId("capabilities-caps-auth-user")).toHaveValue("test_user");
         expect(within(panel!).getByTestId("capabilities-caps-auth-pass")).toHaveValue("test_pass");
@@ -84,7 +84,7 @@ describe("Capabilities Android device panel", () => {
         expect(screen.getByRole("combobox", { name: "sessionTimeout" })).toHaveValue("2m");
     });
 
-    it("shows android 11.0 chip from catalog and keeps 2m + QVGA defaults", async () => {
+    it("shows android 11.0 chip from catalog and keeps 2m sessionTimeout default", async () => {
         const user = userEvent.setup();
         renderCapabilities();
 
@@ -93,11 +93,11 @@ describe("Capabilities Android device panel", () => {
         await user.click(screen.getByRole("button", { name: "android: 11.0" }));
 
         expect(screen.getByRole("combobox", { name: "sessionTimeout" })).toHaveValue("2m");
-        expect(screen.getByRole("combobox", { name: "skin" })).toHaveValue("QVGA");
+        expect(screen.queryByRole("combobox", { name: "skin" })).toBeNull();
 
         const panel = screen.getByTestId("capabilities-terminal-panel");
         expect(panel!.textContent).toContain('"browserVersion": "11.0"');
-        expect(panel!.textContent).toContain('"skin": "QVGA"');
+        expect(panel!.textContent).not.toContain('"skin"');
     });
 
     it("puts appium:* caps in alwaysMatch (no proxy, no WebDriver desiredCapabilities set)", async () => {
@@ -114,7 +114,6 @@ describe("Capabilities Android device panel", () => {
         await user.type(screen.getByTestId("caps-android-app"), "https://example.org/app-debug.apk");
         await user.click(segButton("caps-android-no-reset", "true")!);
         await user.selectOptions(screen.getByRole("combobox", { name: "orientation" }), "LANDSCAPE");
-        await user.selectOptions(screen.getByRole("combobox", { name: "skin" }), "HVGA");
 
         await user.click(screen.getByTestId("capabilities-create-session"));
 
@@ -135,7 +134,7 @@ describe("Capabilities Android device panel", () => {
         expect(am["selenoid:options"].enableVNC).toBe(true);
         expect(am["selenoid:options"].name).toBe("Manual session");
         expect(am["selenoid:options"].sessionTimeout).toBe("2m");
-        expect(am["selenoid:options"].skin).toBe("HVGA");
+        expect(am["selenoid:options"].skin).toBeUndefined();
 
         // Android is not a WebDriver-proxy path.
         expect(am.proxy).toBeUndefined();
@@ -153,7 +152,7 @@ describe("Capabilities Android device panel", () => {
         expect(panel!.textContent).toContain('"browserName": "android"');
         expect(panel!.textContent).toContain('"platformName": "Android"');
         expect(panel!.textContent).toContain('"appium:orientation": "PORTRAIT"');
-        expect(panel!.textContent).toContain('"skin": "QVGA"');
+        expect(panel!.textContent).not.toContain('"skin"');
         expect(panel!.textContent).toContain('"appium:noReset": false');
     });
 
