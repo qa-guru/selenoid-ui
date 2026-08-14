@@ -34,6 +34,69 @@ export async function hubSessionErrorMessage(response: Response): Promise<string
     }
 }
 
+/** Manual Create Session wait for POST /wd/hub/session (Android + WD). */
+export const CREATE_SESSION_TIMEOUT_MS = 300000; // 5m
+
+export function scheduleCreateSessionAbort(
+    controller: AbortController,
+    timeoutMs: number = CREATE_SESSION_TIMEOUT_MS
+): ReturnType<typeof setTimeout> {
+    return setTimeout(() => {
+        const minutes = Math.max(1, Math.round(timeoutMs / 60000));
+        controller.abort(
+            new DOMException(
+                `Create Session timed out after ${minutes}m waiting for POST /wd/hub/session`,
+                "TimeoutError"
+            )
+        );
+    }, timeoutMs);
+}
+
+function createSessionTimeoutPlaque(timeoutMs: number): string {
+    const minutes = Math.max(1, Math.round(timeoutMs / 60000));
+    return (
+        `Create Session timed out after ${minutes}m waiting for POST /wd/hub/session. ` +
+        `Check the container logs or Selenoid -session-attempt-timeout.`
+    );
+}
+
+function errorName(err: unknown): string {
+    return err && typeof err === "object" && "name" in err ? String((err as { name: unknown }).name) : "";
+}
+
+function errorMessage(err: unknown): string {
+    if (err instanceof Error) {
+        return err.message;
+    }
+    if (typeof err === "string") {
+        return err;
+    }
+    return err == null ? "" : String(err);
+}
+
+function isCreateSessionAbort(err: unknown): boolean {
+    const name = errorName(err);
+    if (name === "AbortError" || name === "TimeoutError") {
+        return true;
+    }
+    return /aborted without reason|The operation was aborted|The user aborted a request/i.test(errorMessage(err));
+}
+
+/** fetch() reject (timeout / network) → Create Session plaque. Never nameless AbortError. */
+export function createSessionCatchMessage(
+    err: unknown,
+    { timeoutMs = CREATE_SESSION_TIMEOUT_MS }: { timeoutMs?: number } = {}
+): string {
+    if (isCreateSessionAbort(err)) {
+        return createSessionTimeoutPlaque(timeoutMs);
+    }
+    const message = errorMessage(err);
+    if (!message || /aborted without reason/i.test(message)) {
+        return createSessionTimeoutPlaque(timeoutMs);
+    }
+    return `Create Session failed: ${message}`;
+}
+
 export type ScreenSize = { width: number; height: number };
 
 /** Parse `1920x1080` / `1920x1080x24` → outer window size. */

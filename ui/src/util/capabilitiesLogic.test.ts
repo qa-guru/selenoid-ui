@@ -1,5 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { browserWindowOptions, hubSessionErrorMessage, parseScreenSize, pickDefaultWebdriverBrowser, resizeSessionWindow, sessionIdFrom } from "./capabilitiesLogic";
+import {
+    browserWindowOptions,
+    CREATE_SESSION_TIMEOUT_MS,
+    createSessionCatchMessage,
+    hubSessionErrorMessage,
+    parseScreenSize,
+    pickDefaultWebdriverBrowser,
+    resizeSessionWindow,
+    scheduleCreateSessionAbort,
+    sessionIdFrom,
+} from "./capabilitiesLogic";
 
 describe("capabilitiesLogic", () => {
     it("handles old selenium protocol versions", () => {
@@ -121,6 +131,38 @@ describe("capabilitiesLogic", () => {
         await expect(hubSessionErrorMessage(response)).resolves.toBe(
             "Create Session failed: HTTP 500 — Chrome instance exited"
         );
+    });
+
+    it("maps AbortError / TimeoutError to a 5m Create Session timeout, never aborted-without-reason", () => {
+        const nameless = new DOMException("signal is aborted without reason", "AbortError");
+        const timedOut = new DOMException("Create Session timed out after 5m waiting for POST /wd/hub/session", "TimeoutError");
+        for (const err of [nameless, timedOut]) {
+            const message = createSessionCatchMessage(err, { timeoutMs: CREATE_SESSION_TIMEOUT_MS });
+            expect(message).toContain("timed out after 5m waiting for POST /wd/hub/session");
+            expect(message).toMatch(/container logs|-session-attempt-timeout/);
+            expect(message).not.toMatch(/aborted without reason/i);
+            expect(message).not.toMatch(/AbortError/);
+        }
+    });
+
+    it("maps network TypeError to Create Session failed, not AbortError", () => {
+        expect(createSessionCatchMessage(new TypeError("Failed to fetch"))).toBe(
+            "Create Session failed: Failed to fetch"
+        );
+    });
+
+    it("aborts Create Session with TimeoutError reason after the wait", () => {
+        vi.useFakeTimers();
+        try {
+            const controller = new AbortController();
+            scheduleCreateSessionAbort(controller, CREATE_SESSION_TIMEOUT_MS);
+            expect(controller.signal.aborted).toBe(false);
+            vi.advanceTimersByTime(CREATE_SESSION_TIMEOUT_MS);
+            expect(controller.signal.aborted).toBe(true);
+            expect((controller.signal.reason as { name?: string }).name).toBe("TimeoutError");
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it("pickDefaultWebdriverBrowser prefers chrome 149.0", () => {

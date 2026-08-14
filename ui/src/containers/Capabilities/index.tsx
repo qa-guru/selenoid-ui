@@ -16,6 +16,9 @@ import {
     resizeSessionWindow,
     sessionIdFrom,
     hubSessionErrorMessage,
+    createSessionCatchMessage,
+    CREATE_SESSION_TIMEOUT_MS,
+    scheduleCreateSessionAbort,
 } from "../../util/capabilitiesLogic";
 import { waitForLiveSession } from "../../util/waitForLiveSession";
 import { sameOriginURL } from "../../util/uiFeed";
@@ -2371,7 +2374,7 @@ const Launch = ({
                 selenoidOptions: androidSelenoidOptions,
             });
             const androidController = new AbortController();
-            const androidTimeout = setTimeout(() => androidController.abort(), 300000);
+            const androidTimeout = scheduleCreateSessionAbort(androidController);
             try {
                 await primeHubAuth(wdAuthToken);
                 const response = await fetch(
@@ -2400,8 +2403,9 @@ const Launch = ({
                     onLoading(false);
                 }
             } catch (err) {
-                console.error("Can't start Android session manually", err);
-                onError(err instanceof Error ? err.message : String(err));
+                const message = createSessionCatchMessage(err, { timeoutMs: CREATE_SESSION_TIMEOUT_MS });
+                console.error(message, err);
+                onError(message);
                 onLoading(false);
             } finally {
                 clearTimeout(androidTimeout);
@@ -2473,7 +2477,7 @@ const Launch = ({
         }
 
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 300000);
+        const timeout = scheduleCreateSessionAbort(controller);
 
         try {
             await primeHubAuth(wdAuthToken);
@@ -2533,8 +2537,9 @@ const Launch = ({
                 onLoading(false);
             }
         } catch (err) {
-            console.error("Can't start session manually", err);
-            onError(err instanceof Error ? err.message : String(err));
+            const message = createSessionCatchMessage(err, { timeoutMs: CREATE_SESSION_TIMEOUT_MS });
+            console.error(message, err);
+            onError(message);
             onLoading(false);
         } finally {
             clearTimeout(timeout);

@@ -1,8 +1,9 @@
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
+import { CREATE_SESSION_TIMEOUT_MS } from "../../util/capabilitiesLogic";
 
 const BROWSERS = {
     chrome: { "149.0": {} },
@@ -198,5 +199,86 @@ describe("Capabilities iOS placeholder", () => {
         expect(screen.queryByTestId("capabilities-remote-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-android-panel")).toBeNull();
         expect(screen.queryByTestId("capabilities-playwright-panel")).toBeNull();
+    });
+});
+
+describe("Capabilities Android Create Session errors", () => {
+    it("shows a 5m timeout on the Create Session plaque after abort, never aborted-without-reason", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation((input: any, init?: RequestInit) => {
+            if (String(input).includes("/wd/hub/status")) {
+                return Promise.resolve({ ok: true, status: 200, json: async () => ({}) } as Response);
+            }
+            return new Promise((_resolve, reject) => {
+                const signal = init?.signal;
+                if (!signal) {
+                    return;
+                }
+                const onAbort = () => {
+                    reject(signal.reason ?? new DOMException("signal is aborted without reason", "AbortError"));
+                };
+                if (signal.aborted) {
+                    onAbort();
+                    return;
+                }
+                signal.addEventListener("abort", onAbort);
+            });
+        });
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+        try {
+            renderCapabilities();
+            await selectAndroid(user);
+            vi.useFakeTimers();
+            fireEvent.click(screen.getByTestId("capabilities-create-session"));
+            await act(async () => {
+                await vi.advanceTimersByTimeAsync(CREATE_SESSION_TIMEOUT_MS);
+            });
+
+            const create = screen.getByTestId("capabilities-create-session");
+            expect(create).toHaveClass("error-true");
+            const title = create.getAttribute("title") || "";
+            expect(title).toContain("timed out after 5m waiting for POST /wd/hub/session");
+            expect(title).toMatch(/container logs|-session-attempt-timeout/);
+            expect(title).not.toMatch(/aborted without reason/i);
+            expect(title).not.toMatch(/AbortError/);
+            expect(title).not.toMatch(/Can't start Android session manually/);
+            expect(consoleSpy).toHaveBeenCalledWith(title, expect.anything());
+        } finally {
+            vi.useRealTimers();
+            consoleSpy.mockRestore();
+            fetchMock.mockRestore();
+        }
+    });
+
+    it("shows hub HTTP 500 body on the Create Session plaque", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation((input: any) => {
+            if (String(input).includes("/wd/hub/status")) {
+                return Promise.resolve({ ok: true, status: 200, json: async () => ({}) } as Response);
+            }
+            return Promise.resolve({
+                ok: false,
+                status: 500,
+                json: async () => ({
+                    value: { error: "session not created", message: "Android container died" },
+                }),
+            } as Response);
+        });
+
+        try {
+            renderCapabilities();
+            await selectAndroid(user);
+            await user.click(screen.getByTestId("capabilities-create-session"));
+
+            await waitFor(() => {
+                expect(screen.getByTestId("capabilities-create-session")).toHaveAttribute(
+                    "title",
+                    "Create Session failed: HTTP 500 — Android container died"
+                );
+            });
+        } finally {
+            fetchMock.mockRestore();
+        }
     });
 });
