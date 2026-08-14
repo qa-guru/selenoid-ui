@@ -46,4 +46,18 @@ describe("archiveUrlState", () => {
         });
         expect(next.toString()).toBe("sort=name&order=asc&page=1");
     });
+
+    it("does not mutate the original URLSearchParams", () => {
+        const current = new URLSearchParams("sort=duration");
+        const next = buildArchiveSearchParams(current, { sort: "name" });
+        expect(current.get("sort")).toBe("duration");
+        expect(next.get("sort")).toBe("name");
+    });
+
+    it("accepts a query string as current", () => {
+        const next = buildArchiveSearchParams("sort=duration&keep=1", { sort: "name", page: 1 });
+        expect(next.get("sort")).toBe("name");
+        expect(next.get("keep")).toBe("1");
+        expect(next.get("page")).toBe("1");
+    });
 });

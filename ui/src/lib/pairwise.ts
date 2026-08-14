@@ -164,5 +164,5 @@ export function uncoveredPairs<F extends FactorMap>(
             }
         }
     }
-    return missing.sort();
+    return missing.sort((a, b) => a.localeCompare(b));
 }
