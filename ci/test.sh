@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export GOTOOLCHAIN=go1.26.5+auto
+export GOTOOLCHAIN=go1.26.6+auto
 export GO111MODULE="on"
 
 test -f ui/package.json
@@ -22,4 +22,4 @@ export PATH="$(go env GOPATH)/bin:$PATH"
 go generate github.com/qa-guru/selenoid-ui
 go test -race -v -coverprofile=coverage.txt -covermode=atomic github.com/qa-guru/selenoid-ui github.com/qa-guru/selenoid-ui/selenoid
 
-GOTOOLCHAIN=go1.26.5 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...
+GOTOOLCHAIN=go1.26.6 go run golang.org/x/vuln/cmd/govulncheck@v1.5.0 ./...

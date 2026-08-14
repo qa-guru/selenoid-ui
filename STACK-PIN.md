@@ -10,8 +10,8 @@
 | Stack semver    | hub/cm **v3.0.x**; UI cut **v3.0.23** (latest tag; prod pin — deploy-чат)      |
 | Docker API      | TBD (paired с hub)                                                             |
 | Docker Engine   | TBD (paired с hub)                                                             |
-| Go              | 1.26.5                                                                         |
-| Go (примечание) | Факт `go.mod` + `toolchain go1.26.5`                                           |
+| Go              | 1.26.6                                                                         |
+| Go (примечание) | Факт `go.mod` + `toolchain go1.26.6`                                           |
 | React           | 19                                                                             |
 | Router          | react-router-dom 7                                                             |
 | UI              | Vite 6                                                                         |

@@ -13,6 +13,7 @@
 | **Create Session errors** | Timeout 5m и HTTP body хаба на плашке. Нет `AbortError: signal is aborted without reason` |
 | **Session layout** | VNC заполняет колонку; лог и HAR скроллятся отдельно; gutter между VNC и логами |
 | **Live / mock** | Заголовок Sessions и empty-state, `?mock=1` chip, xterm Canvas2D warning |
+| **Go** | toolchain **1.26.6** + `golang.org/x/net` v0.55.0 — govulncheck (stdlib + idna) |
 
 ## Обновление
 

@@ -1,6 +1,6 @@
 == Contributing & Development
 
-WARNING: **Deprecated AsciiDoc.** Сборка и запуск — в корневом link:../README.md[README.md] (Go **1.26.5**, `qaguru/*` images).
+WARNING: **Deprecated AsciiDoc.** Сборка и запуск — в корневом link:../README.md[README.md] (Go **1.26.6**, `qaguru/*` images).
 
 1) Ensure you have https://github.com/yarnpkg/yarn[yarn] and https://github.com/rakyll/statik[statik] installed.
 
@@ -13,7 +13,7 @@ $ yarn --cwd ui build
 $ go generate github.com/qa-guru/selenoid-ui
 ----
 
-3) Build (requires Golang **1.26.5**, see `.go-version` / `go.mod`):
+3) Build (requires Golang **1.26.6**, see `.go-version` / `go.mod`):
 
 [source,bash]
 ----
