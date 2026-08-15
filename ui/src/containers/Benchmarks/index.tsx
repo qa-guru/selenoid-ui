@@ -100,15 +100,21 @@ function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
         "jenkins-java-wd-cold-1-p1-headless-none",
         "jenkins-java-wd-cold-1-p1-full-attachments",
         "jenkins-java-wd-warm-1-p1-none",
+        "jenkins-java-wd-warm-1-p1-full-attachments",
         "jenkins-java-wd-hot-1-p1-none",
+        "jenkins-java-wd-hot-1-p1-full-attachments",
         "jenkins-python-wd-cold-1-p1-headless-none",
         "jenkins-python-wd-cold-1-p1-full-attachments",
         "jenkins-python-wd-warm-1-p1-none",
+        "jenkins-python-wd-warm-1-p1-full-attachments",
         "jenkins-python-wd-hot-1-p1-none",
+        "jenkins-python-wd-hot-1-p1-full-attachments",
         "jenkins-js-pw-cold-1-p1-headless-none",
         "jenkins-js-pw-cold-1-p1-full-attachments",
         "jenkins-js-pw-warm-1-p1-none",
+        "jenkins-js-pw-warm-1-p1-full-attachments",
         "jenkins-js-pw-hot-1-p1-none",
+        "jenkins-js-pw-hot-1-p1-full-attachments",
     ];
     const byId = new Map(runs.map((r) => [r.id, r]));
     const rows = order.map((id) => byId.get(id)).filter((r): r is PerfRun => Boolean(r));
@@ -621,7 +627,9 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     <a href="https://jenkins.qa.guru/" target="_blank" rel="noreferrer">
                         jenkins.qa.guru
                     </a>
-                    : cold headless, cold full-attachments, warm hub-attach, hot stub.
+                    : each pool has none vs full-attachments. Warm full = Allure
+                    screenshot/page source/console (video/VNC/HAR force cold). Hot is a
+                    stub.
                 </p>
                 <JenkinsLoginTable runs={runs} />
             </section>
