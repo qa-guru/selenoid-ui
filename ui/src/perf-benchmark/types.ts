@@ -4,7 +4,8 @@ export type ImageFlavor = "warm" | "min";
 export type Pool = "cold" | "warm-pool" | "hot-pool";
 export type SuiteSize = "1" | "few" | "many";
 export type HarMode = "off" | "meta" | "bodies";
-export type RunStatus = "ok" | "pending" | "failed";
+export type RunStatus = "ok" | "pending" | "failed" | "n/a" | "stub";
+export type AllureVariant = "none" | "allure-lite" | "allure-heavy";
 
 export type HostProfile = {
     cpu: string;
@@ -74,4 +75,5 @@ export type BenchmarkFilters = {
     parallel: string;
     hub: string;
     artifacts: string;
+    status: RunStatus | "";
 };

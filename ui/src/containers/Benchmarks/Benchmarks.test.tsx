@@ -125,7 +125,47 @@ describe("Benchmarks", () => {
         expect(screen.getByTestId("benchmarks-filter-language")).toBeInTheDocument();
         expect(screen.getByTestId("benchmarks-filter-protocol")).toBeInTheDocument();
         expect(screen.getByTestId("benchmarks-filter-artifacts")).toBeInTheDocument();
+        expect(screen.getByTestId("benchmarks-filter-status")).toBeInTheDocument();
         expect(screen.getByTestId("benchmarks-scale")).toBeInTheDocument();
         expect(screen.getByTestId("benchmarks-artifacts")).toBeInTheDocument();
+    });
+
+    it("pins Java warm none to job #14 4.216; JS warm is n/a; heavy ≠ lite", () => {
+        render(<Benchmarks />);
+        const table = screen.getByTestId("benchmarks-jenkins");
+        const warmNone = table.querySelector('[data-run-id="jenkins-java-wd-warm-1-p1-none"]');
+        expect(warmNone).not.toBeNull();
+        expect(warmNone).toHaveTextContent("4.216");
+        expect(warmNone).toHaveAttribute("data-status", "ok");
+        expect(warmNone).toHaveAttribute("data-variant", "none");
+        const pin = within(table).getByRole("link", { name: /#14/ });
+        expect(pin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/14/"
+        );
+
+        const jsWarmNone = table.querySelector('[data-run-id="jenkins-js-pw-warm-1-p1-none"]');
+        const jsWarmLite = table.querySelector(
+            '[data-run-id="jenkins-js-pw-warm-1-p1-full-attachments"]'
+        );
+        expect(jsWarmNone).toHaveAttribute("data-status", "n/a");
+        expect(jsWarmLite).toHaveAttribute("data-status", "n/a");
+        expect(jsWarmNone).not.toHaveAttribute("data-status", "pending");
+        expect(jsWarmLite).not.toHaveAttribute("data-status", "pending");
+
+        const hotNone = table.querySelector('[data-run-id="jenkins-java-wd-hot-1-p1-none"]');
+        expect(hotNone).toHaveAttribute("data-status", "stub");
+
+        const heavy = table.querySelector(
+            '[data-run-id="jenkins-java-wd-cold-1-p1-full-attachments"]'
+        );
+        const lite = table.querySelector(
+            '[data-run-id="jenkins-java-wd-warm-1-p1-full-attachments"]'
+        );
+        expect(heavy).toHaveAttribute("data-variant", "allure-heavy");
+        expect(lite).toHaveAttribute("data-variant", "allure-lite");
+        expect(heavy).toHaveTextContent("allure-heavy");
+        expect(lite).toHaveTextContent("allure-lite");
+        expect(table.querySelectorAll("tbody tr")).toHaveLength(18);
     });
 });

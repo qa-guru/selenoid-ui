@@ -12,11 +12,16 @@ import type {
 } from "../../perf-benchmark/types";
 import {
     EMPTY_FILTERS,
+    allureVariant,
     artifactsKey,
     cellTriple,
+    deltaVsColdNone,
+    deltaVsNone,
     filterRuns,
     findRun,
     fmt,
+    fmtSigned,
+    poolShort,
     uniqueSorted,
 } from "./filter";
 import { StyledBenchmarks } from "./style.css";
@@ -78,12 +83,21 @@ function JenkinsJobLink({ url }: { url?: string }) {
     let label = "job";
     try {
         const path = new URL(url).pathname.replace(/\/+$/, "");
-        const name = path.split("/").filter(Boolean).pop();
+        const parts = path.split("/").filter(Boolean);
+        let name = parts.pop() ?? "";
+        let build = "";
+        if (/^\d+$/.test(name)) {
+            build = name;
+            name = parts.pop() ?? "";
+        }
         if (name) {
             label = name
                 .replace("autotests-ai-multistack-tests-pipeline-java-", "")
                 .replace("autotests-ai-multistack-tests-pipeline-python-", "python-")
                 .replace("autotests-ai-multistack-tests-pipeline-js-", "js-");
+            if (build) {
+                label = `${label} #${build}`;
+            }
         }
     } catch {
         /* keep default */
@@ -131,24 +145,34 @@ function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
                         <th>variant</th>
                         <th>status</th>
                         <th>wall_s</th>
-                        <th>artifacts</th>
+                        <th>Δ vs cold none</th>
+                        <th>Δ vs none</th>
                         <th>jenkins</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map((run) => (
-                        <tr key={run.id} data-status={run.status} data-run-id={run.id}>
-                            <td>{run.language}</td>
-                            <td>{run.pool}</td>
-                            <td>{run.note ?? run.id}</td>
-                            <td>{run.status}</td>
-                            <td>{fmt(run.wall_time_s)}</td>
-                            <td>{artifactsKey(run)}</td>
-                            <td>
-                                <JenkinsJobLink url={run.jenkins_url} />
-                            </td>
-                        </tr>
-                    ))}
+                    {rows.map((run) => {
+                        const variant = allureVariant(run);
+                        return (
+                            <tr
+                                key={run.id}
+                                data-status={run.status}
+                                data-variant={variant}
+                                data-run-id={run.id}
+                            >
+                                <td>{run.language}</td>
+                                <td>{poolShort(run.pool)}</td>
+                                <td>{variant}</td>
+                                <td>{run.status}</td>
+                                <td>{fmt(run.wall_time_s)}</td>
+                                <td>{fmtSigned(deltaVsColdNone(run, rows))}</td>
+                                <td>{fmtSigned(deltaVsNone(run, rows))}</td>
+                                <td>
+                                    <JenkinsJobLink url={run.jenkins_url} />
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
@@ -541,6 +565,7 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
             parallel: uniqueSorted(runs.map((r) => String(r.parallel))),
             hub: uniqueSorted(runs.map((r) => r.versions.hub)),
             artifacts: uniqueSorted(runs.map(artifactsKey)),
+            status: uniqueSorted(runs.map((r) => r.status)),
         }),
         [runs]
     );
@@ -618,18 +643,19 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     options={options.artifacts}
                     onChange={set("artifacts")}
                 />
+                <FilterSelect
+                    label="status"
+                    name="status"
+                    value={filters.status}
+                    options={options.status}
+                    onChange={set("status")}
+                />
             </div>
 
             <section className="benchmarks__section">
                 <h2>0. Jenkins login-test</h2>
                 <p className="benchmarks__hint">
-                    One Java Selenide, Python Selenium, and JS Playwright login on{" "}
-                    <a href="https://jenkins.qa.guru/" target="_blank" rel="noreferrer">
-                        jenkins.qa.guru
-                    </a>
-                    : each pool has none vs full-attachments. Warm full = Allure
-                    screenshot/page source/console (video/VNC/HAR force cold). Hot is a
-                    stub.
+                    Java none: cold 9.4 · warm 4.2 · hot —. Lite/heavy не сравнивать между пулами.
                 </p>
                 <JenkinsLoginTable runs={runs} />
             </section>

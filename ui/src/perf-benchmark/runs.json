@@ -10,8 +10,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.30",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -56,8 +56,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.30",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -102,8 +102,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.30",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -136,9 +136,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 4.773,
-            "note": "hub-attach job #17 SUCCESS; Gradle 4s; no Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/"
+            "wall_time_s": 4.216,
+            "note": "hub-attach job #14 SUCCESS; Gradle ~3s; no Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/14/"
         },
         {
             "language": "java",
@@ -148,8 +148,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.30",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -194,8 +194,8 @@
             "parallel": 1,
             "browser": "chrome/149.0-min",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.30",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149-min"
             },
@@ -219,7 +219,7 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-java-wd-hot-1-p1-none",
-            "status": "pending",
+            "status": "stub",
             "measured_at": null,
             "image_flavor": "min",
             "pool": "hot-pool",
@@ -229,7 +229,7 @@
                 "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub job, disabled; phase 03 reuse-session",
+            "note": "stub: job disabled",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/"
         },
         {
@@ -240,8 +240,8 @@
             "parallel": 1,
             "browser": "chrome/149.0-min",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.30",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149-min"
             },
@@ -265,17 +265,17 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-java-wd-hot-1-p1-full-attachments",
-            "status": "pending",
+            "status": "stub",
             "measured_at": null,
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
-                "video": true,
+                "video": false,
                 "log": true,
-                "har": "bodies"
+                "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub job, disabled; hot full-attachments; phase 03",
+            "note": "stub: job disabled; Allure screenshot/page source/console",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/"
         },
         {
@@ -286,8 +286,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -332,8 +332,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -378,8 +378,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -424,8 +424,8 @@
             "parallel": 1,
             "browser": "chrome/149.0",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149"
             },
@@ -470,8 +470,8 @@
             "parallel": 1,
             "browser": "chrome/149.0-min",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149-min"
             },
@@ -495,7 +495,7 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-python-wd-hot-1-p1-none",
-            "status": "pending",
+            "status": "stub",
             "measured_at": null,
             "image_flavor": "min",
             "pool": "hot-pool",
@@ -505,7 +505,7 @@
                 "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub job, disabled; phase 03 reuse-session",
+            "note": "stub: no python agent on box1; job disabled",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/"
         },
         {
@@ -516,8 +516,8 @@
             "parallel": 1,
             "browser": "chrome/149.0-min",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "149-min"
             },
@@ -541,17 +541,17 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-python-wd-hot-1-p1-full-attachments",
-            "status": "pending",
+            "status": "stub",
             "measured_at": null,
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
-                "video": true,
+                "video": false,
                 "log": true,
-                "har": "bodies"
+                "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub job, disabled; hot full-attachments; phase 03",
+            "note": "stub: no python agent on box1; job disabled",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-full-attachments/"
         },
         {
@@ -562,8 +562,8 @@
             "parallel": 1,
             "browser": "playwright-chromium/1.61.1",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1"
             },
@@ -608,8 +608,8 @@
             "parallel": 1,
             "browser": "playwright-chromium/1.61.1",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1"
             },
@@ -654,8 +654,8 @@
             "parallel": 1,
             "browser": "playwright-chromium/1.61.1",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1"
             },
@@ -679,7 +679,7 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-js-pw-warm-1-p1-none",
-            "status": "pending",
+            "status": "n/a",
             "measured_at": null,
             "image_flavor": "warm",
             "pool": "warm-pool",
@@ -689,7 +689,7 @@
                 "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub: Playwright WS has no Chrome WD hub-attach; use js-cold-pool",
+            "note": "n/a: Playwright WS always cold docker; no Chrome WD hub-attach",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool/"
         },
         {
@@ -700,8 +700,8 @@
             "parallel": 1,
             "browser": "playwright-chromium/1.61.1",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1"
             },
@@ -725,17 +725,17 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-js-pw-warm-1-p1-full-attachments",
-            "status": "pending",
+            "status": "n/a",
             "measured_at": null,
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
-                "video": true,
+                "video": false,
                 "log": true,
-                "har": "bodies"
+                "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub: Playwright WS has no hub-attach; use js-cold-pool-full-attachments",
+            "note": "n/a: Playwright WS has no hub-attach; use js-cold-pool-full-attachments",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool-full-attachments/"
         },
         {
@@ -746,8 +746,8 @@
             "parallel": 1,
             "browser": "playwright-chromium/1.61.1-min",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1-min"
             },
@@ -771,7 +771,7 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-js-pw-hot-1-p1-none",
-            "status": "pending",
+            "status": "stub",
             "measured_at": null,
             "image_flavor": "min",
             "pool": "hot-pool",
@@ -781,7 +781,7 @@
                 "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub job, disabled; phase 03 reuse-session",
+            "note": "stub: no js agent on box1; job disabled",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/"
         },
         {
@@ -792,8 +792,8 @@
             "parallel": 1,
             "browser": "playwright-chromium/1.61.1-min",
             "versions": {
-                "hub": "3.0.9",
-                "ui": "3.0.31",
+                "hub": "3.0.11",
+                "ui": "3.0.32",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1-min"
             },
@@ -817,17 +817,17 @@
             "passed": null,
             "failed": null,
             "id": "jenkins-js-pw-hot-1-p1-full-attachments",
-            "status": "pending",
+            "status": "stub",
             "measured_at": null,
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
-                "video": true,
+                "video": false,
                 "log": true,
-                "har": "bodies"
+                "har": "off"
             },
             "wall_time_s": null,
-            "note": "stub job, disabled; hot full-attachments; phase 03",
+            "note": "stub: no js agent on box1; job disabled",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-full-attachments/"
         },
         {

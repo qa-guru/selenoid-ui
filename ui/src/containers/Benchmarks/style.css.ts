@@ -103,7 +103,9 @@ export const StyledBenchmarks = styled.div`
         font-weight: 300;
     }
 
-    table.benchmarks__table tr[data-status="pending"] td {
+    table.benchmarks__table tr[data-status="pending"] td,
+    table.benchmarks__table tr[data-status="n/a"] td,
+    table.benchmarks__table tr[data-status="stub"] td {
         color: var(--color-text-muted, #888);
     }
 
