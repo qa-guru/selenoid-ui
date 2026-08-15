@@ -216,11 +216,11 @@
             "log_kb": 0,
             "har_kb": 0,
             "artifacts_total_kb": 0,
-            "passed": null,
-            "failed": null,
+            "passed": 1,
+            "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-none",
-            "status": "stub",
-            "measured_at": null,
+            "status": "ok",
+            "measured_at": "2026-08-15T18:52:56Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -228,9 +228,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": null,
-            "note": "stub: job disabled",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/"
+            "wall_time_s": 4.781,
+            "note": "job #5 SUCCESS; New Session on hot ChromeDriver (not WarmRemote UUID); Gradle ~2s CC hit; no Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/5/"
         },
         {
             "language": "java",

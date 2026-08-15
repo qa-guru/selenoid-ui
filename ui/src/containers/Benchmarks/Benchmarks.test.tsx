@@ -154,7 +154,13 @@ describe("Benchmarks", () => {
         expect(jsWarmLite).not.toHaveAttribute("data-status", "pending");
 
         const hotNone = table.querySelector('[data-run-id="jenkins-java-wd-hot-1-p1-none"]');
-        expect(hotNone).toHaveAttribute("data-status", "stub");
+        expect(hotNone).toHaveAttribute("data-status", "ok");
+        expect(hotNone).toHaveTextContent("4.781");
+        const hotPin = within(table).getByRole("link", { name: /hot-pool #5/ });
+        expect(hotPin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/5/"
+        );
 
         const heavy = table.querySelector(
             '[data-run-id="jenkins-java-wd-cold-1-p1-full-attachments"]'
