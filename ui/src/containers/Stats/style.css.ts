@@ -7,6 +7,8 @@ export const StyledStats = styled.div`
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--wt-post-gap, 14px);
     flex-shrink: 0;
     overflow-y: auto;
     padding: var(--wt-post-gap, 14px);

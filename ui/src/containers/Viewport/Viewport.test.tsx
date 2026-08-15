@@ -71,6 +71,12 @@ describe("Viewport", () => {
         const hot = screen.getByTestId("selenoid-metrics-hot");
         expect(hot).toHaveTextContent("Hot");
         expect(hot.querySelector(".selenoid-metrics__value")?.textContent).toBe("0 / 0");
+        expect(screen.getByTestId("browsers-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("warm-slots-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("hot-slots-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("warm-slots-title")).toHaveTextContent("Warm pool");
+        expect(screen.getByTestId("hot-slots-title")).toHaveTextContent("Hot pool");
+        expect(screen.getAllByTestId("pool-slot-empty")).toHaveLength(2);
     });
 
     it("portals the filter into the header search slot and filters sessions", async () => {

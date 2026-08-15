@@ -46,6 +46,15 @@ export type BrowserProtocols = Record<string, Record<string, BrowserVersionInfo>
 /** browserName → version → count (quota usage) */
 export type BrowsersMap = Record<string, Record<string, number>>;
 
+/** Warm/hot orchestrator slot on hub /status (no URLs). */
+export type PoolSlot = {
+    id?: string;
+    browser?: string;
+    protocol?: string;
+    pool?: string;
+    reservedBy?: string | null;
+};
+
 export type HubState = {
     total?: number;
     used?: number;
@@ -55,6 +64,8 @@ export type HubState = {
     warmTotal?: number;
     hotReady?: number;
     hotTotal?: number;
+    warmSlots?: PoolSlot[];
+    hotSlots?: PoolSlot[];
     [key: string]: unknown;
 };
 

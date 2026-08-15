@@ -29,6 +29,12 @@ func selenoidState() State {
   "used": 2,
   "queued": 0,
   "pending": 0,
+  "warmSlots": [
+    {"id": "pool-chrome-1", "browser": "chrome", "protocol": "webdriver", "pool": "warm", "reservedBy": null}
+  ],
+  "hotSlots": [
+    {"id": "pool-hot-pw-min-1", "browser": "chromium", "protocol": "playwright", "pool": "hot", "reservedBy": "jenkins"}
+  ],
   "browsers": {
     "chrome": {
       "58.0": {
@@ -93,6 +99,10 @@ func TestToUI(t *testing.T) {
 		AssertThat(t, ui.Browsers["firefox"], Is{1})
 		AssertThat(t, ui.Browsers["chrome"], Is{1})
 		AssertThat(t, ui.Browsers["opera"], Is{0})
+		AssertThat(t, len(ui.State.WarmSlots), Is{1})
+		AssertThat(t, ui.State.WarmSlots[0].ID, Is{"pool-chrome-1"})
+		AssertThat(t, len(ui.State.HotSlots), Is{1})
+		AssertThat(t, ui.State.HotSlots[0].Browser, Is{"chromium"})
 	})
 }
 

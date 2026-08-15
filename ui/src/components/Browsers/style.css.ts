@@ -4,6 +4,8 @@ export const StyledBrowsers = styled.div`
     color: var(--color-text, #fff);
     width: 100%;
     max-width: 520px;
+    flex: 1 1 280px;
+    min-width: 0;
 
     .browsers-panel {
         width: 100%;
@@ -74,6 +76,30 @@ export const StyledBrowsers = styled.div`
         font-size: 0.85em;
         color: var(--color-text-muted, #aaa);
         font-variant-numeric: tabular-nums;
+    }
+
+    .browsers-table .protocol {
+        color: var(--color-text-muted, #aaa);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .browsers-table .status {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .browsers-table .status--ready {
+        color: var(--color-info, #5b9fd6);
+    }
+
+    .browsers-table .status--reserved {
+        color: var(--color-warning, #e3b341);
+    }
+
+    .browsers-table .empty {
+        color: var(--color-text-muted, #aaa);
+        font-style: italic;
     }
 
     .usage-track {

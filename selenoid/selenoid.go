@@ -46,18 +46,29 @@ type Version map[string]Quota
 // Browsers - browser names for versions
 type Browsers map[string]Version
 
+// PoolSlot is a warm/hot orchestrator slot on hub /status (no URLs).
+type PoolSlot struct {
+	ID         string  `json:"id"`
+	Browser    string  `json:"browser"`
+	Protocol   string  `json:"protocol"`
+	Pool       string  `json:"pool"`
+	ReservedBy *string `json:"reservedBy"`
+}
+
 // State - current state
 type State struct {
-	Total     int      `json:"total"`
-	Used      int      `json:"used"`
-	Queued    int      `json:"queued"`
-	Pending   int      `json:"pending"`
-	WarmReady int      `json:"warmReady"`
-	WarmTotal int      `json:"warmTotal"`
-	HotReady  int      `json:"hotReady"`
-	HotTotal  int      `json:"hotTotal"`
-	Browsers  Browsers `json:"browsers"`
-	Videos    Videos   `json:"videos"`
+	Total     int        `json:"total"`
+	Used      int        `json:"used"`
+	Queued    int        `json:"queued"`
+	Pending   int        `json:"pending"`
+	WarmReady int        `json:"warmReady"`
+	WarmTotal int        `json:"warmTotal"`
+	HotReady  int        `json:"hotReady"`
+	HotTotal  int        `json:"hotTotal"`
+	WarmSlots []PoolSlot `json:"warmSlots"`
+	HotSlots  []PoolSlot `json:"hotSlots"`
+	Browsers  Browsers   `json:"browsers"`
+	Videos    Videos     `json:"videos"`
 }
 
 type Videos []string
@@ -76,13 +87,13 @@ type sessionInfo struct {
 
 // result - processed selenoid state
 type result struct {
-	State               State                  `json:"state"`
-	Origin              string                 `json:"origin"`
-	Browsers            map[string]int         `json:"browsers"`
-	Sessions            map[string]sessionInfo `json:"sessions"`
-	BrowserProtocols    BrowserProtocols       `json:"browserProtocols,omitempty"`
-	Version             string                 `json:"version"`
-	Errors              []interface{}          `json:"errors"`
+	State            State                  `json:"state"`
+	Origin           string                 `json:"origin"`
+	Browsers         map[string]int         `json:"browsers"`
+	Sessions         map[string]sessionInfo `json:"sessions"`
+	BrowserProtocols BrowserProtocols       `json:"browserProtocols,omitempty"`
+	Version          string                 `json:"version"`
+	Errors           []interface{}          `json:"errors"`
 }
 
 func httpDo(ctx context.Context, req *http.Request, handle func(*http.Response, error) error) error {
@@ -155,12 +166,12 @@ func toUI(state State, webdriverURI *url.URL, version string, browserProtocols B
 	}
 
 	return result{
-		State:               state,
-		Origin:              webdriverURI.String(),
-		Browsers:            browsers,
-		Sessions:            sessions,
-		BrowserProtocols:    browserProtocols,
-		Version:             version,
-		Errors:              make([]interface{}, 0),
+		State:            state,
+		Origin:           webdriverURI.String(),
+		Browsers:         browsers,
+		Sessions:         sessions,
+		BrowserProtocols: browserProtocols,
+		Version:          version,
+		Errors:           make([]interface{}, 0),
 	}
 }

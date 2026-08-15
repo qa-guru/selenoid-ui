@@ -8,6 +8,18 @@
         "pending": 0,
         "warmReady": 0,
         "warmTotal": 3,
+        "hotReady": 0,
+        "hotTotal": 0,
+        "warmSlots": [
+            {
+                "id": "pool-chrome-1",
+                "browser": "chrome",
+                "protocol": "webdriver",
+                "pool": "warm",
+                "reservedBy": null
+            }
+        ],
+        "hotSlots": [],
         "browsers": {
             "firefox": {
                 "": {
