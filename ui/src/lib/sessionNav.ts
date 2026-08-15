@@ -1,5 +1,5 @@
 /** Hash-route search to keep when moving between the sessions list and a detail page. */
-const LIST_SEARCH_KEYS = ["q", "sort", "order", "page"] as const;
+const LIST_SEARCH_KEYS = ["q", "sort", "order", "page", "mock"] as const;
 
 export function sessionsListSearch(search: string = ""): string {
     const raw = search.startsWith("?") ? search.slice(1) : search;

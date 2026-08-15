@@ -34,19 +34,23 @@ describe("mockSessions URL flag", () => {
         expect(isMockSessionsEnabled()).toBe(true);
     });
 
-    it("enables via replaceState without reload and keeps the hash route", () => {
-        window.history.replaceState(null, "", "/#/sessions");
-        const replaceState = vi.spyOn(window.history, "replaceState");
+    it.each(["#/statistics", "#/sessions", "#/new-session", "#/benchmarks", "#/sessions/abc"])(
+        "enables via replaceState without reload and keeps hash %s",
+        (hash) => {
+            window.history.replaceState(null, "", `/${hash}`);
+            const replaceState = vi.spyOn(window.history, "replaceState");
 
-        setMockSessionsEnabled(true);
+            setMockSessionsEnabled(true);
 
-        expect(replaceState).toHaveBeenCalled();
-        expect(window.location.search).toBe("?mock=1");
-        expect(window.location.hash).toBe("#/sessions");
-        expect(isMockSessionsEnabled()).toBe(true);
+            expect(replaceState).toHaveBeenCalled();
+            expect(window.location.search).toBe("?mock=1");
+            expect(window.location.hash).toBe(hash);
+            expect(isMockSessionsEnabled()).toBe(true);
 
-        replaceState.mockRestore();
-    });
+            replaceState.mockRestore();
+            setMockSessionsEnabled(false);
+        }
+    );
 
     it("disables by stripping search and hash mock", () => {
         window.history.replaceState(null, "", "/?mock=1#/sessions?mock=1");

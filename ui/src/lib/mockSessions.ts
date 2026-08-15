@@ -1,8 +1,8 @@
 /**
  * Dev-only live-session fixtures for UI layout checks.
  * Activate: open UI with `?mock=1` (before or after hash), or the header
- * toggle next to Sessions. The toggle uses `history.replaceState` so the
- * HashRouter route stays put and the live list can fade in place.
+ * toggle at the end of nav (after Benchmarks; own burger row). The toggle
+ * uses `history.replaceState` so the HashRouter route stays put.
  *
  * The set is a pairwise covering of live-row factors (badges, quota, name,
  * browser, freeze/active) plus stable seeds mockmax / mockmin / mockfrz.

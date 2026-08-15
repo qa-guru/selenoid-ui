@@ -131,7 +131,7 @@ describe("SelenoidAppHeader", () => {
         expect(ariaCurrentTestids()).toEqual(["header-nav-sessions"]);
     });
 
-    it("injects an unpressed ?mock=1 toggle next to Sessions in header and burger", async () => {
+    it("injects an unpressed ?mock=1 button after Benchmarks in header and burger", async () => {
         renderHeader(["/sessions"]);
         injectHeaderNav();
 
@@ -144,31 +144,35 @@ describe("SelenoidAppHeader", () => {
         expect(headerBtn.textContent).toBe("?mock=1");
         expect(headerBtn.getAttribute("aria-pressed")).toBe("false");
         expect(menuBtn.getAttribute("aria-pressed")).toBe("false");
-        expect(document.querySelector('[data-testid="header-nav-sessions"]')?.nextElementSibling).toBe(
-            headerBtn
-        );
+        expect(document.querySelector('[data-testid="header-nav"]')?.lastElementChild).toBe(headerBtn);
+        expect(headerBtn.previousElementSibling?.getAttribute("data-testid")).toBe("header-nav-mock-divider");
+        expect(document.querySelector('[data-testid="header-menu-nav"]')?.lastElementChild).toBe(menuBtn);
+        expect(document.querySelector('[data-testid="header-menu-nav-sessions-row"]')).toBeNull();
     });
 
-    it("presses the toggle via replaceState without leaving the route", async () => {
-        const user = userEvent.setup();
-        renderHeader(["/sessions"]);
-        injectHeaderNav();
+    it.each(["/statistics", "/sessions", "/new-session", "/benchmarks"] as const)(
+        "presses the toggle on %s without leaving the route",
+        async (route) => {
+            const user = userEvent.setup();
+            renderHeader([route]);
+            injectHeaderNav();
 
-        const headerBtn = await waitFor(() => {
-            const btn = document.querySelector('[data-testid="header-nav-mock"]');
-            expect(btn).toBeTruthy();
-            return btn as HTMLButtonElement;
-        });
+            const headerBtn = await waitFor(() => {
+                const btn = document.querySelector('[data-testid="header-nav-mock"]');
+                expect(btn).toBeTruthy();
+                return btn as HTMLButtonElement;
+            });
 
-        await user.click(headerBtn);
+            await user.click(headerBtn);
 
-        await waitFor(() => {
-            expect(headerBtn.getAttribute("aria-pressed")).toBe("true");
-        });
-        expect(window.location.search).toBe("?mock=1");
-        expect(document.querySelector('[data-testid="header-menu-nav-mock"]')?.getAttribute("aria-pressed")).toBe(
-            "true"
-        );
-        expect(activeTestids()).toEqual(["header-nav-sessions"]);
-    });
+            await waitFor(() => {
+                expect(headerBtn.getAttribute("aria-pressed")).toBe("true");
+            });
+            expect(window.location.search).toBe("?mock=1");
+            expect(
+                document.querySelector('[data-testid="header-menu-nav-mock"]')?.getAttribute("aria-pressed")
+            ).toBe("true");
+            expect(activeTestids()).toEqual([`header-nav-${route.slice(1)}`]);
+        }
+    );
 });

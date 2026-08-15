@@ -162,6 +162,16 @@ describe("Sessions", () => {
         );
     });
 
+    it("keeps ?mock=1 on session detail links", () => {
+        renderSessions({}, { route: "/sessions?mock=1" });
+
+        const shortId = sessionIdShort("abc-def-123");
+        expect(screen.getByRole("link", { name: shortId })).toHaveAttribute(
+            "href",
+            "/sessions/abc-def-123?mock=1"
+        );
+    });
+
     it("invokes delete for manual sessions", async () => {
         const user = userEvent.setup();
         deleteSession.mockClear();

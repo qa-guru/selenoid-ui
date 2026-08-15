@@ -77,7 +77,7 @@ function syncActiveNav(pathname: any) {
  * js/header.js SSOT) rendered above the Viewport. The header markup, burger
  * menu, theme and lang toggles stay owned by js/header.js; this wrapper only
  * publishes the config (via <AppHeader>), keeps the active nav item in sync
- * with the HashRouter route, and injects the `?mock=1` toggle next to Sessions.
+ * with the HashRouter route, and injects the `?mock=1` toggle as the last nav item.
  */
 export function SelenoidAppHeader() {
     const { pathname } = useLocation();
