@@ -102,6 +102,10 @@ describe("Docs", () => {
         expect(table).toHaveTextContent("Awesome");
         expect(table).toHaveTextContent("Dashboard");
         expect(table).toHaveTextContent("Sonar");
+        expect(table).toHaveTextContent("awesome/?query=selenoid-ui");
+        expect(table).toHaveTextContent("dashboard · selenoid-ui");
+        expect(table).toHaveTextContent("awesome/?query=webdriver-image&tags=chrome");
+        expect(table).toHaveTextContent("dashboard · webdriver-image");
         expect(
             page.querySelector(
                 'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=selenoid-ui"]'

@@ -46,12 +46,14 @@ function awesome(epic?: string, tag?: string): ResourceRef {
         params.set("tags", tag);
     }
     const query = params.toString() ? `?${params.toString()}` : "";
-    return { href: `${REPORT_LATEST}/awesome/${query}`, label: "Awesome" };
+    const href = `${REPORT_LATEST}/awesome/${query}`;
+    return { href, label: `awesome/${query}` };
 }
 
 function dashboard(epic?: string): ResourceRef {
     const hash = epic ? `#:~:text=${encodeURIComponent(`Динамика — ${epic}`)}` : "";
-    return { href: `${REPORT_LATEST}/dashboard/${hash}`, label: "Dashboard" };
+    const href = `${REPORT_LATEST}/dashboard/${hash}`;
+    return { href, label: epic ? `dashboard · ${epic}` : "dashboard" };
 }
 
 function docker(image: string): ResourceRef {
