@@ -1,4 +1,4 @@
-export type ResourceKind = "GitHub" | "Docker Hub" | "Live" | "CI";
+export type ResourceKind = "GitHub" | "Docker Hub" | "Live" | "CI" | "Sonar";
 
 export type ResourceLink = {
     kind: ResourceKind;
@@ -265,5 +265,47 @@ export const RESOURCE_ROWS: ResourceLink[] = [
         name: "Go Report · cm",
         href: "https://goreportcard.com/report/github.com/qa-guru/cm",
         role: "Installer Go report",
+    },
+    {
+        kind: "Sonar",
+        name: "sonar.qa.guru",
+        href: "https://sonar.qa.guru",
+        role: "SonarQube instance",
+    },
+    {
+        kind: "Sonar",
+        name: "selenoid",
+        href: "https://sonar.qa.guru/dashboard?id=selenoid",
+        role: "Hub",
+    },
+    {
+        kind: "Sonar",
+        name: "selenoid-ui",
+        href: "https://sonar.qa.guru/dashboard?id=selenoid-ui",
+        role: "Web UI",
+    },
+    {
+        kind: "Sonar",
+        name: "selenoid-cm",
+        href: "https://sonar.qa.guru/dashboard?id=selenoid-cm",
+        role: "Installer",
+    },
+    {
+        kind: "Sonar",
+        name: "selenoid-browser-image",
+        href: "https://sonar.qa.guru/dashboard?id=selenoid-browser-image",
+        role: "Browser node images",
+    },
+    {
+        kind: "Sonar",
+        name: "selenoid-tests",
+        href: "https://sonar.qa.guru/dashboard?id=selenoid-tests",
+        role: "Tests and CI orchestrator",
+    },
+    {
+        kind: "Sonar",
+        name: "selenoid-qa-guru-deploy",
+        href: "https://sonar.qa.guru/dashboard?id=selenoid-qa-guru-deploy",
+        role: "Production deploy",
     },
 ];

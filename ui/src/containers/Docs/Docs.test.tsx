@@ -75,5 +75,7 @@ describe("Docs", () => {
         expect(table).toHaveTextContent("Docker Hub");
         expect(table).toHaveTextContent("Live");
         expect(table).toHaveTextContent("CI");
+        expect(table).toHaveTextContent("Sonar");
+        expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
     });
 });

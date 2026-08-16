@@ -7,7 +7,7 @@ const Resources = () => {
         <div data-testid="docs-resources">
             <h1>Resources</h1>
             <p className="docs__lead">
-                GitHub, Docker Hub, live sites, and CI for the qa-guru Selenoid stack.
+                GitHub, Docker Hub, live sites, CI, and Sonar for the qa-guru Selenoid stack.
             </p>
             <div className="docs__scroll docs__scroll--hug">
                 <table className="docs__table docs__table--links" data-testid="docs-resources-table">
