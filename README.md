@@ -60,6 +60,8 @@ UI не заменяет hub — он **подключается к уже за�
 - **Statistics** (`#/statistics`) — статус квот и обзор hub;
 - **Sessions** (`#/sessions`) — живые сессии сверху и архив завершённых с артефактами (видео + логи + HAR, удаление сессии целиком). Заменяет прежнюю вкладку Videos;
 - **New Session** (`#/new-session`) — создание сессии и сниппеты для WebDriver / Playwright (бывшая Capabilities);
+- **Benchmarks** (`#/benchmarks`) — каталог замеров login-теста;
+- **Docs** (`#/docs`) — Cold / Warm / Hot: как отличаются пулы (English);
 - VNC-просмотр браузера и логи сессии;
 - прокси WebSocket `/playwright/` → hub (нужно для Create Session из браузера).
 

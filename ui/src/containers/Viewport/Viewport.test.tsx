@@ -108,4 +108,12 @@ describe("Viewport", () => {
         expect(screen.getByTestId("benchmarks-page")).toBeInTheDocument();
         expect(screen.getByTestId("benchmarks-catalog")).toBeInTheDocument();
     });
+
+    it("shows Docs browser-pools page on the docs route", () => {
+        injectHeaderSlots();
+        renderViewport(["/docs"]);
+
+        expect(screen.getByTestId("docs-page")).toBeInTheDocument();
+        expect(screen.getByTestId("docs-comparison")).toBeInTheDocument();
+    });
 });

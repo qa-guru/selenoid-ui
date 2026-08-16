@@ -12,12 +12,14 @@ function navMarkup() {
         <a href="#/sessions" data-testid="header-nav-sessions">Sessions</a>
         <a href="#/new-session" data-testid="header-nav-new-session">New Session</a>
         <a href="#/benchmarks" data-testid="header-nav-benchmarks">Benchmarks</a>
+        <a href="#/docs" data-testid="header-nav-docs">Docs</a>
       </nav>
       <nav data-testid="header-menu-nav">
         <a href="#/statistics" data-testid="header-menu-nav-statistics">Statistics</a>
         <a href="#/sessions" data-testid="header-menu-nav-sessions">Sessions</a>
         <a href="#/new-session" data-testid="header-menu-nav-new-session">New Session</a>
         <a href="#/benchmarks" data-testid="header-menu-nav-benchmarks">Benchmarks</a>
+        <a href="#/docs" data-testid="header-menu-nav-docs">Docs</a>
       </nav>
     `;
     document.body.appendChild(mount);
@@ -31,7 +33,7 @@ afterEach(() => {
 });
 
 describe("syncHeaderMockToggle", () => {
-    it("inserts an unpressed ?mock=1 button after Benchmarks in header and burger", () => {
+    it("inserts an unpressed ?mock=1 button after Docs in header and burger", () => {
         navMarkup();
         expect(syncHeaderMockToggle(false)).toBe(true);
 
@@ -46,13 +48,13 @@ describe("syncHeaderMockToggle", () => {
         const headerNav = document.querySelector('[data-testid="header-nav"]');
         expect(headerNav?.lastElementChild).toBe(headerBtn);
         expect(headerBtn?.previousElementSibling?.getAttribute("data-testid")).toBe("header-nav-mock-divider");
-        expect(document.querySelector('[data-testid="header-nav-benchmarks"]')?.nextElementSibling).toBe(
+        expect(document.querySelector('[data-testid="header-nav-docs"]')?.nextElementSibling).toBe(
             headerBtn?.previousElementSibling
         );
 
         const menuNav = document.querySelector('[data-testid="header-menu-nav"]');
         expect(menuNav?.lastElementChild).toBe(menuBtn);
-        expect(document.querySelector('[data-testid="header-menu-nav-benchmarks"]')?.nextElementSibling).toBe(
+        expect(document.querySelector('[data-testid="header-menu-nav-docs"]')?.nextElementSibling).toBe(
             menuBtn
         );
         expect(document.querySelector('[data-testid="header-menu-nav-sessions-row"]')).toBeNull();
@@ -134,7 +136,7 @@ describe("syncHeaderMockToggle", () => {
         replaceState.mockRestore();
     });
 
-    it.each(["#/statistics", "#/new-session", "#/benchmarks", "#/sessions"])(
+    it.each(["#/statistics", "#/new-session", "#/benchmarks", "#/docs", "#/sessions"])(
         "keeps the hash route %s when toggling",
         (hash) => {
             window.history.replaceState(null, "", `/${hash}`);

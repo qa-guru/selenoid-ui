@@ -56,8 +56,8 @@ function createDivider(): HTMLElement {
 
 /**
  * Place the toggle as the last child of a nav. Desktop nav gets a plaque
- * divider in front so the chip is a separate item after Benchmarks, not a
- * sibling glued to Sessions.
+ * divider in front so the chip is a separate item after the last product
+ * nav link, not a sibling glued to Sessions.
  */
 function ensureToggleAtEnd(nav: HTMLElement, testid: string, enabled: boolean, withDivider: boolean): void {
     const existing = nav.querySelector(`[data-testid="${testid}"]`);

@@ -21,6 +21,7 @@ function injectHeaderNav() {
         ["#/sessions", "header-nav-sessions", "header-menu-nav-sessions", "Sessions"],
         ["#/new-session", "header-nav-new-session", "header-menu-nav-new-session", "New Session"],
         ["#/benchmarks", "header-nav-benchmarks", "header-menu-nav-benchmarks", "Benchmarks"],
+        ["#/docs", "header-nav-docs", "header-menu-nav-docs", "Docs"],
     ];
     for (const [href, testid, menuTestid, label] of items) {
         const link = document.createElement("a");
@@ -114,6 +115,16 @@ describe("SelenoidAppHeader", () => {
         expect(ariaCurrentTestids()).toEqual(["header-nav-benchmarks"]);
     });
 
+    it("highlights Docs on the docs route", async () => {
+        renderHeader(["/docs"]);
+        injectHeaderNav();
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-docs"]);
+        });
+        expect(ariaCurrentTestids()).toEqual(["header-nav-docs"]);
+    });
+
     it("re-syncs the active item on SPA navigation", async () => {
         const user = userEvent.setup();
         renderHeader(["/statistics"]);
@@ -131,7 +142,7 @@ describe("SelenoidAppHeader", () => {
         expect(ariaCurrentTestids()).toEqual(["header-nav-sessions"]);
     });
 
-    it("injects an unpressed ?mock=1 button after Benchmarks in header and burger", async () => {
+    it("injects an unpressed ?mock=1 button after Docs in header and burger", async () => {
         renderHeader(["/sessions"]);
         injectHeaderNav();
 
@@ -150,7 +161,7 @@ describe("SelenoidAppHeader", () => {
         expect(document.querySelector('[data-testid="header-menu-nav-sessions-row"]')).toBeNull();
     });
 
-    it.each(["/statistics", "/sessions", "/new-session", "/benchmarks"] as const)(
+    it.each(["/statistics", "/sessions", "/new-session", "/benchmarks", "/docs"] as const)(
         "presses the toggle on %s without leaving the route",
         async (route) => {
             const user = userEvent.setup();

@@ -11,6 +11,7 @@ import HeaderStats from "../../components/HeaderStats";
 import Stats from "../../containers/Stats";
 import Capabilities from "../../containers/Capabilities";
 import Benchmarks from "../../containers/Benchmarks";
+import Docs from "../../containers/Docs";
 import Sessions from "../../components/Sessions";
 import Session from "../../components/Session";
 import SessionArchive from "../../components/SessionArchive";
@@ -124,6 +125,8 @@ const Viewport = () => {
                     <Route path="/capabilities" element={<Navigate to="/new-session" replace />} />
 
                     <Route path="/benchmarks" element={<Benchmarks />} />
+
+                    <Route path="/docs" element={<Docs />} />
 
                     <Route path="/sessions/:session" element={<SessionRoute origin={origin} sessions={sessions} />} />
                 </Routes>
