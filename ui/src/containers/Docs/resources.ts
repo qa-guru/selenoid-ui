@@ -155,21 +155,4 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         "Playwright WebKit node"
     ),
     image("android", "qaguru/android", "android", "Appium Android node", false),
-    {
-        name: "selenoid.qa.guru",
-        href: "https://selenoid.qa.guru",
-        comment: "Production Selenoid 3",
-    },
-    {
-        name: "Allure TestOps",
-        href: "https://allure.qa.guru/project/5271",
-        github: GITHUB_TESTS,
-        comment: "Project 5271",
-    },
-    {
-        name: "sonar.qa.guru",
-        href: "https://sonar.qa.guru",
-        sonar: { href: "https://sonar.qa.guru", label: "Sonar" },
-        comment: "SonarQube instance",
-    },
 ];

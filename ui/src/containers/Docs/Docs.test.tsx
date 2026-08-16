@@ -92,6 +92,8 @@ describe("Docs", () => {
         expect(page).not.toHaveTextContent("selenoid-warm-pool");
         expect(page).not.toHaveTextContent("browsers-production.json");
         expect(page).not.toHaveTextContent("selenoid-qa-guru-deploy");
+        expect(page).not.toHaveTextContent("selenoid.qa.guru");
+        expect(page).not.toHaveTextContent("Allure TestOps");
 
         const table = screen.getByTestId("docs-resources-table");
         expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_SERVICES.length);
@@ -110,8 +112,6 @@ describe("Docs", () => {
                 'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/"]'
             )
         ).toBeTruthy();
-        expect(page.querySelector('a[href="https://sonar.qa.guru"]')).toBeTruthy();
-        expect(page.querySelector('a[href="https://selenoid.qa.guru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
     });
 });
