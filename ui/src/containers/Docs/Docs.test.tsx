@@ -68,6 +68,10 @@ describe("Docs", () => {
         expect(page.querySelector('a[href="https://hub.docker.com/u/qaguru"]')).toBeTruthy();
         expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
         expect(page.innerHTML).not.toMatch(/aerokube\.com/i);
+        expect(page).not.toHaveTextContent("zero-design-system");
+        expect(page).not.toHaveTextContent("selenoid-warm-pool");
+        expect(page).not.toHaveTextContent("browsers-production.json");
+        expect(page).not.toHaveTextContent("selenoid-qa-guru-deploy");
 
         const table = screen.getByTestId("docs-resources-table");
         expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_ROWS.length);

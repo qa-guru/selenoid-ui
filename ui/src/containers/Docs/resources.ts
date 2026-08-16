@@ -39,36 +39,6 @@ export const RESOURCE_ROWS: ResourceLink[] = [
         role: "Tests and CI orchestrator",
     },
     {
-        kind: "GitHub",
-        name: "qa-guru/selenoid.qa.guru",
-        href: "https://github.com/qa-guru/selenoid.qa.guru",
-        role: "Production deploy",
-    },
-    {
-        kind: "GitHub",
-        name: "qa-guru/selenoid-warm-pool",
-        href: "https://github.com/qa-guru/selenoid-warm-pool",
-        role: "Warm-pool prototype",
-    },
-    {
-        kind: "GitHub",
-        name: "qa-guru/zero-design-system",
-        href: "https://github.com/qa-guru/zero-design-system",
-        role: "Monorepo",
-    },
-    {
-        kind: "GitHub",
-        name: "browsers.json",
-        href: "https://github.com/qa-guru/selenoid/blob/main/config/browsers.json",
-        role: "Hub catalog",
-    },
-    {
-        kind: "GitHub",
-        name: "browsers-production.json",
-        href: "https://github.com/qa-guru/selenoid.qa.guru/blob/main/deploy/browsers-production.json",
-        role: "Prod catalog overlay",
-    },
-    {
         kind: "Docker Hub",
         name: "qaguru",
         href: "https://hub.docker.com/u/qaguru",
@@ -301,11 +271,5 @@ export const RESOURCE_ROWS: ResourceLink[] = [
         name: "selenoid-tests",
         href: "https://sonar.qa.guru/dashboard?id=selenoid-tests",
         role: "Tests and CI orchestrator",
-    },
-    {
-        kind: "Sonar",
-        name: "selenoid-qa-guru-deploy",
-        href: "https://sonar.qa.guru/dashboard?id=selenoid-qa-guru-deploy",
-        role: "Production deploy",
     },
 ];
