@@ -17,7 +17,7 @@ const Resources = () => {
     return (
         <div data-testid="docs-resources">
             <h1>Resources</h1>
-            <p className="docs__lead">qa-guru Selenoid stack — GitHub, Docker Hub, live sites, and Sonar.</p>
+            <p className="docs__lead">qa-guru Selenoid stack — GitHub, Docker Hub, reports, and Sonar.</p>
             <div className="docs__scroll">
                 <table className="docs__table docs__table--links" data-testid="docs-resources-table">
                     <thead>
@@ -25,6 +25,9 @@ const Resources = () => {
                             <th>Service</th>
                             <th>GitHub</th>
                             <th>Docker Hub</th>
+                            <th>Awesome</th>
+                            <th>Dashboard</th>
+                            <th>Sonar</th>
                             <th>Comment</th>
                         </tr>
                     </thead>
@@ -47,14 +50,15 @@ const Resources = () => {
                                     <ExtLink link={row.dockerHub} />
                                 </td>
                                 <td>
-                                    {row.comment}
-                                    {row.sonar ? (
-                                        <>
-                                            {" · "}
-                                            <ExtLink link={row.sonar} />
-                                        </>
-                                    ) : null}
+                                    <ExtLink link={row.awesome} />
                                 </td>
+                                <td>
+                                    <ExtLink link={row.dashboard} />
+                                </td>
+                                <td>
+                                    <ExtLink link={row.sonar} />
+                                </td>
+                                <td>{row.comment}</td>
                             </tr>
                         ))}
                     </tbody>

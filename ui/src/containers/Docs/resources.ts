@@ -8,6 +8,8 @@ export type ResourceService = {
     href?: string;
     github?: ResourceRef;
     dockerHub?: ResourceRef;
+    awesome?: ResourceRef;
+    dashboard?: ResourceRef;
     sonar?: ResourceRef;
     comment: string;
 };
@@ -33,6 +35,15 @@ const GITHUB_TESTS: ResourceRef = {
     label: "qa-guru/selenoid-tests",
 };
 
+const AWESOME: ResourceRef = {
+    href: "https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/",
+    label: "Awesome",
+};
+const DASHBOARD: ResourceRef = {
+    href: "https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/",
+    label: "Dashboard",
+};
+
 function docker(image: string): ResourceRef {
     return { href: `https://hub.docker.com/r/${image}`, label: image };
 }
@@ -44,7 +55,13 @@ function sonar(projectKey: string): ResourceRef {
     };
 }
 
-function image(name: string, repo: string, ghPath: string, comment: string): ResourceService {
+function image(
+    name: string,
+    repo: string,
+    ghPath: string,
+    comment: string,
+    reports = true
+): ResourceService {
     return {
         name,
         github: {
@@ -52,6 +69,8 @@ function image(name: string, repo: string, ghPath: string, comment: string): Res
             label: `browser-image/${ghPath}`,
         },
         dockerHub: docker(repo),
+        awesome: reports ? AWESOME : undefined,
+        dashboard: reports ? DASHBOARD : undefined,
         comment,
     };
 }
@@ -61,6 +80,8 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "selenoid",
         github: GITHUB_SELENOID,
         dockerHub: docker("qaguru/selenoid"),
+        awesome: AWESOME,
+        dashboard: DASHBOARD,
         sonar: sonar("selenoid"),
         comment: "Hub — WebDriver and Playwright",
     },
@@ -68,6 +89,8 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "selenoid-ui",
         github: GITHUB_UI,
         dockerHub: docker("qaguru/selenoid-ui"),
+        awesome: AWESOME,
+        dashboard: DASHBOARD,
         sonar: sonar("selenoid-ui"),
         comment: "Web UI",
     },
@@ -75,6 +98,8 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "cm",
         github: GITHUB_CM,
         dockerHub: docker("qaguru/cm"),
+        awesome: AWESOME,
+        dashboard: DASHBOARD,
         sonar: sonar("selenoid-cm"),
         comment: "Installer",
     },
@@ -82,12 +107,16 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "browser-image",
         github: GITHUB_IMAGE,
         dockerHub: { href: "https://hub.docker.com/u/qaguru", label: "qaguru/*" },
+        awesome: AWESOME,
+        dashboard: DASHBOARD,
         sonar: sonar("selenoid-browser-image"),
         comment: "Browser node image source",
     },
     {
         name: "selenoid-tests",
         github: GITHUB_TESTS,
+        awesome: AWESOME,
+        dashboard: DASHBOARD,
         sonar: sonar("selenoid-tests"),
         comment: "Go pyramid and CI orchestrator",
     },
@@ -125,23 +154,11 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         "playwright/playwright-webkit",
         "Playwright WebKit node"
     ),
-    image("android", "qaguru/android", "android", "Appium Android node"),
+    image("android", "qaguru/android", "android", "Appium Android node", false),
     {
         name: "selenoid.qa.guru",
         href: "https://selenoid.qa.guru",
         comment: "Production Selenoid 3",
-    },
-    {
-        name: "Allure dashboard",
-        href: "https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/",
-        github: GITHUB_TESTS,
-        comment: "Merged test pyramid",
-    },
-    {
-        name: "Allure awesome",
-        href: "https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/",
-        github: GITHUB_TESTS,
-        comment: "Per-epic test details",
     },
     {
         name: "Allure TestOps",
@@ -152,6 +169,7 @@ export const RESOURCE_SERVICES: ResourceService[] = [
     {
         name: "sonar.qa.guru",
         href: "https://sonar.qa.guru",
+        sonar: { href: "https://sonar.qa.guru", label: "Sonar" },
         comment: "SonarQube instance",
     },
 ];

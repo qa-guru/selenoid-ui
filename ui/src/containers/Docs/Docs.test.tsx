@@ -97,7 +97,19 @@ describe("Docs", () => {
         expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_SERVICES.length);
         expect(table).toHaveTextContent("webdriver-chrome");
         expect(table).toHaveTextContent("playwright-chromium");
-        expect(table).toHaveTextContent("Allure dashboard");
+        expect(table).toHaveTextContent("Awesome");
+        expect(table).toHaveTextContent("Dashboard");
+        expect(table).toHaveTextContent("Sonar");
+        expect(
+            page.querySelector(
+                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/"]'
+            )
+        ).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/"]'
+            )
+        ).toBeTruthy();
         expect(page.querySelector('a[href="https://sonar.qa.guru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://selenoid.qa.guru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
