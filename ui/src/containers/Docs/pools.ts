@@ -16,9 +16,13 @@ export type OneRunRow = {
 };
 
 export const POOL_STATS: { value: string; label: string; tone?: "success" }[] = [
-    { value: "~9.4 s", label: "Cold — new browser every run" },
-    { value: "~4.2 s", label: "Warm — container ready, new session" },
-    { value: "~2.2 s", label: "Hot — JVM and Chrome already running", tone: "success" },
+    { value: "~9.4 seconds", label: "Cold — a new browser on every run" },
+    { value: "~4.2 seconds", label: "Warm — the container is ready; a new session still opens" },
+    {
+        value: "~2.2 seconds",
+        label: "Hot — Java and Chrome are already running",
+        tone: "success",
+    },
 ];
 
 export const COMPARISON_HEADERS = ["", "Cold", "Warm · 4 slots", "Hot · 2 slots"] as const;
@@ -27,211 +31,211 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
     {
         label: "Why it exists",
         cold: {
-            human: "Default Selenoid path. Use it when you do not need a warm browser.",
-            tech: "browsers.json catalog. Fallback when warm/hot slots are idle or unused.",
+            human: "This is the default Selenoid path. Use it when you do not need a browser waiting in advance.",
+            tech: "The hub reads the browsers.json catalog and starts a container when a test asks for a session. Warm and hot slots are a separate overlay; if they are idle or unused, the test still falls back here.",
         },
         warm: {
-            human: "Faster CI: skip docker run on every test.",
-            tech: "Containers already running. Gradle ~3 s; leave this path as-is.",
+            human: "Jenkins builds get faster because Docker does not start a new container for every test.",
+            tech: "The browser containers are already running. Gradle still takes about three seconds to start the test. Do not change this path to copy the hot-pool shortcuts.",
         },
         hot: {
-            human: "Fastest run: Java and Chrome do not start again.",
-            tech: "Separate Jenkins job. Do not fold into the warm hub-attach job.",
+            human: "This is the fastest run: Java and Chrome do not start again between builds.",
+            tech: "This is a separate Jenkins job. Do not merge it into the warm job that still opens a session through the hub.",
         },
     },
     {
         label: "Browsers standing by",
         cold: {
             human: "None. A browser appears only when the test asks for a session.",
-            tech: "0 warm slots. Hub docker run on POST /session.",
+            tech: "There are zero warm slots. The hub runs docker run when it receives POST /session.",
         },
         warm: {
-            human: "Four: two Chrome, two Playwright — full image and -min.",
-            tech: "Chrome 149 :14441 and 149-min :14442. Playwright 1.61.1 :14501 and 1.61.1-min :14502.",
+            human: "Four browsers wait: two Chrome and two Playwright. In each pair one image is the full browser and one is the smaller “-min” image.",
+            tech: "Chrome 149 listens on port 14441; Chrome 149-min on port 14442. Playwright 1.61.1 listens on port 14501; Playwright 1.61.1-min on port 14502.",
         },
         hot: {
-            human: "Two -min browsers: one Chrome, one Playwright.",
-            tech: "-min only. Chrome 149-min :16440. Playwright 1.61.1-min :16441.",
+            human: "Two smaller “-min” browsers wait: one Chrome and one Playwright.",
+            tech: "Only “-min” images. Chrome 149-min listens on port 16440. Playwright 1.61.1-min listens on port 16441.",
         },
     },
     {
         label: "Container",
         cold: {
-            human: "A new container per test, then it is removed.",
-            tech: "docker run per session, then rm.",
+            human: "A new Docker container starts for each test, then it is removed.",
+            tech: "The hub runs docker run for that session, then docker rm when the session ends.",
         },
         warm: {
-            human: "The container is already up. The driver waits for “open a session”.",
-            tech: "Container up. ChromeDriver listens for New Session.",
+            human: "The container is already running. The driver only waits for the command “open a session”.",
+            tech: "The container stays up. ChromeDriver listens for the WebDriver New Session command.",
         },
         hot: {
-            human: "The container is up, and the window is not closed between runs.",
-            tech: "Container up. Session and page survive across Jenkins builds.",
+            human: "The container is already running, and the browser window is not closed between Jenkins builds.",
+            tech: "The container stays up. The WebDriver session and the page survive from one Jenkins build to the next.",
         },
     },
     {
         label: "Browser session",
         cold: {
-            human: "Always a new window in a new container.",
-            tech: "New Session + new container.",
+            human: "Every run gets a new window inside a new container.",
+            tech: "The hub creates a New Session and a new container together.",
         },
         warm: {
-            human: "New window, but in an already running Chrome. Starts on a blank page.",
-            tech: "New Session → about:blank. A preopened /login is gone by the time Gradle finishes.",
+            human: "Every run gets a new window, but inside Chrome that is already running. That window starts on a blank page.",
+            tech: "New Session opens about:blank. If someone had opened /login earlier, that page is gone by the time Gradle finishes starting the test.",
         },
         hot: {
-            human: "The same window as the previous build. No extra blank tab.",
-            tech: "One WebDriver session in the daemon JVM. skipBlankOpen. quit() is off the test path.",
+            human: "The run uses the same window as the previous Jenkins build. No extra blank tab is opened.",
+            tech: "One WebDriver session lives in the daemon Java process. skipBlankOpen is on. quit() is not called on the test path.",
         },
     },
     {
         label: "How the test reaches Chrome",
         cold: {
             human: "Through the Selenoid hub, like any ordinary test.",
-            tech: "Test → hub POST /session. Playwright via the hub WebSocket.",
+            tech: "The test sends POST /session to the hub. Playwright talks to the hub over a WebSocket.",
         },
         warm: {
-            human: "Also through the hub, but the hub points at a warm Chrome instead of docker run.",
-            tech: "Test → hub :4444 → 127.0.0.1:14441. Chrome WD only. Hub Playwright is still cold.",
+            human: "Also through the hub, but the hub forwards the request to a warm Chrome instead of starting a container with docker run.",
+            tech: "The test talks to the hub on port 4444. The hub forwards to 127.0.0.1:14441. This attach path is WebDriver Chrome only. Playwright through the hub is still the cold path.",
         },
         hot: {
-            human: "The hub is skipped. The Jenkins agent talks to Chrome by container DNS.",
-            tech: "http://hot-chrome-min-1:4444/ on network selenoid-warm. box2 cannot use 127.0.0.1:16440.",
+            human: "The hub is skipped. The Jenkins agent talks to Chrome by the Docker container name on the shared network.",
+            tech: "The agent uses http://hot-chrome-min-1:4444/ on the Docker network selenoid-warm. The second Jenkins agent cannot reach that browser as 127.0.0.1:16440, because that address is local to the first agent.",
         },
     },
     {
-        label: "Reserve",
+        label: "Reserving a slot",
         cold: {
-            human: "No slot queue. The hub picks a container itself.",
-            tech: "Pool orchestrator is not involved. Hub does docker run.",
+            human: "There is no slot queue. The hub picks and starts a container by itself.",
+            tech: "The pool orchestrator is not involved. The hub runs docker run.",
         },
         warm: {
-            human: "Claim a warm Chrome and ask the hub to open a new window in it.",
-            tech: "POST /pool/reserve loopback:true — hub New Session on the slot.",
+            human: "The job claims a warm Chrome and asks the hub to open a new window in that Chrome.",
+            tech: "POST /pool/reserve with loopback:true. The hub then sends New Session to that slot.",
         },
         hot: {
-            human: "Mark the slot busy. Do not open a window — it is already there.",
-            tech: "POST /pool/reserve loopback:false — lock only, no New Session.",
+            human: "The job only marks the slot busy. It does not open a window — the window is already there.",
+            tech: "POST /pool/reserve with loopback:false. That is a lock only; no New Session is sent.",
         },
     },
     {
-        label: "Release",
+        label: "Releasing a slot",
         cold: {
-            human: "By then the browser is gone — the container died with the test.",
-            tech: "Session closed, container removed.",
+            human: "By the time release would matter, the browser is already gone: the container died with the test.",
+            tech: "The session is closed and the container is removed.",
         },
         warm: {
-            human: "The slot is free. The container stays; the window is closed. Next run opens a new one.",
-            tech: "POST /pool/release. Next build does New Session again.",
+            human: "The slot is marked free. The container stays; the window is closed. The next run opens a new window.",
+            tech: "POST /pool/release. The next build sends New Session again.",
         },
         hot: {
-            human: "Clear the busy mark. Chrome and Java keep running.",
-            tech: "POST /pool/release. No quit(). Daemon and session stay.",
+            human: "The busy mark is cleared. Chrome and Java keep running.",
+            tech: "POST /pool/release. quit() is not called. The daemon and the session stay.",
         },
     },
     {
         label: "Login page between tests",
         cold: {
-            human: "Not kept. There is no container to hold it.",
-            tech: "No idle /login.",
+            human: "The login page is not kept. There is no container left to hold it.",
+            tech: "There is no idle browser sitting on /login.",
         },
         warm: {
-            human: "Do not leave login open “just in case”. Warm slots are not for that.",
-            tech: "Idle /login on warm is forbidden.",
+            human: "Do not leave the login page open “just in case”. Warm slots are not meant to hold that page between runs.",
+            tech: "Leaving an idle /login page on a warm slot is forbidden.",
         },
         hot: {
-            human: "The window stays alive, but it is not left on login unattended. Sessions are wiped only if the daemon restarts.",
-            tech: "Keep-alive session. Wipe ChromeDriver sessions on daemon restart.",
+            human: "The window stays alive, but it is not left sitting on the login page unattended. ChromeDriver sessions are wiped only if the daemon restarts.",
+            tech: "The WebDriver session is kept alive. ChromeDriver sessions are wiped when the daemon process restarts.",
         },
     },
     {
-        label: "Login-test duration",
+        label: "How long the login test takes",
         cold: {
-            human: "About 9 seconds.",
-            tech: "java cold-pool · 9.4 s",
+            human: "About nine seconds.",
+            tech: "Java, cold pool: 9.4 seconds.",
         },
         warm: {
-            human: "About 4 seconds.",
-            tech: "java warm-pool · 4.2 s",
+            human: "About four seconds.",
+            tech: "Java, warm pool: 4.2 seconds.",
         },
         hot: {
-            human: "About 2 seconds when Java and Chrome are already warm.",
-            tech: "java hot-pool · 2.1–2.2 s",
+            human: "About two seconds when Java and Chrome are already warm.",
+            tech: "Java, hot pool: 2.1 to 2.2 seconds.",
         },
     },
     {
         label: "Where the time goes",
         cold: {
-            human: "Start a container, open Chrome, start Java, run login.",
-            tech: "docker run + New Session + Gradle test-worker + login.",
+            human: "Start a container, open Chrome, start Java, then run login.",
+            tech: "docker run, then New Session, then a new Gradle test-worker, then the login steps in the browser.",
         },
         warm: {
-            human: "Claim the slot, open a new window, run Gradle, log in. Code is not fetched again on a manual run.",
-            tech: "reserve + New Session + Gradle test ~3 s + login. Checkout skipped on Build Now.",
+            human: "Claim the slot, open a new window, start Gradle, then log in. On a manual Jenkins run the test code is not fetched from git again.",
+            tech: "reserve, then New Session, then about three seconds of Gradle test, then login. Git checkout is skipped when you press Build Now.",
         },
         hot: {
-            human: "Most of the wall is Jenkins overhead. The login in Chrome is about half a second.",
-            tech: "reserve + ensure reuse + POST /run ~600 ms + release. ~1.5 s is pipeline/shell, not the browser. Git lives in a sync job.",
+            human: "Most of the time you see on the Jenkins build is Jenkins itself. The login in Chrome is about half a second.",
+            tech: "reserve, then ensure.sh reuses the running daemon, then POST /run takes about 600 milliseconds, then release. About 1.5 seconds is the Jenkins pipeline and the shell, not the browser. Git lives in a separate sync job.",
         },
     },
     {
         label: "Java process",
         cold: {
-            human: "Every build starts Java from scratch.",
-            tech: "New Gradle test-worker.",
+            human: "Every Jenkins build starts Java from scratch.",
+            tech: "A new Gradle test-worker process starts each time.",
         },
         warm: {
-            human: "Gradle is warm, but the test still runs in a new process.",
-            tech: "Gradle daemon + configuration-cache. New test-worker per build.",
+            human: "Gradle itself is already warm, but the test still runs in a new Java process.",
+            tech: "The Gradle daemon and configuration-cache stay up. A new test-worker still starts for each build.",
         },
         hot: {
-            human: "A Java daemon stays on the agent. The build only tells it to run login.",
-            tech: "HotJunitDaemon on 127.0.0.1:17890. Not a test-worker. Restart if test classes change.",
+            human: "A Java daemon stays on the Jenkins agent. The build only tells that process to run login.",
+            tech: "HotJunitDaemon listens on 127.0.0.1:17890. It is not a Gradle test-worker. Restart it when the test classes change.",
         },
     },
     {
-        label: "Where test code comes from",
+        label: "Where the test code comes from",
         cold: {
             human: "A git push checks out fresh code. A manual run usually reuses what is already on the agent.",
-            tech: "Checkout unless the run was started by a user.",
+            tech: "Jenkins checks out git unless a person started the run with Build Now.",
         },
         warm: {
-            human: "Same: a manual run does not clone if the tests are already on disk.",
-            tech: "Checkout skipped on Build Now when the workspace exists.",
+            human: "The same as cold: a manual run does not clone again if the tests are already on disk.",
+            tech: "Git checkout is skipped on Build Now when the workspace already exists.",
         },
         hot: {
-            human: "The test job does not touch git. A separate sync job updates the tree. No code → the test fails with a hint.",
-            tech: "No ls-remote / fetch / checkout. Missing gradlew → “run the sync job first”.",
+            human: "The test job does not touch git. A separate sync job updates the files. If there is no code, the test fails with a hint to run that sync job first.",
+            tech: "The test job does not run git ls-remote, fetch, or checkout. If gradlew is missing, the job fails with “run the sync job first”.",
         },
     },
     {
         label: "Close the browser after the test",
         cold: {
-            human: "Yes. The container goes with it.",
-            tech: "quit() after the test. Container rm.",
+            human: "Yes. The container is removed with it.",
+            tech: "quit() runs after the test. Then the container is removed with docker rm.",
         },
         warm: {
-            human: "Yes, the window closes. The container waits for the next run.",
-            tech: "closeBrowserAfterEach defaults to true. Slot up, no session.",
+            human: "Yes, the window closes. The container stays and waits for the next run.",
+            tech: "closeBrowserAfterEach defaults to true. The slot stays up, but there is no open session.",
         },
         hot: {
-            human: "No. The window is left open for the next build on purpose.",
-            tech: "closeBrowserAfterEach/All = false. Same Selenide thread.",
+            human: "No. The window is left open on purpose for the next Jenkins build.",
+            tech: "closeBrowserAfterEach and closeBrowserAfterAll are false. The same Selenide thread keeps the session.",
         },
     },
     {
         label: "Playwright",
         cold: {
-            human: "Ordinary hub path, like any cold browser.",
-            tech: "Hub POST /session → playwright-chromium 1.61.1.",
+            human: "The ordinary hub path, like any cold browser.",
+            tech: "The hub receives POST /session and starts playwright-chromium 1.61.1.",
         },
         warm: {
-            human: "Playwright containers are up, but the hub does not attach to them — that stays cold.",
-            tech: "Slots :14501/:14502 up. No Playwright hub-attach.",
+            human: "Playwright containers are already running, but the hub does not attach to them. A Playwright test through the hub still takes the cold path.",
+            tech: "Slots on ports 14501 and 14502 are up. There is no Playwright hub-attach.",
         },
         hot: {
-            human: "A -min Playwright is up; the Java login job does not use it.",
-            tech: "Slot :16441 up. Java hot-pool talks to Chrome :16440.",
+            human: "A smaller “-min” Playwright is running, but the Java login job does not use it.",
+            tech: "The slot on port 16441 is up. The Java hot-pool job talks to Chrome on port 16440.",
         },
     },
 ];
@@ -240,22 +244,22 @@ export const ONE_RUN_ROWS: OneRunRow[] = [
     {
         pool: "Cold",
         cell: {
-            human: "Ask for a browser → hub starts a container → open a window → log in → tear it all down.",
-            tech: "hub → docker run chrome → New Session → login → DELETE session → rm container",
+            human: "Ask for a browser, then the hub starts a container, then a window opens, then login runs, then everything is torn down.",
+            tech: "The hub runs docker run for Chrome, then New Session, then login, then DELETE session, then docker rm of the container.",
         },
     },
     {
         pool: "Warm",
         cell: {
-            human: "Claim a warm Chrome → hub opens a new blank window → log in → close the window → free the slot.",
-            tech: "reserve loopback → hub POST /session on :14441 → about:blank → login → quit → release",
+            human: "Claim a warm Chrome, then the hub opens a new blank window, then login runs, then the window closes, then the slot is marked free.",
+            tech: "reserve with loopback, then the hub sends POST /session to port 14441, then about:blank, then login, then quit, then release.",
         },
     },
     {
         pool: "Hot",
         cell: {
-            human: "Mark the slot busy → tell the running Java to log in on the Chrome that is already open → clear the lock.",
-            tech: "reserve (lock) → POST :17890/run → Chrome :16440 → login → release. Chrome does not quit.",
+            human: "Mark the slot busy, then tell the running Java process to log in on the Chrome that is already open, then clear the lock.",
+            tech: "reserve is a lock only, then POST :17890/run, then Chrome on port 16440, then login, then release. Chrome does not quit.",
         },
     },
 ];

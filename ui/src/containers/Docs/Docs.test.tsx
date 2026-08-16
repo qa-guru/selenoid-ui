@@ -12,16 +12,16 @@ describe("Docs", () => {
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
             "Cold · Warm · Hot — how the pools differ"
         );
-        expect(screen.getByTestId("docs-stat-cold")).toHaveTextContent("~9.4 s");
-        expect(screen.getByTestId("docs-stat-warm")).toHaveTextContent("~4.2 s");
-        expect(screen.getByTestId("docs-stat-hot")).toHaveTextContent("~2.2 s");
+        expect(screen.getByTestId("docs-stat-cold")).toHaveTextContent("~9.4 seconds");
+        expect(screen.getByTestId("docs-stat-warm")).toHaveTextContent("~4.2 seconds");
+        expect(screen.getByTestId("docs-stat-hot")).toHaveTextContent("~2.2 seconds");
         expect(screen.getByTestId("docs-release-callout")).toHaveTextContent(
             "Releasing a slot does not close Chrome"
         );
 
         const comparison = screen.getByTestId("docs-comparison");
         expect(comparison.querySelectorAll("tbody tr")).toHaveLength(COMPARISON_ROWS.length);
-        expect(comparison).toHaveTextContent("POST /pool/reserve loopback:false");
+        expect(comparison).toHaveTextContent("POST /pool/reserve with loopback:false");
         expect(comparison).toHaveTextContent("http://hot-chrome-min-1:4444/");
 
         const oneRun = screen.getByTestId("docs-one-run");

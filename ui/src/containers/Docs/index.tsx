@@ -23,11 +23,12 @@ const Docs = () => {
         <StyledDocs data-testid="docs-page">
             <h1>Cold · Warm · Hot — how the pools differ</h1>
             <p className="docs__lead">
-                Same Java login test in every column. Each cell: plain English first, then the
-                mechanism.
+                The same Java login test is measured in every column. Each cell has two sentences:
+                first what a person sees, then how it works.
             </p>
             <p className="docs__meta">
-                Timing: login test, Allure off, Jenkins, 15–16 Aug 2026. Playwright 1.61.1.
+                Times are for the login test with Allure reporting turned off, run from Jenkins, on
+                15–16 August 2026. Playwright version is 1.61.1.
             </p>
 
             <div className="docs__stats" data-testid="docs-pool-stats">
@@ -47,10 +48,10 @@ const Docs = () => {
             <aside className="docs__callout" data-testid="docs-release-callout">
                 <h2>Releasing a slot does not close Chrome</h2>
                 <p>
-                    After the test we tell the pool the slot is free. On cold the browser is already
-                    gone with its container. On warm the container stays up, but the window is
-                    closed — the next run opens a new session. On hot Chrome stays open; only the
-                    lock is cleared.
+                    After the test we tell the pool that the slot is free. In the cold pool the
+                    browser is already gone together with its container. In the warm pool the
+                    container stays up, but the window is closed — the next run opens a new session.
+                    In the hot pool Chrome stays open; only the lock is cleared.
                 </p>
             </aside>
 
@@ -110,8 +111,9 @@ const Docs = () => {
             </section>
 
             <p className="docs__footnote">
-                Versus cold: warm is ~5 s faster, hot ~7 s. Do not compare Allure lite/heavy across
-                pools — that cost is the report, not the browser.
+                Compared with cold, warm is about five seconds faster and hot is about seven seconds
+                faster. Do not compare Allure with few attachments against Allure with many
+                attachments across pools: that extra time is the report, not the browser.
             </p>
         </StyledDocs>
     );
