@@ -35,14 +35,17 @@ const GITHUB_TESTS: ResourceRef = {
     label: "qa-guru/selenoid-tests",
 };
 
-const AWESOME: ResourceRef = {
-    href: "https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/",
-    label: "Awesome",
-};
-const DASHBOARD: ResourceRef = {
-    href: "https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/",
-    label: "Dashboard",
-};
+const REPORT_LATEST = "https://qa-guru.github.io/selenoid-tests/reports/latest";
+
+function awesome(epic?: string): ResourceRef {
+    const query = epic ? `?query=${encodeURIComponent(epic)}` : "";
+    return { href: `${REPORT_LATEST}/awesome/${query}`, label: "Awesome" };
+}
+
+function dashboard(epic?: string): ResourceRef {
+    const hash = epic ? `#:~:text=${encodeURIComponent(`Динамика — ${epic}`)}` : "";
+    return { href: `${REPORT_LATEST}/dashboard/${hash}`, label: "Dashboard" };
+}
 
 function docker(image: string): ResourceRef {
     return { href: `https://hub.docker.com/r/${image}`, label: image };
@@ -60,8 +63,10 @@ function image(
     repo: string,
     ghPath: string,
     comment: string,
-    reports = true
+    epic?: string | false
 ): ResourceService {
+    const reports = epic !== false;
+    const slug = typeof epic === "string" ? epic : undefined;
     return {
         name,
         github: {
@@ -69,8 +74,8 @@ function image(
             label: `browser-image/${ghPath}`,
         },
         dockerHub: docker(repo),
-        awesome: reports ? AWESOME : undefined,
-        dashboard: reports ? DASHBOARD : undefined,
+        awesome: reports ? awesome(slug) : undefined,
+        dashboard: reports ? dashboard(slug) : undefined,
         comment,
     };
 }
@@ -80,8 +85,8 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "selenoid",
         github: GITHUB_SELENOID,
         dockerHub: docker("qaguru/selenoid"),
-        awesome: AWESOME,
-        dashboard: DASHBOARD,
+        awesome: awesome("selenoid"),
+        dashboard: dashboard("selenoid"),
         sonar: sonar("selenoid"),
         comment: "Hub — WebDriver and Playwright",
     },
@@ -89,8 +94,8 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "selenoid-ui",
         github: GITHUB_UI,
         dockerHub: docker("qaguru/selenoid-ui"),
-        awesome: AWESOME,
-        dashboard: DASHBOARD,
+        awesome: awesome("selenoid-ui"),
+        dashboard: dashboard("selenoid-ui"),
         sonar: sonar("selenoid-ui"),
         comment: "Web UI",
     },
@@ -98,8 +103,8 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "cm",
         github: GITHUB_CM,
         dockerHub: docker("qaguru/cm"),
-        awesome: AWESOME,
-        dashboard: DASHBOARD,
+        awesome: awesome("cm"),
+        dashboard: dashboard("cm"),
         sonar: sonar("selenoid-cm"),
         comment: "Installer",
     },
@@ -107,52 +112,81 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         name: "browser-image",
         github: GITHUB_IMAGE,
         dockerHub: { href: "https://hub.docker.com/u/qaguru", label: "qaguru/*" },
-        awesome: AWESOME,
-        dashboard: DASHBOARD,
+        awesome: awesome(),
+        dashboard: dashboard(),
         sonar: sonar("selenoid-browser-image"),
         comment: "Browser node image source",
     },
     {
         name: "selenoid-tests",
         github: GITHUB_TESTS,
-        awesome: AWESOME,
-        dashboard: DASHBOARD,
+        awesome: awesome(),
+        dashboard: dashboard(),
         sonar: sonar("selenoid-tests"),
         comment: "Go pyramid and CI orchestrator",
     },
-    image("video-recorder", "qaguru/video-recorder", "video-recorder", "Session video sidecar"),
-    image("webdriver-chrome", "qaguru/webdriver-chrome", "webdriver/chrome", "Chrome WebDriver node"),
-    image("webdriver-firefox", "qaguru/webdriver-firefox", "webdriver/firefox", "Firefox WebDriver node"),
-    image("webdriver-msedge", "qaguru/webdriver-msedge", "webdriver/msedge", "Edge WebDriver node"),
+    image(
+        "video-recorder",
+        "qaguru/video-recorder",
+        "video-recorder",
+        "Session video sidecar",
+        "video-recorder"
+    ),
+    image(
+        "webdriver-chrome",
+        "qaguru/webdriver-chrome",
+        "webdriver/chrome",
+        "Chrome WebDriver node",
+        "webdriver-image"
+    ),
+    image(
+        "webdriver-firefox",
+        "qaguru/webdriver-firefox",
+        "webdriver/firefox",
+        "Firefox WebDriver node",
+        "webdriver-image"
+    ),
+    image(
+        "webdriver-msedge",
+        "qaguru/webdriver-msedge",
+        "webdriver/msedge",
+        "Edge WebDriver node",
+        "webdriver-image"
+    ),
     image(
         "playwright-chromium",
         "qaguru/playwright-chromium",
         "playwright/playwright-chromium",
-        "Playwright Chromium node"
+        "Playwright Chromium node",
+        "playwright-image"
     ),
     image(
         "playwright-chrome",
         "qaguru/playwright-chrome",
         "playwright/playwright-chrome",
-        "Playwright Chrome node"
+        "Playwright Chrome node",
+        "playwright-image"
     ),
     image(
         "playwright-firefox",
         "qaguru/playwright-firefox",
         "playwright/playwright-firefox",
-        "Playwright Firefox node"
+        "Playwright Firefox node",
+        "playwright-image"
     ),
     image(
         "playwright-msedge",
         "qaguru/playwright-msedge",
         "playwright/playwright-msedge",
-        "Playwright Edge node"
+        "Playwright Edge node",
+        "playwright-image"
     ),
     image(
         "playwright-webkit",
         "qaguru/playwright-webkit",
         "playwright/playwright-webkit",
-        "Playwright WebKit node"
+        "Playwright WebKit node",
+        "playwright-image"
     ),
     image("android", "qaguru/android", "android", "Appium Android node", false),
 ];

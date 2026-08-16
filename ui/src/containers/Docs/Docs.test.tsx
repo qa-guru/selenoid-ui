@@ -104,14 +104,33 @@ describe("Docs", () => {
         expect(table).toHaveTextContent("Sonar");
         expect(
             page.querySelector(
-                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/"]'
+                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=selenoid-ui"]'
             )
         ).toBeTruthy();
         expect(
             page.querySelector(
-                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/dashboard/"]'
+                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=webdriver-image"]'
             )
         ).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=playwright-image"]'
+            )
+        ).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/"]'
+            )
+        ).toBeTruthy();
+        const chrome = RESOURCE_SERVICES.find((row) => row.name === "webdriver-chrome");
+        expect(chrome?.awesome?.href).toContain("query=webdriver-image");
+        expect(chrome?.dashboard?.href).toContain("webdriver-image");
+        expect(page.querySelector(`a[href="${chrome?.awesome?.href}"]`)).toBeTruthy();
+        expect(page.querySelector(`a[href="${chrome?.dashboard?.href}"]`)).toBeTruthy();
+        const androidRow = Array.from(table.querySelectorAll("tbody tr")).find((tr) =>
+            tr.textContent?.includes("android")
+        );
+        expect(androidRow?.querySelector('a[href*="/awesome/"]')).toBeFalsy();
         expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
     });
 });
