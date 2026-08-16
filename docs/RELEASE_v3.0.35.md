@@ -11,7 +11,7 @@
 |-----------|----------|
 | **Benchmarks · §0** | Колонки **variant** (`none` / `allure-lite` / `allure-heavy`) и две Δ: vs cold none (пул) и vs none (налог Allure). Не смешивать lite↔heavy между пулами. |
 | **Java none** | cold **9.414** · warm **[#14 4.216s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/14/)** · hot **[#5 4.781s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/5/)** (New Session на hot ChromeDriver, не UUID attach). |
-| **JS warm** | **n/a** — Playwright без hub-attach, не pending. Остальные hot-строки **stub**. |
+| **JS warm** | **n/a** — Playwright без container-reuse, не pending. Остальные hot-строки **stub**. |
 
 ## Обновление
 

@@ -192,7 +192,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
         },
         warm: {
             human: "Also through the hub, but the hub forwards the request to a warm Chrome instead of starting a container with docker run.",
-            tech: "The test talks to the hub on port 4444. The hub forwards to 127.0.0.1:14441. This attach path is WebDriver Chrome only. Playwright through the hub is still the cold path.",
+            tech: "The test talks to the hub on port 4444. The hub forwards to 127.0.0.1:14441. This container-reuse path is WebDriver Chrome only. Playwright through the hub is still the cold path.",
         },
         hot: {
             human: "The hub is skipped. The Jenkins agent talks to Chrome by the Docker container name on the shared network.",
@@ -326,8 +326,8 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             tech: "The hub receives POST /session and starts playwright-chromium 1.61.1.",
         },
         warm: {
-            human: "Playwright containers are already running, but the hub does not attach to them. A Playwright test through the hub still takes the cold path.",
-            tech: "Slots on ports 14501 and 14502 are up. There is no Playwright hub-attach.",
+            human: "Playwright containers are already running, but the hub does not reuse them. A Playwright test through the hub still takes the cold path.",
+            tech: "Slots on ports 14501 and 14502 are up. There is no Playwright container-reuse.",
         },
         hot: {
             human: "A smaller “-min” Playwright is running, but the Java login job does not use it.",

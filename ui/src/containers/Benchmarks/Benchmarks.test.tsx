@@ -103,7 +103,7 @@ describe("Benchmarks", () => {
                     pool: "warm-pool",
                     jenkins_url:
                         "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/",
-                    note: "hub-attach",
+                    note: "container-reuse",
                     wall_time_s: 4.216,
                 },
             ],

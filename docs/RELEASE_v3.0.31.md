@@ -9,7 +9,7 @@
 
 | Изменение | Описание |
 |-----------|----------|
-| **Benchmarks · Jenkins** | Секция **0. Jenkins login-test**: cold headless, cold full-attachments, warm hub-attach, hot stub — ссылки на [jenkins.qa.guru](https://jenkins.qa.guru/) |
+| **Benchmarks · Jenkins** | Секция **0. Jenkins login-test**: cold headless, cold full-attachments, warm container-reuse, hot stub — ссылки на [jenkins.qa.guru](https://jenkins.qa.guru/) |
 | **Wall times** | Замеры 14.08: warm #17 **4.773 s**, cold #8 **9.414 s**, cold-full #8 **18.897 s** |
 | **Header Hot** | Метрика Hot в шапке из hub SSE (`used` / quota) |
 
