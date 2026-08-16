@@ -59,7 +59,10 @@ function syncActiveNav(pathname: any) {
 
     const current = normalize(pathname);
     for (const link of links) {
-        const isActive = hashHrefToPath(link.getAttribute("href")) === current;
+        const hrefPath = hashHrefToPath(link.getAttribute("href"));
+        const isActive = Boolean(
+            hrefPath && (hrefPath === current || current.startsWith(`${hrefPath}/`))
+        );
         link.classList.toggle("is-active", isActive);
         if (isActive) {
             link.setAttribute("aria-current", "page");

@@ -115,5 +115,15 @@ describe("Viewport", () => {
 
         expect(screen.getByTestId("docs-page")).toBeInTheDocument();
         expect(screen.getByTestId("docs-comparison")).toBeInTheDocument();
+        expect(screen.getByTestId("docs-nav-resources")).toBeInTheDocument();
+    });
+
+    it("shows Docs Resources catalog on the docs/resources route", () => {
+        injectHeaderSlots();
+        renderViewport(["/docs/resources"]);
+
+        expect(screen.getByTestId("docs-page")).toBeInTheDocument();
+        expect(screen.getByTestId("docs-resources")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Resources");
     });
 });

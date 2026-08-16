@@ -1,14 +1,28 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
+import { RESOURCE_SECTIONS } from "./resources";
+
+function renderDocs(path = "/docs") {
+    return render(
+        <MemoryRouter initialEntries={[path]}>
+            <Routes>
+                <Route path="/docs/*" element={<Docs />} />
+            </Routes>
+        </MemoryRouter>
+    );
+}
 
 describe("Docs", () => {
     it("renders the browser-pools comparison", () => {
-        render(<Docs />);
+        renderDocs();
 
         expect(screen.getByTestId("docs-page")).toBeInTheDocument();
+        expect(screen.getByTestId("docs-nav-pools")).toHaveClass("is-active");
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
             "Cold · Warm · Hot — how the pools differ"
         );
@@ -36,5 +50,28 @@ describe("Docs", () => {
         const oneRun = screen.getByTestId("docs-one-run");
         expect(oneRun.querySelectorAll("tbody tr")).toHaveLength(ONE_RUN_ROWS.length);
         expect(oneRun).toHaveTextContent("Chrome does not quit");
+    });
+
+    it("renders the Resources catalog without aerokube GitHub links", async () => {
+        const user = userEvent.setup();
+        renderDocs();
+
+        await user.click(screen.getByTestId("docs-nav-resources"));
+
+        expect(screen.getByTestId("docs-nav-resources")).toHaveClass("is-active");
+        expect(screen.getByTestId("docs-nav-pools")).not.toHaveClass("is-active");
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Resources");
+
+        const page = screen.getByTestId("docs-resources");
+        expect(page).toHaveTextContent("qa-guru/selenoid");
+        expect(page).toHaveTextContent("qaguru/selenoid-ui");
+        expect(page.querySelector('a[href="https://hub.docker.com/u/qaguru"]')).toBeTruthy();
+        expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
+        expect(page.innerHTML).not.toMatch(/aerokube\.com/i);
+
+        for (const section of RESOURCE_SECTIONS) {
+            const table = screen.getByTestId(`docs-resources-${section.id}`);
+            expect(table.querySelectorAll("tbody tr")).toHaveLength(section.rows.length);
+        }
     });
 });

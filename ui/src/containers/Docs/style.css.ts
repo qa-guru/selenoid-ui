@@ -5,6 +5,69 @@ export const StyledDocs = styled.div`
     width: 100%;
     padding: 20px var(--page-padding-x, 16px) 40px;
     color: var(--color-text, #fff);
+    display: grid;
+    grid-template-columns: 12.5em minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .docs__toc {
+        position: sticky;
+        top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 4px 0;
+    }
+
+    @media (max-width: 768px) {
+        .docs__toc {
+            position: static;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+
+    .docs__toc-link {
+        color: var(--color-text-muted, #aaa);
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 300;
+        padding: 6px 10px;
+        border-left: 3px solid transparent;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .docs__toc-link:hover,
+    .docs__toc-link.is-active {
+        color: var(--color-text, #fff);
+    }
+
+    .docs__toc-link.is-active {
+        border-left-color: var(--color-info, #5b9fd6);
+        background: var(--color-surface, #2a3038);
+    }
+
+    @media (max-width: 768px) {
+        .docs__toc-link {
+            border-left: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 4px;
+        }
+
+        .docs__toc-link.is-active {
+            border-bottom-color: var(--color-info, #5b9fd6);
+        }
+    }
+
+    .docs__article {
+        min-width: 0;
+    }
 
     h1 {
         margin: 0 0 8px;
@@ -120,8 +183,19 @@ export const StyledDocs = styled.div`
         min-width: 720px;
     }
 
-    table.docs__table--run {
+    table.docs__table--run,
+    table.docs__table--links {
         min-width: 480px;
+    }
+
+    table.docs__table--links a {
+        color: var(--color-success, #59a781);
+        text-decoration: none;
+        font-weight: 400;
+    }
+
+    table.docs__table--links a:hover {
+        text-decoration: underline;
     }
 
     table.docs__table th,

@@ -125,6 +125,16 @@ describe("SelenoidAppHeader", () => {
         expect(ariaCurrentTestids()).toEqual(["header-nav-docs"]);
     });
 
+    it("highlights Docs on a nested docs route", async () => {
+        renderHeader(["/docs/resources"]);
+        injectHeaderNav();
+
+        await waitFor(() => {
+            expect(activeTestids()).toEqual(["header-nav-docs"]);
+        });
+        expect(ariaCurrentTestids()).toEqual(["header-nav-docs"]);
+    });
+
     it("re-syncs the active item on SPA navigation", async () => {
         const user = userEvent.setup();
         renderHeader(["/statistics"]);
