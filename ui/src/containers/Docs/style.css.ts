@@ -176,11 +176,6 @@ export const StyledDocs = styled.div`
         border-radius: 4px;
     }
 
-    .docs__scroll--hug {
-        width: max-content;
-        max-width: 100%;
-    }
-
     table.docs__table {
         width: 100%;
         border-collapse: collapse;
@@ -234,7 +229,7 @@ export const StyledDocs = styled.div`
     }
 
     table.docs__table--links {
-        width: auto;
+        width: 100%;
         min-width: 0;
     }
 
@@ -245,6 +240,11 @@ export const StyledDocs = styled.div`
         left: auto;
         min-width: 0;
         white-space: nowrap;
+    }
+
+    table.docs__table--links tbody td:last-child {
+        white-space: normal;
+        width: 100%;
     }
 
     table.docs__table--links tbody td:first-child {

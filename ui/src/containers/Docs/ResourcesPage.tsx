@@ -28,7 +28,7 @@ const Resources = () => {
                 </a>
                 .
             </p>
-            <div className="docs__scroll docs__scroll--hug">
+            <div className="docs__scroll">
                 <table className="docs__table docs__table--links" data-testid="docs-resources-table">
                     <thead>
                         <tr>
