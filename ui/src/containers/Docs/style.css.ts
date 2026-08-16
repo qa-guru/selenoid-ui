@@ -252,6 +252,16 @@ export const StyledDocs = styled.div`
         font-weight: 300;
     }
 
+    table.docs__table--links tbody th {
+        color: var(--color-text, #fff);
+        background: transparent;
+        font-weight: 400;
+    }
+
+    table.docs__table--links .docs-resource__empty {
+        color: var(--color-text-muted, #aaa);
+    }
+
     table.docs__table--links thead th {
         position: sticky;
         top: 0;
@@ -271,6 +281,15 @@ export const StyledDocs = styled.div`
     }
 
     table.docs__table--links a:hover {
+        text-decoration: underline;
+    }
+
+    .docs__lead a {
+        color: var(--color-success, #59a781);
+        text-decoration: none;
+    }
+
+    .docs__lead a:hover {
         text-decoration: underline;
     }
 

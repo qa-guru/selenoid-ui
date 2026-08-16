@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
-import { RESOURCE_ROWS } from "./resources";
+import { RESOURCE_SERVICES } from "./resources";
 
 function renderDocs(path = "/docs") {
     return render(
@@ -66,6 +66,7 @@ describe("Docs", () => {
         expect(page).toHaveTextContent("qa-guru/selenoid");
         expect(page).toHaveTextContent("qaguru/selenoid-ui");
         expect(page.querySelector('a[href="https://hub.docker.com/u/qaguru"]')).toBeTruthy();
+        expect(page.querySelector('a[href="https://github.com/qa-guru/selenoid"]')).toBeTruthy();
         expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
         expect(page.innerHTML).not.toMatch(/aerokube\.com/i);
         expect(page).not.toHaveTextContent("zero-design-system");
@@ -74,12 +75,12 @@ describe("Docs", () => {
         expect(page).not.toHaveTextContent("selenoid-qa-guru-deploy");
 
         const table = screen.getByTestId("docs-resources-table");
-        expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_ROWS.length);
+        expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_SERVICES.length);
+        expect(table).toHaveTextContent("Service");
         expect(table).toHaveTextContent("GitHub");
         expect(table).toHaveTextContent("Docker Hub");
-        expect(table).toHaveTextContent("Live");
-        expect(table).toHaveTextContent("CI");
-        expect(table).toHaveTextContent("Sonar");
-        expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
+        expect(table).toHaveTextContent("Comment");
+        expect(page.querySelector('a[href="https://sonar.qa.guru"]')).toBeTruthy();
+        expect(page.querySelector('a[href="https://selenoid.qa.guru"]')).toBeTruthy();
     });
 });

@@ -1,33 +1,54 @@
 import React from "react";
 
-import { RESOURCE_ROWS } from "./resources";
+import { RESOURCE_SERVICES, type ResourceRef } from "./resources";
+
+function ExtLink({ link }: { link?: ResourceRef }) {
+    if (!link) {
+        return <span className="docs-resource__empty">—</span>;
+    }
+    return (
+        <a href={link.href} target="_blank" rel="noreferrer">
+            {link.label}
+        </a>
+    );
+}
 
 const Resources = () => {
     return (
         <div data-testid="docs-resources">
             <h1>Resources</h1>
             <p className="docs__lead">
-                GitHub, Docker Hub, live sites, CI, and Sonar for the qa-guru Selenoid stack.
+                qa-guru Selenoid stack. Prod:{" "}
+                <a href="https://selenoid.qa.guru" target="_blank" rel="noreferrer">
+                    selenoid.qa.guru
+                </a>
+                . Sonar:{" "}
+                <a href="https://sonar.qa.guru" target="_blank" rel="noreferrer">
+                    sonar.qa.guru
+                </a>
+                .
             </p>
             <div className="docs__scroll docs__scroll--hug">
                 <table className="docs__table docs__table--links" data-testid="docs-resources-table">
                     <thead>
                         <tr>
-                            <th>Kind</th>
-                            <th>Name</th>
-                            <th>What it is</th>
+                            <th>Service</th>
+                            <th>GitHub</th>
+                            <th>Docker Hub</th>
+                            <th>Comment</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {RESOURCE_ROWS.map((row) => (
-                            <tr key={row.href}>
-                                <td className="docs-resource__kind">{row.kind}</td>
-                                <th scope="row">
-                                    <a href={row.href} target="_blank" rel="noreferrer">
-                                        {row.name}
-                                    </a>
-                                </th>
-                                <td>{row.role}</td>
+                        {RESOURCE_SERVICES.map((row) => (
+                            <tr key={row.name}>
+                                <th scope="row">{row.name}</th>
+                                <td>
+                                    <ExtLink link={row.github} />
+                                </td>
+                                <td>
+                                    <ExtLink link={row.dockerHub} />
+                                </td>
+                                <td>{row.comment}</td>
                             </tr>
                         ))}
                     </tbody>
