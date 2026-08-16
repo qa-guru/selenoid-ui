@@ -176,6 +176,11 @@ export const StyledDocs = styled.div`
         border-radius: 4px;
     }
 
+    .docs__scroll--hug {
+        width: max-content;
+        max-width: 100%;
+    }
+
     table.docs__table {
         width: 100%;
         border-collapse: collapse;
@@ -183,19 +188,8 @@ export const StyledDocs = styled.div`
         min-width: 720px;
     }
 
-    table.docs__table--run,
-    table.docs__table--links {
+    table.docs__table--run {
         min-width: 480px;
-    }
-
-    table.docs__table--links a {
-        color: var(--color-success, #59a781);
-        text-decoration: none;
-        font-weight: 400;
-    }
-
-    table.docs__table--links a:hover {
-        text-decoration: underline;
     }
 
     table.docs__table th,
@@ -237,6 +231,47 @@ export const StyledDocs = styled.div`
     table.docs__table td {
         font-weight: 300;
         min-width: 16em;
+    }
+
+    table.docs__table--links {
+        width: auto;
+        min-width: 0;
+    }
+
+    table.docs__table--links tbody th,
+    table.docs__table--links tbody td,
+    table.docs__table--links thead th {
+        position: static;
+        left: auto;
+        min-width: 0;
+        white-space: nowrap;
+    }
+
+    table.docs__table--links tbody td:first-child {
+        background: transparent;
+        font-weight: 300;
+    }
+
+    table.docs__table--links thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    table.docs__table--links .docs-resource__kind {
+        color: var(--color-text-muted, #aaa);
+        font-weight: 300;
+        background: transparent;
+    }
+
+    table.docs__table--links a {
+        color: var(--color-success, #59a781);
+        text-decoration: none;
+        font-weight: 400;
+    }
+
+    table.docs__table--links a:hover {
+        text-decoration: underline;
     }
 
     table.docs__table--marks {

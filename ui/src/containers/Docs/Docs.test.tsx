@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
-import { RESOURCE_SECTIONS } from "./resources";
+import { RESOURCE_ROWS } from "./resources";
 
 function renderDocs(path = "/docs") {
     return render(
@@ -69,9 +69,11 @@ describe("Docs", () => {
         expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
         expect(page.innerHTML).not.toMatch(/aerokube\.com/i);
 
-        for (const section of RESOURCE_SECTIONS) {
-            const table = screen.getByTestId(`docs-resources-${section.id}`);
-            expect(table.querySelectorAll("tbody tr")).toHaveLength(section.rows.length);
-        }
+        const table = screen.getByTestId("docs-resources-table");
+        expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_ROWS.length);
+        expect(table).toHaveTextContent("GitHub");
+        expect(table).toHaveTextContent("Docker Hub");
+        expect(table).toHaveTextContent("Live");
+        expect(table).toHaveTextContent("CI");
     });
 });
