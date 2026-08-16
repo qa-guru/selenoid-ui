@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
-import { COMPARISON_ROWS, ONE_RUN_ROWS } from "./pools";
+import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
 
 describe("Docs", () => {
     it("renders the browser-pools comparison", () => {
@@ -18,6 +18,15 @@ describe("Docs", () => {
         expect(screen.getByTestId("docs-release-callout")).toHaveTextContent(
             "Releasing a slot does not close Chrome"
         );
+
+        const features = screen.getByTestId("docs-features");
+        expect(features.querySelectorAll("tbody tr")).toHaveLength(FEATURE_ROWS.length);
+        expect(features).toHaveTextContent("Browser container is already running before the test");
+        const reuseRow = Array.from(features.querySelectorAll("tbody tr")).find((tr) =>
+            tr.textContent?.includes("The same browser window is reused across Jenkins builds")
+        );
+        expect(reuseRow?.querySelectorAll('[aria-label="No"]')).toHaveLength(2);
+        expect(reuseRow?.querySelectorAll('[aria-label="Yes"]')).toHaveLength(1);
 
         const comparison = screen.getByTestId("docs-comparison");
         expect(comparison.querySelectorAll("tbody tr")).toHaveLength(COMPARISON_ROWS.length);

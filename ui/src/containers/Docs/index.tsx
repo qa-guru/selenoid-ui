@@ -3,6 +3,8 @@ import React from "react";
 import {
     COMPARISON_HEADERS,
     COMPARISON_ROWS,
+    FEATURE_HEADERS,
+    FEATURE_ROWS,
     ONE_RUN_ROWS,
     POOL_STATS,
     type Dual,
@@ -15,6 +17,17 @@ function DualCell({ human, tech }: Dual) {
             <p className="docs-cell__human">{human}</p>
             <p className="docs-cell__tech">{tech}</p>
         </div>
+    );
+}
+
+function Mark({ yes }: { yes: boolean }) {
+    return (
+        <span
+            className={yes ? "docs-mark docs-mark--yes" : "docs-mark docs-mark--no"}
+            aria-label={yes ? "Yes" : "No"}
+        >
+            {yes ? "✓" : "—"}
+        </span>
     );
 }
 
@@ -54,6 +67,46 @@ const Docs = () => {
                     In the hot pool Chrome stays open; only the lock is cleared.
                 </p>
             </aside>
+
+            <section className="docs__section">
+                <h2>What each pool has</h2>
+                <p className="docs__hint">
+                    A check means this pool has the feature or optimization. A dash means it does
+                    not.
+                </p>
+                <div className="docs__scroll">
+                    <table className="docs__table docs__table--marks" data-testid="docs-features">
+                        <thead>
+                            <tr>
+                                {FEATURE_HEADERS.map((header) => (
+                                    <th key={header}>{header}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {FEATURE_ROWS.map((row) => (
+                                <tr key={row.label}>
+                                    <th scope="row">
+                                        <span className="docs-feature__label">{row.label}</span>
+                                        {row.detail ? (
+                                            <span className="docs-feature__detail">{row.detail}</span>
+                                        ) : null}
+                                    </th>
+                                    <td>
+                                        <Mark yes={row.cold} />
+                                    </td>
+                                    <td>
+                                        <Mark yes={row.warm} />
+                                    </td>
+                                    <td>
+                                        <Mark yes={row.hot} />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
             <section className="docs__section">
                 <h2>Comparison</h2>

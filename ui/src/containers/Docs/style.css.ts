@@ -14,6 +14,7 @@ export const StyledDocs = styled.div`
 
     .docs__lead,
     .docs__meta,
+    .docs__hint,
     .docs__footnote {
         margin: 0 0 12px;
         color: var(--color-text-muted, #aaa);
@@ -23,8 +24,14 @@ export const StyledDocs = styled.div`
     }
 
     .docs__meta,
+    .docs__hint,
     .docs__footnote {
         font-size: 0.8em;
+    }
+
+    .docs__hint {
+        margin: 0 0 10px;
+        max-width: 72ch;
     }
 
     .docs__stats {
@@ -156,6 +163,51 @@ export const StyledDocs = styled.div`
     table.docs__table td {
         font-weight: 300;
         min-width: 16em;
+    }
+
+    table.docs__table--marks {
+        min-width: 560px;
+    }
+
+    table.docs__table--marks thead th:not(:first-child),
+    table.docs__table--marks tbody td {
+        text-align: center;
+        vertical-align: middle;
+        min-width: 5.5em;
+        width: 6.5em;
+    }
+
+    table.docs__table--marks tbody th {
+        white-space: normal;
+        min-width: 22em;
+    }
+
+    .docs-feature__label {
+        display: block;
+        font-weight: 400;
+        color: var(--color-text, #fff);
+    }
+
+    .docs-feature__detail {
+        display: block;
+        margin-top: 4px;
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.92em;
+        font-weight: 300;
+    }
+
+    .docs-mark {
+        font-size: 1.15em;
+        line-height: 1;
+    }
+
+    .docs-mark--yes {
+        color: var(--color-success, #59a781);
+        font-weight: 500;
+    }
+
+    .docs-mark--no {
+        color: var(--color-text-muted, #888);
     }
 
     .docs-cell {

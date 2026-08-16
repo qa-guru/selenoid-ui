@@ -15,6 +15,14 @@ export type OneRunRow = {
     cell: Dual;
 };
 
+export type FeatureRow = {
+    label: string;
+    detail?: string;
+    cold: boolean;
+    warm: boolean;
+    hot: boolean;
+};
+
 export const POOL_STATS: { value: string; label: string; tone?: "success" }[] = [
     { value: "~9.4 seconds", label: "Cold — a new browser on every run" },
     { value: "~4.2 seconds", label: "Warm — the container is ready; a new session still opens" },
@@ -26,6 +34,94 @@ export const POOL_STATS: { value: string; label: string; tone?: "success" }[] = 
 ];
 
 export const COMPARISON_HEADERS = ["", "Cold", "Warm · 4 slots", "Hot · 2 slots"] as const;
+
+export const FEATURE_HEADERS = ["What the pool has", "Cold", "Warm", "Hot"] as const;
+
+export const FEATURE_ROWS: FeatureRow[] = [
+    {
+        label: "Browser container is already running before the test",
+        detail: "No docker run at the start of the session.",
+        cold: false,
+        warm: true,
+        hot: true,
+    },
+    {
+        label: "Skip starting a new Docker container for every test",
+        cold: false,
+        warm: true,
+        hot: true,
+    },
+    {
+        label: "A smaller “-min” browser image is standing by",
+        cold: false,
+        warm: true,
+        hot: true,
+    },
+    {
+        label: "A Playwright container is standing by",
+        detail: "The container is up. The Java login job does not use it.",
+        cold: false,
+        warm: true,
+        hot: true,
+    },
+    {
+        label: "Claim and free a named pool slot (reserve and release)",
+        cold: false,
+        warm: true,
+        hot: true,
+    },
+    {
+        label: "Reserve asks the hub to open a new window in that Chrome",
+        detail: "POST /pool/reserve with loopback:true.",
+        cold: false,
+        warm: true,
+        hot: false,
+    },
+    {
+        label: "Opens a new browser window (New Session) on every run",
+        detail: "This is how cold and warm work. Hot reuses the window that is already open.",
+        cold: true,
+        warm: true,
+        hot: false,
+    },
+    {
+        label: "The same browser window is reused across Jenkins builds",
+        cold: false,
+        warm: false,
+        hot: true,
+    },
+    {
+        label: "The test skips the Selenoid hub and talks to Chrome by container name",
+        cold: false,
+        warm: false,
+        hot: true,
+    },
+    {
+        label: "A Java daemon stays on the agent; the build does not start a new test-worker",
+        cold: false,
+        warm: false,
+        hot: true,
+    },
+    {
+        label: "Git is off the test job; a separate sync job updates the files",
+        cold: false,
+        warm: false,
+        hot: true,
+    },
+    {
+        label: "Chrome stays open after the test (quit is not called)",
+        cold: false,
+        warm: false,
+        hot: true,
+    },
+    {
+        label: "Gradle daemon and configuration cache are part of this path",
+        detail: "Hot does not run the test through Gradle. Cold starts a new test-worker each time.",
+        cold: false,
+        warm: true,
+        hot: false,
+    },
+];
 
 export const COMPARISON_ROWS: ComparisonRow[] = [
     {
