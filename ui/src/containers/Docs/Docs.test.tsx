@@ -65,6 +65,7 @@ describe("Docs", () => {
         const page = screen.getByTestId("docs-resources");
         expect(page).toHaveTextContent("qa-guru/selenoid");
         expect(page).toHaveTextContent("qaguru/selenoid-ui");
+        expect(page.querySelector('a[href="https://hub.docker.com/r/qaguru/webdriver-chrome"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://hub.docker.com/u/qaguru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://github.com/qa-guru/selenoid"]')).toBeTruthy();
         expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
@@ -76,11 +77,11 @@ describe("Docs", () => {
 
         const table = screen.getByTestId("docs-resources-table");
         expect(table.querySelectorAll("tbody tr")).toHaveLength(RESOURCE_SERVICES.length);
-        expect(table).toHaveTextContent("Service");
-        expect(table).toHaveTextContent("GitHub");
-        expect(table).toHaveTextContent("Docker Hub");
-        expect(table).toHaveTextContent("Comment");
+        expect(table).toHaveTextContent("webdriver-chrome");
+        expect(table).toHaveTextContent("playwright-chromium");
+        expect(table).toHaveTextContent("Allure dashboard");
         expect(page.querySelector('a[href="https://sonar.qa.guru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://selenoid.qa.guru"]')).toBeTruthy();
+        expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
     });
 });

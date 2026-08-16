@@ -17,17 +17,7 @@ const Resources = () => {
     return (
         <div data-testid="docs-resources">
             <h1>Resources</h1>
-            <p className="docs__lead">
-                qa-guru Selenoid stack. Prod:{" "}
-                <a href="https://selenoid.qa.guru" target="_blank" rel="noreferrer">
-                    selenoid.qa.guru
-                </a>
-                . Sonar:{" "}
-                <a href="https://sonar.qa.guru" target="_blank" rel="noreferrer">
-                    sonar.qa.guru
-                </a>
-                .
-            </p>
+            <p className="docs__lead">qa-guru Selenoid stack — GitHub, Docker Hub, live sites, and Sonar.</p>
             <div className="docs__scroll">
                 <table className="docs__table docs__table--links" data-testid="docs-resources-table">
                     <thead>
@@ -40,15 +30,31 @@ const Resources = () => {
                     </thead>
                     <tbody>
                         {RESOURCE_SERVICES.map((row) => (
-                            <tr key={row.name}>
-                                <th scope="row">{row.name}</th>
+                            <tr key={`${row.name}-${row.href ?? row.github?.href ?? row.dockerHub?.href}`}>
+                                <th scope="row">
+                                    {row.href ? (
+                                        <a href={row.href} target="_blank" rel="noreferrer">
+                                            {row.name}
+                                        </a>
+                                    ) : (
+                                        row.name
+                                    )}
+                                </th>
                                 <td>
                                     <ExtLink link={row.github} />
                                 </td>
                                 <td>
                                     <ExtLink link={row.dockerHub} />
                                 </td>
-                                <td>{row.comment}</td>
+                                <td>
+                                    {row.comment}
+                                    {row.sonar ? (
+                                        <>
+                                            {" · "}
+                                            <ExtLink link={row.sonar} />
+                                        </>
+                                    ) : null}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
