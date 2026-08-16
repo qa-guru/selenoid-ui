@@ -48,7 +48,7 @@ export default defineConfig({
         // DevTools MIME warning and a stale SW can leave localhost as a blank page.
         devSwNotHtml(),
         react(),
-        // PWA baseline (canon: reference-app / stacks java-spring frontend-react):
+        // PWA baseline (canon: Multistack / stacks java-spring frontend-react):
         // emit manifest.webmanifest + sw.js next to the Vite `build/` shell.
         // Precache app shell only; live API/SSE/video/ws denylisted; no push,
         // no offline session API. Registration owned by src/pwa/registerServiceWorker.ts.
