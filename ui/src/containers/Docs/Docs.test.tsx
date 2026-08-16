@@ -109,28 +109,23 @@ describe("Docs", () => {
         ).toBeTruthy();
         expect(
             page.querySelector(
-                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=webdriver-image"]'
-            )
-        ).toBeTruthy();
-        expect(
-            page.querySelector(
-                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=playwright-image"]'
-            )
-        ).toBeTruthy();
-        expect(
-            page.querySelector(
                 'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/"]'
             )
         ).toBeTruthy();
         const chrome = RESOURCE_SERVICES.find((row) => row.name === "webdriver-chrome");
         expect(chrome?.awesome?.href).toContain("query=webdriver-image");
+        expect(chrome?.awesome?.href).toContain("tags=chrome");
         expect(chrome?.dashboard?.href).toContain("webdriver-image");
         expect(page.querySelector(`a[href="${chrome?.awesome?.href}"]`)).toBeTruthy();
         expect(page.querySelector(`a[href="${chrome?.dashboard?.href}"]`)).toBeTruthy();
-        const androidRow = Array.from(table.querySelectorAll("tbody tr")).find((tr) =>
-            tr.textContent?.includes("android")
-        );
-        expect(androidRow?.querySelector('a[href*="/awesome/"]')).toBeFalsy();
+        const firefox = RESOURCE_SERVICES.find((row) => row.name === "webdriver-firefox");
+        expect(firefox?.awesome?.href).toContain("tags=firefox");
+        const android = RESOURCE_SERVICES.find((row) => row.name === "android");
+        expect(android?.awesome?.href).toContain("query=android");
+        expect(page.querySelector(`a[href="${android?.awesome?.href}"]`)).toBeTruthy();
+        const ios = RESOURCE_SERVICES.find((row) => row.name === "ios");
+        expect(ios?.awesome?.href).toContain("query=ios");
+        expect(page.querySelector(`a[href="${ios?.awesome?.href}"]`)).toBeTruthy();
         expect(page.querySelector('a[href="https://sonar.qa.guru/dashboard?id=selenoid-ui"]')).toBeTruthy();
     });
 });

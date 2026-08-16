@@ -37,8 +37,15 @@ const GITHUB_TESTS: ResourceRef = {
 
 const REPORT_LATEST = "https://qa-guru.github.io/selenoid-tests/reports/latest";
 
-function awesome(epic?: string): ResourceRef {
-    const query = epic ? `?query=${encodeURIComponent(epic)}` : "";
+function awesome(epic?: string, tag?: string): ResourceRef {
+    const params = new URLSearchParams();
+    if (epic) {
+        params.set("query", epic);
+    }
+    if (tag) {
+        params.set("tags", tag);
+    }
+    const query = params.toString() ? `?${params.toString()}` : "";
     return { href: `${REPORT_LATEST}/awesome/${query}`, label: "Awesome" };
 }
 
@@ -63,7 +70,8 @@ function image(
     repo: string,
     ghPath: string,
     comment: string,
-    epic?: string | false
+    epic?: string | false,
+    tag?: string
 ): ResourceService {
     const reports = epic !== false;
     const slug = typeof epic === "string" ? epic : undefined;
@@ -74,7 +82,7 @@ function image(
             label: `browser-image/${ghPath}`,
         },
         dockerHub: docker(repo),
-        awesome: reports ? awesome(slug) : undefined,
+        awesome: reports ? awesome(slug, tag) : undefined,
         dashboard: reports ? dashboard(slug) : undefined,
         comment,
     };
@@ -137,56 +145,70 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         "qaguru/webdriver-chrome",
         "webdriver/chrome",
         "Chrome WebDriver node",
-        "webdriver-image"
+        "webdriver-image",
+        "chrome"
     ),
     image(
         "webdriver-firefox",
         "qaguru/webdriver-firefox",
         "webdriver/firefox",
         "Firefox WebDriver node",
-        "webdriver-image"
+        "webdriver-image",
+        "firefox"
     ),
     image(
         "webdriver-msedge",
         "qaguru/webdriver-msedge",
         "webdriver/msedge",
         "Edge WebDriver node",
-        "webdriver-image"
+        "webdriver-image",
+        "msedge"
     ),
     image(
         "playwright-chromium",
         "qaguru/playwright-chromium",
         "playwright/playwright-chromium",
         "Playwright Chromium node",
-        "playwright-image"
+        "playwright-image",
+        "chromium"
     ),
     image(
         "playwright-chrome",
         "qaguru/playwright-chrome",
         "playwright/playwright-chrome",
         "Playwright Chrome node",
-        "playwright-image"
+        "playwright-image",
+        "chrome"
     ),
     image(
         "playwright-firefox",
         "qaguru/playwright-firefox",
         "playwright/playwright-firefox",
         "Playwright Firefox node",
-        "playwright-image"
+        "playwright-image",
+        "firefox"
     ),
     image(
         "playwright-msedge",
         "qaguru/playwright-msedge",
         "playwright/playwright-msedge",
         "Playwright Edge node",
-        "playwright-image"
+        "playwright-image",
+        "msedge"
     ),
     image(
         "playwright-webkit",
         "qaguru/playwright-webkit",
         "playwright/playwright-webkit",
         "Playwright WebKit node",
-        "playwright-image"
+        "playwright-image",
+        "webkit"
     ),
-    image("android", "qaguru/android", "android", "Appium Android node", false),
+    image("android", "qaguru/android", "android", "Appium Android node", "android"),
+    {
+        name: "ios",
+        awesome: awesome("ios"),
+        dashboard: dashboard("ios"),
+        comment: "Appium iOS node — not on roadmap",
+    },
 ];
