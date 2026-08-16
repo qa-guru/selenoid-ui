@@ -51,9 +51,13 @@ function awesome(epic?: string, tag?: string): ResourceRef {
 }
 
 function dashboard(epic?: string): ResourceRef {
-    const hash = epic ? `#:~:text=${encodeURIComponent(`Динамика — ${epic}`)}` : "";
-    const href = `${REPORT_LATEST}/dashboard/${hash}`;
-    return { href, label: epic ? `dashboard · ${epic}` : "dashboard" };
+    if (!epic) {
+        return { href: `${REPORT_LATEST}/dashboard/`, label: "dashboard" };
+    }
+    return {
+        href: `${REPORT_LATEST}/dashboards/${encodeURIComponent(epic)}/`,
+        label: `dashboards/${epic}`,
+    };
 }
 
 function docker(image: string): ResourceRef {

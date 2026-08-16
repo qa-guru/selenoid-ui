@@ -103,9 +103,9 @@ describe("Docs", () => {
         expect(table).toHaveTextContent("Dashboard");
         expect(table).toHaveTextContent("Sonar");
         expect(table).toHaveTextContent("awesome/?query=selenoid-ui");
-        expect(table).toHaveTextContent("dashboard · selenoid-ui");
+        expect(table).toHaveTextContent("dashboards/selenoid-ui");
         expect(table).toHaveTextContent("awesome/?query=webdriver-image&tags=chrome");
-        expect(table).toHaveTextContent("dashboard · webdriver-image");
+        expect(table).toHaveTextContent("dashboards/webdriver-image");
         expect(
             page.querySelector(
                 'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/?query=selenoid-ui"]'
@@ -119,7 +119,7 @@ describe("Docs", () => {
         const chrome = RESOURCE_SERVICES.find((row) => row.name === "webdriver-chrome");
         expect(chrome?.awesome?.href).toContain("query=webdriver-image");
         expect(chrome?.awesome?.href).toContain("tags=chrome");
-        expect(chrome?.dashboard?.href).toContain("webdriver-image");
+        expect(chrome?.dashboard?.href).toContain("/dashboards/webdriver-image/");
         expect(page.querySelector(`a[href="${chrome?.awesome?.href}"]`)).toBeTruthy();
         expect(page.querySelector(`a[href="${chrome?.dashboard?.href}"]`)).toBeTruthy();
         const firefox = RESOURCE_SERVICES.find((row) => row.name === "webdriver-firefox");
