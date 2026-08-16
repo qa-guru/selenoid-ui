@@ -66,6 +66,24 @@ describe("Docs", () => {
         expect(page).toHaveTextContent("qa-guru/selenoid");
         expect(page).toHaveTextContent("qaguru/selenoid-ui");
         expect(page.querySelector('a[href="https://hub.docker.com/r/qaguru/webdriver-chrome"]')).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://github.com/qa-guru/browser-image/tree/main/video-recorder"]'
+            )
+        ).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://github.com/qa-guru/browser-image/tree/main/webdriver/firefox"]'
+            )
+        ).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://github.com/qa-guru/browser-image/tree/main/playwright/playwright-webkit"]'
+            )
+        ).toBeTruthy();
+        expect(
+            page.querySelector('a[href="https://github.com/qa-guru/browser-image/tree/main/android"]')
+        ).toBeTruthy();
         expect(page.querySelector('a[href="https://hub.docker.com/u/qaguru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://github.com/qa-guru/selenoid"]')).toBeTruthy();
         expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);

@@ -44,10 +44,13 @@ function sonar(projectKey: string): ResourceRef {
     };
 }
 
-function image(name: string, repo: string, comment: string): ResourceService {
+function image(name: string, repo: string, ghPath: string, comment: string): ResourceService {
     return {
         name,
-        github: GITHUB_IMAGE,
+        github: {
+            href: `https://github.com/qa-guru/browser-image/tree/main/${ghPath}`,
+            label: `browser-image/${ghPath}`,
+        },
         dockerHub: docker(repo),
         comment,
     };
@@ -88,16 +91,41 @@ export const RESOURCE_SERVICES: ResourceService[] = [
         sonar: sonar("selenoid-tests"),
         comment: "Go pyramid and CI orchestrator",
     },
-    image("video-recorder", "qaguru/video-recorder", "Session video sidecar"),
-    image("webdriver-chrome", "qaguru/webdriver-chrome", "Chrome WebDriver node"),
-    image("webdriver-firefox", "qaguru/webdriver-firefox", "Firefox WebDriver node"),
-    image("webdriver-msedge", "qaguru/webdriver-msedge", "Edge WebDriver node"),
-    image("playwright-chromium", "qaguru/playwright-chromium", "Playwright Chromium node"),
-    image("playwright-chrome", "qaguru/playwright-chrome", "Playwright Chrome node"),
-    image("playwright-firefox", "qaguru/playwright-firefox", "Playwright Firefox node"),
-    image("playwright-msedge", "qaguru/playwright-msedge", "Playwright Edge node"),
-    image("playwright-webkit", "qaguru/playwright-webkit", "Playwright WebKit node"),
-    image("android", "qaguru/android", "Appium Android node"),
+    image("video-recorder", "qaguru/video-recorder", "video-recorder", "Session video sidecar"),
+    image("webdriver-chrome", "qaguru/webdriver-chrome", "webdriver/chrome", "Chrome WebDriver node"),
+    image("webdriver-firefox", "qaguru/webdriver-firefox", "webdriver/firefox", "Firefox WebDriver node"),
+    image("webdriver-msedge", "qaguru/webdriver-msedge", "webdriver/msedge", "Edge WebDriver node"),
+    image(
+        "playwright-chromium",
+        "qaguru/playwright-chromium",
+        "playwright/playwright-chromium",
+        "Playwright Chromium node"
+    ),
+    image(
+        "playwright-chrome",
+        "qaguru/playwright-chrome",
+        "playwright/playwright-chrome",
+        "Playwright Chrome node"
+    ),
+    image(
+        "playwright-firefox",
+        "qaguru/playwright-firefox",
+        "playwright/playwright-firefox",
+        "Playwright Firefox node"
+    ),
+    image(
+        "playwright-msedge",
+        "qaguru/playwright-msedge",
+        "playwright/playwright-msedge",
+        "Playwright Edge node"
+    ),
+    image(
+        "playwright-webkit",
+        "qaguru/playwright-webkit",
+        "playwright/playwright-webkit",
+        "Playwright WebKit node"
+    ),
+    image("android", "qaguru/android", "android", "Appium Android node"),
     {
         name: "selenoid.qa.guru",
         href: "https://selenoid.qa.guru",
