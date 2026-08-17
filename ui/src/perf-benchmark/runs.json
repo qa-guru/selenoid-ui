@@ -228,8 +228,8 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 1.303,
-            "note": "job #59 SUCCESS; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #55 2.192s three sh; not #13; not Allure",
+            "wall_time_s": 1.3,
+            "note": "job #59 SUCCESS 1303 ms; display 1.3; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #55 2.192s three sh; not #13; not Allure",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/59/"
         },
         {

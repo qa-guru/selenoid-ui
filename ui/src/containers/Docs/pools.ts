@@ -281,7 +281,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
         },
         hot: {
             human: "About 1.3 seconds when Java and Chrome are already warm.",
-            tech: "Java, hot pool: 1.303 seconds (#59).",
+            tech: "Java, hot pool: 1.3 seconds (#59).",
         },
     },
     {
@@ -542,9 +542,9 @@ export const WALL_BY_POOL: Record<
         layers: [{ id: "new-session" }, { id: "gradle", seconds: 3, pin: "~3s" }, { id: "login" }],
     },
     hot: {
-        totalLabel: "1.303s",
+        totalLabel: "1.3s",
         pin: "#59",
-        totalSeconds: 1.303,
+        totalSeconds: 1.3,
         layers: [
             { id: "login", seconds: 0.667, pin: "~0.7s /run" },
             { id: "jenkins-shell", seconds: 0.636, pin: "~0.6s pipeline/shell" },

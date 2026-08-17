@@ -155,7 +155,7 @@ describe("Benchmarks", () => {
 
         const hotNone = table.querySelector('[data-run-id="jenkins-java-wd-hot-1-p1-none"]');
         expect(hotNone).toHaveAttribute("data-status", "ok");
-        expect(hotNone).toHaveTextContent("1.303");
+        expect(hotNone).toHaveTextContent("1.3");
         const hotPin = within(table).getByRole("link", { name: /hot-pool #59/ });
         expect(hotPin).toHaveAttribute(
             "href",
