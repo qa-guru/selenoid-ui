@@ -9,8 +9,7 @@
 
 | Изменение | Описание |
 |-----------|----------|
-| **Docs · pool diagrams** | На `/docs` три схемы (topology, one-run, wall) с переключателем Cold / Warm / Hot. Hot путь — `POST /pool/lease` + daemon, не hub New Session. Пины wall: cold ~9.4s · warm [#14 4.216s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/14/) · hot [#59 1.303s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/59/). |
-| **Java hot none** | Пин **[#59 1.303s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/59/)** — один Jenkins `sh` (lease + `/run` + trap release), `created:false`, daemon reuse. Не [#55](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/) 2.192s (три `sh`). |
+| **Docs · pool diagrams** | На `/docs` три схемы (topology, one-run, wall) с переключателем Cold / Warm / Hot. Hot путь — `POST /pool/lease` + daemon, не hub New Session. Пины wall: cold ~9.4s · warm [#14 4.216s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/14/) · hot [#55 2.192s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/). |
 
 ## Обновление
 
