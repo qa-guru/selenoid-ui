@@ -162,6 +162,20 @@ describe("Benchmarks", () => {
             "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/"
         );
 
+        const hotLite = table.querySelector(
+            '[data-run-id="jenkins-java-wd-hot-1-p1-full-attachments"]'
+        );
+        expect(hotLite).toHaveAttribute("data-status", "ok");
+        expect(hotLite).toHaveAttribute("data-variant", "allure-lite");
+        expect(hotLite).toHaveTextContent("10.653");
+        const hotLitePin = within(table).getByRole("link", {
+            name: /hot-pool-full-attachments #5/,
+        });
+        expect(hotLitePin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/5/"
+        );
+
         const heavy = table.querySelector(
             '[data-run-id="jenkins-java-wd-cold-1-p1-full-attachments"]'
         );
