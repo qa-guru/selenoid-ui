@@ -155,11 +155,11 @@ describe("Benchmarks", () => {
 
         const hotNone = table.querySelector('[data-run-id="jenkins-java-wd-hot-1-p1-none"]');
         expect(hotNone).toHaveAttribute("data-status", "ok");
-        expect(hotNone).toHaveTextContent("2.246");
-        const hotPin = within(table).getByRole("link", { name: /hot-pool #13/ });
+        expect(hotNone).toHaveTextContent("2.192");
+        const hotPin = within(table).getByRole("link", { name: /hot-pool #55/ });
         expect(hotPin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/13/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/"
         );
 
         const heavy = table.querySelector(

@@ -194,9 +194,9 @@
             "parallel": 1,
             "browser": "chrome/149.0-min",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
+                "hub": "3.0.12",
+                "ui": "3.0.36",
+                "cm": "3.0.3",
                 "browser_image": "149-min"
             },
             "host": {
@@ -220,7 +220,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-15T21:50:02Z",
+            "measured_at": "2026-08-17T00:57:05Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -228,9 +228,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 2.246,
-            "note": "job #13 SUCCESS; long-lived JUnit daemon reuse + keep-alive Chrome session; JUnit 710ms; no Allure; not WarmRemote UUID; not #12 restart 7.389s",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/13/"
+            "wall_time_s": 2.192,
+            "note": "job #55 SUCCESS; POST /pool/lease + long-lived JUnit daemon; created:false; not #13; not #12 restart 7.389s; not #5 New Session 4.781s; not WarmRemote; not Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/"
         },
         {
             "language": "java",
