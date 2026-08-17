@@ -2,8 +2,8 @@
 
 **Дата:** 17 августа 2026  
 **Предыдущий:** [v3.0.36](https://github.com/qa-guru/selenoid-ui/releases/tag/v3.0.36)  
-**GitHub:** не тегировано (notes only).  
-**Stack cut:** не в этом окне; prod остаётся hub **v3.0.13** / UI **v3.0.36** / cm **v3.0.3**.
+**GitHub:** https://github.com/qa-guru/selenoid-ui/releases/tag/v3.0.37  
+**Stack cut:** hub **v3.0.13** · cm **v3.0.3** · UI → **v3.0.37**.
 
 ## Что нового
 
@@ -13,4 +13,6 @@
 
 ## Обновление
 
-Tag/deploy UI — отдельно, не вместе с этим пином.
+```bash
+docker pull qaguru/selenoid-ui:v3.0.37
+```
