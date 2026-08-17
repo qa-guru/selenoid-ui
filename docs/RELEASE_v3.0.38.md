@@ -2,8 +2,8 @@
 
 **Дата:** 17 августа 2026  
 **Предыдущий:** [v3.0.37](https://github.com/qa-guru/selenoid-ui/releases/tag/v3.0.37)  
-**GitHub:** (tag when cutting)  
-**Stack cut:** hub **v3.0.13** · cm **v3.0.3** · UI → **v3.0.38** (notes; prod still 3.0.37 until tag/push).
+**GitHub:** https://github.com/qa-guru/selenoid-ui/releases/tag/v3.0.38  
+**Stack cut:** hub **v3.0.13** · cm **v3.0.3** · UI → **v3.0.38**.
 
 ## Что нового
 
