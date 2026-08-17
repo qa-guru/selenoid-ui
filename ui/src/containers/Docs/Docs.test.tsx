@@ -26,7 +26,7 @@ describe("Docs", () => {
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Cold · Warm · Hot — how the pools differ");
         expect(screen.getByTestId("docs-stat-cold")).toHaveTextContent("~9.4 seconds");
         expect(screen.getByTestId("docs-stat-warm")).toHaveTextContent("~4.2 seconds");
-        expect(screen.getByTestId("docs-stat-hot")).toHaveTextContent("~2.2 seconds");
+        expect(screen.getByTestId("docs-stat-hot")).toHaveTextContent("~1.3 seconds");
         expect(screen.getByTestId("docs-release-callout")).toHaveTextContent("Releasing a slot does not close Chrome");
 
         const features = screen.getByTestId("docs-features");
@@ -97,9 +97,9 @@ describe("Docs", () => {
         expect(sequence).toHaveTextContent("17890");
         expect(sequence).not.toHaveTextContent("docker run");
         expect(sequence).not.toHaveTextContent("14441");
-        expect(wall).toHaveTextContent("~0.6s /run");
-        expect(wall).toHaveTextContent("~1.5s pipeline/shell");
-        expect(wall).toHaveTextContent("#55");
+        expect(wall).toHaveTextContent("~0.7s /run");
+        expect(wall).toHaveTextContent("~0.6s pipeline/shell");
+        expect(wall).toHaveTextContent("#59");
         expect(screen.queryByTestId("docs-wall-layer-docker-run")).not.toBeInTheDocument();
         expect(screen.getByTestId("docs-wall-layer-jenkins-shell")).toBeInTheDocument();
 
