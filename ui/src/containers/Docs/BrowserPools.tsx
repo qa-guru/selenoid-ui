@@ -1,14 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
-import {
-    COMPARISON_HEADERS,
-    COMPARISON_ROWS,
-    FEATURE_HEADERS,
-    FEATURE_ROWS,
-    ONE_RUN_ROWS,
-    POOL_STATS,
-    type Dual,
-} from "./pools";
+import PoolDiagrams from "./PoolDiagrams";
+import { COMPARISON_HEADERS, COMPARISON_ROWS, FEATURE_HEADERS, FEATURE_ROWS, ONE_RUN_ROWS, POOL_STATS } from "./pools";
+import type { Dual, PoolId } from "./pools";
 
 function DualCell({ human, tech }: Dual) {
     return (
@@ -21,57 +15,60 @@ function DualCell({ human, tech }: Dual) {
 
 function Mark({ yes }: { yes: boolean }) {
     return (
-        <span
-            className={yes ? "docs-mark docs-mark--yes" : "docs-mark docs-mark--no"}
-            aria-label={yes ? "Yes" : "No"}
-        >
+        <span className={yes ? "docs-mark docs-mark--yes" : "docs-mark docs-mark--no"} aria-label={yes ? "Yes" : "No"}>
             {yes ? "✓" : "—"}
         </span>
     );
 }
 
 const Pools = () => {
+    const [pool, setPool] = useState<PoolId>("cold");
+
     return (
         <>
             <h1>Cold · Warm · Hot — how the pools differ</h1>
             <p className="docs__lead">
-                The same Java login test is measured in every column. Each cell has two sentences:
-                first what a person sees, then how it works.
+                The same Java login test is measured in every column. Each cell has two sentences: first what a person
+                sees, then how it works.
             </p>
             <p className="docs__meta">
-                Times are for the login test with Allure reporting turned off, run from Jenkins, on
-                15–16 August 2026. Playwright version is 1.61.1.
+                Times are for the login test with Allure reporting turned off, run from Jenkins, on 15–16 August 2026.
+                Playwright version is 1.61.1.
             </p>
 
             <div className="docs__stats" data-testid="docs-pool-stats">
                 {POOL_STATS.map((stat) => (
-                    <div
-                        key={stat.label}
-                        className="docs__stat"
+                    <button
+                        key={stat.id}
+                        type="button"
+                        className={pool === stat.id ? "docs__stat is-selected" : "docs__stat"}
                         data-tone={stat.tone}
-                        data-testid={`docs-stat-${stat.label.split(" — ")[0].toLowerCase()}`}
+                        data-pool={stat.id}
+                        aria-pressed={pool === stat.id}
+                        data-testid={`docs-stat-${stat.id}`}
+                        onClick={() => setPool(stat.id)}
                     >
                         <span className="docs__stat-value">{stat.value}</span>
                         <span className="docs__stat-label">{stat.label}</span>
-                    </div>
+                    </button>
                 ))}
             </div>
+
+            <PoolDiagrams pool={pool} onPoolChange={setPool} />
 
             <aside className="docs__callout" data-testid="docs-release-callout">
                 <h2>Releasing a slot does not close Chrome</h2>
                 <p>
-                    After the test we tell the pool that the slot is free. In the cold pool the
-                    browser is already gone together with its container. In the warm pool the
-                    container stays up, but the window is closed — the next run opens a new session.
-                    In the hot pool Chrome stays open; only the lock is cleared.
+                    After the test we tell the pool that the slot is free. In the cold pool the browser is already gone
+                    together with its container. In the warm pool the container stays up, but the window is closed — the
+                    next run opens a new session. In the hot pool Chrome stays open; only the lock is cleared.
                 </p>
             </aside>
 
             <section className="docs__section">
                 <h2>What each pool has</h2>
                 <p className="docs__hint">
-                    A check means this pool has the feature or optimization. A dash means it does
-                    not.
+                    A check means this pool has the feature or optimization. A dash means it does not.
                 </p>
                 <div className="docs__scroll">
                     <table className="docs__table docs__table--marks" data-testid="docs-features">
@@ -87,9 +84,7 @@ const Pools = () => {
                                 <tr key={row.label}>
                                     <th scope="row">
                                         <span className="docs-feature__label">{row.label}</span>
-                                        {row.detail ? (
-                                            <span className="docs-feature__detail">{row.detail}</span>
-                                        ) : null}
+                                        {row.detail ? <span className="docs-feature__detail">{row.detail}</span> : null}
                                     </th>
                                     <td>
                                         <Mark yes={row.cold} />
@@ -163,9 +158,9 @@ const Pools = () => {
             </section>
 
             <p className="docs__footnote">
-                Compared with cold, warm is about five seconds faster and hot is about seven seconds
-                faster. Do not compare Allure with few attachments against Allure with many
-                attachments across pools: that extra time is the report, not the browser.
+                Compared with cold, warm is about five seconds faster and hot is about seven seconds faster. Do not
+                compare Allure with few attachments against Allure with many attachments across pools: that extra time
+                is the report, not the browser.
             </p>
         </>
     );

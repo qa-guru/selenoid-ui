@@ -115,6 +115,16 @@ export const StyledDocs = styled.div`
         border-radius: 4px;
         padding: 12px 14px;
         background: var(--color-surface, #2a3038);
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .docs__stat.is-selected {
+        border-color: var(--color-info, #5b9fd6);
+        box-shadow: inset 0 0 0 1px var(--color-info, #5b9fd6);
     }
 
     .docs__stat-value {
@@ -355,5 +365,310 @@ export const StyledDocs = styled.div`
         color: var(--color-text-muted, #aaa);
         font-size: 0.92em;
         font-weight: 300;
+    }
+
+    .docs__diagrams {
+        margin: 0 0 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .docs-pool-switch {
+        display: inline-flex;
+        border: 1px solid var(--color-border-strong, #555f6a);
+        border-radius: 4px;
+        overflow: hidden;
+        align-self: start;
+    }
+
+    .docs-pool-switch__btn {
+        background: var(--color-surface, #2a3038);
+        color: var(--color-text-muted, #aaa);
+        border: none;
+        border-right: 1px solid var(--color-border-strong, #555f6a);
+        padding: 8px 16px;
+        font: inherit;
+        font-size: 0.9em;
+        cursor: pointer;
+    }
+
+    .docs-pool-switch__btn:last-child {
+        border-right: none;
+    }
+
+    .docs-pool-switch__btn.is-selected {
+        color: var(--color-text, #fff);
+        background: var(--color-surface, #1e242c);
+        box-shadow: inset 0 -2px 0 var(--color-info, #5b9fd6);
+    }
+
+    .docs-pool-switch__btn[data-pool="hot"].is-selected {
+        box-shadow: inset 0 -2px 0 var(--color-success, #59a781);
+        color: var(--color-success, #59a781);
+    }
+
+    .docs-diagram {
+        border: 1px solid var(--color-border-strong, #555f6a);
+        border-radius: 4px;
+        padding: 12px 14px 14px;
+        background: var(--color-surface, #2a3038);
+        overflow-x: auto;
+    }
+
+    .docs-diagram h2 {
+        margin: 0 0 8px;
+        font-size: 1.05em;
+        font-weight: 400;
+    }
+
+    .docs-diagram__path,
+    .docs-diagram__caption,
+    .docs-diagram__note {
+        margin: 8px 0 0;
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.8em;
+        font-weight: 300;
+        max-width: 72ch;
+    }
+
+    .docs-diagram__path {
+        margin: 0 0 10px;
+        color: var(--color-text, #fff);
+        font-weight: 400;
+    }
+
+    .docs-diagram__caption:empty {
+        display: none;
+    }
+
+    .docs-topo-wrap {
+        overflow-x: auto;
+    }
+
+    .docs-topo {
+        position: relative;
+        min-width: 720px;
+    }
+
+    .docs-topo__edges {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+    }
+
+    .docs-topo__edge {
+        stroke: var(--color-text-muted, #555);
+        stroke-width: 1.5;
+        opacity: 0.35;
+    }
+
+    .docs-topo__edge.is-live {
+        stroke: var(--color-info, #5b9fd6);
+        stroke-width: 2.5;
+        opacity: 1;
+    }
+
+    .docs-topo__edge.is-watch {
+        stroke: var(--color-text-muted, #888);
+        stroke-dasharray: 4 3;
+        opacity: 0.55;
+    }
+
+    .docs-topo__grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(10em, 1fr) minmax(11em, 1.1fr) minmax(12em, 1.3fr) minmax(10em, 1fr);
+        grid-template-rows: auto auto;
+        gap: 28px 14px;
+    }
+
+    .docs-topo__node {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        margin: 0;
+        padding: 10px 12px;
+        border: 1px solid var(--color-border-strong, #555f6a);
+        border-radius: 4px;
+        background: var(--color-surface, #1e242c);
+        color: var(--color-text, #fff);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        min-height: 4.5em;
+    }
+
+    .docs-topo__node.is-live {
+        border-color: var(--color-info, #5b9fd6);
+        box-shadow: inset 0 0 0 1px var(--color-info, #5b9fd6);
+        opacity: 1;
+    }
+
+    .docs-topo__node.is-dim {
+        opacity: 0.38;
+    }
+
+    .docs-topo__node.is-watch {
+        opacity: 0.72;
+        border-style: dashed;
+    }
+
+    .docs-topo__node.is-focus {
+        outline: 1px solid var(--color-text, #fff);
+        outline-offset: 1px;
+    }
+
+    .docs-topo__node--jenkins {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+    }
+
+    .docs-topo__node--pool {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .docs-topo__node--hub {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .docs-topo__node--ui {
+        grid-column: 4;
+        grid-row: 1;
+    }
+
+    .docs-topo__node--hot {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .docs-topo__node--warm {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    .docs-topo__node--docker {
+        grid-column: 4;
+        grid-row: 2;
+    }
+
+    .docs-topo__title {
+        font-weight: 400;
+        font-size: 0.88em;
+    }
+
+    .docs-topo__line {
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.75em;
+        font-weight: 300;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .docs-seq {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .docs-seq__step {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        color: var(--color-text, #fff);
+        font-size: 0.9em;
+        font-weight: 400;
+    }
+
+    .docs-seq__n {
+        flex: 0 0 1.6em;
+        height: 1.6em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid var(--color-info, #5b9fd6);
+        color: var(--color-info, #5b9fd6);
+        font-size: 0.75em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .docs-seq__text {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.85em;
+        font-weight: 400;
+    }
+
+    .docs-wall__total {
+        margin: 0 0 10px;
+        font-size: 1.15em;
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+    }
+
+    .docs-wall {
+        display: flex;
+        flex-direction: column;
+        min-height: 160px;
+        border: 1px solid var(--color-border-strong, #555f6a);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .docs-wall__layer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        min-height: 2.2em;
+        border-bottom: 1px solid var(--color-border-strong, #555f6a);
+        background: var(--color-surface, #1e242c);
+        color: var(--color-text, #fff);
+        font-size: 0.85em;
+    }
+
+    .docs-wall__layer:last-child {
+        border-bottom: none;
+    }
+
+    .docs-wall__layer[data-layer="docker-run"] {
+        background: color-mix(in srgb, var(--color-info, #5b9fd6) 18%, var(--color-surface, #1e242c));
+    }
+
+    .docs-wall__layer[data-layer="new-session"] {
+        background: color-mix(in srgb, var(--color-info, #5b9fd6) 12%, var(--color-surface, #1e242c));
+    }
+
+    .docs-wall__layer[data-layer="gradle"] {
+        background: color-mix(in srgb, var(--color-text-muted, #aaa) 16%, var(--color-surface, #1e242c));
+    }
+
+    .docs-wall__layer[data-layer="login"] {
+        background: color-mix(in srgb, var(--color-success, #59a781) 16%, var(--color-surface, #1e242c));
+    }
+
+    .docs-wall__layer[data-layer="jenkins-shell"] {
+        background: color-mix(in srgb, var(--color-text-muted, #aaa) 22%, var(--color-surface, #1e242c));
+    }
+
+    .docs-wall__name {
+        font-weight: 400;
+    }
+
+    .docs-wall__pin {
+        color: var(--color-text-muted, #aaa);
+        font-variant-numeric: tabular-nums;
+        font-weight: 300;
+        white-space: nowrap;
     }
 `;

@@ -23,15 +23,11 @@ describe("Docs", () => {
 
         expect(screen.getByTestId("docs-page")).toBeInTheDocument();
         expect(screen.getByTestId("docs-nav-pools")).toHaveClass("is-active");
-        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-            "Cold · Warm · Hot — how the pools differ"
-        );
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Cold · Warm · Hot — how the pools differ");
         expect(screen.getByTestId("docs-stat-cold")).toHaveTextContent("~9.4 seconds");
         expect(screen.getByTestId("docs-stat-warm")).toHaveTextContent("~4.2 seconds");
         expect(screen.getByTestId("docs-stat-hot")).toHaveTextContent("~2.2 seconds");
-        expect(screen.getByTestId("docs-release-callout")).toHaveTextContent(
-            "Releasing a slot does not close Chrome"
-        );
+        expect(screen.getByTestId("docs-release-callout")).toHaveTextContent("Releasing a slot does not close Chrome");
 
         const features = screen.getByTestId("docs-features");
         expect(features.querySelectorAll("tbody tr")).toHaveLength(FEATURE_ROWS.length);
@@ -44,12 +40,78 @@ describe("Docs", () => {
 
         const comparison = screen.getByTestId("docs-comparison");
         expect(comparison.querySelectorAll("tbody tr")).toHaveLength(COMPARISON_ROWS.length);
-        expect(comparison).toHaveTextContent("POST /pool/reserve with loopback:false");
+        expect(comparison).toHaveTextContent("POST /pool/lease");
+        expect(comparison).not.toHaveTextContent("POST /pool/reserve with loopback:false");
         expect(comparison).toHaveTextContent("http://hot-chrome-min-1:4444/");
 
         const oneRun = screen.getByTestId("docs-one-run");
         expect(oneRun.querySelectorAll("tbody tr")).toHaveLength(ONE_RUN_ROWS.length);
-        expect(oneRun).toHaveTextContent("Chrome does not quit");
+        expect(oneRun).toHaveTextContent("release without killSession or quit");
+    });
+
+    it("drives topology, sequence, and wall from one Cold | Warm | Hot selector", async () => {
+        const user = userEvent.setup();
+        renderDocs();
+
+        const topology = screen.getByTestId("docs-diagram-topology");
+        const sequence = screen.getByTestId("docs-diagram-sequence");
+        const wall = screen.getByTestId("docs-diagram-wall");
+
+        expect(topology).toBeInTheDocument();
+        expect(sequence).toBeInTheDocument();
+        expect(wall).toBeInTheDocument();
+
+        expect(topology).toHaveAttribute("data-pool", "cold");
+        expect(screen.getByTestId("docs-topo-node-docker")).toHaveAttribute("data-live", "true");
+        expect(screen.getByTestId("docs-topo-node-hot")).toHaveAttribute("data-live", "false");
+        expect(screen.getByTestId("docs-topo-node-hub")).toHaveAttribute("data-live", "true");
+        expect(sequence).toHaveTextContent("docker run");
+        expect(sequence).not.toHaveTextContent("POST /pool/lease");
+        expect(sequence).not.toHaveTextContent("14441");
+        expect(wall).toHaveTextContent("docker run");
+        expect(screen.getByTestId("docs-wall-layer-docker-run")).toBeInTheDocument();
+        expect(screen.queryByTestId("docs-wall-layer-jenkins-shell")).not.toBeInTheDocument();
+
+        await user.click(screen.getByTestId("docs-pool-select-warm"));
+        expect(topology).toHaveAttribute("data-pool", "warm");
+        expect(sequence).toHaveAttribute("data-pool", "warm");
+        expect(wall).toHaveAttribute("data-pool", "warm");
+        expect(screen.getByTestId("docs-topo-node-warm")).toHaveAttribute("data-live", "true");
+        expect(screen.getByTestId("docs-topo-node-docker")).toHaveAttribute("data-live", "false");
+        expect(screen.getByTestId("docs-topo-node-hot")).toHaveAttribute("data-live", "false");
+        expect(sequence).toHaveTextContent("POST /pool/reserve");
+        expect(sequence).toHaveTextContent("14441");
+        expect(sequence).not.toHaveTextContent("POST /pool/lease");
+        expect(sequence).not.toHaveTextContent("docker run");
+        expect(wall).toHaveTextContent("~3s");
+        expect(wall).toHaveTextContent("#14");
+        expect(screen.queryByTestId("docs-wall-layer-docker-run")).not.toBeInTheDocument();
+
+        await user.click(screen.getByTestId("docs-pool-select-hot"));
+        expect(topology).toHaveAttribute("data-pool", "hot");
+        expect(screen.getByTestId("docs-topo-node-hot")).toHaveAttribute("data-live", "true");
+        expect(screen.getByTestId("docs-topo-node-hub")).toHaveAttribute("data-live", "false");
+        expect(screen.getByTestId("docs-topo-node-docker")).toHaveAttribute("data-live", "false");
+        expect(sequence).toHaveTextContent("POST /pool/lease");
+        expect(sequence).toHaveTextContent("hot-chrome-min-1:4444");
+        expect(sequence).toHaveTextContent("17890");
+        expect(sequence).not.toHaveTextContent("docker run");
+        expect(sequence).not.toHaveTextContent("14441");
+        expect(wall).toHaveTextContent("~0.6s /run");
+        expect(wall).toHaveTextContent("~1.5s pipeline/shell");
+        expect(wall).toHaveTextContent("#55");
+        expect(screen.queryByTestId("docs-wall-layer-docker-run")).not.toBeInTheDocument();
+        expect(screen.getByTestId("docs-wall-layer-jenkins-shell")).toBeInTheDocument();
+
+        await user.click(screen.getByTestId("docs-stat-cold"));
+        expect(topology).toHaveAttribute("data-pool", "cold");
+        expect(sequence).toHaveTextContent("docker run");
+        expect(sequence).not.toHaveTextContent("POST /pool/lease");
+
+        await user.click(screen.getByTestId("docs-topo-node-ui"));
+        expect(screen.getByTestId("docs-diagram-caption")).toHaveTextContent(
+            "The UI only watches hub status. It does not start a session or claim a slot."
+        );
     });
 
     it("renders the Resources catalog without aerokube GitHub links", async () => {
@@ -67,23 +129,17 @@ describe("Docs", () => {
         expect(page).toHaveTextContent("qaguru/selenoid-ui");
         expect(page.querySelector('a[href="https://hub.docker.com/r/qaguru/webdriver-chrome"]')).toBeTruthy();
         expect(
-            page.querySelector(
-                'a[href="https://github.com/qa-guru/browser-image/tree/main/video-recorder"]'
-            )
+            page.querySelector('a[href="https://github.com/qa-guru/browser-image/tree/main/video-recorder"]')
         ).toBeTruthy();
         expect(
-            page.querySelector(
-                'a[href="https://github.com/qa-guru/browser-image/tree/main/webdriver/firefox"]'
-            )
+            page.querySelector('a[href="https://github.com/qa-guru/browser-image/tree/main/webdriver/firefox"]')
         ).toBeTruthy();
         expect(
             page.querySelector(
                 'a[href="https://github.com/qa-guru/browser-image/tree/main/playwright/playwright-webkit"]'
             )
         ).toBeTruthy();
-        expect(
-            page.querySelector('a[href="https://github.com/qa-guru/browser-image/tree/main/android"]')
-        ).toBeTruthy();
+        expect(page.querySelector('a[href="https://github.com/qa-guru/browser-image/tree/main/android"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://hub.docker.com/u/qaguru"]')).toBeTruthy();
         expect(page.querySelector('a[href="https://github.com/qa-guru/selenoid"]')).toBeTruthy();
         expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
@@ -113,9 +169,7 @@ describe("Docs", () => {
             )
         ).toBeTruthy();
         expect(
-            page.querySelector(
-                'a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/"]'
-            )
+            page.querySelector('a[href="https://qa-guru.github.io/selenoid-tests/reports/latest/awesome/"]')
         ).toBeTruthy();
         const chrome = RESOURCE_SERVICES.find((row) => row.name === "webdriver-chrome");
         expect(chrome?.awesome?.href).toContain("query=webdriver-image");
