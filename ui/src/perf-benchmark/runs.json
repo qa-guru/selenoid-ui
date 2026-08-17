@@ -195,7 +195,7 @@
             "browser": "chrome/149.0-min",
             "versions": {
                 "hub": "3.0.13",
-                "ui": "3.0.39",
+                "ui": "3.0.43",
                 "cm": "3.0.3",
                 "browser_image": "149-min"
             },

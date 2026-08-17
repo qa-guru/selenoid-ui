@@ -18,6 +18,7 @@ coverage.txt
 ui/package-lock.json
 ui/.env.local
 ui/.env.*.local
+ui/.local-preview-*.png
 
 .DS_Store
 dist/**
