@@ -655,7 +655,7 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
             <section className="benchmarks__section">
                 <h2>0. Jenkins login-test</h2>
                 <p className="benchmarks__hint">
-                    Java none: cold 9.4 · warm 4.2 · hot 1.3. Lite/heavy не сравнивать между пулами.
+                    Java none: cold 9.4 · warm 4.2 · hot 0.9. Lite/heavy не сравнивать между пулами.
                 </p>
                 <JenkinsLoginTable runs={runs} />
             </section>

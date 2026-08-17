@@ -34,7 +34,7 @@ export const POOL_STATS: { id: PoolId; value: string; label: string; tone?: "suc
     { id: "warm", value: "~4.2 seconds", label: "Warm — the container is ready; a new session still opens" },
     {
         id: "hot",
-        value: "~1.3 seconds",
+        value: "~0.9 seconds",
         label: "Hot — Java and Chrome are already running",
         tone: "success",
     },
@@ -280,8 +280,8 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             tech: "Java, warm pool: 4.216 seconds (#14).",
         },
         hot: {
-            human: "About 1.3 seconds when Java and Chrome are already warm.",
-            tech: "Java, hot pool: 1.3 seconds (#59).",
+            human: "About 0.9 seconds when Java and Chrome are already warm.",
+            tech: "Java, hot pool: 0.9 seconds (#80).",
         },
     },
     {
@@ -300,7 +300,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             human:
                 "Login in Chrome is about 0.7 seconds. The rest is Jenkins starting the job.",
             tech:
-                "POST /pool/lease, then ensure.sh reuses the running daemon, then POST /run takes about 667 milliseconds, then trap release in the same shell. About 0.6 seconds is the Jenkins pipeline, not the browser. Git lives in a separate sync job.",
+                "POST /pool/lease, then the running daemon, then POST /run takes about 678 milliseconds, then trap release in the same shell. About 0.3 seconds is the Jenkins Test stage around /run, not the browser. Git lives in a separate sync job.",
         },
     },
     {
@@ -542,12 +542,12 @@ export const WALL_BY_POOL: Record<
         layers: [{ id: "new-session" }, { id: "gradle", seconds: 3, pin: "~3s" }, { id: "login" }],
     },
     hot: {
-        totalLabel: "1.3s",
-        pin: "#59",
-        totalSeconds: 1.3,
+        totalLabel: "0.9s",
+        pin: "#80",
+        totalSeconds: 0.9,
         layers: [
-            { id: "login", seconds: 0.667, pin: "~0.7s /run" },
-            { id: "jenkins-shell", seconds: 0.636, pin: "~0.6s pipeline/shell" },
+            { id: "login", seconds: 0.678, pin: "~0.7s /run" },
+            { id: "jenkins-shell", seconds: 0.283, pin: "~0.3s pipeline/shell" },
         ],
     },
 };

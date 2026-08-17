@@ -204,7 +204,7 @@
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
-                "note": "Jenkins exclusive agent; wall_time_s = job duration when measured"
+                "note": "Jenkins exclusive agent; wall_time_s = Test stage display 0.9s (#80)"
             },
             "session_create_p50_ms": null,
             "session_create_p95_ms": null,
@@ -220,7 +220,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-17T04:52:51Z",
+            "measured_at": "2026-08-17T15:43:54Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -228,9 +228,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 1.3,
-            "note": "job #59 SUCCESS 1303 ms; display 1.3; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #55 2.192s three sh; not #13; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/59/"
+            "wall_time_s": 0.9,
+            "note": "job #80 SUCCESS; Test stage 961 ms; display 0.9; /run 678 ms; Jenkins wall 1300 ms; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #59 1.3s Jenkins wall; not Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/80/"
         },
         {
             "language": "java",
