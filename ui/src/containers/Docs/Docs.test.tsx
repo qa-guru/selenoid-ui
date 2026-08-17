@@ -90,6 +90,7 @@ describe("Docs", () => {
         expect(page.innerHTML).not.toMatch(/aerokube\.com/i);
         expect(page).not.toHaveTextContent("zero-design-system");
         expect(page).not.toHaveTextContent("selenoid-warm-pool");
+        expect(page).not.toHaveTextContent("selenoid-pool");
         expect(page).not.toHaveTextContent("browsers-production.json");
         expect(page).not.toHaveTextContent("selenoid-qa-guru-deploy");
         expect(page).not.toHaveTextContent("selenoid.qa.guru");
