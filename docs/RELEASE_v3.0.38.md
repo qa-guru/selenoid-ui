@@ -9,7 +9,7 @@
 
 | Изменение | Описание |
 |-----------|----------|
-| **Java hot lite** | Пин **[#5 10.653s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/5/)** — screenshot/page source/console, `created:false`, daemon `:17891`. Не none [#55 2.192s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/). Не video/VNC/HAR. |
+| **Java hot lite** | Пин **[#6 2.617s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/6/)** — screenshot/page source/console в results, `created:false`, daemon `:17891`. Не `allure generate` на стене ([#5 10.653s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/5/)). Не none [#55 2.192s](https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/55/). |
 
 ## Обновление
 

@@ -266,7 +266,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-17T03:59:05Z",
+            "measured_at": "2026-08-17T04:05:55Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -274,9 +274,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 10.653,
-            "note": "job #5 SUCCESS; Allure lite screenshot/page source/console; POST /pool/lease created:false; daemon reuse :17891; not #55 none; not gradle test; not video/VNC/HAR; not #3 weaver start; not #4 10.774s",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/5/"
+            "wall_time_s": 2.617,
+            "note": "job #6 SUCCESS; Allure lite screenshot/page source/console in results; POST /pool/lease created:false; daemon reuse :17891; not allure generate on wall (#5 10.653s kit+archive); not #55 none; not gradle test; not video/VNC/HAR; not #7 2.650s",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/6/"
         },
         {
             "language": "python",

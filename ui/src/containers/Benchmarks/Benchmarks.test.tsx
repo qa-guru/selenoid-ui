@@ -167,13 +167,13 @@ describe("Benchmarks", () => {
         );
         expect(hotLite).toHaveAttribute("data-status", "ok");
         expect(hotLite).toHaveAttribute("data-variant", "allure-lite");
-        expect(hotLite).toHaveTextContent("10.653");
+        expect(hotLite).toHaveTextContent("2.617");
         const hotLitePin = within(table).getByRole("link", {
-            name: /hot-pool-full-attachments #5/,
+            name: /hot-pool-full-attachments #6/,
         });
         expect(hotLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/5/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/6/"
         );
 
         const heavy = table.querySelector(
