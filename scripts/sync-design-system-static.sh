@@ -7,7 +7,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 UI_PUBLIC="$ROOT/ui/public"
 MONOREPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 DS="$MONOREPO_ROOT/projects/design-system-home/design-system"
-REACT_UI="$MONOREPO_ROOT/packages/react-ui"
+REACT_UI="$MONOREPO_ROOT/projects/design-system-home/react-ui"
 VENDOR="$ROOT/ui/vendor/react-ui"
 
 if [[ ! -d "$DS/css" ]]; then
