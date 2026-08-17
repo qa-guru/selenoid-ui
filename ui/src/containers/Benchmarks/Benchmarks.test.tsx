@@ -186,6 +186,14 @@ describe("Benchmarks", () => {
         expect(lite).toHaveAttribute("data-variant", "allure-lite");
         expect(heavy).toHaveTextContent("allure-heavy");
         expect(lite).toHaveTextContent("allure-lite");
+        expect(lite).toHaveTextContent("6.662");
+        const warmLitePin = within(table).getByRole("link", {
+            name: /warm-pool-full-attachments #8/,
+        });
+        expect(warmLitePin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/8/"
+        );
         expect(table.querySelectorAll("tbody tr")).toHaveLength(18);
     });
 });
