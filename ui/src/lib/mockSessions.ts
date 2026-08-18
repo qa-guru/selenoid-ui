@@ -212,16 +212,11 @@ function notifyMockSessions(): void {
     window.dispatchEvent(new Event(MOCK_SESSIONS_CHANGE));
 }
 
+let createdMockSessionSeq = 0;
+
 function newCreatedMockSessionId(): string {
-    const bytes = new Uint8Array(12);
-    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
-        crypto.getRandomValues(bytes);
-    } else {
-        for (let i = 0; i < bytes.length; i += 1) {
-            bytes[i] = Math.floor(Math.random() * 256);
-        }
-    }
-    return `mockusr-${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+    createdMockSessionSeq += 1;
+    return `mockusr-${createdMockSessionSeq.toString(16).padStart(24, "0")}`;
 }
 
 /** Live-row object for a mock Create Session (form caps, not the pairwise matrix). */
