@@ -35,6 +35,7 @@ import {
     primeHubAuth,
 } from "../../config/hubAuth";
 import { rememberHubAuthToken } from "../../config/hubSessionAuth";
+import { isMockSessionsEnabled, spawnCreatedMockSession } from "../../lib/mockSessions";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -2373,6 +2374,17 @@ const Launch = ({
                 orientation: androidOrientation,
                 selenoidOptions: androidSelenoidOptions,
             });
+            if (isMockSessionsEnabled()) {
+                const sessionId = spawnCreatedMockSession({
+                    browserName: "android",
+                    version,
+                    quota: String(authUser || "").trim(),
+                    caps: { ...androidSelenoidOptions },
+                });
+                navigate(`/sessions/${sessionId}`);
+                onLoading(false);
+                return;
+            }
             const androidController = new AbortController();
             const androidTimeout = scheduleCreateSessionAbort(androidController);
             try {
@@ -2474,6 +2486,18 @@ const Launch = ({
         if (windowOpts) {
             Object.assign(alwaysMatch, windowOpts);
             Object.assign(desiredCapabilities, windowOpts);
+        }
+
+        if (isMockSessionsEnabled()) {
+            const sessionId = spawnCreatedMockSession({
+                browserName: `${name}`,
+                version: `${version}`,
+                quota: String(authUser || "").trim(),
+                caps: { ...selenoidOptions },
+            });
+            navigate(`/sessions/${sessionId}`);
+            onLoading(false);
+            return;
         }
 
         const controller = new AbortController();
@@ -2582,6 +2606,33 @@ const Launch = ({
 
         onError("");
         onLoading(true);
+
+        if (isMockSessionsEnabled()) {
+            const opts = buildSelenoidOptions({
+                sessionTimeout: pwSession.sessionTimeout,
+                name: pwSession.name,
+                screenResolution: pwSession.screenResolution,
+                enableVnc: pwSession.enableVnc,
+                enableVideo: pwSession.enableVideo,
+                enableHar: pwSession.enableHar,
+                enableLog: pwSession.enableLog,
+                timeZone: pwSession.timeZone,
+                env: pwSession.env,
+                labels: pwSession.labels,
+                videoName: pwSession.videoName,
+                logName: pwSession.logName,
+                harContent: pwSession.harContent,
+            });
+            const sessionId = spawnCreatedMockSession({
+                browserName: name,
+                version,
+                quota: String(authUser || "").trim(),
+                caps: { ...opts, headless: Boolean(pwSession.headless) },
+            });
+            navigate(`/sessions/${sessionId}`);
+            onLoading(false);
+            return;
+        }
 
         const existingIds = new Set(Object.keys(sessions || {}));
         const wsUrl = playwrightEndpoint(name, version, accessKey, pwSession);

@@ -1,11 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+    isMockLiveSession,
     isMockSessionsEnabled,
+    mergeMockLiveSessions,
     MOCK_SESSIONS_CHANGE,
+    MOCK_SESSION_ID,
     mockDetailsSession,
     mockLivePreview,
+    removeMockLiveSession,
+    resetMockLiveSessionOverlay,
     setMockSessionsEnabled,
+    spawnCreatedMockSession,
     subscribeMockSessions,
 } from "./mockSessions";
 
@@ -15,6 +21,8 @@ function resetUrl() {
 
 afterEach(() => {
     resetUrl();
+    resetMockLiveSessionOverlay();
+    setMockSessionsEnabled(false);
 });
 
 describe("mockSessions URL flag", () => {
@@ -134,5 +142,56 @@ describe("mockDetailsSession", () => {
 
     it("returns null when there is nothing to overlay", () => {
         expect(mockDetailsSession("missing", undefined, null, null)).toBeNull();
+    });
+});
+
+describe("created mock sessions from Create Session", () => {
+    it("merges a form-built session on top of pairwise fixtures", () => {
+        const id = spawnCreatedMockSession({
+            browserName: "chrome",
+            version: "149.0",
+            quota: "alice",
+            caps: {
+                name: "RTL session",
+                enableVNC: true,
+                screenResolution: "1280x1024x24",
+                sessionTimeout: "15m",
+                labels: { manual: "true" },
+            },
+        });
+
+        expect(id.startsWith("mockusr-")).toBe(true);
+        expect(isMockLiveSession(id)).toBe(true);
+
+        const merged = mergeMockLiveSessions({ hub: { id: "hub", caps: { browserName: "firefox" } } });
+        expect(merged.hub?.caps?.browserName).toBe("firefox");
+        expect(merged[MOCK_SESSION_ID.max]).toBeTruthy();
+        expect(merged[id]?.caps?.browserName).toBe("chrome");
+        expect(merged[id]?.caps?.version).toBe("149.0");
+        expect(merged[id]?.caps?.name).toBe("RTL session");
+        expect(merged[id]?.caps?.screenResolution).toBe("1280x1024x24");
+        expect(merged[id]?.quota).toBe("alice");
+    });
+
+    it("drops a created session without touching pairwise fixtures", () => {
+        const id = spawnCreatedMockSession({
+            browserName: "firefox",
+            version: "151.0",
+            caps: { name: "gone" },
+        });
+        expect(removeMockLiveSession(id)).toBe(true);
+        expect(mergeMockLiveSessions({})[id]).toBeUndefined();
+        expect(mergeMockLiveSessions({})[MOCK_SESSION_ID.max]).toBeTruthy();
+        expect(isMockLiveSession(id)).toBe(false);
+    });
+
+    it("hides a pairwise fixture until overlay reset", () => {
+        expect(removeMockLiveSession(MOCK_SESSION_ID.min)).toBe(true);
+        expect(mergeMockLiveSessions({})[MOCK_SESSION_ID.min]).toBeUndefined();
+        expect(mergeMockLiveSessions({})[MOCK_SESSION_ID.max]).toBeTruthy();
+        expect(isMockLiveSession(MOCK_SESSION_ID.min)).toBe(true);
+
+        resetMockLiveSessionOverlay();
+        expect(mergeMockLiveSessions({})[MOCK_SESSION_ID.min]).toBeTruthy();
     });
 });

@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi, afterEach } from "vitest";
 import SessionInfo from "./SessionInfo";
+import { setMockSessionsEnabled, spawnCreatedMockSession, resetMockLiveSessionOverlay } from "../../lib/mockSessions";
 
 const browser = {
     quota: "alice",
@@ -238,6 +239,41 @@ describe("SessionInfo", () => {
         vi.unstubAllGlobals();
     });
 
+    it("stop of a created mock session skips the hub and returns to the list", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn();
+        vi.stubGlobal("fetch", fetchMock);
+        setMockSessionsEnabled(true);
+        const id = spawnCreatedMockSession({
+            browserName: "chrome",
+            version: "149.0",
+            caps: { name: "Manual session", labels: { manual: "true" }, enableVNC: true },
+        });
+
+        render(
+            <MemoryRouter initialEntries={[`/sessions/${id}`]}>
+                <Routes>
+                    <Route
+                        path="/sessions/:session"
+                        element={
+                            <SessionInfo
+                                session={id}
+                                browser={{ quota: "", caps: { browserName: "chrome", version: "149.0" } }}
+                                live
+                            />
+                        }
+                    />
+                    <Route path="/sessions" element={<div data-testid="sessions-list" />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByTestId("session-stop"));
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(screen.getByTestId("sessions-list")).toBeInTheDocument();
+        vi.unstubAllGlobals();
+    });
+
     it("delete wipes finished artifacts", async () => {
         const user = userEvent.setup();
         const fetchMock = vi.fn().mockResolvedValue({ ok: true });
@@ -262,5 +298,7 @@ describe("SessionInfo", () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+        resetMockLiveSessionOverlay();
+        setMockSessionsEnabled(false);
     });
 });

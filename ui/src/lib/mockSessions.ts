@@ -6,6 +6,9 @@
  *
  * The set is a pairwise covering of live-row factors (badges, quota, name,
  * browser, freeze/active) plus stable seeds mockmax / mockmin / mockfrz.
+ *
+ * Create Session in mock mode does not POST the hub: it appends a live row
+ * built from the New Session form (see `spawnCreatedMockSession`).
  */
 
 import type { LiveSession, SessionCaps, SessionsMap } from "../types/hub";
@@ -191,9 +194,118 @@ export function subscribeMockSessions(listener: () => void): () => void {
     };
 }
 
-/** Merge mock live sessions on top of real feed (mock ids win). */
+export type CreatedMockSessionInput = {
+    id?: string;
+    browserName: string;
+    version?: string;
+    quota?: string;
+    caps?: SessionCaps;
+};
+
+let createdMockSessions: SessionsMap = {};
+let hiddenMockSessionIds = new Set<string>();
+
+function notifyMockSessions(): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+    window.dispatchEvent(new Event(MOCK_SESSIONS_CHANGE));
+}
+
+function newCreatedMockSessionId(): string {
+    const bytes = new Uint8Array(12);
+    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+        crypto.getRandomValues(bytes);
+    } else {
+        for (let i = 0; i < bytes.length; i += 1) {
+            bytes[i] = Math.floor(Math.random() * 256);
+        }
+    }
+    return `mockusr-${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Live-row object for a mock Create Session (form caps, not the pairwise matrix). */
+export function createMockLiveSession(input: CreatedMockSessionInput): LiveSession {
+    const id = input.id || newCreatedMockSessionId();
+    const extra = input.caps || {};
+    const caps: SessionCaps = {
+        ...extra,
+        browserName: input.browserName,
+    };
+    const version = input.version || extra.version;
+    if (version) {
+        caps.version = String(version);
+    }
+    return {
+        id,
+        container: "mock-container-created",
+        quota: input.quota || "",
+        caps,
+    };
+}
+
+export function addCreatedMockSession(session: LiveSession): LiveSession {
+    const id = session.id || newCreatedMockSessionId();
+    const next = { ...session, id };
+    createdMockSessions = { ...createdMockSessions, [id]: next };
+    hiddenMockSessionIds.delete(id);
+    notifyMockSessions();
+    return next;
+}
+
+/** Insert a form-built mock session and return its id. */
+export function spawnCreatedMockSession(input: CreatedMockSessionInput): string {
+    const session = addCreatedMockSession(createMockLiveSession(input));
+    return String(session.id);
+}
+
+/** True for pairwise fixtures and sessions spawned from Create Session. */
+export function isMockLiveSession(id: string | undefined): boolean {
+    if (!id) {
+        return false;
+    }
+    return Boolean(createdMockSessions[id] || MOCK_LIVE_SESSIONS[id]);
+}
+
+/**
+ * Drop a created mock session, or hide a pairwise fixture.
+ * Returns true when the hub DELETE should be skipped.
+ */
+export function removeMockLiveSession(id: string): boolean {
+    if (!id) {
+        return false;
+    }
+    if (createdMockSessions[id]) {
+        const next = { ...createdMockSessions };
+        delete next[id];
+        createdMockSessions = next;
+        notifyMockSessions();
+        return true;
+    }
+    if (MOCK_LIVE_SESSIONS[id] && !hiddenMockSessionIds.has(id)) {
+        hiddenMockSessionIds = new Set(hiddenMockSessionIds);
+        hiddenMockSessionIds.add(id);
+        notifyMockSessions();
+        return true;
+    }
+    return false;
+}
+
+/** Tests / afterEach — pairwise fixtures come back; created rows are gone. */
+export function resetMockLiveSessionOverlay(): void {
+    createdMockSessions = {};
+    hiddenMockSessionIds = new Set();
+}
+
+/** Merge mock live sessions on top of real feed (created ids win, then fixtures). */
 export function mergeMockLiveSessions(sessions: SessionsMap = {}): SessionsMap {
-    return { ...sessions, ...MOCK_LIVE_SESSIONS };
+    const merged: SessionsMap = { ...sessions, ...MOCK_LIVE_SESSIONS, ...createdMockSessions };
+    if (hiddenMockSessionIds.size) {
+        for (const id of hiddenMockSessionIds) {
+            delete merged[id];
+        }
+    }
+    return merged;
 }
 
 export const MOCK_MAX_ID = MOCK_SESSION_ID.max;

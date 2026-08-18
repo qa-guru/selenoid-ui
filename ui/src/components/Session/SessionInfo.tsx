@@ -6,6 +6,7 @@ import { Badge, Button, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
 import { useDeleteSession } from "../SessionArchive/service";
 import { sessionsListTo } from "../../lib/sessionNav";
+import { isMockLiveSession, isMockSessionsEnabled } from "../../lib/mockSessions";
 import { isManualSession, sessionBrowserName, sessionName } from "../../util/sessionIdentity";
 import { SessionCapBadges, SessionIdentity } from "../SessionIdentity";
 
@@ -41,11 +42,18 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
             return;
         }
         setStopping(true);
-        deleteSession(session).catch((e: any) => {
-            console.error("Can't delete session", session, e);
-            setStopping(false);
-        });
-    }, [session, canStop, stopping]);
+        const mockOverlay = isMockSessionsEnabled() && isMockLiveSession(session);
+        deleteSession(session)
+            .then(() => {
+                if (mockOverlay) {
+                    navigate(backTo);
+                }
+            })
+            .catch((e: any) => {
+                console.error("Can't delete session", session, e);
+                setStopping(false);
+            });
+    }, [session, canStop, stopping, navigate, backTo]);
 
     const onDelete = useCallback(() => {
         if (!canDelete || deleting) {

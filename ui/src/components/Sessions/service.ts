@@ -2,9 +2,13 @@ import { useCallback, useState } from "react";
 
 import { hubFetchInit } from "../../config/hubAuth";
 import { resolveHubAuthToken } from "../../config/hubSessionAuth";
+import { isMockSessionsEnabled, removeMockLiveSession } from "../../lib/mockSessions";
 
 /** DELETE /wd/hub/session/{id} — shared by Stats trash and VNC kill. */
 export function deleteSession(id: string) {
+    if (isMockSessionsEnabled() && removeMockLiveSession(id)) {
+        return Promise.resolve();
+    }
     return fetch(`/wd/hub/session/${id}`, hubFetchInit(resolveHubAuthToken(), { method: "DELETE" })).then(
         (response: any) => {
             if (!response.ok) {
