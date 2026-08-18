@@ -219,7 +219,12 @@ const Session = ({ origin, session, browser }: any) => {
                         </div>
                     )}
                     {hasLogColumn && (
-                        <div className="session-interactive-card session-log-slot">
+                        <div
+                            className={`session-interactive-card session-log-slot${
+                                hasMediaColumn ? "" : " session-log-slot--solo"
+                            }`}
+                            data-testid="session-log-slot"
+                        >
                             {keepLiveLog || showLive || showMockPreview ? (
                                 <Log
                                     {...{

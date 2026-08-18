@@ -55,7 +55,22 @@ describe("Session detail page", () => {
         const row = document.querySelector(".interactive");
         expect(row?.contains(document.querySelector(".session-media-slot"))).toBe(true);
         expect(row?.contains(document.querySelector(".session-log-slot"))).toBe(true);
+        expect(document.querySelector(".session-log-slot")).not.toHaveClass("session-log-slot--solo");
         expect(screen.queryByTestId("session-detail-video")).toBeNull();
+    });
+
+    it("sizes a log-only slot to the VNC 16/9 screen when there is no media column", () => {
+        renderSession({
+            session: "log-only-1",
+            browser: {
+                quota: "alice",
+                caps: { browserName: "chrome", version: "120", enableVNC: false },
+            },
+        });
+
+        expect(document.querySelector(".session-media-slot")).toBeNull();
+        expect(screen.getByTestId("live-log")).toBeInTheDocument();
+        expect(screen.getByTestId("session-log-slot")).toHaveClass("session-log-slot", "session-log-slot--solo");
     });
 
     it("loads finished artifacts and renders video, logs, HAR", async () => {

@@ -83,20 +83,23 @@ export const StyledSession = styled.div`
         }
     }
 
-    /* Log-only (no VNC): nothing to size the row — hug content. */
-    .interactive:not(:has(.session-media-slot)) .session-log-slot {
+    /* Log-only (no VNC): same default screen as VncWindow (16/9), not hug-to-one-line. */
+    .session-log-slot--solo {
+        aspect-ratio: 16 / 9;
         height: auto;
         min-height: 0;
-        overflow: visible;
+        overflow: hidden;
+        align-self: start;
 
         > * {
-            flex: 1 0 auto;
-            height: auto;
+            flex: 1 1 auto;
+            min-height: 0;
+            height: 100%;
         }
     }
 
     @media (max-width: 999px) {
-        .session-log-slot {
+        .session-log-slot:not(.session-log-slot--solo) {
             height: auto;
             min-height: 0;
             overflow: visible;
