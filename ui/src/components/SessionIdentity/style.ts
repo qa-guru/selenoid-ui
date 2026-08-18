@@ -46,6 +46,8 @@ export const sessionIdentityCss = css`
             font-weight: 300;
             font-variant-numeric: tabular-nums;
             white-space: nowrap;
+            border-left: 2px solid var(--color-border-strong, #555f6a);
+            padding-left: 8px;
         }
     }
 

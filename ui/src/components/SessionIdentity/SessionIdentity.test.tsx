@@ -20,6 +20,7 @@ describe("SessionIdentity", () => {
         const resolution = screen.getByText("1920x1080x24");
         expect(resolution).toHaveClass("session__resolution");
         expect(resolution).not.toHaveClass("badge");
+        expect(resolution.previousElementSibling).toHaveClass("version");
         expect(resolution.closest(".browser")).toContainElement(screen.getByText("149.0"));
         const name = screen.getByText("FullSuite.loginAndCheckout");
         expect(name).toHaveClass("session-name");
