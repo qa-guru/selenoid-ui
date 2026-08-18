@@ -263,12 +263,24 @@ export const StyledSession = styled.div`
 
             .btn,
             .badge {
+                box-sizing: border-box;
+                flex-shrink: 0;
+                isolation: isolate;
                 text-decoration: none;
                 white-space: nowrap;
                 min-height: var(--plaque-control-height, 32px);
                 padding: var(--space-1, 4px) var(--space-3, 10px);
                 font-size: var(--font-size-sm, 12px);
                 line-height: 1.2;
+            }
+
+            .btn:focus-visible {
+                outline-offset: -2px;
+            }
+
+            .btn--danger:hover:not(:disabled),
+            .btn--danger:active:not(:disabled) {
+                filter: none;
             }
 
             .badge {

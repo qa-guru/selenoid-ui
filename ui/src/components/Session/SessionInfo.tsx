@@ -104,8 +104,8 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
                                 disabled={!canStop || stopping}
                                 onClick={onStop}
                                 data-testid="session-stop"
+                                aria-busy={stopping || undefined}
                             >
-                                {stopping ? <BeatLoader size={2} color={"#fff"} /> : null}
                                 Stop session
                             </Button>
                         )}
@@ -114,8 +114,8 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
                             disabled={!canDelete || deleting}
                             onClick={onDelete}
                             data-testid="session-delete"
+                            aria-busy={deleting || undefined}
                         >
-                            {deleting ? <BeatLoader size={2} color={"#fff"} /> : null}
                             Delete session
                         </Button>
                         <Link to={backTo} className="btn btn--secondary" data-testid="session-close">
