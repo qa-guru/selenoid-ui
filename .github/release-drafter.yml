@@ -1,5 +1,5 @@
-name-template: $NEXT_PATCH_VERSION
-tag-template: $NEXT_PATCH_VERSION
+name-template: v$NEXT_PATCH_VERSION
+tag-template: v$NEXT_PATCH_VERSION
 template: |
   ## What’s Changed
 
@@ -7,10 +7,18 @@ template: |
 
 categories:
   - title: 🚀 New Features
-    label: new-feature
+    when:
+      labels:
+        - new-feature
   - title: 🐛 Bug Fixes
-    label: bug
+    when:
+      labels:
+        - bug
   - title: 📖 Documentation
-    label: docs
+    when:
+      labels:
+        - docs
   - title: 📦 Dependency updates
-    label: dependencies
+    when:
+      labels:
+        - dependencies
