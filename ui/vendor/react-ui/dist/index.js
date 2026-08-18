@@ -1357,6 +1357,9 @@ function VncWindow({
                 children: unlocked ? /* @__PURE__ */ jsx23(IconUnlock, {}) : /* @__PURE__ */ jsx23(IconLock, {})
               }
             ),
+            killControl,
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconCopyOut, {}) }),
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconCopyIn, {}) }),
             /* @__PURE__ */ jsx23(
               VncBarAction,
               {
@@ -1366,9 +1369,6 @@ function VncWindow({
                 children: fullscreen ? /* @__PURE__ */ jsx23(IconFullscreenExit, {}) : /* @__PURE__ */ jsx23(IconFullscreen, {})
               }
             ),
-            killControl,
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconCopyOut, {}) }),
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconCopyIn, {}) }),
             onDownload ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.download, testId: "vnc-window-download", onClick: onDownload, children: /* @__PURE__ */ jsx23(IconDownload, {}) }) : null
           ] })
         ] }),
