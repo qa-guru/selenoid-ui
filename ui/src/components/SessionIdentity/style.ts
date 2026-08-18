@@ -65,10 +65,18 @@ export const sessionIdentityCss = css`
     .session__caps {
         display: flex;
         align-items: center;
-        gap: 0.4em;
+        gap: 0.3em;
         flex-shrink: 1;
         flex-wrap: wrap;
         justify-content: flex-end;
+
+        .badge {
+            padding: 0 5px;
+            font-size: 9px;
+            font-weight: 600;
+            line-height: 16px;
+            letter-spacing: 0.04em;
+        }
     }
 
     .session__resolution {
