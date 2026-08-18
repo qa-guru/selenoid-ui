@@ -192,4 +192,32 @@ describe("HarViewer", () => {
         expect(screen.getByTestId("session-har-panel-response")).toBeInTheDocument();
         expect(screen.getByText("Body not captured (meta / headers + size only).")).toBeInTheDocument();
     });
+
+    it("shows capturing placeholder while live without mock", () => {
+        render(<HarViewer session="s1" browser={{ caps: { enableHAR: true } }} sessionAlive />);
+        expect(screen.getByTestId("session-har-empty")).toHaveTextContent(
+            "Hub is capturing network over CDP. The .har file is written when the session ends."
+        );
+        expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("renders fixture HAR rows while live when mockEnabled", async () => {
+        const user = userEvent.setup();
+        render(
+            <HarViewer
+                session="mockmax-aaaaaaaaaaaaaaaaaaaaaaa"
+                browser={{ caps: { enableHAR: true } }}
+                sessionAlive
+                mockEnabled
+            />
+        );
+
+        expect(screen.getByText("https://shop.example/login")).toBeInTheDocument();
+        expect(screen.getByText("https://shop.example/api/cart")).toBeInTheDocument();
+        expect(fetch).not.toHaveBeenCalled();
+
+        await user.click(screen.getByTestId("session-har-row-0"));
+        expect(screen.getByTestId("session-har-detail")).toBeInTheDocument();
+        expect(screen.getByText("Set-Cookie")).toBeInTheDocument();
+    });
 });

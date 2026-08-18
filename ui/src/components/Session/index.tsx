@@ -260,6 +260,7 @@ const Session = ({ origin, session, browser }: any) => {
                         browser={{ caps: { ...capsForHar, enableHAR: true } }}
                         sessionAlive={showLive}
                         file={harFile || undefined}
+                        mockEnabled={mockEnabled}
                         fullscreen={fullscreenSlot === "har"}
                         onToggleFullscreen={() =>
                             setFullscreenSlot((s) => (s === "har" ? null : "har"))

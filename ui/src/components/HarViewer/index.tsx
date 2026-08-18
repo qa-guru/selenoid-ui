@@ -6,6 +6,98 @@ import { fullscreenAction } from "../fullscreenAction";
 const POLL_MS = 2500;
 const MAX_ROWS = 200;
 
+/** Live `?mock=1` layout fixture — hub only writes `/har/<id>.har` when the session ends. */
+const MOCK_HAR = {
+    log: {
+        version: "1.2",
+        creator: { name: "selenoid-ui", version: "mock" },
+        entries: [
+            {
+                time: 86,
+                request: {
+                    method: "GET",
+                    url: "https://shop.example/login",
+                    headers: [
+                        { name: "Accept", value: "text/html" },
+                        { name: "User-Agent", value: "selenoid" },
+                    ],
+                },
+                response: {
+                    status: 200,
+                    statusText: "OK",
+                    headers: [
+                        { name: "Content-Type", value: "text/html; charset=utf-8" },
+                        { name: "Cache-Control", value: "no-store" },
+                        { name: "Set-Cookie", value: "sid=mock; Path=/" },
+                    ],
+                    content: {
+                        size: 4096,
+                        mimeType: "text/html",
+                        text: "<html><body>login</body></html>",
+                    },
+                },
+                timings: { blocked: 1, dns: 2, connect: 8, ssl: 12, send: 1, wait: 54, receive: 8 },
+            },
+            {
+                time: 18,
+                request: {
+                    method: "GET",
+                    url: "https://shop.example/api/session",
+                    headers: [{ name: "Accept", value: "application/json" }],
+                },
+                response: {
+                    status: 200,
+                    statusText: "OK",
+                    headers: [
+                        { name: "Content-Type", value: "application/json" },
+                        { name: "X-Request-Id", value: "mock-session-1" },
+                    ],
+                    content: {
+                        size: 128,
+                        mimeType: "application/json",
+                        text: '{"user":"alice@shop.example"}',
+                    },
+                },
+                timings: { blocked: 0, dns: 0, connect: 0, ssl: 0, send: 1, wait: 14, receive: 3 },
+            },
+            {
+                time: 42,
+                request: {
+                    method: "GET",
+                    url: "https://shop.example/api/cart",
+                    headers: [{ name: "Accept", value: "application/json" }],
+                },
+                response: {
+                    status: 200,
+                    statusText: "OK",
+                    headers: [{ name: "Content-Type", value: "application/json" }],
+                    content: {
+                        size: 256,
+                        mimeType: "application/json",
+                        text: '{"items":2,"total":19.90}',
+                    },
+                },
+                timings: { blocked: 0, dns: 0, connect: 0, ssl: 0, send: 1, wait: 36, receive: 5 },
+            },
+            {
+                time: 31,
+                request: {
+                    method: "GET",
+                    url: "https://shop.example/favicon.ico",
+                    headers: [{ name: "Accept", value: "*/*" }],
+                },
+                response: {
+                    status: 404,
+                    statusText: "Not Found",
+                    headers: [{ name: "Content-Type", value: "text/plain" }],
+                    content: { size: 19, mimeType: "text/plain", text: "Not Found" },
+                },
+                timings: { blocked: 0, dns: 0, connect: 0, ssl: 0, send: 1, wait: 28, receive: 2 },
+            },
+        ],
+    },
+};
+
 function harFileName(session: any, caps: any = {}) {
     const custom = String(caps.harName || caps.HARName || "").trim();
     if (custom) {
@@ -22,14 +114,23 @@ function wantsHar(caps: any = {}) {
  * Session HAR shell: polls hub GET /har/<id>.har, Panel + download.
  * Presentational table lives in @zero-design-system/react HarViewer.
  */
-const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp, fullscreen, onToggleFullscreen }: any) => {
+const HarViewer = ({
+    session,
+    browser = {},
+    sessionAlive = true,
+    file: fileProp,
+    fullscreen,
+    onToggleFullscreen,
+    mockEnabled = false,
+}: any) => {
     const caps = browser.caps || {};
     const enabled = Boolean(fileProp) || wantsHar(caps);
     const file = fileProp || harFileName(session, caps);
     const href = `/har/${file}`;
+    const useMockHar = Boolean(mockEnabled && enabled && !fileProp);
 
-    const [phase, setPhase] = useState(enabled ? "waiting" : "idle");
-    const [har, setHar] = useState<any>(null);
+    const [phase, setPhase] = useState(useMockHar ? "ready" : enabled ? "waiting" : "idle");
+    const [har, setHar] = useState<any>(useMockHar ? MOCK_HAR : null);
     const [error, setError] = useState("");
     const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
     const [detailTab, setDetailTab] = useState<HarDetailTab>("headers");
@@ -38,6 +139,12 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp,
 
     const poll = useCallback(async () => {
         if (!session || !enabled) {
+            return;
+        }
+        if (useMockHar) {
+            setHar(MOCK_HAR);
+            setPhase("ready");
+            setError("");
             return;
         }
         // While the session is live the hub may not expose /har/<id>.har yet — skip
@@ -73,12 +180,18 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp,
             setPhase("error");
             setError(err instanceof Error ? err.message : "Failed to load HAR");
         }
-    }, [enabled, href, session, fileProp]);
+    }, [enabled, href, session, fileProp, useMockHar]);
 
     useEffect(() => {
         if (!enabled || !session) {
             setPhase("idle");
             setHar(null);
+            return undefined;
+        }
+        if (useMockHar) {
+            setHar(MOCK_HAR);
+            setPhase("ready");
+            setError("");
             return undefined;
         }
         let cancelled = false;
@@ -147,7 +260,14 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp,
                         label: "Download",
                         onClick: () => {
                             const a = document.createElement("a");
-                            a.href = href;
+                            if (useMockHar) {
+                                const blob = new Blob([JSON.stringify(MOCK_HAR, null, 2)], {
+                                    type: "application/json",
+                                });
+                                a.href = URL.createObjectURL(blob);
+                            } else {
+                                a.href = href;
+                            }
                             a.download = file;
                             a.click();
                         },
