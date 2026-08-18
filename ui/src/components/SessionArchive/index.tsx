@@ -1,20 +1,19 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import { StyledArchive } from "./style.css";
 import { IconTrash, Panel } from "@zero-design-system/react";
 import { useDeleteSession } from "./service";
-import {
-    fetchSessionPage,
-    SESSION_PAGE_SIZE,
-    type SessionArchiveSortField,
-    type SessionArchiveSortOrder,
-} from "./api";
+import { fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
+import type { SessionArchiveSortField, SessionArchiveSortOrder } from "./api";
 import { sessionIdShort } from "../../util/sessionsLogic";
 import { sessionDetailTo } from "../../lib/sessionNav";
-import { buildArchiveSearchParams, parseArchiveUrlState, type ArchiveUrlState } from "./archiveUrlState";
+import { capsFromArchiveSession, hasSessionIdentity } from "../../util/sessionIdentity";
+import { SessionCapBadges, SessionIdentity } from "../SessionIdentity";
+import { buildArchiveSearchParams, parseArchiveUrlState } from "./archiveUrlState";
+import type { ArchiveUrlState } from "./archiveUrlState";
 
 /** Empty-state hourglass — composition only; dripicons off. */
 function IconHourglass() {
@@ -31,57 +30,6 @@ function IconHourglass() {
             <path d="M3.5 2.5h9M3.5 13.5h9" />
             <path d="M4.5 2.5c0 3 3.5 4 3.5 5.5S4.5 11 4.5 13.5" />
             <path d="M11.5 2.5c0 3-3.5 4-3.5 5.5s3.5 3 3.5 5.5" />
-        </svg>
-    );
-}
-
-function IconVideo() {
-    return (
-        <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <rect x="2.5" y="4" width="8" height="8" rx="1.5" />
-            <path d="M10.5 7.25 13.5 5.5v5L10.5 8.75" />
-        </svg>
-    );
-}
-
-function IconLog() {
-    return (
-        <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <path d="M4 2.5h5l3 3v8H4z" />
-            <path d="M9 2.5v3h3M6 8.5h4M6 11h3" />
-        </svg>
-    );
-}
-
-function IconHar() {
-    return (
-        <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <circle cx="8" cy="8" r="5.5" />
-            <path d="M2.5 8h11M8 2.5c1.6 1.8 1.6 9.2 0 11M8 2.5c-1.6 1.8-1.6 9.2 0 11" />
         </svg>
     );
 }
@@ -145,21 +93,14 @@ const SessionArchive = ({ query = "" }: any) => {
         if (import.meta.env.MODE === "test") {
             return;
         }
-        const mirrored = parseArchiveUrlState(
-            buildArchiveSearchParams(new URLSearchParams(), listState)
-        );
+        const mirrored = parseArchiveUrlState(buildArchiveSearchParams(new URLSearchParams(), listState));
         const current = parseArchiveUrlState(searchParams);
-        if (
-            mirrored.sort === current.sort &&
-            mirrored.order === current.order &&
-            mirrored.page === current.page
-        ) {
+        if (mirrored.sort === current.sort && mirrored.order === current.order && mirrored.page === current.page) {
             return;
         }
-        setSearchParams(
-            Object.fromEntries(buildArchiveSearchParams(new URLSearchParams(), listState).entries()),
-            { replace: true }
-        );
+        setSearchParams(Object.fromEntries(buildArchiveSearchParams(new URLSearchParams(), listState).entries()), {
+            replace: true,
+        });
     }, [listState, searchParams, setSearchParams]);
 
     const patchListState = useCallback((patch: Partial<ArchiveUrlState>) => {
@@ -242,73 +183,30 @@ const SessionArchive = ({ query = "" }: any) => {
                 className="archive-panel"
                 bodyClassName="archive-panel__body"
             >
+                <div className="archive__sort-bar" data-testid="archive-sort">
+                    <SortHeader label="Session" field="id" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
+                    <SortHeader
+                        label="Finished"
+                        field="finished"
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={onSort}
+                    />
+                    <SortHeader
+                        label="Duration"
+                        field="duration"
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={onSort}
+                    />
+                    <SortHeader label="User" field="quota" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
+                    <SortHeader label="Name" field="name" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
+                </div>
                 {/* No TransitionGroup: page swaps would stack exit+enter and double list height. */}
-                <div className="archive__table-wrap">
-                    <table className="archive__table" data-testid="archive-table">
-                        <colgroup>
-                            <col className="archive__col_id" />
-                            <col className="archive__col_date" />
-                            <col className="archive__col_duration" />
-                            <col className="archive__col_quota" />
-                            <col className="archive__col_name" />
-                            <col className="archive__col_actions" />
-                        </colgroup>
-                        <thead data-testid="archive-head">
-                            <tr>
-                                <th scope="col" className="archive__col_id">
-                                    <SortHeader
-                                        label="Session"
-                                        field="id"
-                                        sortBy={sortBy}
-                                        sortOrder={sortOrder}
-                                        onSort={onSort}
-                                    />
-                                </th>
-                                <th scope="col" className="archive__col_date">
-                                    <SortHeader
-                                        label="Finished"
-                                        field="finished"
-                                        sortBy={sortBy}
-                                        sortOrder={sortOrder}
-                                        onSort={onSort}
-                                    />
-                                </th>
-                                <th scope="col" className="archive__col_duration">
-                                    <SortHeader
-                                        label="Duration"
-                                        field="duration"
-                                        sortBy={sortBy}
-                                        sortOrder={sortOrder}
-                                        onSort={onSort}
-                                    />
-                                </th>
-                                <th scope="col" className="archive__col_quota">
-                                    <SortHeader
-                                        label="User"
-                                        field="quota"
-                                        sortBy={sortBy}
-                                        sortOrder={sortOrder}
-                                        onSort={onSort}
-                                    />
-                                </th>
-                                <th scope="col" className="archive__col_name">
-                                    <SortHeader
-                                        label="Name"
-                                        field="name"
-                                        sortBy={sortBy}
-                                        sortOrder={sortOrder}
-                                        onSort={onSort}
-                                    />
-                                </th>
-                                <th scope="col" className="archive__col_actions" aria-label="Actions" />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sessions.map((session: any) => (
-                                <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="archive__list" data-testid="archive-list">
+                    {sessions.map((session: any) => (
+                        <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
+                    ))}
                 </div>
 
                 {showPager && (
@@ -385,110 +283,49 @@ const SortHeader = ({
 };
 
 const SessionRow = ({ session, onDeleted }: any) => {
-    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [deleting, deleteSession] = useDeleteSession(session, onDeleted);
     const detailTo = sessionDetailTo(session.id, searchParams.toString());
-    const name = session.name || "";
+    const caps = capsFromArchiveSession(session);
     const quota = session.quota || "";
     const dateLabel = formatSessionDate(session.finished || session.started);
     const durationLabel = formatDuration(session.started, session.finished);
-    const hasArtifacts = Boolean(session.video || session.log || session.har);
-
-    const openDetail = useCallback(() => {
-        if (!deleting) {
-            navigate(detailTo);
-        }
-    }, [deleting, detailTo, navigate]);
-
-    const onRowKeyDown = useCallback(
-        (event: React.KeyboardEvent<HTMLTableRowElement>) => {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                openDetail();
-            }
-        },
-        [openDetail]
-    );
-
-    const stopRowAction = useCallback((event: React.MouseEvent) => {
-        event.stopPropagation();
-    }, []);
+    const identity = hasSessionIdentity(caps);
 
     return (
-        <tr
-            className="archive__row archive__row_clickable"
-            data-testid="session-card"
-            data-session={session.id}
-            tabIndex={0}
-            onClick={openDetail}
-            onKeyDown={onRowKeyDown}
-        >
-            <td className="archive__col_id">
-                <Link
-                    to={detailTo}
-                    className="archive__id archive__row-link"
-                    data-testid="session-detail-link"
-                    title={session.id}
-                    onClick={stopRowAction}
-                >
-                    {sessionIdShort(session.id)}
+        <div className="session" data-testid="session-card" data-session={session.id}>
+            <Link to={detailTo} className="link id session__id" data-testid="session-detail-link" title={session.id}>
+                {sessionIdShort(session.id)}
+            </Link>
+            <span className="session__quota" data-testid="session-quota" title={quota || undefined}>
+                {quota || "—"}
+            </span>
+            {identity ? (
+                <Link className="link identity session__fields" to={detailTo}>
+                    <SessionIdentity caps={caps} />
                 </Link>
-            </td>
-            <td className="archive__col_date">
-                <span className="archive__date" data-testid="session-date">
-                    {dateLabel}
-                </span>
-            </td>
-            <td className="archive__col_duration">
-                <span className="archive__duration" data-testid="session-duration">
-                    {durationLabel}
-                </span>
-            </td>
-            <td className="archive__col_quota">
-                <span
-                    className={`archive__quota${quota ? "" : " archive__quota_empty"}`}
-                    data-testid="session-quota"
-                    title={quota || undefined}
-                >
-                    {quota || "—"}
-                </span>
-            </td>
-            <td className="archive__col_name">
-                <span
-                    className={`archive__name${name ? "" : " archive__name_empty"}`}
-                    data-testid="session-name"
-                    title={name || undefined}
-                >
-                    {name || "—"}
-                </span>
-            </td>
-            <td className="archive__col_actions" onClick={stopRowAction}>
-                <div className="archive__actions">
-                <Link
-                    to={detailTo}
-                    className="archive__artifacts"
-                    data-testid="session-detail-artifacts"
-                    aria-label="Session artifacts"
-                >
-                    {session.video && (
-                        <span className="archive__artifact-icon" title="VIDEO" data-testid="artifact-video">
-                            <IconVideo />
+            ) : (
+                <span className="session__fields" />
+            )}
+            {dateLabel || durationLabel ? (
+                <span className="session__meta">
+                    {dateLabel ? (
+                        <span className="session__date" data-testid="session-date">
+                            {dateLabel}
                         </span>
-                    )}
-                    {session.log && (
-                        <span className="archive__artifact-icon" title="LOG" data-testid="artifact-log">
-                            <IconLog />
+                    ) : null}
+                    {durationLabel ? (
+                        <span className="session__duration" data-testid="session-duration">
+                            {durationLabel}
                         </span>
-                    )}
-                    {session.har && (
-                        <span className="archive__artifact-icon" title="HAR" data-testid="artifact-har">
-                            <IconHar />
-                        </span>
-                    )}
-                    {!hasArtifacts && <span className="archive__empty-artifacts">—</span>}
-                </Link>
+                    ) : null}
+                </span>
+            ) : null}
 
+            <div className="session__caps">
+                <SessionCapBadges artifacts={{ video: session.video, log: session.log, har: session.har }} />
+            </div>
+            <div className="session__actions">
                 <button
                     type="button"
                     className="icon-btn session-delete"
@@ -506,9 +343,8 @@ const SessionRow = ({ session, onDeleted }: any) => {
                         </span>
                     )}
                 </button>
-                </div>
-            </td>
-        </tr>
+            </div>
+        </div>
     );
 };
 

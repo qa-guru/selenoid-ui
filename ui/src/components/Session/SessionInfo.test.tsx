@@ -40,6 +40,8 @@ describe("SessionInfo", () => {
         expect(screen.getByText("120.0")).toBeInTheDocument();
         expect(screen.getByTestId("session-info-id")).toHaveTextContent("abc-def-");
         expect(screen.getByText("chrome").closest(".session__fields")).toBeTruthy();
+        const main = screen.getByTestId("session-info-id").closest(".session-info__main");
+        expect(main?.firstElementChild).toHaveClass("session__id");
         expect(screen.queryByText("/")).not.toBeInTheDocument();
     });
 
@@ -165,7 +167,7 @@ describe("SessionInfo", () => {
         expect(screen.getByText("HAR")).toBeInTheDocument();
         expect(screen.queryByTestId("session-stop")).not.toBeInTheDocument();
         expect(screen.getByTestId("session-delete")).toBeEnabled();
-        expect(screen.getByTestId("session-info-id").nextElementSibling).toHaveClass("session-info__actions");
+        expect(screen.getByTestId("session-info-id")).toHaveClass("session__id");
         expect(screen.getByTestId("session-finished").closest(".session-info__actions")).toBeTruthy();
         expect(screen.getByText("LOG").closest(".session-info__additional")).toBeTruthy();
     });
@@ -205,7 +207,8 @@ describe("SessionInfo", () => {
         const close = screen.getByTestId("session-close");
         expect(close).toHaveTextContent("Close session window");
         const id = screen.getByTestId("session-info-id");
-        expect(id.nextElementSibling).toHaveClass("session-info__actions");
+        expect(id).toHaveClass("session__id");
+        expect(id.closest(".session-info__main")?.querySelector(".session-info__actions")).toBeTruthy();
         expect(screen.getByTestId("session-info-panel").querySelector(".panel__bar .panel__actions")).toBeNull();
     });
 

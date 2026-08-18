@@ -52,7 +52,8 @@ describe("Sessions", () => {
         expect(screen.getByText("MANUAL")).toBeInTheDocument();
         // Default Create Session name is hidden — it only duplicates the MANUAL badge.
         expect(screen.queryByText("Manual session")).not.toBeInTheDocument();
-        expect(document.querySelector(".session-name[title='Manual session']")).toBeTruthy();
+        expect(screen.getByText("chrome").closest("a.identity")!.querySelector(".session-name")).toBeNull();
+        expect(screen.queryByText("—")).not.toBeInTheDocument();
         expect(screen.getByText("Smoke test")).toBeInTheDocument();
     });
 
@@ -151,7 +152,8 @@ describe("Sessions", () => {
 
         const identity = screen.getByText("chrome").closest("a.identity");
         expect(identity!).toHaveAttribute("href", "/sessions/abc-def-123");
-        expect(identity!).toHaveClass("link", "identity");
+        expect(identity!).toHaveClass("link", "identity", "session__fields");
+        expect(identity!.querySelector(".session-name_empty")).toBeNull();
     });
 
     it("keeps list search on session detail links", () => {
@@ -168,10 +170,7 @@ describe("Sessions", () => {
         renderSessions({}, { route: "/sessions?mock=1" });
 
         const shortId = sessionIdShort("abc-def-123");
-        expect(screen.getByRole("link", { name: shortId })).toHaveAttribute(
-            "href",
-            "/sessions/abc-def-123?mock=1"
-        );
+        expect(screen.getByRole("link", { name: shortId })).toHaveAttribute("href", "/sessions/abc-def-123?mock=1");
     });
 
     it("invokes delete for manual sessions", async () => {

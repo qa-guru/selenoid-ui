@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { isManualSession, sessionCapFlags, sessionName } from "./sessionIdentity";
+import {
+    capsFromArchiveSession,
+    hasSessionIdentity,
+    isManualSession,
+    sessionCapFlags,
+    sessionName,
+} from "./sessionIdentity";
 
 describe("sessionIdentity", () => {
     it("hides the default Create Session name next to MANUAL", () => {
@@ -45,5 +51,14 @@ describe("sessionIdentity", () => {
             log: false,
             resolution: "",
         });
+    });
+
+    it("maps archive payload without inventing browser caps", () => {
+        expect(capsFromArchiveSession({ id: "s1", name: "LoginTest", video: "s1.mp4" } as any)).toEqual({
+            name: "LoginTest",
+        });
+        expect(hasSessionIdentity(capsFromArchiveSession({ name: "LoginTest" }))).toBe(true);
+        expect(hasSessionIdentity(capsFromArchiveSession({}))).toBe(false);
+        expect(capsFromArchiveSession({ browserName: "firefox", version: "150.0" }).browserName).toBe("firefox");
     });
 });

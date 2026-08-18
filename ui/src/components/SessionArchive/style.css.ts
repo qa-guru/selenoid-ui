@@ -1,8 +1,10 @@
 import styled from "styled-components";
+import { sessionIdentityCss } from "../SessionIdentity/style";
 
 const colorBorder = "var(--color-border-strong, #555f6a)";
 
 export const StyledArchive = styled.div`
+    ${sessionIdentityCss}
     box-sizing: border-box;
     width: 100%;
     padding: var(--wt-post-gap, 14px);
@@ -16,93 +18,27 @@ export const StyledArchive = styled.div`
         min-height: 52px;
     }
 
-    .archive__table-wrap {
-        padding: 0 var(--space-5, 16px);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        box-sizing: border-box;
-    }
-
-    .archive__table {
-        width: 100%;
-        min-width: 640px;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 0.82em;
-    }
-
-    .archive__col_id {
-        width: 76px;
-    }
-
-    .archive__col_date {
-        width: 8.75em;
-    }
-
-    .archive__col_duration {
-        width: 7.5em;
-    }
-
-    .archive__col_quota {
-        width: 96px;
-    }
-
-    .archive__col_name {
-        width: auto;
-    }
-
-    .archive__col_actions {
-        /* video + log + har (3×22px) + gaps + delete — 72px clipped the trash icon */
-        width: 104px;
-    }
-
-    .archive__table thead th {
-        padding: 10px 0 8px;
+    .archive__sort-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem 1rem;
+        padding: 10px var(--space-5, 16px) 8px;
         border-bottom: 1px solid ${colorBorder};
         color: var(--color-text-muted, #aaa);
         font-size: 0.72rem;
         font-weight: 600;
         letter-spacing: 0.03em;
         text-transform: uppercase;
-        text-align: left;
-        vertical-align: middle;
-        white-space: nowrap;
+        box-sizing: border-box;
     }
 
-    .archive__table tbody td {
-        padding: 8px 0;
-        border-bottom: 1px dashed ${colorBorder};
-        color: var(--color-text, #fff);
-        vertical-align: middle;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .archive__table tbody tr:hover .archive__id,
-    .archive__table tbody tr:hover .archive__name {
-        color: var(--color-success, #59a781);
-    }
-
-    .archive__row_clickable {
-        cursor: pointer;
-    }
-
-    .archive__row_clickable:focus {
-        outline: none;
-    }
-
-    .archive__row_clickable:focus-visible {
-        box-shadow: inset 0 0 0 1px var(--color-success, #59a781);
-    }
-
-    .archive__row-link {
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-decoration: none;
-        color: inherit;
+    .archive__list {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 0 var(--space-5, 16px);
+        box-sizing: border-box;
     }
 
     .archive__sort {
@@ -166,110 +102,6 @@ export const StyledArchive = styled.div`
                 color: var(--color-success, #59a781);
                 opacity: 1;
             }
-        }
-    }
-
-    .archive__id {
-        color: var(--color-text, #fff);
-        font-weight: 300;
-        font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .archive__date,
-    .archive__duration,
-    .archive__quota {
-        color: var(--color-text-muted, #aaa);
-        font-size: 0.95em;
-        font-weight: 300;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .archive__quota_empty,
-    .archive__name_empty {
-        color: var(--color-text-muted, #aaa);
-    }
-
-    .archive__name {
-        font-weight: 300;
-        color: var(--color-text, #fff);
-    }
-
-    .archive__table tbody td.archive__col_actions {
-        overflow: visible;
-    }
-
-    .archive__col_actions {
-        text-align: right;
-    }
-
-    .archive__actions {
-        display: inline-flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 0.35em;
-        flex-shrink: 0;
-    }
-
-    .archive__artifacts {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25em;
-        text-decoration: none;
-        color: var(--color-text-muted, #aaa);
-
-        &:hover {
-            color: var(--color-text, #fff);
-        }
-    }
-
-    .archive__artifact-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 22px;
-        height: 22px;
-        color: inherit;
-
-        svg {
-            width: 16px;
-            height: 16px;
-            display: block;
-        }
-    }
-
-    .archive__empty-artifacts {
-        color: var(--color-text-muted, #aaa);
-        font-size: 0.9em;
-        min-width: 22px;
-        text-align: center;
-    }
-
-    .archive__actions .session-delete {
-        color: var(--color-text, #fff);
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 22px;
-        height: 22px;
-        padding: 0;
-
-        .icon svg {
-            width: 16px;
-            height: 16px;
-            display: block;
-        }
-
-        &:hover:not(:disabled) {
-            color: var(--color-danger, #ff6e59);
-        }
-
-        &:disabled {
-            opacity: 0.5;
-            cursor: default;
         }
     }
 

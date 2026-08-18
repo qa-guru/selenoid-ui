@@ -229,11 +229,6 @@ export const StyledSession = styled.div`
             font-size: 0.82em;
         }
 
-        .session__quota {
-            flex: 0 1 auto;
-            max-width: 10em;
-        }
-
         .session__fields {
             flex: 1 1 160px;
         }
@@ -241,18 +236,6 @@ export const StyledSession = styled.div`
         &__additional {
             flex: 0 1 auto;
             min-width: 0;
-        }
-
-        &__id {
-            flex: 0 0 auto;
-            max-width: 8em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
-            font-variant-numeric: tabular-nums;
-            font-weight: 300;
-            color: var(--color-text-muted, #aaa);
         }
 
         &__actions {

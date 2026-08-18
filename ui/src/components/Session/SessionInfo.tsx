@@ -6,7 +6,7 @@ import { Badge, Button, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
 import { useDeleteSession } from "../SessionArchive/service";
 import { sessionsListTo } from "../../lib/sessionNav";
-import { isManualSession, sessionName } from "../../util/sessionIdentity";
+import { isManualSession, sessionBrowserName, sessionName } from "../../util/sessionIdentity";
 import { SessionCapBadges, SessionIdentity } from "../SessionIdentity";
 
 const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finished = false, artifacts = {} }: any) => {
@@ -66,6 +66,9 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
         >
             <div className="session-info">
                 <div className={`session-info__main${manual ? " session_manual" : ""}`}>
+                    <div className="session__id session-info__id" data-testid="session-info-id">
+                        {shortId}
+                    </div>
                     {showIdentity || starting ? (
                         <>
                             {starting ? (
@@ -77,7 +80,7 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
                                     {browser.quota || "—"}
                                 </span>
                             )}
-                            {(caps.browserName || caps.version || displayName || name) && (
+                            {(sessionBrowserName(caps) || displayName) && (
                                 <div className="session__fields">
                                     <SessionIdentity caps={caps} />
                                 </div>
@@ -87,10 +90,6 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
 
                     <div className="session-info__additional session__caps">
                         <SessionCapBadges caps={caps} artifacts={artifacts} />
-                    </div>
-
-                    <div className="session-info__id" data-testid="session-info-id">
-                        {shortId}
                     </div>
 
                     <div className="session-info__actions">

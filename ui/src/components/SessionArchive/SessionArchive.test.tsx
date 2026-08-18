@@ -77,7 +77,7 @@ describe("SessionArchive", () => {
         expect(screen.getByTestId("archive-pager-status")).toHaveTextContent("2 / 2");
     });
 
-    it("renders semantic table with aligned header and body columns", async () => {
+    it("renders unified list rows with sort controls, not a table", async () => {
         (fetch as any).mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -91,12 +91,14 @@ describe("SessionArchive", () => {
         renderArchive();
 
         await waitFor(() => expect(screen.getByTestId("session-card")).toBeInTheDocument());
-        expect(screen.getAllByRole("columnheader")).toHaveLength(6);
-        expect(screen.getByTestId("archive-table").querySelectorAll("colgroup col")).toHaveLength(6);
-        expect(screen.getByTestId("session-card").querySelectorAll("td")).toHaveLength(6);
+        expect(screen.getByTestId("archive-list")).toBeInTheDocument();
+        expect(screen.getByTestId("archive-sort")).toBeInTheDocument();
+        expect(screen.getByTestId("session-card")).toHaveClass("session");
+        expect(screen.queryByRole("table")).not.toBeInTheDocument();
+        expect(screen.queryByTestId("archive-table")).not.toBeInTheDocument();
     });
 
-    it("renders a list row with meta, artifact icons, and detail link (no video preview)", async () => {
+    it("renders a list row with meta, cap badges, and detail link (no video preview)", async () => {
         (fetch as any).mockResolvedValueOnce({
             ok: true,
             json: async () => ({
@@ -134,20 +136,19 @@ describe("SessionArchive", () => {
         expect(screen.getByTestId("session-date")).toHaveTextContent(/^\d{1,2}\/\d{1,2}\/\d{2}, \d{2}:\d{2}$/);
         expect(screen.getByTestId("session-date").textContent).not.toMatch(/AM|PM/i);
         const row = screen.getByTestId("session-card");
-        expect(row.querySelectorAll("td")).toHaveLength(6);
+        expect(row).toHaveClass("session");
+        expect(row.querySelector(".browser")).toBeNull();
         expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-1");
-        expect(screen.getByTestId("artifact-video")).toHaveAttribute("title", "VIDEO");
-        expect(screen.getByTestId("artifact-log")).toHaveAttribute("title", "LOG");
-        expect(screen.getByTestId("artifact-har")).toHaveAttribute("title", "HAR");
-        expect(screen.queryByText("VIDEO")).toBeNull();
+        expect(screen.getByText("VIDEO")).toHaveClass("badge");
+        expect(screen.getByText("LOG")).toHaveClass("badge");
+        expect(screen.getByText("HAR")).toHaveClass("badge");
+        expect(screen.queryByTestId("artifact-video")).toBeNull();
         expect(screen.queryByTestId("session-video")).toBeNull();
         expect(document.querySelector("video")).toBeNull();
-        // No dripicons — local SVG chrome only.
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
-        // Artifact icons sit in the same actions group as delete.
-        const actions = screen.getByTestId("session-delete").closest(".archive__actions");
-        expect(actions!.contains(screen.getByTestId("artifact-video"))).toBe(true);
-        expect(actions!.contains(screen.getByTestId("session-delete"))).toBe(true);
+        expect(row.querySelector(".session__caps")).toContainElement(screen.getByText("VIDEO"));
+        expect(row.querySelector(".session__actions")).toContainElement(screen.getByTestId("session-delete"));
+        expect(screen.getByTestId("session-delete")).toHaveClass("icon-btn", "session-delete");
     });
 
     it("links har-only sessions into the detail page", async () => {
@@ -166,8 +167,9 @@ describe("SessionArchive", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-detail-link")).toHaveAttribute("href", "/sessions/sess-2");
         });
-        expect(screen.getByTestId("artifact-har")).toBeInTheDocument();
-        expect(screen.queryByTestId("artifact-video")).toBeNull();
+        expect(screen.getByText("HAR")).toHaveClass("badge");
+        expect(screen.queryByText("VIDEO")).toBeNull();
+        expect(screen.queryByTestId("artifact-har")).toBeNull();
         expect(document.querySelector("video")).toBeNull();
     });
 
@@ -253,6 +255,28 @@ describe("SessionArchive", () => {
             expect(fetch!).toHaveBeenCalledWith("/sessions/?json=&limit=10&offset=20&sort=name&order=asc");
         });
         expect(screen.getByTestId("archive-sort-name")).toHaveAttribute("aria-sort", "ascending");
+    });
+
+    it("does not invent browser identity from artifact-only payload", async () => {
+        (fetch as any).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                sessions: [{ id: "sess-1", video: "sess-1.mp4" }],
+                total: 1,
+                limit: 10,
+                offset: 0,
+            }),
+        });
+
+        renderArchive();
+
+        await waitFor(() => expect(screen.getByTestId("session-card")).toBeInTheDocument());
+        const row = screen.getByTestId("session-card");
+        expect(row.querySelector(".browser")).toBeNull();
+        expect(row.querySelector(".session-name")).toBeNull();
+        expect(screen.getByText("VIDEO")).toHaveClass("badge");
+        expect(screen.queryByText("—")).toBeTruthy();
+        expect(screen.getByTestId("session-quota")).toHaveTextContent("—");
     });
 
     it("keeps sort and page on the detail link", async () => {

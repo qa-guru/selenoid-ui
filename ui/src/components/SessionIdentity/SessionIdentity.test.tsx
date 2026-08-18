@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SessionCapBadges, SessionIdentity } from "./index";
 
 describe("SessionIdentity", () => {
-    it("renders browser, version, resolution, and truncated name with the table rail", () => {
+    it("renders browser, version, resolution, and name with a single name rail", () => {
         const { container } = render(
             <SessionIdentity
                 caps={{
@@ -25,11 +25,14 @@ describe("SessionIdentity", () => {
         const name = screen.getByText("FullSuite.loginAndCheckout");
         expect(name).toHaveClass("session-name");
         expect(name).not.toHaveClass("badge");
+        expect(name).not.toHaveClass("session-name_empty");
+        expect(name.previousElementSibling).toHaveClass("browser");
         expect(container.querySelector(".browser")).toBeTruthy();
+        expect(screen.queryByText("—")).not.toBeInTheDocument();
     });
 
-    it("hides default Manual session label", () => {
-        render(
+    it("omits the name node, em dash, and empty rail when Manual session is hidden", () => {
+        const { container } = render(
             <SessionIdentity
                 caps={{
                     browserName: "chrome",
@@ -40,7 +43,34 @@ describe("SessionIdentity", () => {
         );
 
         expect(screen.queryByText("Manual session")).not.toBeInTheDocument();
-        expect(document.querySelector(".session-name[title='Manual session']")).toHaveClass("session-name_empty");
+        expect(screen.queryByText("—")).not.toBeInTheDocument();
+        expect(container.querySelector(".session-name")).toBeNull();
+        expect(container.querySelector(".session-name_empty")).toBeNull();
+        expect(container.querySelector(".browser")).toBeTruthy();
+    });
+
+    it("does not render .browser when browserName is missing", () => {
+        const { container } = render(
+            <SessionIdentity
+                caps={{
+                    name: "LoginTest",
+                    version: "149.0",
+                    screenResolution: "1920x1080x24",
+                }}
+            />
+        );
+
+        expect(container.querySelector(".browser")).toBeNull();
+        expect(screen.queryByText("149.0")).not.toBeInTheDocument();
+        expect(screen.queryByText("1920x1080x24")).not.toBeInTheDocument();
+        const name = screen.getByTestId("session-name");
+        expect(name).toHaveTextContent("LoginTest");
+        expect(name.previousElementSibling).toBeNull();
+    });
+
+    it("renders nothing when there is no browser and no display name", () => {
+        const { container } = render(<SessionIdentity caps={{ name: "Manual session", labels: { manual: "true" } }} />);
+        expect(container).toBeEmptyDOMElement();
     });
 });
 
