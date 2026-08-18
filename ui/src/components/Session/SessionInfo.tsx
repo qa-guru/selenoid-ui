@@ -6,15 +6,10 @@ import { Badge, Button, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
 import { useDeleteSession } from "../SessionArchive/service";
 import { sessionsListTo } from "../../lib/sessionNav";
+import { isManualSession, sessionName } from "../../util/sessionIdentity";
+import { SessionCapBadges, SessionIdentity } from "../SessionIdentity";
 
-const SessionInfo = ({
-    session = "",
-    browser = { caps: {} },
-    live = false,
-    wasLive = false,
-    finished = false,
-    artifacts = {},
-}: any) => {
+const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finished = false, artifacts = {} }: any) => {
     const location = useLocation();
     const navigate = useNavigate();
     const backTo = sessionsListTo(location.search);
@@ -24,6 +19,10 @@ const SessionInfo = ({
     const hasArtifacts = Boolean(artifacts.video || artifacts.log || artifacts.har);
     const canStop = Boolean(live && session);
     const canDelete = Boolean(session && !live && hasArtifacts);
+    const starting = Boolean(live && !browser.quota);
+    const { name, displayName } = sessionName(caps);
+    const showIdentity = Boolean(browser.quota || caps.browserName || caps.version || name);
+    const manual = isManualSession(caps);
 
     useEffect(() => {
         if (!live) {
@@ -35,10 +34,7 @@ const SessionInfo = ({
         navigate(backTo);
     }, [navigate, backTo]);
 
-    const [deleting, deleteArtifacts] = useDeleteSession(
-        { id: session, ...artifacts },
-        onDeleted
-    );
+    const [deleting, deleteArtifacts] = useDeleteSession({ id: session, ...artifacts }, onDeleted);
 
     const onStop = useCallback(() => {
         if (!canStop || stopping) {
@@ -69,37 +65,28 @@ const SessionInfo = ({
             bodyClassName="session-info-panel__body"
         >
             <div className="session-info">
-                <div className="session-info__main">
-                    <div className="session-browser">
-                        {live || wasLive ? (
-                            live && !browser.quota ? (
-                                <BeatLoader size={5} color={"#fff"} loading />
-                            ) : (
-                                <span className="session-browser__loader-slot" aria-hidden="true" />
-                            )
-                        ) : null}
-                        {!finished && (
-                            <>
-                                <span className="session-browser__quota">{browser.quota}</span>
-                                {browser.quota && <span className="session-browser__version-separator">/</span>}
-                                <span className="session-browser__name">{caps.browserName}</span>
-                                {caps.browserName && <span className="session-browser__version-separator">/</span>}
-                                <span className="session-browser__version">{caps.version}</span>
-                                {caps.version && caps.screenResolution && (
-                                    <span className="session-browser__version-separator">/</span>
-                                )}
-                                {caps.screenResolution && <Badge>{caps.screenResolution}</Badge>}
-                            </>
-                        )}
-                    </div>
+                <div className={`session-info__main${manual ? " session_manual" : ""}`}>
+                    {showIdentity || starting ? (
+                        <>
+                            {starting ? (
+                                <span className="session__quota session__quota_starting" title="Starting…">
+                                    <BeatLoader size={4} color={"#fff"} loading />
+                                </span>
+                            ) : browser.quota ? (
+                                <span className="session__quota" title={browser.quota}>
+                                    {browser.quota}
+                                </span>
+                            ) : null}
+                            {(caps.browserName || caps.version || displayName || name) && (
+                                <div className="session__fields">
+                                    <SessionIdentity caps={caps} />
+                                </div>
+                            )}
+                        </>
+                    ) : null}
 
-                    <div className="session-info__additional">
-                        <div className="custom-capabilities">
-                            {caps.name && <Badge>{caps.name}</Badge>}
-                            {(caps.enableHAR || caps.enableHar || artifacts.har) && <Badge>HAR</Badge>}
-                            {(caps.enableVideo || artifacts.video) && <Badge>VIDEO</Badge>}
-                            {(caps.enableLog || artifacts.log) && <Badge>LOG</Badge>}
-                        </div>
+                    <div className="session-info__additional session__caps">
+                        <SessionCapBadges caps={caps} artifacts={artifacts} />
                     </div>
 
                     <div className="session-info__id" data-testid="session-info-id">
@@ -131,11 +118,7 @@ const SessionInfo = ({
                             {deleting ? <BeatLoader size={2} color={"#fff"} /> : null}
                             Delete session
                         </Button>
-                        <Link
-                            to={backTo}
-                            className="btn btn--secondary"
-                            data-testid="session-close"
-                        >
+                        <Link to={backTo} className="btn btn--secondary" data-testid="session-close">
                             Close session window
                         </Link>
                     </div>

@@ -379,7 +379,7 @@ describe("Session detail page", () => {
         expect(screen.queryByTestId("session-detail-video")).toBeNull();
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
         expect(screen.getByTestId("session-close")).toBeInTheDocument();
-        expect(screen.queryByText("alice")).toBeNull();
+        expect(screen.getByText("alice")).toBeInTheDocument();
         expect(screen.getByText("LoginTest")).toBeInTheDocument();
 
         act(() => {

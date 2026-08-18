@@ -1,6 +1,8 @@
 import styled from "styled-components";
+import { sessionIdentityCss } from "../SessionIdentity/style";
 
 export const StyledSession = styled.div`
+    ${sessionIdentityCss}
     box-sizing: border-box;
     flex: 1;
     width: 100%;
@@ -209,74 +211,45 @@ export const StyledSession = styled.div`
         color: var(--color-text, #fff);
 
         &__main {
-            min-height: 40px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
             flex-wrap: wrap;
-            gap: var(--space-3, 12px);
+            align-items: center;
+            gap: var(--space-3, 10px) var(--space-4, 15px);
+            min-width: 0;
+            font-size: 0.82em;
+        }
 
-            .session-browser {
-                line-height: 40px;
-                display: inline-flex;
-                align-items: center;
-                flex-shrink: 0;
-                gap: var(--space-1, 4px);
+        .session__quota {
+            flex: 0 1 auto;
+            max-width: 10em;
+        }
 
-                &__name {
-                    text-transform: uppercase;
-                    font-weight: 200;
-                }
-
-                &__version-separator {
-                    margin-right: 3px;
-                    margin-left: 3px;
-                    font-size: 1.5em;
-                    color: var(--color-border, #3d444c);
-                }
-
-                &__version {
-                    font-size: 0.8em;
-                }
-
-                &__quota {
-                    font-size: 0.8em;
-                    color: var(--color-text-muted, #999);
-                }
-            }
-
-            .session-browser__loader-slot {
-                display: inline-block;
-                width: 35px;
-                height: 5px;
-                flex-shrink: 0;
-            }
+        .session__fields {
+            flex: 1 1 160px;
         }
 
         &__additional {
-            flex: 1 1 auto;
+            flex: 0 1 auto;
             min-width: 0;
-            display: flex;
-            justify-content: flex-end;
-
-            .custom-capabilities {
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                gap: var(--space-2, 8px);
-                flex-wrap: nowrap;
-            }
         }
 
         &__id {
-            flex-shrink: 0;
+            flex: 0 0 auto;
+            max-width: 8em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+            font-variant-numeric: tabular-nums;
+            font-weight: 300;
+            color: var(--color-text-muted, #aaa);
         }
 
         &__actions {
             display: inline-flex;
             align-items: center;
             gap: var(--space-2, 8px);
-            flex-shrink: 0;
+            flex: 1 0 100%;
 
             .btn,
             .badge {

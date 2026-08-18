@@ -1,10 +1,10 @@
 import styled from "styled-components";
+import { sessionIdentityCss } from "../SessionIdentity/style";
 
 const colorBorder = "var(--color-border-strong, #555f6a)";
-const secondaryColor = "var(--color-text-muted, #aaa)";
-const manualColor = "#F0A202";
 
 export const StyledSessions = styled.div`
+    ${sessionIdentityCss}
     box-sizing: border-box;
     width: 100%;
     overflow-y: auto;
@@ -110,95 +110,9 @@ export const StyledSessions = styled.div`
         }
     }
 
-    .session__quota {
+    .session .session__quota {
         flex: 0 1 96px;
         max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: ${secondaryColor};
-        font-size: 0.95em;
-        font-weight: 300;
-    }
-
-    .session__fields {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4, 15px);
-        flex: 1;
-        min-width: 0;
-        text-decoration: none;
-        color: inherit;
-
-        &:hover .name,
-        &:hover .session-name {
-            color: var(--color-success, #59a781);
-        }
-    }
-
-    .browser {
-        display: inline-flex;
-        align-items: baseline;
-        gap: 0.35em;
-        flex: 0 0 auto;
-        white-space: nowrap;
-
-        .name {
-            text-transform: uppercase;
-            font-weight: 300;
-            line-height: 1.2;
-            color: var(--color-text, #fff);
-        }
-
-        .version {
-            font-weight: 300;
-            font-size: 0.95em;
-            color: ${secondaryColor};
-        }
-    }
-
-    .session-name {
-        flex: 1 1 140px;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-weight: 300;
-        color: var(--color-text, #fff);
-        border-left: 2px solid ${colorBorder};
-        padding-left: 8px;
-    }
-
-    .session-name_empty {
-        flex: 0 0 auto;
-        color: ${secondaryColor};
-    }
-
-    .session_manual .session-name {
-        border-color: ${manualColor};
-    }
-
-    .session__quota_starting {
-        display: inline-flex;
-        align-items: center;
-        min-width: 2.5em;
-    }
-
-    .session__caps {
-        display: flex;
-        align-items: center;
-        gap: 0.4em;
-        flex-shrink: 1;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-    }
-
-    .session__resolution {
-        color: ${secondaryColor};
-        font-size: 0.95em;
-        font-weight: 300;
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
     }
 
     .session__actions {
@@ -249,7 +163,7 @@ export const StyledSessions = styled.div`
             order: 1;
         }
 
-        .session__quota {
+        .session .session__quota {
             order: 2;
             flex: 1 1 auto;
             max-width: none;

@@ -4,10 +4,12 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
-import { Badge, IconTrash, Panel } from "@zero-design-system/react";
+import { IconTrash, Panel } from "@zero-design-system/react";
 import { useSessionDelete } from "./service";
 import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
+import { isManualSession } from "../../util/sessionIdentity";
 import { sessionDetailTo } from "../../lib/sessionNav";
+import { SessionCapBadges, SessionIdentity } from "../SessionIdentity";
 
 /** Empty-state hourglass — composition only; dripicons off. */
 function IconHourglass() {
@@ -94,10 +96,7 @@ const Session = ({ id, session: { quota, caps, starting }, ref }: any) => {
     const location = useLocation();
     const [deleting, deleteSession] = useSessionDelete(id);
     const href = deleting ? "#" : sessionDetailTo(id, location.search);
-    const manual = Boolean(caps.labels && caps.labels.manual);
-    const name = caps.name || "";
-    // Default Create Session name duplicates the MANUAL badge — keep title for e2e, hide label.
-    const displayName = manual && name.trim().toLowerCase() === "manual session" ? "" : name;
+    const manual = isManualSession(caps);
     const startingRow = Boolean(starting);
 
     return (
@@ -112,22 +111,11 @@ const Session = ({ id, session: { quota, caps, starting }, ref }: any) => {
                 {startingRow ? <BeatLoader size={4} color={"#fff"} loading /> : quota || "—"}
             </span>
             <Link className="link identity session__fields" to={href}>
-                <span className="browser">
-                    <span className="name">{caps.browserName}</span>
-                    {caps.version && <span className="version">{caps.version}</span>}
-                </span>
-                <span className={`session-name${displayName ? "" : " session-name_empty"}`} title={name || undefined}>
-                    {displayName || "—"}
-                </span>
+                <SessionIdentity caps={caps} />
             </Link>
 
             <div className="session__caps">
-                {manual && <Badge variant="primary">MANUAL</Badge>}
-                {caps.enableVNC && <Badge variant="primary">VNC</Badge>}
-                {caps.enableVideo && <Badge>VIDEO</Badge>}
-                {(caps.enableHAR || caps.enableHar) && <Badge>HAR</Badge>}
-                {caps.enableLog && <Badge>LOG</Badge>}
-                {caps.screenResolution && <span className="session__resolution">{caps.screenResolution}</span>}
+                <SessionCapBadges caps={caps} />
             </div>
             <div className="session__actions">
                 {manual && (

@@ -39,9 +39,11 @@ describe("SessionInfo", () => {
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("120.0")).toBeInTheDocument();
         expect(screen.getByTestId("session-info-id")).toHaveTextContent("abc-def-");
+        expect(screen.getByText("chrome").closest(".session__fields")).toBeTruthy();
+        expect(screen.queryByText("/")).not.toBeInTheDocument();
     });
 
-    it("renders Badge for resolution and session name", () => {
+    it("uses the same identity block as the sessions table", () => {
         render(
             <MemoryRouter>
                 <SessionInfo session="abc-def-12345678" browser={browser} />
@@ -49,12 +51,12 @@ describe("SessionInfo", () => {
         );
 
         const resolution = screen.getByText("1920x1080");
-        expect(resolution!).toHaveClass("badge");
-        expect(resolution!).not.toHaveClass("badge--primary");
+        expect(resolution).toHaveClass("session__resolution");
+        expect(resolution).not.toHaveClass("badge");
 
         const name = screen.getByText("Manual session");
-        expect(name!).toHaveClass("badge");
-        expect(name!).not.toHaveClass("badge--primary");
+        expect(name).toHaveClass("session-name");
+        expect(name).not.toHaveClass("badge");
     });
 
     it("live mode shows HAR VIDEO LOG from caps", () => {
@@ -81,9 +83,11 @@ describe("SessionInfo", () => {
         expect(screen.getByText("HAR")).toHaveClass("badge");
         expect(screen.getByText("VIDEO")).toHaveClass("badge");
         expect(screen.getByText("LOG")).toHaveClass("badge");
+        expect(screen.getByText("FullSuite.loginAndCheckout")).toHaveClass("session-name");
+        expect(screen.getByText("FullSuite.loginAndCheckout")).not.toHaveClass("badge");
     });
 
-    it("omits resolution Badge when screenResolution is missing", () => {
+    it("omits resolution when screenResolution is missing", () => {
         render(
             <MemoryRouter>
                 <SessionInfo
@@ -101,7 +105,8 @@ describe("SessionInfo", () => {
         );
 
         expect(screen.queryByText("1920x1080")).not.toBeInTheDocument();
-        expect(screen.getByText("No resolution")).toHaveClass("badge");
+        expect(screen.getByText("No resolution")).toHaveClass("session-name");
+        expect(screen.getByText("No resolution")).not.toHaveClass("badge");
     });
 
     it("finished mode shows Close window and artifact badges", () => {
@@ -125,9 +130,7 @@ describe("SessionInfo", () => {
         expect(screen.getByText("HAR")).toBeInTheDocument();
         expect(screen.queryByTestId("session-stop")).not.toBeInTheDocument();
         expect(screen.getByTestId("session-delete")).toBeEnabled();
-        expect(screen.getByTestId("session-info-id").nextElementSibling).toHaveClass(
-            "session-info__actions"
-        );
+        expect(screen.getByTestId("session-info-id").nextElementSibling).toHaveClass("session-info__actions");
         expect(screen.getByTestId("session-finished").closest(".session-info__actions")).toBeTruthy();
         expect(screen.getByText("LOG").closest(".session-info__additional")).toBeTruthy();
     });
@@ -143,10 +146,7 @@ describe("SessionInfo", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByTestId("session-close")).toHaveAttribute(
-            "href",
-            "/sessions?sort=duration&order=asc&page=2"
-        );
+        expect(screen.getByTestId("session-close")).toHaveAttribute("href", "/sessions?sort=duration&order=asc&page=2");
     });
 
     it("live mode exposes labeled Stop, Delete, and Close after the session id", () => {
