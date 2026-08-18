@@ -111,7 +111,7 @@ describe("Session detail page", () => {
         expect(screen.getByTestId("session-video-download")).toHaveAttribute("aria-label", "Download");
         expect(screen.getByTestId("session-har-download")).toHaveAttribute("aria-label", "Download");
         expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
-        expect(screen.getByTestId("session-back")).toHaveAttribute("href", "/sessions");
+        expect(screen.getByTestId("session-close")).toHaveAttribute("href", "/sessions");
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
     });
 
@@ -378,7 +378,7 @@ describe("Session detail page", () => {
         expect(screen.getByTestId("live-log")).toBeInTheDocument();
         expect(screen.queryByTestId("session-detail-video")).toBeNull();
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
-        expect(screen.getByTestId("session-back")).toBeInTheDocument();
+        expect(screen.getByTestId("session-close")).toBeInTheDocument();
         expect(screen.queryByText("alice")).toBeNull();
         expect(screen.getByText("LoginTest")).toBeInTheDocument();
 

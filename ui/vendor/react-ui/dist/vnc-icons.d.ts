@@ -1,4 +1,6 @@
 export declare function IconClose(): import("react").JSX.Element;
+/** Media-stop square — live session stop (Session panel). Pair: templates/icon-stop.html. */
+export declare function IconStop(): import("react").JSX.Element;
 /** Trash / kill session — same glyph as Stats `session-delete` (Sessions / Archive). */
 export declare function IconTrash(): import("react").JSX.Element;
 export declare function IconDocumentRemove(): import("react").JSX.Element;

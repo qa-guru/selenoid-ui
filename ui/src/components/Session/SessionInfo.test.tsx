@@ -24,8 +24,10 @@ describe("SessionInfo", () => {
 
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
         expect(screen.getByTestId("session-info-title")).toHaveTextContent("Session details");
-        expect(screen.getByTestId("session-back")).toHaveClass("btn", "btn--secondary");
-        expect(screen.getByTestId("session-back")).toHaveAttribute("href", "/sessions");
+        const close = screen.getByTestId("session-close");
+        expect(close).toHaveClass("icon-btn", "panel__action");
+        expect(close).toHaveAttribute("href", "/sessions");
+        expect(close).toHaveAttribute("aria-label", "Close window");
         expect(screen.getByText("alice")).toBeInTheDocument();
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("120.0")).toBeInTheDocument();
@@ -95,7 +97,7 @@ describe("SessionInfo", () => {
         expect(screen.getByText("No resolution")).toHaveClass("badge");
     });
 
-    it("finished mode shows back link and artifact badges", () => {
+    it("finished mode shows Close window and artifact badges", () => {
         render(
             <MemoryRouter>
                 <SessionInfo
@@ -106,19 +108,20 @@ describe("SessionInfo", () => {
             </MemoryRouter>
         );
 
-        const back = screen.getByTestId("session-back");
-        expect(back).toHaveAttribute("href", "/sessions");
-        expect(back).toHaveClass("btn", "btn--secondary");
+        const close = screen.getByTestId("session-close");
+        expect(close).toHaveAttribute("href", "/sessions");
+        expect(close).toHaveClass("icon-btn", "panel__action");
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
         expect(screen.getByText("VIDEO")).toBeInTheDocument();
         expect(screen.getByText("LOG")).toBeInTheDocument();
         expect(screen.getByText("HAR")).toBeInTheDocument();
-        expect(screen.queryByTestId("session-kill")).toBeNull();
+        expect(screen.getByTestId("session-stop")).toBeDisabled();
+        expect(screen.getByTestId("session-delete")).toBeEnabled();
         expect(screen.getByText("FINISHED").closest(".session-info__additional")).toBeTruthy();
         expect(screen.getByText("LOG").closest(".session-info__additional")).toBeTruthy();
     });
 
-    it("keeps list filters on the back button", () => {
+    it("keeps list filters on Close window", () => {
         render(
             <MemoryRouter initialEntries={["/sessions/fin-sess-1?sort=duration&order=asc&page=2"]}>
                 <SessionInfo
@@ -129,26 +132,33 @@ describe("SessionInfo", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByTestId("session-back")).toHaveAttribute(
+        expect(screen.getByTestId("session-close")).toHaveAttribute(
             "href",
             "/sessions?sort=duration&order=asc&page=2"
         );
     });
 
-    it("live mode exposes Kill session in Session panel bar", () => {
+    it("live mode exposes Stop, disabled Delete, and Close in Session panel bar", () => {
         render(
             <MemoryRouter>
                 <SessionInfo session="abc-def-12345678" browser={browser} live />
             </MemoryRouter>
         );
 
-        const kill = screen.getByTestId("session-kill");
-        expect(kill!).toHaveClass("icon-btn", "panel__action");
-        expect(kill!).toHaveAttribute("aria-label", "Kill session");
-        expect(kill.querySelector("svg")).toBeTruthy();
+        const stop = screen.getByTestId("session-stop");
+        expect(stop).toHaveClass("icon-btn", "panel__action");
+        expect(stop).toHaveAttribute("aria-label", "Stop session");
+        expect(stop).toBeEnabled();
+        expect(stop.querySelector("svg")).toBeTruthy();
+
+        const del = screen.getByTestId("session-delete");
+        expect(del).toHaveAttribute("aria-label", "Delete session");
+        expect(del).toBeDisabled();
+
+        expect(screen.getByTestId("session-close")).toHaveAttribute("aria-label", "Close window");
     });
 
-    it("kill issues DELETE /wd/hub/session/{id} and stays on the page", async () => {
+    it("stop issues DELETE /wd/hub/session/{id} and stays on the page", async () => {
         const user = userEvent.setup();
         const fetchMock = vi.fn().mockResolvedValue({ ok: true });
         vi.stubGlobal("fetch", fetchMock);
@@ -159,7 +169,7 @@ describe("SessionInfo", () => {
             </MemoryRouter>
         );
 
-        await user.click(screen.getByTestId("session-kill"));
+        await user.click(screen.getByTestId("session-stop"));
         expect(fetchMock!).toHaveBeenCalledWith(
             "/wd/hub/session/abc-def-12345678",
             expect.objectContaining({
@@ -171,6 +181,28 @@ describe("SessionInfo", () => {
             })
         );
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
+        vi.unstubAllGlobals();
+    });
+
+    it("delete wipes finished artifacts", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+        vi.stubGlobal("fetch", fetchMock);
+
+        render(
+            <MemoryRouter>
+                <SessionInfo
+                    session="fin-sess-1"
+                    finished
+                    artifacts={{ video: "fin-sess-1.mp4", log: "fin-sess-1.log", har: "fin-sess-1.har" }}
+                />
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByTestId("session-delete"));
+        expect(fetchMock).toHaveBeenCalledWith("/video/fin-sess-1.mp4", { method: "DELETE" });
+        expect(fetchMock).toHaveBeenCalledWith("/logs/fin-sess-1.log", { method: "DELETE" });
+        expect(fetchMock).toHaveBeenCalledWith("/har/fin-sess-1.har", { method: "DELETE" });
         vi.unstubAllGlobals();
     });
 

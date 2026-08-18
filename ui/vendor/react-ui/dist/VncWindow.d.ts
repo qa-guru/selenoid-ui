@@ -36,8 +36,9 @@ export interface VncWindowProps {
      */
     screenSize?: VncScreenSize;
     /**
-     * Custom Back control — e.g. a router `Link`. When omitted a `button` firing
-     * `onBack` is rendered. Compose with `WindowControl as={Link} tone="danger"`.
+     * Optional Back/close control. Omitted unless `back` or `onBack` is set —
+     * session close lives on the Session panel, not VNC chrome.
+     * Compose with `WindowControl as={Link} tone="danger"`.
      */
     back?: ReactNode;
     /**
@@ -60,9 +61,10 @@ export interface VncWindowProps {
     titleTestId?: string;
 }
 /**
- * Selenoid VNC window: base panel + chrome (back, connection status, lock,
- * fullscreen, clipboard) over a black noVNC screen. Composes the `vnc-window`
- * primitive with `WindowControl` / `ConnectionStatus`.
+ * Selenoid VNC window: base panel + chrome (connection status, lock,
+ * fullscreen, clipboard) over a black noVNC screen. Close/back is opt-in
+ * (`back` / `onBack`). Composes `vnc-window` with `WindowControl` /
+ * `ConnectionStatus`.
  */
 export declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, kill, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, onKill, children, labels, className, 'data-testid': dataTestId, titleTestId, }: VncWindowProps): import("react").JSX.Element;
 //# sourceMappingURL=VncWindow.d.ts.map

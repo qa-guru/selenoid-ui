@@ -494,20 +494,23 @@ function Panel({
             trail
           ] }),
           barEnd != null ? /* @__PURE__ */ jsx10("div", { className: "panel__bar-end", children: barEnd }) : null,
-          hasActions ? /* @__PURE__ */ jsx10("div", { className: "panel__actions", children: actions.map((action, index) => /* @__PURE__ */ jsx10(
-            "button",
-            {
-              type: "button",
-              className: "icon-btn panel__action",
-              "aria-label": action.label,
-              title: action.label,
-              disabled: action.disabled,
-              "data-testid": action["data-testid"],
-              onClick: action.onClick,
-              children: /* @__PURE__ */ jsx10("span", { className: "icon", "aria-hidden": "true", children: action.icon })
-            },
-            action["data-testid"] ?? `${action.label}-${index}`
-          )) }) : null
+          hasActions ? /* @__PURE__ */ jsx10("div", { className: "panel__actions", children: actions.map((action, index) => {
+            const ActionTag = action.as ?? "button";
+            const isButton = ActionTag === "button";
+            return /* @__PURE__ */ jsx10(
+              ActionTag,
+              {
+                ...isButton ? { type: "button", disabled: action.disabled } : { href: action.href, to: action.to },
+                className: "icon-btn panel__action",
+                "aria-label": action.label,
+                title: action.label,
+                "data-testid": action["data-testid"],
+                onClick: action.onClick,
+                children: /* @__PURE__ */ jsx10("span", { className: "icon", "aria-hidden": "true", children: action.icon })
+              },
+              action["data-testid"] ?? `${action.label}-${index}`
+            );
+          }) }) : null
         ] }),
         /* @__PURE__ */ jsx10("div", { className: cn("panel__body", bodyClassName), children }),
         foot != null ? /* @__PURE__ */ jsx10("div", { className: "panel__foot", children: foot }) : null
@@ -1001,6 +1004,20 @@ import { jsx as jsx21, jsxs as jsxs12 } from "react/jsx-runtime";
 function IconClose() {
   return /* @__PURE__ */ jsx21("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx21("path", { d: "m4 4 8 8M12 4l-8 8" }) });
 }
+function IconStop() {
+  return /* @__PURE__ */ jsx21(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: /* @__PURE__ */ jsx21("rect", { x: "4.5", y: "4.5", width: "7", height: "7", rx: "1.25" })
+    }
+  );
+}
 function IconTrash() {
   return /* @__PURE__ */ jsxs12(
     "svg",
@@ -1194,7 +1211,7 @@ function VncWindow({
   const aspectStyle = screenSize && screenSize.width > 0 && screenSize.height > 0 ? {
     ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
   } : void 0;
-  const backControl = back ?? /* @__PURE__ */ jsx23(WindowControl, { tone: "danger", "aria-label": l.back, title: l.back, onClick: onBack, children: /* @__PURE__ */ jsx23(IconClose, {}) });
+  const backControl = back !== void 0 ? back : onBack ? /* @__PURE__ */ jsx23(WindowControl, { tone: "danger", "aria-label": l.back, title: l.back, onClick: onBack, children: /* @__PURE__ */ jsx23(IconClose, {}) }) : null;
   const killControl = kill ?? (onKill ? /* @__PURE__ */ jsx23(
     WindowControl,
     {
@@ -1742,6 +1759,7 @@ export {
   IconDownload,
   IconLock,
   IconReset,
+  IconStop,
   IconTrash,
   IconUnlock,
   IconUpload,

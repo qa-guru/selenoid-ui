@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ElementType, ReactNode } from 'react';
 export type PanelVariant = 'content' | 'terminal';
 export type PanelTone = 'dark' | 'light';
 /** `bottom` (default) — foot under body; `rail` — foot as right column (`.panel--foot-rail`). */
@@ -17,6 +17,15 @@ export interface PanelAction {
     onClick?: () => void;
     disabled?: boolean;
     'data-testid'?: string;
+    /** Render as another element — e.g. a router `Link`. Defaults to `button`. */
+    as?: ElementType;
+    /** Native href when `as="a"`. */
+    href?: string;
+    /** Router `to` when `as` is a Link. */
+    to?: string | {
+        pathname: string;
+        search?: string;
+    };
 }
 export interface PanelProps {
     /**

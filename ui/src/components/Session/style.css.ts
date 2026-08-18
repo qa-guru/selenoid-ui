@@ -205,13 +205,6 @@ export const StyledSession = styled.div`
         padding: var(--space-3, 10px) var(--space-4, 15px);
     }
 
-    .session-kill-placeholder {
-        display: inline-block;
-        width: 28px;
-        height: 28px;
-        visibility: hidden;
-    }
-
     .session-info {
         color: var(--color-text, #fff);
 
@@ -277,20 +270,6 @@ export const StyledSession = styled.div`
 
         &__id {
             flex-shrink: 0;
-        }
-
-        &__back {
-            text-decoration: none;
-            flex-shrink: 0;
-            min-height: var(--plaque-control-height, 32px);
-            padding: var(--space-1, 4px) var(--space-3, 10px);
-            font-size: var(--font-size-sm, 12px);
-            line-height: 1.2;
-            color: var(--color-text, #fff);
-
-            &:hover {
-                text-decoration: none;
-            }
         }
     }
 

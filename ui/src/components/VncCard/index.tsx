@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import { VncWindow, WindowControl, IconClose } from "@zero-design-system/react";
+import { VncWindow } from "@zero-design-system/react";
 import "@zero-design-system/react/styles.css";
 
 import VncScreen from "./VncScreen";
@@ -11,7 +10,7 @@ import { parseScreenSize } from "../../util/capabilitiesLogic";
  * RFB screen and Selenoid clipboard endpoints. Chrome, states and fullscreen
  * collapse live in @zero-design-system/react (no local styled-components).
  * Screen height follows `caps.screenResolution` aspect (default 16/9 in CSS).
- * Session kill lives on SessionInfo panel (`Panel.actions` + IconTrash), not here.
+ * Stop / delete / close live on SessionInfo (`Panel.actions`), not here.
  */
 export default class VncCard extends Component<any, any> {
     screen: any;
@@ -49,11 +48,6 @@ export default class VncCard extends Component<any, any> {
                 fullscreen={fullscreen}
                 unlocked={unlocked}
                 screenSize={screenSize || undefined}
-                back={
-                    <WindowControl as={Link} to="/" tone="danger" title="Back" aria-label="Back">
-                        <IconClose />
-                    </WindowControl>
-                }
                 onToggleLock={this.handleLock}
                 onToggleFullscreen={this.handleFullscreen}
                 onCopy={() => copyFromDocker(session)}

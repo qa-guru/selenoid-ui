@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader";
-import { Badge, IconTrash, Panel } from "@zero-design-system/react";
+import { Badge, IconClose, IconStop, IconTrash, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
+import { useDeleteSession } from "../SessionArchive/service";
 import { sessionsListTo } from "../../lib/sessionNav";
 
 const SessionInfo = ({
@@ -15,50 +16,71 @@ const SessionInfo = ({
     artifacts = {},
 }: any) => {
     const location = useLocation();
+    const navigate = useNavigate();
     const backTo = sessionsListTo(location.search);
     const caps = browser.caps || {};
     const shortId = session ? session.substring(0, 8) : "";
-    const [killing, setKilling] = useState(false);
+    const [stopping, setStopping] = useState(false);
+    const hasArtifacts = Boolean(artifacts.video || artifacts.log || artifacts.har);
+    const canStop = Boolean(live && session);
+    const canDelete = Boolean(session && !live && hasArtifacts);
 
     useEffect(() => {
         if (!live) {
-            setKilling(false);
+            setStopping(false);
         }
     }, [live]);
 
-    const onKill = useCallback(() => {
-        if (!session || killing) {
+    const onDeleted = useCallback(() => {
+        navigate(backTo);
+    }, [navigate, backTo]);
+
+    const [deleting, deleteArtifacts] = useDeleteSession(
+        { id: session, ...artifacts },
+        onDeleted
+    );
+
+    const onStop = useCallback(() => {
+        if (!canStop || stopping) {
             return;
         }
-        setKilling(true);
+        setStopping(true);
         deleteSession(session).catch((e: any) => {
             console.error("Can't delete session", session, e);
-            setKilling(false);
+            setStopping(false);
         });
-    }, [session, killing]);
+    }, [session, canStop, stopping]);
 
-    const killActions =
-        live && session
-            ? [
-                  {
-                      icon: killing ? <BeatLoader size={2} color={"#fff"} /> : <IconTrash />,
-                      label: "Kill session",
-                      disabled: killing,
-                      onClick: onKill,
-                      "data-testid": "session-kill",
-                  },
-              ]
-            : wasLive && session
-              ? [
-                    {
-                        icon: <span className="session-kill-placeholder" aria-hidden="true" />,
-                        label: "Kill session",
-                        disabled: true,
-                        onClick: () => {},
-                        "data-testid": "session-kill-placeholder",
-                    },
-                ]
-              : undefined;
+    const onDelete = useCallback(() => {
+        if (!canDelete || deleting) {
+            return;
+        }
+        deleteArtifacts();
+    }, [canDelete, deleting, deleteArtifacts]);
+
+    const actions = [
+        {
+            icon: stopping ? <BeatLoader size={2} color={"#fff"} /> : <IconStop />,
+            label: "Stop session",
+            disabled: !canStop || stopping,
+            onClick: onStop,
+            "data-testid": "session-stop",
+        },
+        {
+            icon: deleting ? <BeatLoader size={2} color={"#fff"} /> : <IconTrash />,
+            label: "Delete session",
+            disabled: !canDelete || deleting,
+            onClick: onDelete,
+            "data-testid": "session-delete",
+        },
+        {
+            as: Link,
+            to: backTo,
+            icon: <IconClose />,
+            label: "Close window",
+            "data-testid": "session-close",
+        },
+    ];
 
     return (
         <Panel
@@ -67,18 +89,11 @@ const SessionInfo = ({
             titleTestId="session-info-title"
             className="session-info-panel"
             bodyClassName="session-info-panel__body"
-            actions={killActions}
+            actions={actions}
         >
             <div className="session-info">
                 <div className="session-info__main">
                     <div className="session-browser">
-                        <Link
-                            to={backTo}
-                            className="btn btn--secondary session-info__back"
-                            data-testid="session-back"
-                        >
-                            ← Sessions
-                        </Link>
                         {live || wasLive ? (
                             live && !browser.quota ? (
                                 <BeatLoader size={5} color={"#fff"} loading />

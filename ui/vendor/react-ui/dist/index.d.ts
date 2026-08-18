@@ -45,7 +45,7 @@ export { VncWindow } from './VncWindow';
 export type { VncWindowProps, VncWindowState, VncWindowLabels, VncScreenSize, } from './VncWindow';
 export { HarViewer, formatSize, formatTiming, harStatusClass, HAR_TIMING_KEYS, } from './HarViewer';
 export type { HarViewerProps, HarEntry, HarHeader, HarContent, HarDetailTab, } from './HarViewer';
-export { IconClose, IconTrash, IconDocumentRemove, IconDotsHorizontal, IconLock, IconUnlock, IconChevronUp, IconChevronDown, IconVncCopy, IconUpload, } from './vnc-icons';
+export { IconClose, IconStop, IconTrash, IconDocumentRemove, IconDotsHorizontal, IconLock, IconUnlock, IconChevronUp, IconChevronDown, IconVncCopy, IconUpload, } from './vnc-icons';
 export { escapeHtml, highlightJson, highlightShell, highlightCurlHeredoc, highlightMarkdown, trimOutputBlankLines, highlightOutput, mountHighlightedOutput, } from './code-highlight';
 export type { HighlightKind, HighlightOptions } from './code-highlight';
 //# sourceMappingURL=index.d.ts.map

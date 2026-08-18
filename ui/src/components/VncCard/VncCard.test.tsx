@@ -55,9 +55,8 @@ describe("VncCard", () => {
 
         expect(screen.getByTestId("vnc-screen-stub")).toBeInTheDocument();
         expect(container.querySelector(".vnc-window--connected")).toBeInTheDocument();
-
-        expect(screen.getByRole("link", { name: "Back" })).toHaveClass("window-control", "window-control--danger");
         expect(screen.getByTestId("vnc-window-title")).toHaveTextContent("VNC window (view)");
+
         expect(screen.getByRole("button", { name: "Unlock screen" })).toHaveClass(
             "window-control",
             "window-control--info"
@@ -66,13 +65,16 @@ describe("VncCard", () => {
             "window-control",
             "window-control--success"
         );
+        expect(screen.queryByRole("link", { name: "Back" })).toBeNull();
+        expect(screen.queryByRole("button", { name: "Back" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Kill session" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Kill container" })).toBeNull();
+        expect(screen.queryByRole("button", { name: "Stop session" })).toBeNull();
+        expect(screen.queryByRole("button", { name: "Close window" })).toBeNull();
         expect(screen.getByRole("button", { name: "Copy from Selenoid" })).toHaveClass("window-control");
         expect(screen.getByRole("button", { name: "Paste to Selenoid" })).toHaveClass("window-control");
 
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
-        expect(screen.getByRole("link", { name: "Back" }).querySelector("svg")).toBeTruthy();
         expect(screen.getByRole("button", { name: "Enter fullscreen" }).querySelector("svg")).toBeTruthy();
     });
 
