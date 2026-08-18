@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { VncWindow } from "@zero-design-system/react";
+import { VncWindow } from "../../../vendor/react-ui/dist/index.js";
 import "@zero-design-system/react/styles.css";
 
 import VncScreen from "./VncScreen";
