@@ -3,12 +3,13 @@ import { describe, expect, it } from "vitest";
 import { SessionCapBadges, SessionIdentity } from "./index";
 
 describe("SessionIdentity", () => {
-    it("renders browser, version, and truncated name with the table rail", () => {
+    it("renders browser, version, resolution, and truncated name with the table rail", () => {
         const { container } = render(
             <SessionIdentity
                 caps={{
                     browserName: "chrome",
                     version: "149.0",
+                    screenResolution: "1920x1080x24",
                     name: "FullSuite.loginAndCheckout",
                 }}
             />
@@ -16,6 +17,10 @@ describe("SessionIdentity", () => {
 
         expect(screen.getByText("chrome")).toHaveClass("name");
         expect(screen.getByText("149.0")).toHaveClass("version");
+        const resolution = screen.getByText("1920x1080x24");
+        expect(resolution).toHaveClass("session__resolution");
+        expect(resolution).not.toHaveClass("badge");
+        expect(resolution.closest(".browser")).toContainElement(screen.getByText("149.0"));
         const name = screen.getByText("FullSuite.loginAndCheckout");
         expect(name).toHaveClass("session-name");
         expect(name).not.toHaveClass("badge");
@@ -39,7 +44,7 @@ describe("SessionIdentity", () => {
 });
 
 describe("SessionCapBadges", () => {
-    it("matches the live table: primary MANUAL/VNC, default VIDEO/HAR/LOG, resolution as text", () => {
+    it("matches the live table: primary MANUAL/VNC, default VIDEO/HAR/LOG", () => {
         render(
             <SessionCapBadges
                 caps={{
@@ -58,9 +63,7 @@ describe("SessionCapBadges", () => {
         expect(screen.getByText("VIDEO")).toHaveClass("badge");
         expect(screen.getByText("HAR")).toHaveClass("badge");
         expect(screen.getByText("LOG")).toHaveClass("badge");
-        const resolution = screen.getByText("1920x1080x24");
-        expect(resolution).toHaveClass("session__resolution");
-        expect(resolution).not.toHaveClass("badge");
+        expect(screen.queryByText("1920x1080x24")).not.toBeInTheDocument();
     });
 
     it("shows HAR/VIDEO/LOG from finished artifacts", () => {

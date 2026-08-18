@@ -53,6 +53,8 @@ describe("SessionInfo", () => {
         const resolution = screen.getByText("1920x1080");
         expect(resolution).toHaveClass("session__resolution");
         expect(resolution).not.toHaveClass("badge");
+        expect(resolution.closest(".browser")).toContainElement(screen.getByText("120.0"));
+        expect(resolution.closest(".session__caps")).toBeNull();
 
         const name = screen.getByText("Manual session");
         expect(name).toHaveClass("session-name");

@@ -3,7 +3,7 @@ import { css } from "styled-components";
 const secondaryColor = "var(--color-text-muted, #aaa)";
 const manualColor = "#F0A202";
 
-/** Shared live-row identity: browser + name rail + cap badges + resolution. */
+/** Shared live-row identity: browser + version + resolution + name rail + cap badges. */
 export const sessionIdentityCss = css`
     .session__fields {
         display: flex;
@@ -38,6 +38,14 @@ export const sessionIdentityCss = css`
             font-weight: 300;
             font-size: 0.95em;
             color: ${secondaryColor};
+        }
+
+        .session__resolution {
+            color: ${secondaryColor};
+            font-size: 0.95em;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
     }
 
@@ -77,14 +85,6 @@ export const sessionIdentityCss = css`
             line-height: 16px;
             letter-spacing: 0.04em;
         }
-    }
-
-    .session__resolution {
-        color: ${secondaryColor};
-        font-size: 0.95em;
-        font-weight: 300;
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
     }
 
     .session__quota {

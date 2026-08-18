@@ -81,6 +81,8 @@ describe("Sessions", () => {
         const resolution = screen.getByText("1920x1080");
         expect(resolution!).toHaveClass("session__resolution");
         expect(resolution!).not.toHaveClass("badge");
+        expect(resolution!.closest(".browser")).toContainElement(screen.getByText("120.0"));
+        expect(resolution!.closest(".session__caps")).toBeNull();
 
         const deleteBtn = screen.getByRole("button", { name: "Delete" });
         expect(deleteBtn!).toHaveClass("icon-btn", "session-delete");

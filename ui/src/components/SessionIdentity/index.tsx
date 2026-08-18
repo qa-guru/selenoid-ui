@@ -6,11 +6,13 @@ import { sessionCapFlags, sessionName } from "../../util/sessionIdentity";
 
 export function SessionIdentity({ caps = {} }: { caps?: SessionCaps }) {
     const { name, displayName } = sessionName(caps);
+    const resolution = String(caps.screenResolution || "");
     return (
         <>
             <span className="browser">
                 <span className="name">{caps.browserName}</span>
                 {caps.version ? <span className="version">{caps.version}</span> : null}
+                {resolution ? <span className="session__resolution">{resolution}</span> : null}
             </span>
             <span className={`session-name${displayName ? "" : " session-name_empty"}`} title={name || undefined}>
                 {displayName || "—"}
@@ -34,7 +36,6 @@ export function SessionCapBadges({
             {flags.video ? <Badge>VIDEO</Badge> : null}
             {flags.har ? <Badge>HAR</Badge> : null}
             {flags.log ? <Badge>LOG</Badge> : null}
-            {flags.resolution ? <span className="session__resolution">{flags.resolution}</span> : null}
         </>
     );
 }
