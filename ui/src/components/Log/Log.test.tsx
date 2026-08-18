@@ -45,7 +45,7 @@ describe("Log chrome → Panel terminal", () => {
         const { container } = render(<Log />);
 
         const panel = screen.getByTestId("session-log-panel");
-        expect(panel!).toHaveClass("panel", "panel--terminal", "log-card");
+        expect(panel!).toHaveClass("panel", "panel--terminal", "panel--bar-chrome", "log-card");
         expect(screen.getByTestId("session-log-title")).toHaveTextContent("Session logs");
         expect(panel.querySelector(".log-card__body .term")).toBeTruthy();
         expect(container.querySelector(".log-card__content")).toBeNull();

@@ -201,7 +201,7 @@ export const StyledSession = styled.div`
         flex: 0 0 auto;
     }
 
-    .session-info-panel__body {
+    .session-info-panel.panel--terminal > .session-info-panel__body {
         padding: var(--space-3, 10px) var(--space-4, 15px);
     }
 

@@ -57,6 +57,8 @@ const SessionVideo = ({ file }: any) => {
     return (
         <StyledSessionVideo data-testid="session-video-panel-wrap">
             <Panel
+                variant="terminal"
+                barChrome
                 title="Video"
                 testId="session-video-panel"
                 titleTestId="session-video-title"

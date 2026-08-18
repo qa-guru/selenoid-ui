@@ -60,6 +60,8 @@ const SessionInfo = ({
 
     return (
         <Panel
+            variant="terminal"
+            barChrome
             title="Session details"
             testId="session-info-panel"
             titleTestId="session-info-title"

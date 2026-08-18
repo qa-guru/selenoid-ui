@@ -1,4 +1,4 @@
-/* VNC window — original Selenoid VNC chrome composed with the base panel. */
+/* VNC window — panel chrome (dots + title + panel__actions) over a black noVNC screen. */
 .vnc-window-frame {
   position: relative;
   display: flex;
@@ -19,17 +19,11 @@
 }
 
 .panel--vnc {
-  --panel-bg: #000;
-  --panel-border: rgba(255, 255, 255, 0.1);
-  /* Bar band matches panel--terminal chrome (#1a1917), not invisible 3% white on #000. */
-  --panel-bar-bg: #1a1917;
   /* Remote desktop aspect — override via --vnc-aspect (e.g. 1280 / 1024). */
   --vnc-aspect: 16 / 9;
-  --panel-title-color: rgba(255, 255, 255, 0.55);
   flex: 0 1 100%;
   width: 100%;
   height: auto;
-  background: #000;
 }
 
 .panel--vnc > .panel__bar {
@@ -37,35 +31,12 @@
   width: 100%;
   height: var(--panel-bar-height-chrome);
   min-height: var(--panel-bar-height-chrome);
-  gap: 0;
-  padding: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: var(--panel-bar-bg);
-}
-
-.vnc-window__controls,
-.vnc-window__actions {
-  display: flex;
-  align-items: center;
-  height: var(--panel-bar-height-chrome);
-}
-
-.vnc-window__actions {
-  margin-left: auto;
-}
-
-.vnc-window__title {
-  margin-inline-start: var(--space-3, 12px);
-  padding-inline-end: var(--space-2, 8px);
-  min-width: 0;
-  flex: 1 1 auto;
 }
 
 .vnc-window__status-label {
-  margin-left: var(--space-1, 4px);
   color: var(--window-control-info);
-  font-size: var(--font-size-sm, 12px);
-  line-height: 20px;
+  font-size: var(--font-size-xs, 0.6875rem);
+  line-height: 1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -77,16 +48,6 @@
 
 .vnc-window--disconnected .vnc-window__status-label {
   color: var(--window-control-danger);
-}
-
-/* 15px circles keep roughly the same gap/diameter ratio as 8px panel dots
-   with their 5px gap: 24px center step → 9px visible gap. */
-.vnc-window--connected .window-control {
-  margin-inline-end: -6px;
-}
-
-.vnc-window--connected .vnc-window__actions {
-  padding-inline-end: 6px;
 }
 
 .vnc-window__screen {
@@ -111,7 +72,6 @@
   display: none;
 }
 
-.vnc-window--connected .connection-status,
 .vnc-window--connected .vnc-window__status-label {
   display: none;
 }

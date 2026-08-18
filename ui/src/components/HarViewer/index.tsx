@@ -129,6 +129,7 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
             <Panel
                 variant="terminal"
                 title="HAR Viewer"
+                barChrome
                 testId="session-har-panel"
                 titleTestId="session-har-title"
                 className="har-card"

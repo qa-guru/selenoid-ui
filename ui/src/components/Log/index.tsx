@@ -335,6 +335,7 @@ export default class Log extends Component<any, any> {
                 <Panel
                     variant="terminal"
                     title="Session logs"
+                    barChrome
                     testId="session-log-panel"
                     titleTestId="session-log-title"
                     className="log-card"

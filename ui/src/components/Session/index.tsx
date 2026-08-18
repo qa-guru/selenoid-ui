@@ -38,6 +38,8 @@ function IconHourglass() {
 function SessionVideoWaiting() {
     return (
         <Panel
+            variant="terminal"
+            barChrome
             title="Video"
             testId="session-video-waiting-panel"
             titleTestId="session-video-title"

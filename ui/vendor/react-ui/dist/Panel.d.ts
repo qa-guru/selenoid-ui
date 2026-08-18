@@ -78,11 +78,16 @@ export interface PanelProps {
      * when it bumps into dots.
      */
     actions?: PanelAction[];
+    /**
+     * Force `--panel-bar-height-chrome` (36px) even without actions / bar-end /
+     * trail tabs. Aligns title-only panels with neighbours in a session stack.
+     */
+    barChrome?: boolean;
     testId?: string;
     titleTestId?: string;
     bodyClassName?: string;
     hidden?: boolean;
     className?: string;
 }
-export declare function Panel({ title, children, variant, tone, trail, foot, footPlacement, barEnd, actions, testId, titleTestId, bodyClassName, hidden, className, }: PanelProps): import("react").JSX.Element;
+export declare function Panel({ title, children, variant, tone, trail, foot, footPlacement, barEnd, actions, barChrome, testId, titleTestId, bodyClassName, hidden, className, }: PanelProps): import("react").JSX.Element;
 //# sourceMappingURL=Panel.d.ts.map

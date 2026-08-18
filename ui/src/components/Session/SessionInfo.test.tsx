@@ -23,6 +23,12 @@ describe("SessionInfo", () => {
         );
 
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("session-info-panel")).toHaveClass(
+            "panel",
+            "panel--terminal",
+            "panel--bar-chrome",
+            "session-info-panel"
+        );
         expect(screen.getByTestId("session-info-title")).toHaveTextContent("Session details");
         const close = screen.getByTestId("session-close");
         expect(close).toHaveClass("btn", "btn--secondary");

@@ -76,7 +76,8 @@
 /* Chrome in bar (actions, meta, format tabs) — taller band for 28px hit targets. */
 .panel__bar:has(> .panel__actions),
 .panel__bar:has(> .panel__bar-end),
-.panel__bar:has(> .panel__trail > .tabs) {
+.panel__bar:has(> .panel__trail > .tabs),
+.panel--bar-chrome > .panel__bar {
   flex-basis: var(--panel-bar-height-chrome);
   height: var(--panel-bar-height-chrome);
   min-height: var(--panel-bar-height-chrome);

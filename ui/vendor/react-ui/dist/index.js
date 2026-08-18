@@ -440,6 +440,7 @@ function Panel({
   footPlacement = "bottom",
   barEnd,
   actions,
+  barChrome = false,
   testId,
   titleTestId,
   bodyClassName,
@@ -477,6 +478,7 @@ function Panel({
         "panel",
         `panel--${variant}`,
         variant === "terminal" && tone === "light" && "panel--terminal-light",
+        barChrome && "panel--bar-chrome",
         foot != null && footPlacement === "rail" && "panel--foot-rail",
         className
       ),
@@ -1187,6 +1189,24 @@ var defaultLabels = {
   view: "view",
   control: "control"
 };
+function VncBarAction({
+  label,
+  sessionControl,
+  onClick,
+  children
+}) {
+  return /* @__PURE__ */ jsx23(
+    "button",
+    {
+      type: "button",
+      className: cn("icon-btn", "panel__action", sessionControl && "vnc-window__session-control"),
+      "aria-label": label,
+      title: label,
+      onClick,
+      children: /* @__PURE__ */ jsx23("span", { className: "icon", "aria-hidden": "true", children })
+    }
+  );
+}
 function VncWindow({
   state,
   fullscreen = false,
@@ -1211,23 +1231,14 @@ function VncWindow({
   const aspectStyle = screenSize && screenSize.width > 0 && screenSize.height > 0 ? {
     ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
   } : void 0;
-  const backControl = back !== void 0 ? back : onBack ? /* @__PURE__ */ jsx23(WindowControl, { tone: "danger", "aria-label": l.back, title: l.back, onClick: onBack, children: /* @__PURE__ */ jsx23(IconClose, {}) }) : null;
-  const killControl = kill ?? (onKill ? /* @__PURE__ */ jsx23(
-    WindowControl,
-    {
-      tone: "danger",
-      sessionControl: true,
-      "aria-label": l.kill,
-      title: l.kill,
-      onClick: onKill,
-      children: /* @__PURE__ */ jsx23(IconTrash, {})
-    }
-  ) : null);
+  const backControl = back !== void 0 ? back : onBack ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.back, onClick: onBack, children: /* @__PURE__ */ jsx23(IconClose, {}) }) : null;
+  const killControl = kill ?? (onKill ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.kill, sessionControl: true, onClick: onKill, children: /* @__PURE__ */ jsx23(IconTrash, {}) }) : null);
   return /* @__PURE__ */ jsx23("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: /* @__PURE__ */ jsxs13(
     "div",
     {
       className: cn(
         "panel",
+        "panel--terminal",
         "panel--vnc",
         "vnc-window",
         `vnc-window--${state}`,
@@ -1241,38 +1252,38 @@ function VncWindow({
       "aria-label": titleText,
       children: [
         /* @__PURE__ */ jsxs13("div", { className: "panel__bar", children: [
-          /* @__PURE__ */ jsxs13("div", { className: "vnc-window__controls", children: [
+          /* @__PURE__ */ jsxs13("div", { className: "panel__dots", "aria-hidden": "true", children: [
+            /* @__PURE__ */ jsx23("span", { className: "panel__dot" }),
+            /* @__PURE__ */ jsx23("span", { className: "panel__dot" }),
+            /* @__PURE__ */ jsx23("span", { className: "panel__dot" })
+          ] }),
+          /* @__PURE__ */ jsxs13("div", { className: "panel__trail", children: [
+            /* @__PURE__ */ jsx23("span", { className: "panel__title vnc-window__title", "data-testid": titleTestId, children: titleText }),
+            state !== "connected" ? /* @__PURE__ */ jsx23("span", { className: "vnc-window__status-label", "aria-hidden": "true", children: state }) : null
+          ] }),
+          /* @__PURE__ */ jsxs13("div", { className: "panel__actions vnc-window__actions", children: [
             backControl,
-            /* @__PURE__ */ jsx23(ConnectionStatus, { state }),
-            state !== "connected" ? /* @__PURE__ */ jsx23("span", { className: "vnc-window__status-label", "aria-hidden": "true", children: state }) : null,
             /* @__PURE__ */ jsx23(
-              WindowControl,
+              VncBarAction,
               {
-                tone: "info",
+                label: unlocked ? l.lock : l.unlock,
                 sessionControl: true,
-                "aria-label": unlocked ? l.lock : l.unlock,
-                title: unlocked ? l.lock : l.unlock,
                 onClick: onToggleLock,
                 children: unlocked ? /* @__PURE__ */ jsx23(IconUnlock, {}) : /* @__PURE__ */ jsx23(IconLock, {})
               }
             ),
             /* @__PURE__ */ jsx23(
-              WindowControl,
+              VncBarAction,
               {
-                tone: "success",
+                label: fullscreen ? l.exitFullscreen : l.enterFullscreen,
                 sessionControl: true,
-                "aria-label": fullscreen ? l.exitFullscreen : l.enterFullscreen,
-                title: fullscreen ? l.exitFullscreen : l.enterFullscreen,
                 onClick: onToggleFullscreen,
                 children: fullscreen ? /* @__PURE__ */ jsx23(IconChevronDown, {}) : /* @__PURE__ */ jsx23(IconChevronUp, {})
               }
-            )
-          ] }),
-          /* @__PURE__ */ jsx23("span", { className: "panel__title vnc-window__title", "data-testid": titleTestId, children: titleText }),
-          /* @__PURE__ */ jsxs13("div", { className: "vnc-window__actions", children: [
+            ),
             killControl,
-            /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.copy, title: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
-            /* @__PURE__ */ jsx23(WindowControl, { tone: "neutral", "aria-label": l.paste, title: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) })
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) })
           ] })
         ] }),
         /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })
