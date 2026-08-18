@@ -33,17 +33,23 @@ HAR_DIR = DEV_ROOT / "har"
 TZ = timezone(timedelta(hours=2))
 NOW = datetime(2026, 7, 28, 12, 50, 0, tzinfo=TZ)
 
+# Default matrix stack (java-spring + typescript-react) on autotests.ai.
+DEFAULT_STACK_UI = "https://autotests.ai/stack/backend-java-spring/frontend-typescript-react/"
+DEFAULT_STACK_LOGIN = DEFAULT_STACK_UI + "login"
+DEFAULT_STACK_AUTH_LOGIN = "https://autotests.ai/stack/backend-java-spring/api/auth/login"
+DEFAULT_STACK_CSS = DEFAULT_STACK_UI + "assets/index.css"
+
 # Video: tiny placeholder (list icons only need the filename). Showcase copies a real mp4.
 VIDEO_STUB_BYTES = b"mock"
 
 # Session log text — readable in Session logs panel (not the literal "mock").
-MOCK_LOG = """\
+MOCK_LOG = f"""\
 2026-07-28 12:44:01 INFO  [SESSION_CREATED] [chrome 148.0]
 2026-07-28 12:44:02 INFO  [PROXY_TO] [http://172.17.0.2:4444]
 2026-07-28 12:44:03 INFO  [INIT] capabilities: enableVNC=true enableVideo=true enableHAR=true
-2026-07-28 12:44:05 INFO  [NAVIGATE] https://example.com/
+2026-07-28 12:44:05 INFO  [NAVIGATE] {DEFAULT_STACK_LOGIN}
 2026-07-28 12:44:06 INFO  [HAR_CAPTURE_STARTED] CDP Network domain enabled
-2026-07-28 12:45:12 INFO  [CLICK] css=#submit
+2026-07-28 12:45:12 INFO  [CLICK] css=[data-testid='submit-button']
 2026-07-28 12:46:00 INFO  [SESSION_DELETED] reason=client
 2026-07-28 12:46:01 INFO  [VIDEO_RENAMED] done
 2026-07-28 12:46:01 INFO  [HAR_FLUSHED] entries=3
@@ -54,7 +60,7 @@ def _iso(dt: datetime) -> str:
     return dt.isoformat()
 
 
-def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
+def _mock_har(_session_id: str, *, started: datetime | None = None) -> dict:
     """Minimal valid HAR 1.2 so HarViewer can parse log.entries."""
     base = started or NOW - timedelta(minutes=5)
     t0 = _iso(base)
@@ -68,7 +74,7 @@ def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
                 {
                     "startedDateTime": t0,
                     "id": "page_1",
-                    "title": "Example Domain",
+                    "title": "Login Form",
                     "pageTimings": {"onContentLoad": 180.0, "onLoad": 420.0},
                 }
             ],
@@ -79,7 +85,7 @@ def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
                     "time": 42.0,
                     "request": {
                         "method": "GET",
-                        "url": "https://example.com/",
+                        "url": DEFAULT_STACK_LOGIN,
                         "httpVersion": "HTTP/1.1",
                         "cookies": [],
                         "headers": [
@@ -99,7 +105,7 @@ def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
                         "content": {
                             "size": 1256,
                             "mimeType": "text/html",
-                            "text": "<html><body>Example Domain</body></html>",
+                            "text": "<html><body>Login Form</body></html>",
                         },
                         "redirectURL": "",
                         "headersSize": 96,
@@ -122,7 +128,7 @@ def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
                     "time": 18.0,
                     "request": {
                         "method": "GET",
-                        "url": "https://example.com/styles.css",
+                        "url": DEFAULT_STACK_CSS,
                         "httpVersion": "HTTP/1.1",
                         "cookies": [],
                         "headers": [{"name": "Accept", "value": "text/css"}],
@@ -150,7 +156,7 @@ def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
                     "time": 55.0,
                     "request": {
                         "method": "POST",
-                        "url": f"https://api.example.com/sessions/{session_id}/events",
+                        "url": DEFAULT_STACK_AUTH_LOGIN,
                         "httpVersion": "HTTP/1.1",
                         "cookies": [],
                         "headers": [
@@ -160,21 +166,21 @@ def _mock_har(session_id: str, *, started: datetime | None = None) -> dict:
                         "queryString": [],
                         "postData": {
                             "mimeType": "application/json",
-                            "text": '{"event":"click","target":"#submit"}',
+                            "text": '{"username":"user1","password":"password1"}',
                         },
                         "headersSize": 140,
                         "bodySize": 36,
                     },
                     "response": {
-                        "status": 201,
-                        "statusText": "Created",
+                        "status": 200,
+                        "statusText": "OK",
                         "httpVersion": "HTTP/1.1",
                         "cookies": [],
                         "headers": [{"name": "Content-Type", "value": "application/json"}],
                         "content": {
                             "size": 27,
                             "mimeType": "application/json",
-                            "text": '{"ok":true,"id":"evt-1"}',
+                            "text": '{"token":"mock","username":"user1"}',
                         },
                         "redirectURL": "",
                         "headersSize": 88,

@@ -31,7 +31,7 @@ describe("VncScreen mock preview", () => {
         );
 
         expect(screen.getByTestId("mock-vnc-desktop")).toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Login Form" })).toBeInTheDocument();
         expect(onUpdateState).toHaveBeenCalledWith("connected");
         expect(rfbCtor).not.toHaveBeenCalled();
     });

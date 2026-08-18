@@ -5,6 +5,7 @@ import { IconDownload, Panel } from "@zero-design-system/react";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 import { mockLivePreview } from "../../lib/mockSessions";
+import { DEFAULT_STACK_AUTH_LOGIN, DEFAULT_STACK_AUTH_ME, DEFAULT_STACK_LOGIN, DEFAULT_STACK_USER } from "../../lib/defaultStack";
 import { fullscreenAction } from "../fullscreenAction";
 
 import "xterm/css/xterm.css";
@@ -21,15 +22,15 @@ const GROW_ROWS = 16;
 const MOCK_LIVE_LOG = [
     "[chromedriver] ChromeDriver was started successfully.",
     "POST /session 200",
-    "POST /session/url https://shop.example/login 200",
-    "POST /session/element {using: css selector, value: #email}",
-    "POST /session/element/value alice@shop.example",
-    "POST /session/element {using: css selector, value: #password}",
+    `POST /session/url ${DEFAULT_STACK_LOGIN} 200`,
+    "POST /session/element {using: css selector, value: [data-testid='login-input']}",
+    `POST /session/element/value ${DEFAULT_STACK_USER}`,
+    "POST /session/element {using: css selector, value: [data-testid='password-input']}",
 ];
 
 const MOCK_LIVE_TICKS = [
-    "GET https://shop.example/api/session 200 18ms",
-    "GET https://shop.example/api/cart 200 42ms",
+    `POST ${DEFAULT_STACK_AUTH_LOGIN} 200 18ms`,
+    `GET ${DEFAULT_STACK_AUTH_ME} 200 42ms`,
     "[devtools] Runtime.consoleAPICalled",
 ];
 

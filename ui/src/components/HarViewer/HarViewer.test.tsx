@@ -4,6 +4,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import HarViewer, { harFileName, wantsHar } from "./index";
+import { DEFAULT_STACK_AUTH_ME, DEFAULT_STACK_LOGIN, DEFAULT_STACK_UI } from "../../lib/defaultStack";
 
 function harPayload(entries: any) {
     return {
@@ -42,7 +43,7 @@ describe("HarViewer", () => {
                             time: 42,
                             request: {
                                 method: "GET",
-                                url: "https://example.com/",
+                                url: DEFAULT_STACK_UI,
                                 headers: [
                                     { name: "Accept", value: "text/html" },
                                     { name: "User-Agent", value: "selenoid" },
@@ -89,7 +90,7 @@ describe("HarViewer", () => {
 
         await waitFor(() => {
             expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
-            expect(screen.getByText("https://example.com/")).toBeInTheDocument();
+            expect(screen.getByText(DEFAULT_STACK_UI)).toBeInTheDocument();
         });
         expect(fetch!).toHaveBeenCalledWith("/har/sess-1.har", { cache: "no-store" });
         expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR Viewer");
@@ -169,7 +170,7 @@ describe("HarViewer", () => {
                 harPayload([
                     {
                         time: 0,
-                        request: { method: "GET", url: "https://cdp.example/empty" },
+                        request: { method: "GET", url: `${DEFAULT_STACK_UI}empty` },
                         response: {
                             status: 0,
                             content: { size: 0, mimeType: "" },
@@ -181,7 +182,7 @@ describe("HarViewer", () => {
         render(<HarViewer session="sess-empty" browser={{ caps: { enableHAR: true } }} sessionAlive={false} />);
 
         const row = await screen.findByTestId("session-har-row-0");
-        expect(screen.getByText("https://cdp.example/empty")).toBeInTheDocument();
+        expect(screen.getByText(`${DEFAULT_STACK_UI}empty`)).toBeInTheDocument();
         expect(row!).toHaveTextContent("—");
 
         await user.click(row);
@@ -212,8 +213,8 @@ describe("HarViewer", () => {
             />
         );
 
-        expect(screen.getByText("https://shop.example/login")).toBeInTheDocument();
-        expect(screen.getByText("https://shop.example/api/cart")).toBeInTheDocument();
+        expect(screen.getByText(DEFAULT_STACK_LOGIN)).toBeInTheDocument();
+        expect(screen.getByText(DEFAULT_STACK_AUTH_ME)).toBeInTheDocument();
         expect(fetch).not.toHaveBeenCalled();
 
         await user.click(screen.getByTestId("session-har-row-0"));

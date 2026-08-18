@@ -12,6 +12,7 @@ vi.mock("../../util/waitForLiveSession", async (importOriginal) => {
 
 import Session from "./index";
 import { setMockSessionsEnabled } from "../../lib/mockSessions";
+import { DEFAULT_STACK_UI } from "../../lib/defaultStack";
 
 vi.mock("../VncCard", () => ({
     default: () => <div data-testid="vnc-card">VNC</div>,
@@ -103,7 +104,7 @@ describe("Session detail page", () => {
                             entries: [
                                 {
                                     time: 10,
-                                    request: { method: "GET", url: "https://example.com/" },
+                                    request: { method: "GET", url: DEFAULT_STACK_UI },
                                     response: { status: 200, content: { size: 1, mimeType: "text/html" } },
                                 },
                             ],

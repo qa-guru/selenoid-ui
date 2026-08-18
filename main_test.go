@@ -289,17 +289,17 @@ func TestStatusError(t *testing.T) {
 func TestCheckOrigin(t *testing.T) {
 	t.Run("Check origin", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "http://localhost", nil)
-		r.Header.Add("Origin", "some-host.example.com")
+		r.Header.Add("Origin", "some-host.autotests.ai")
 		AssertThat(t, checkOrigin("*")(r), Is{true})
-		AssertThat(t, checkOrigin("some-host.example.com,another-host.example.com")(r), Is{true})
-		AssertThat(t, checkOrigin("missing-host.example.com,another-host.example.com")(r), Is{false})
+		AssertThat(t, checkOrigin("some-host.autotests.ai,another-host.autotests.ai")(r), Is{true})
+		AssertThat(t, checkOrigin("missing-host.autotests.ai,another-host.autotests.ai")(r), Is{false})
 	})
 }
 
 func TestConfigureWsProxy(t *testing.T) {
 	t.Run("Sets per-proxy upgrader when allowed-origin configured", func(t *testing.T) {
 		prev := allowedOrigin
-		allowedOrigin = "https://ui.example.com"
+		allowedOrigin = "https://selenoid.qa.guru"
 		defer func() { allowedOrigin = prev }()
 
 		target, _ := url.Parse("ws://127.0.0.1:9")

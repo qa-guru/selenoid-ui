@@ -2,6 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { HarViewer as HarViewerTable, IconDownload, Panel } from "@zero-design-system/react";
 import type { HarDetailTab } from "@zero-design-system/react";
 import { fullscreenAction } from "../fullscreenAction";
+import {
+    DEFAULT_STACK_AUTH_LOGIN,
+    DEFAULT_STACK_AUTH_ME,
+    DEFAULT_STACK_FAVICON,
+    DEFAULT_STACK_LOGIN,
+    DEFAULT_STACK_USER,
+} from "../../lib/defaultStack";
 
 const POLL_MS = 2500;
 const MAX_ROWS = 200;
@@ -16,7 +23,7 @@ const MOCK_HAR = {
                 time: 86,
                 request: {
                     method: "GET",
-                    url: "https://shop.example/login",
+                    url: DEFAULT_STACK_LOGIN,
                     headers: [
                         { name: "Accept", value: "text/html" },
                         { name: "User-Agent", value: "selenoid" },
@@ -41,8 +48,8 @@ const MOCK_HAR = {
             {
                 time: 18,
                 request: {
-                    method: "GET",
-                    url: "https://shop.example/api/session",
+                    method: "POST",
+                    url: DEFAULT_STACK_AUTH_LOGIN,
                     headers: [{ name: "Accept", value: "application/json" }],
                 },
                 response: {
@@ -55,7 +62,7 @@ const MOCK_HAR = {
                     content: {
                         size: 128,
                         mimeType: "application/json",
-                        text: '{"user":"alice@shop.example"}',
+                        text: `{"username":"${DEFAULT_STACK_USER}"}`,
                     },
                 },
                 timings: { blocked: 0, dns: 0, connect: 0, ssl: 0, send: 1, wait: 14, receive: 3 },
@@ -64,7 +71,7 @@ const MOCK_HAR = {
                 time: 42,
                 request: {
                     method: "GET",
-                    url: "https://shop.example/api/cart",
+                    url: DEFAULT_STACK_AUTH_ME,
                     headers: [{ name: "Accept", value: "application/json" }],
                 },
                 response: {
@@ -74,7 +81,7 @@ const MOCK_HAR = {
                     content: {
                         size: 256,
                         mimeType: "application/json",
-                        text: '{"items":2,"total":19.90}',
+                        text: `{"username":"${DEFAULT_STACK_USER}"}`,
                     },
                 },
                 timings: { blocked: 0, dns: 0, connect: 0, ssl: 0, send: 1, wait: 36, receive: 5 },
@@ -83,7 +90,7 @@ const MOCK_HAR = {
                 time: 31,
                 request: {
                     method: "GET",
-                    url: "https://shop.example/favicon.ico",
+                    url: DEFAULT_STACK_FAVICON,
                     headers: [{ name: "Accept", value: "*/*" }],
                 },
                 response: {

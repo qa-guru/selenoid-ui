@@ -36,6 +36,7 @@ import {
 } from "../../config/hubAuth";
 import { rememberHubAuthToken } from "../../config/hubSessionAuth";
 import { isMockSessionsEnabled, spawnCreatedMockSession } from "../../lib/mockSessions";
+import { DEFAULT_STACK_UI } from "../../lib/defaultStack";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
 import {
@@ -1326,7 +1327,7 @@ Map<String, String> selenoidOptions = ${javaSelenoidOptionsBlock(selenoidOptions
 String wsEndpoint = "${base}" + "?${query}";
 Browser browser = playwright.${pw.java}().connect(wsEndpoint);
 Page page = browser.newPage();
-page.navigate("https://example.com");
+page.navigate("${DEFAULT_STACK_UI}");
 browser.close();
 playwright.close();
 `,
@@ -1335,7 +1336,7 @@ val selenoidOptions = ${kotlinSelenoidOptionsBlock(selenoidOptions)}
 val wsEndpoint = "${base}?${query}"
 val browser = playwright.${pw.java}().connect(wsEndpoint)
 val page = browser.newPage()
-page.navigate("https://example.com")
+page.navigate("${DEFAULT_STACK_UI}")
 browser.close()
 playwright.close()
 `,
@@ -1368,7 +1369,7 @@ var wsEndpoint = "${base}" + "?${query}";
 var playwright = await Playwright.CreateAsync();
 var browser = await playwright.${pw.cs}.ConnectAsync(wsEndpoint);
 var page = await browser.NewPageAsync();
-await page.GotoAsync("https://example.com");
+await page.GotoAsync("${DEFAULT_STACK_UI}");
 await browser.CloseAsync();
 `,
         python: `from urllib.parse import urlencode
@@ -1380,7 +1381,7 @@ ws_endpoint = "${base}?" + urlencode(selenoid_options)
 with sync_playwright() as p:
     browser = p.${pw.py}.connect(ws_endpoint)
     page = browser.new_page()
-    page.goto("https://example.com")
+    page.goto("${DEFAULT_STACK_UI}")
     browser.close()
 `,
         javascript: `const { ${pw.js} } = require('playwright');
@@ -1390,7 +1391,7 @@ const wsEndpoint = \`${base}?\${new URLSearchParams(selenoidOptions)}\`;
 
 const browser = await ${pw.js}.connect(wsEndpoint);
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto('${DEFAULT_STACK_UI}');
 await browser.close();
 `,
         typescript: `import { ${pw.js} } from 'playwright';
@@ -1400,7 +1401,7 @@ const wsEndpoint = \`${base}?\${new URLSearchParams(selenoidOptions)}\`;
 
 const browser = await ${pw.js}.connect(wsEndpoint);
 const page = await browser.newPage();
-await page.goto('https://example.com');
+await page.goto('${DEFAULT_STACK_UI}');
 await browser.close();
 `,
         PHP: `$selenoidOptions = ${phpSelenoidOptionsBlock(selenoidOptions)};
@@ -1408,7 +1409,7 @@ $wsEndpoint = '${base}' . '?' . http_build_query($selenoidOptions);
 
 $browser = Playwright::create()->${pw.py}()->connect($wsEndpoint);
 $page = $browser->newPage();
-$page->goto('https://example.com');
+$page->goto('${DEFAULT_STACK_UI}');
 $browser->close();
 `,
         ruby: `require 'uri'
@@ -1419,7 +1420,7 @@ ws_endpoint = '${base}' + '?' + URI.encode_www_form(selenoid_options)
 Playwright.create do |playwright|
   browser = playwright.${pw.rb}.connect(ws_endpoint)
   page = browser.new_page
-  page.goto('https://example.com')
+  page.goto('${DEFAULT_STACK_UI}')
   browser.close
 end
 `,

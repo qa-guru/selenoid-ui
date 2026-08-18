@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import type { SessionCaps } from "../../types/hub";
+import { DEFAULT_STACK_LOGIN, DEFAULT_STACK_TITLE, DEFAULT_STACK_USER } from "../../lib/defaultStack";
 
 /**
  * Dev-only stand-in for a live noVNC framebuffer.
@@ -8,7 +9,7 @@ import type { SessionCaps } from "../../types/hub";
  */
 export function MockVncDesktop({ caps = {} }: { caps?: SessionCaps }) {
     const version = caps.version || "149.0";
-    const url = "https://shop.example/login";
+    const url = DEFAULT_STACK_LOGIN;
 
     return (
         <StyledMockDesktop
@@ -23,7 +24,7 @@ export function MockVncDesktop({ caps = {} }: { caps?: SessionCaps }) {
                 <div className="vnc-mock-tabs">
                     <span className="vnc-mock-tab vnc-mock-tab--active">
                         <span className="vnc-mock-favicon" aria-hidden="true" />
-                        Sign in — Shop
+                        {DEFAULT_STACK_TITLE}
                     </span>
                     <span className="vnc-mock-tab-add" aria-hidden="true">
                         +
@@ -40,11 +41,11 @@ export function MockVncDesktop({ caps = {} }: { caps?: SessionCaps }) {
                 </div>
                 <div className="vnc-mock-page">
                     <div className="vnc-mock-card">
-                        <div className="vnc-mock-brand">Shop</div>
-                        <h1>Sign in</h1>
+                        <div className="vnc-mock-brand">autotests.ai</div>
+                        <h1>{DEFAULT_STACK_TITLE}</h1>
                         <label>
-                            Email
-                            <span className="vnc-mock-field">alice@shop.example</span>
+                            Login
+                            <span className="vnc-mock-field">{DEFAULT_STACK_USER}</span>
                         </label>
                         <label>
                             Password
@@ -54,7 +55,7 @@ export function MockVncDesktop({ caps = {} }: { caps?: SessionCaps }) {
                             </span>
                         </label>
                         <span className="vnc-mock-submit">
-                            Sign in
+                            Login
                             <i className="vnc-mock-pointer" />
                         </span>
                     </div>
