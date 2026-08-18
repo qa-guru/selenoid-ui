@@ -47,6 +47,7 @@ describe("Log chrome → Panel terminal", () => {
         const panel = screen.getByTestId("session-log-panel");
         expect(panel!).toHaveClass("panel", "panel--terminal", "panel--bar-chrome", "log-card");
         expect(screen.getByTestId("session-log-title")).toHaveTextContent("Session logs");
+        expect(screen.queryByTestId("session-log-download")).toBeNull();
         expect(panel.querySelector(".log-card__body .term")).toBeTruthy();
         expect(container.querySelector(".log-card__content")).toBeNull();
     });
@@ -79,6 +80,7 @@ describe("Log chrome → Panel terminal", () => {
             />
         );
         expect(ws).not.toHaveBeenCalled();
+        expect(screen.getByTestId("session-log-download")).toHaveClass("icon-btn", "panel__action");
         vi.unstubAllGlobals();
     });
 

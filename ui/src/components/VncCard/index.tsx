@@ -5,6 +5,21 @@ import "@zero-design-system/react/styles.css";
 import VncScreen from "./VncScreen";
 import { parseScreenSize } from "../../util/capabilitiesLogic";
 
+function videoFileName(session: string, caps: any = {}) {
+    const custom = String(caps.videoName || "").trim();
+    if (custom) {
+        return custom.endsWith(".mp4") ? custom : `${custom}.mp4`;
+    }
+    return `${session}.mp4`;
+}
+
+function triggerDownload(href: string, filename: string) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.click();
+}
+
 /**
  * Selenoid VNC window — design-system `VncWindow` primitive wired to the noVNC
  * RFB screen and Selenoid clipboard endpoints. Chrome, states and fullscreen
@@ -52,6 +67,10 @@ export default class VncCard extends Component<any, any> {
                 onToggleFullscreen={this.handleFullscreen}
                 onCopy={() => copyFromDocker(session)}
                 onPaste={() => pasteToDocker(session)}
+                onDownload={() => {
+                    const file = videoFileName(session, browser.caps);
+                    triggerDownload(`/video/${file}`, file);
+                }}
                 labels={{ copy: "Copy from Selenoid", paste: "Paste to Selenoid" }}
             >
                 <VncScreen

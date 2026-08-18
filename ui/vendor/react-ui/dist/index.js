@@ -1184,6 +1184,7 @@ var defaultLabels = {
   exitFullscreen: "Exit fullscreen",
   copy: "Copy from Selenoid",
   paste: "Paste to Selenoid",
+  download: "Download",
   kill: "Kill container",
   title: "VNC window",
   view: "view",
@@ -1193,6 +1194,7 @@ function VncBarAction({
   label,
   sessionControl,
   onClick,
+  testId,
   children
 }) {
   return /* @__PURE__ */ jsx23(
@@ -1202,6 +1204,7 @@ function VncBarAction({
       className: cn("icon-btn", "panel__action", sessionControl && "vnc-window__session-control"),
       "aria-label": label,
       title: label,
+      "data-testid": testId,
       onClick,
       children: /* @__PURE__ */ jsx23("span", { className: "icon", "aria-hidden": "true", children })
     }
@@ -1219,6 +1222,7 @@ function VncWindow({
   onToggleFullscreen,
   onCopy,
   onPaste,
+  onDownload,
   onKill,
   children,
   labels,
@@ -1282,8 +1286,9 @@ function VncWindow({
               }
             ),
             killControl,
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) })
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) }),
+            onDownload ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.download, testId: "vnc-window-download", onClick: onDownload, children: /* @__PURE__ */ jsx23(IconDownload, {}) }) : null
           ] })
         ] }),
         /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })

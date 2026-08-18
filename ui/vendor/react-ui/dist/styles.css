@@ -2951,10 +2951,7 @@ html.theme-light .plaque-field-checkstrip--pill .plaque-field-checkstrip__item:h
 
 .vnc-window--connecting .vnc-window__session-control,
 .vnc-window--disconnecting .vnc-window__session-control,
-.vnc-window--disconnected .vnc-window__session-control,
-.vnc-window--connecting .vnc-window__actions,
-.vnc-window--disconnecting .vnc-window__actions,
-.vnc-window--disconnected .vnc-window__actions {
+.vnc-window--disconnected .vnc-window__session-control {
   display: none;
 }
 

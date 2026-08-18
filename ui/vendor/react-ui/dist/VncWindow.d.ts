@@ -9,6 +9,7 @@ export interface VncWindowLabels {
     exitFullscreen: string;
     copy: string;
     paste: string;
+    download: string;
     /** Destructive: DELETE session / kill container. */
     kill: string;
     /** Panel name in the bar. */
@@ -50,6 +51,8 @@ export interface VncWindowProps {
     onToggleFullscreen?: () => void;
     onCopy?: () => void;
     onPaste?: () => void;
+    /** Artifact download (session video). Shown only when set. */
+    onDownload?: () => void;
     /** DELETE /wd/hub/session/{id} — shown only when set (or `kill` node). */
     onKill?: () => void;
     /** noVNC mount slot (rendered inside `.vnc-window__screen-mount`). */
@@ -63,5 +66,5 @@ export interface VncWindowProps {
  * Selenoid VNC window: terminal panel chrome (dots + title + icon-btn actions)
  * over a black noVNC screen. Close/back is opt-in (`back` / `onBack`).
  */
-export declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, kill, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, onKill, children, labels, className, 'data-testid': dataTestId, titleTestId, }: VncWindowProps): import("react").JSX.Element;
+export declare function VncWindow({ state, fullscreen, unlocked, screenSize, back, kill, onBack, onToggleLock, onToggleFullscreen, onCopy, onPaste, onDownload, onKill, children, labels, className, 'data-testid': dataTestId, titleTestId, }: VncWindowProps): import("react").JSX.Element;
 //# sourceMappingURL=VncWindow.d.ts.map

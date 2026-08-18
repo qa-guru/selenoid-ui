@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { Panel } from "@zero-design-system/react";
+import { IconDownload, Panel } from "@zero-design-system/react";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 import { mockLivePreview } from "../../lib/mockSessions";
@@ -31,6 +31,14 @@ const MOCK_LIVE_TICKS = [
     "GET https://shop.example/api/cart 200 42ms",
     "[devtools] Runtime.consoleAPICalled",
 ];
+
+function logFileName(session: string, caps: any = {}) {
+    const custom = String(caps.logName || "").trim();
+    if (custom) {
+        return custom.endsWith(".log") ? custom : `${custom}.log`;
+    }
+    return `${session}.log`;
+}
 
 function mockAttachLine(caps: any = {}) {
     const browser = caps.browserName || "chrome";
@@ -328,7 +336,8 @@ export default class Log extends Component<any, any> {
     }
 
     render() {
-        const { hidden, className } = this.props;
+        const { hidden, className, session, browser = {} } = this.props;
+        const logFile = session ? logFileName(session, browser.caps) : "";
 
         return (
             <StyledLog className={`${className} hidden-${hidden}`}>
@@ -340,6 +349,23 @@ export default class Log extends Component<any, any> {
                     titleTestId="session-log-title"
                     className="log-card"
                     bodyClassName="log-card__body"
+                    actions={
+                        logFile
+                            ? [
+                                  {
+                                      icon: <IconDownload />,
+                                      label: "Download",
+                                      onClick: () => {
+                                          const a = document.createElement("a");
+                                          a.href = `/logs/${logFile}`;
+                                          a.download = logFile;
+                                          a.click();
+                                      },
+                                      "data-testid": "session-log-download",
+                                  },
+                              ]
+                            : undefined
+                    }
                 >
                     <div
                         className="term"

@@ -80,6 +80,7 @@ describe("VncCard", () => {
             "icon-btn",
             "panel__action"
         );
+        expect(screen.getByTestId("vnc-window-download")).toHaveClass("icon-btn", "panel__action");
         expect(container.querySelector(".window-control")).toBeNull();
 
         expect(document.querySelector("[class*='dripicons']")).toBeNull();
