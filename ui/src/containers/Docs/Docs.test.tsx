@@ -42,7 +42,7 @@ describe("Docs", () => {
         expect(comparison.querySelectorAll("tbody tr")).toHaveLength(COMPARISON_ROWS.length);
         expect(comparison).toHaveTextContent("POST /pool/lease");
         expect(comparison).not.toHaveTextContent("POST /pool/reserve with loopback:false");
-        expect(comparison).toHaveTextContent("http://hot-chrome-min-1:4444/");
+        expect(comparison).toHaveTextContent("hot-chrome-min-1:4444/");
 
         const oneRun = screen.getByTestId("docs-one-run");
         expect(oneRun.querySelectorAll("tbody tr")).toHaveLength(ONE_RUN_ROWS.length);

@@ -217,7 +217,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             human:
                 "The hub is skipped. The Jenkins agent talks to Chrome by the Docker container name on the shared network.",
             tech:
-                "The agent uses http://hot-chrome-min-1:4444/ on the Docker network selenoid-warm. The second Jenkins agent cannot reach that browser as 127.0.0.1:16440, because that address is local to the first agent.",
+                "The agent uses Docker DNS hot-chrome-min-1:4444/ on the network selenoid-warm. The second Jenkins agent cannot reach that browser as 127.0.0.1:16440, because that address is local to the first agent.",
         },
     },
     {
@@ -395,7 +395,7 @@ export const ONE_RUN_ROWS: OneRunRow[] = [
             human:
                 "Mark the slot busy, then tell the running Java process to log in on the Chrome that is already open, then clear the lock.",
             tech:
-                "POST /pool/lease, then ensure.sh reuses the daemon on :17890, then POST /run, then login, then release without killSession or quit. Docker DNS http://hot-chrome-min-1:4444/, not 127.0.0.1:16440.",
+                "POST /pool/lease, then ensure.sh reuses the daemon on :17890, then POST /run, then login, then release without killSession or quit. Docker DNS hot-chrome-min-1:4444/, not 127.0.0.1:16440.",
         },
     },
 ];
@@ -425,7 +425,7 @@ export const SEQUENCE_STEPS: Record<PoolId, string[]> = {
     ],
     hot: [
         "POST /pool/lease",
-        "http://hot-chrome-min-1:4444/",
+        "hot-chrome-min-1:4444/",
         "ensure.sh reuse daemon :17890",
         "POST /run",
         "login",

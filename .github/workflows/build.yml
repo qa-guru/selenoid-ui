@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
           cache: yarn
           cache-dependency-path: ui/yarn.lock
 
@@ -37,6 +37,6 @@ jobs:
           VITE_HUB_AUTH_USER: ${{ secrets.HUB_AUTH_USER }}
           VITE_HUB_AUTH_PASS: ${{ secrets.HUB_AUTH_PASS }}
 
-      - uses: release-drafter/release-drafter@v5
+      - uses: release-drafter/release-drafter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

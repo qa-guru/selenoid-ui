@@ -1,4 +1,4 @@
-# Stack pin: main / v3.0.43 (Selenoid 3)
+# Stack pin: main / v3.0.44 (Selenoid 3)
 
 **Репозиторий:** Web UI (qa-guru/selenoid-ui)
 
@@ -7,7 +7,7 @@
 | Поле            | Значение                                                                       |
 | --------------- | ------------------------------------------------------------------------------ |
 | Линия           | Selenoid 3                                                                     |
-| Stack semver    | hub **v3.0.13** / cm **v3.0.3**; UI cut **v3.0.43** (prod pin **v3.0.43**)     |
+| Stack semver    | hub **v3.0.13** / cm **v3.0.3**; UI cut **v3.0.44** (prod pin **v3.0.44**)     |
 | Docker API      | TBD (paired с hub)                                                             |
 | Docker Engine   | TBD (paired с hub)                                                             |
 | Go              | 1.26.6                                                                         |
@@ -18,7 +18,7 @@
 | TypeScript      | **7** full `ui/src` (`strict`, `allowJs: false`; Vite bundler retained)        |
 | Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL      |
 | Typecheck       | `yarn --cwd ui typecheck` → `tsc -p tsconfig.json --noEmit` (CI: `ci/test.sh`) |
-| Node CI         | 24                                                                             |
+| Node CI         | 26                                                                             |
 | Git anchor      | `main` / `feat/selenoid-3-*`                                                   |
 | PWA             | landed (`vite-plugin-pwa`: shell precache, live API/SSE online-only)           |
 
