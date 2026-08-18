@@ -113,13 +113,16 @@ describe("SessionInfo", () => {
         expect(close).toHaveAttribute("href", "/sessions");
         expect(close).toHaveClass("btn", "btn--secondary");
         expect(close).toHaveTextContent("Close session window");
-        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+        expect(screen.getByTestId("session-finished")).toHaveTextContent("FINISHED");
         expect(screen.getByText("VIDEO")).toBeInTheDocument();
         expect(screen.getByText("LOG")).toBeInTheDocument();
         expect(screen.getByText("HAR")).toBeInTheDocument();
-        expect(screen.getByTestId("session-stop")).toBeDisabled();
+        expect(screen.queryByTestId("session-stop")).not.toBeInTheDocument();
         expect(screen.getByTestId("session-delete")).toBeEnabled();
-        expect(screen.getByText("FINISHED").closest(".session-info__additional")).toBeTruthy();
+        expect(screen.getByTestId("session-info-id").nextElementSibling).toHaveClass(
+            "session-info__actions"
+        );
+        expect(screen.getByTestId("session-finished").closest(".session-info__actions")).toBeTruthy();
         expect(screen.getByText("LOG").closest(".session-info__additional")).toBeTruthy();
     });
 
@@ -151,6 +154,7 @@ describe("SessionInfo", () => {
         expect(stop).toHaveClass("btn", "btn--danger");
         expect(stop).toHaveTextContent("Stop session");
         expect(stop).toBeEnabled();
+        expect(screen.queryByTestId("session-finished")).not.toBeInTheDocument();
 
         const del = screen.getByTestId("session-delete");
         expect(del).toHaveClass("btn", "btn--danger");

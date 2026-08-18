@@ -93,7 +93,6 @@ const SessionInfo = ({
 
                     <div className="session-info__additional">
                         <div className="custom-capabilities">
-                            {finished && <Badge variant="primary">FINISHED</Badge>}
                             {caps.name && <Badge>{caps.name}</Badge>}
                             {(caps.enableHAR || caps.enableHar || artifacts.har) && <Badge>HAR</Badge>}
                             {(caps.enableVideo || artifacts.video) && <Badge>VIDEO</Badge>}
@@ -106,15 +105,21 @@ const SessionInfo = ({
                     </div>
 
                     <div className="session-info__actions">
-                        <Button
-                            variant="danger"
-                            disabled={!canStop || stopping}
-                            onClick={onStop}
-                            data-testid="session-stop"
-                        >
-                            {stopping ? <BeatLoader size={2} color={"#fff"} /> : null}
-                            Stop session
-                        </Button>
+                        {finished ? (
+                            <Badge variant="primary" data-testid="session-finished">
+                                FINISHED
+                            </Badge>
+                        ) : (
+                            <Button
+                                variant="danger"
+                                disabled={!canStop || stopping}
+                                onClick={onStop}
+                                data-testid="session-stop"
+                            >
+                                {stopping ? <BeatLoader size={2} color={"#fff"} /> : null}
+                                Stop session
+                            </Button>
+                        )}
                         <Button
                             variant="danger"
                             disabled={!canDelete || deleting}

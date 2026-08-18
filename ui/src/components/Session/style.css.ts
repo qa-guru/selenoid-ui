@@ -278,13 +278,20 @@ export const StyledSession = styled.div`
             gap: var(--space-2, 8px);
             flex-shrink: 0;
 
-            .btn {
+            .btn,
+            .badge {
                 text-decoration: none;
                 white-space: nowrap;
                 min-height: var(--plaque-control-height, 32px);
                 padding: var(--space-1, 4px) var(--space-3, 10px);
                 font-size: var(--font-size-sm, 12px);
                 line-height: 1.2;
+            }
+
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                box-sizing: border-box;
             }
         }
     }
