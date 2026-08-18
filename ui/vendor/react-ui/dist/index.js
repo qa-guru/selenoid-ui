@@ -1002,7 +1002,7 @@ function WindowControl({
 }
 
 // src/vnc-icons.tsx
-import { jsx as jsx21, jsxs as jsxs12 } from "react/jsx-runtime";
+import { Fragment, jsx as jsx21, jsxs as jsxs12 } from "react/jsx-runtime";
 function IconClose() {
   return /* @__PURE__ */ jsx21("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx21("path", { d: "m4 4 8 8M12 4l-8 8" }) });
 }
@@ -1121,6 +1121,44 @@ function IconChevronDown() {
     }
   );
 }
+function IconFullscreen() {
+  return /* @__PURE__ */ jsxs12(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx21("path", { d: "M3 6.25V3h3.25" }),
+        /* @__PURE__ */ jsx21("path", { d: "M13 6.25V3h-3.25" }),
+        /* @__PURE__ */ jsx21("path", { d: "M3 9.75V13h3.25" }),
+        /* @__PURE__ */ jsx21("path", { d: "M13 9.75V13h-3.25" })
+      ]
+    }
+  );
+}
+function IconFullscreenExit() {
+  return /* @__PURE__ */ jsxs12(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      children: [
+        /* @__PURE__ */ jsx21("path", { d: "M6.25 3v3.25H3" }),
+        /* @__PURE__ */ jsx21("path", { d: "M9.75 3v3.25H13" }),
+        /* @__PURE__ */ jsx21("path", { d: "M6.25 13v-3.25H3" }),
+        /* @__PURE__ */ jsx21("path", { d: "M9.75 13v-3.25H13" })
+      ]
+    }
+  );
+}
 function IconVncCopy() {
   return /* @__PURE__ */ jsxs12("svg", { viewBox: "0 0 16 16", fill: "none", children: [
     /* @__PURE__ */ jsx21("rect", { x: "5", y: "5", width: "8", height: "9", rx: "1.5", stroke: "currentColor", strokeWidth: "1.5" }),
@@ -1130,6 +1168,49 @@ function IconVncCopy() {
         d: "M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1",
         stroke: "currentColor",
         strokeWidth: "1.5"
+      }
+    )
+  ] });
+}
+var clipboardSheets = /* @__PURE__ */ jsxs12(Fragment, { children: [
+  /* @__PURE__ */ jsx21("rect", { x: "4", y: "4.5", width: "6.25", height: "8", rx: "1.25", stroke: "currentColor", strokeWidth: "1.5" }),
+  /* @__PURE__ */ jsx21(
+    "path",
+    {
+      d: "M4 10.75H3.25A1.25 1.25 0 0 1 2 9.5V3.5A1.25 1.25 0 0 1 3.25 2.25h4.25A1.25 1.25 0 0 1 8.75 3.5V4.5",
+      stroke: "currentColor",
+      strokeWidth: "1.5"
+    }
+  )
+] });
+function IconCopyOut() {
+  return /* @__PURE__ */ jsxs12("svg", { viewBox: "0 0 16 16", fill: "none", children: [
+    clipboardSheets,
+    /* @__PURE__ */ jsx21(
+      "path",
+      {
+        d: "M11.25 8.5H14.5M13 6.75 14.75 8.5 13 10.25",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }
+    )
+  ] });
+}
+function IconCopyIn() {
+  return /* @__PURE__ */ jsxs12("svg", { viewBox: "0 0 16 16", fill: "none", children: [
+    clipboardSheets,
+    /* @__PURE__ */ jsx21(
+      "path",
+      {
+        d: "M14.5 8.5H11.25M12.75 6.75 11 8.5 12.75 10.25",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "1.5",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
       }
     )
   ] });
@@ -1182,8 +1263,8 @@ var defaultLabels = {
   unlock: "Unlock screen",
   enterFullscreen: "Enter fullscreen",
   exitFullscreen: "Exit fullscreen",
-  copy: "Copy from Selenoid",
-  paste: "Paste to Selenoid",
+  copy: "Copy from session",
+  paste: "Paste into session",
   download: "Download",
   kill: "Kill container",
   title: "VNC window",
@@ -1282,12 +1363,12 @@ function VncWindow({
                 label: fullscreen ? l.exitFullscreen : l.enterFullscreen,
                 sessionControl: true,
                 onClick: onToggleFullscreen,
-                children: fullscreen ? /* @__PURE__ */ jsx23(IconChevronDown, {}) : /* @__PURE__ */ jsx23(IconChevronUp, {})
+                children: fullscreen ? /* @__PURE__ */ jsx23(IconFullscreenExit, {}) : /* @__PURE__ */ jsx23(IconFullscreen, {})
               }
             ),
             killControl,
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconVncCopy, {}) }),
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconUpload, {}) }),
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconCopyOut, {}) }),
+            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconCopyIn, {}) }),
             onDownload ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.download, testId: "vnc-window-download", onClick: onDownload, children: /* @__PURE__ */ jsx23(IconDownload, {}) }) : null
           ] })
         ] }),
@@ -1298,7 +1379,7 @@ function VncWindow({
 }
 
 // src/HarViewer.tsx
-import { Fragment } from "react";
+import { Fragment as Fragment2 } from "react";
 import { jsx as jsx24, jsxs as jsxs14 } from "react/jsx-runtime";
 var HAR_TIMING_KEYS = [
   "blocked",
@@ -1355,7 +1436,7 @@ function HeaderKv({ title, headers }) {
   const pairs = headerPairs(headers);
   return /* @__PURE__ */ jsxs14("div", { className: "har-section", children: [
     /* @__PURE__ */ jsx24("div", { className: "har-section__title", children: title }),
-    pairs.length === 0 ? /* @__PURE__ */ jsx24("div", { className: "har-muted", children: "No headers captured." }) : /* @__PURE__ */ jsx24("div", { className: "har-kv", children: pairs.map((h, i) => /* @__PURE__ */ jsxs14(Fragment, { children: [
+    pairs.length === 0 ? /* @__PURE__ */ jsx24("div", { className: "har-muted", children: "No headers captured." }) : /* @__PURE__ */ jsx24("div", { className: "har-kv", children: pairs.map((h, i) => /* @__PURE__ */ jsxs14(Fragment2, { children: [
       /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: h.name }),
       /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: h.value || "\u2014" })
     ] }, `${h.name}-${i}`)) })
@@ -1403,7 +1484,7 @@ function EntryDetail({
       /* @__PURE__ */ jsx24(HeaderKv, { title: "Request Headers", headers: req.headers })
     ] }),
     tab === "timings" && /* @__PURE__ */ jsx24("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-timings", children: /* @__PURE__ */ jsxs14("div", { className: "har-kv", children: [
-      HAR_TIMING_KEYS.map((key) => /* @__PURE__ */ jsxs14(Fragment, { children: [
+      HAR_TIMING_KEYS.map((key) => /* @__PURE__ */ jsxs14(Fragment2, { children: [
         /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: key }),
         /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: formatTiming(timings[key]) })
       ] }, key)),
@@ -1458,7 +1539,7 @@ function HarViewer({
       const status = Number(resp.status) || 0;
       const open = expandedIndex === idx;
       const rowId = `har-row-${idx}`;
-      return /* @__PURE__ */ jsxs14(Fragment, { children: [
+      return /* @__PURE__ */ jsxs14(Fragment2, { children: [
         /* @__PURE__ */ jsxs14(
           "tr",
           {
@@ -1770,9 +1851,13 @@ export {
   IconChevronUp,
   IconClose,
   IconCopy,
+  IconCopyIn,
+  IconCopyOut,
   IconDocumentRemove,
   IconDotsHorizontal,
   IconDownload,
+  IconFullscreen,
+  IconFullscreenExit,
   IconLock,
   IconReset,
   IconStop,

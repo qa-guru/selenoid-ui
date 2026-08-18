@@ -451,3 +451,22 @@
   width: 100%;
   max-width: 100%;
 }
+
+/* Fills nearest positioned ancestor (session viewport). Pair: VNC `.vnc-window-frame--fullscreen`. */
+.panel-host--fullscreen {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.panel-host--fullscreen > .panel {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}

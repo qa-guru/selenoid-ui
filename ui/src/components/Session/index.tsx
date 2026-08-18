@@ -144,7 +144,7 @@ const Session = ({ origin, session, browser }: any) => {
         };
     }, [browser, session]);
 
-    const [isLogHidden, onVNCFullscreenChange] = useState(false);
+    const [fullscreenSlot, setFullscreenSlot] = useState<null | "vnc" | "log" | "har">(null);
     const hubLive = Boolean(browser);
     const detailsBrowser = mockEnabled
         ? mockDetailsSession(session, browser, artifacts, endedBrowser)
@@ -157,7 +157,7 @@ const Session = ({ origin, session, browser }: any) => {
     const finishedInfo = !hubLive && hasArchive;
     const wasLive = wasLiveRef.current;
     const showSessionInfo = showLive || showMockPreview || (wasLive && !browser) || finishedInfo;
-    const keepLiveLog = wasLive && !hubLive && !showMockPreview && !isLogHidden;
+    const keepLiveLog = wasLive && !hubLive && !showMockPreview && fullscreenSlot !== "vnc";
     const displayBrowser = detailsBrowser || endedBrowser || {
         quota: artifacts?.quota || "",
         caps: {
@@ -206,7 +206,9 @@ const Session = ({ origin, session, browser }: any) => {
                                         session,
                                         browser: displayBrowser,
                                         mockEnabled,
-                                        onVNCFullscreenChange,
+                                        fullscreen: fullscreenSlot === "vnc",
+                                        onVNCFullscreenChange: (on: boolean) =>
+                                            setFullscreenSlot(on ? "vnc" : null),
                                     }}
                                 />
                             ) : artifacts?.video ? (
@@ -225,12 +227,21 @@ const Session = ({ origin, session, browser }: any) => {
                                         session,
                                         browser: displayBrowser,
                                         mockEnabled,
+                                        fullscreen: fullscreenSlot === "log",
+                                        onToggleFullscreen: () =>
+                                            setFullscreenSlot((s) => (s === "log" ? null : "log")),
                                     }}
                                     className="session-peer"
-                                    hidden={isLogHidden}
+                                    hidden={fullscreenSlot === "vnc" || fullscreenSlot === "har"}
                                 />
                             ) : (
-                                <SessionLogFile file={artifacts.log} />
+                                <SessionLogFile
+                                    file={artifacts.log}
+                                    fullscreen={fullscreenSlot === "log"}
+                                    onToggleFullscreen={() =>
+                                        setFullscreenSlot((s) => (s === "log" ? null : "log"))
+                                    }
+                                />
                             )}
                         </div>
                     )}
@@ -244,6 +255,10 @@ const Session = ({ origin, session, browser }: any) => {
                         browser={{ caps: { ...capsForHar, enableHAR: true } }}
                         sessionAlive={showLive}
                         file={harFile || undefined}
+                        fullscreen={fullscreenSlot === "har"}
+                        onToggleFullscreen={() =>
+                            setFullscreenSlot((s) => (s === "har" ? null : "har"))
+                        }
                     />
                 </div>
             )}
@@ -312,7 +327,7 @@ const Session = ({ origin, session, browser }: any) => {
 
 export default Session;
 
-function VncContainer({ origin, session, browser = {}, mockEnabled, onVNCFullscreenChange }: any) {
+function VncContainer({ origin, session, browser = {}, mockEnabled, fullscreen, onVNCFullscreenChange }: any) {
     if (browser.caps && !browser.caps.enableVNC) {
         return <span />;
     }
@@ -324,6 +339,7 @@ function VncContainer({ origin, session, browser = {}, mockEnabled, onVNCFullscr
                 session,
                 browser,
                 mockEnabled,
+                fullscreen,
                 onVNCFullscreenChange,
             }}
         />

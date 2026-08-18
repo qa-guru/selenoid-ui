@@ -167,6 +167,16 @@ export const StyledSession = styled.div`
             flex-direction: column;
         }
 
+        .har-viewer.panel-host--fullscreen {
+            position: absolute;
+            z-index: 2;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
         .har-card.panel--terminal > .har-card__body {
             flex: 1 1 auto;
             min-height: 0;

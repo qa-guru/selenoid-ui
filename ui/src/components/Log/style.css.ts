@@ -11,6 +11,27 @@ export const StyledLog = styled.div`
         display: none;
     }
 
+    &.panel-host--fullscreen {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        flex-wrap: nowrap;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: stretch;
+        padding: 0;
+
+        .log-card {
+            flex: 1 1 auto;
+            height: 100%;
+            min-height: 0;
+            align-self: stretch;
+        }
+    }
+
     &.session-peer {
         align-items: stretch;
         flex: 1 1 auto;

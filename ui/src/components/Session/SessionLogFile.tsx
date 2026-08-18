@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { IconDownload, Panel } from "@zero-design-system/react";
 
 import { StyledLog } from "../Log/style.css";
+import { fullscreenAction } from "../fullscreenAction";
 
 /**
  * Finished-session log panel — loads the static hub artifact `/logs/<file>`
  * (live sessions use the websocket Log component instead).
  */
-const SessionLogFile = ({ file }: any) => {
+const SessionLogFile = ({ file, fullscreen, onToggleFullscreen }: any) => {
     const [text, setText] = useState("");
     const [phase, setPhase] = useState(file ? "loading" : "idle");
     const [error, setError] = useState("");
@@ -55,7 +56,10 @@ const SessionLogFile = ({ file }: any) => {
     }
 
     return (
-        <StyledLog className="session-peer" data-testid="session-log-file">
+        <StyledLog
+            className={`session-peer${fullscreen ? " panel-host--fullscreen" : ""}`}
+            data-testid="session-log-file"
+        >
             <Panel
                 variant="terminal"
                 barChrome
@@ -65,6 +69,9 @@ const SessionLogFile = ({ file }: any) => {
                 className="log-card"
                 bodyClassName="log-card__body"
                 actions={[
+                    ...(onToggleFullscreen
+                        ? [fullscreenAction(Boolean(fullscreen), onToggleFullscreen, "session-log-fullscreen")]
+                        : []),
                     {
                         icon: <IconDownload />,
                         label: "Download",

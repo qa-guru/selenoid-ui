@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HarViewer as HarViewerTable, IconDownload, Panel } from "@zero-design-system/react";
 import type { HarDetailTab } from "@zero-design-system/react";
+import { fullscreenAction } from "../fullscreenAction";
 
 const POLL_MS = 2500;
 const MAX_ROWS = 200;
@@ -21,7 +22,7 @@ function wantsHar(caps: any = {}) {
  * Session HAR shell: polls hub GET /har/<id>.har, Panel + download.
  * Presentational table lives in @zero-design-system/react HarViewer.
  */
-const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp }: any) => {
+const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp, fullscreen, onToggleFullscreen }: any) => {
     const caps = browser.caps || {};
     const enabled = Boolean(fileProp) || wantsHar(caps);
     const file = fileProp || harFileName(session, caps);
@@ -125,7 +126,10 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
     }
 
     return (
-        <div className="har-viewer" data-testid="session-har-viewer">
+        <div
+            className={`har-viewer${fullscreen ? " panel-host--fullscreen" : ""}`}
+            data-testid="session-har-viewer"
+        >
             <Panel
                 variant="terminal"
                 title="HAR Viewer"
@@ -135,6 +139,9 @@ const HarViewer = ({ session, browser = {}, sessionAlive = true, file: fileProp 
                 className="har-card"
                 bodyClassName="har-card__body"
                 actions={[
+                    ...(onToggleFullscreen
+                        ? [fullscreenAction(Boolean(fullscreen), onToggleFullscreen, "session-har-fullscreen")]
+                        : []),
                     {
                         icon: <IconDownload />,
                         label: "Download",

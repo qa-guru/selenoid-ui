@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 const xtermState = { textarea: null as HTMLTextAreaElement | null, resizeCalls: 0 };
@@ -82,6 +83,36 @@ describe("Log chrome → Panel terminal", () => {
         expect(ws).not.toHaveBeenCalled();
         expect(screen.getByTestId("session-log-download")).toHaveClass("icon-btn", "panel__action");
         vi.unstubAllGlobals();
+    });
+
+    it("renders fullscreen control with a hover title", async () => {
+        const onToggleFullscreen = vi.fn();
+        const { rerender } = render(
+            <Log
+                session="mockmax-aaaaaaaaaaaaaaaaaaaaaaa"
+                origin="http://localhost"
+                browser={{ caps: { enableLog: true } }}
+                onToggleFullscreen={onToggleFullscreen}
+            />
+        );
+
+        const btn = screen.getByTestId("session-log-fullscreen");
+        expect(btn).toHaveClass("icon-btn", "panel__action");
+        expect(btn).toHaveAttribute("title", "Enter fullscreen");
+        expect(btn).toHaveAttribute("aria-label", "Enter fullscreen");
+        await userEvent.click(btn);
+        expect(onToggleFullscreen).toHaveBeenCalledOnce();
+
+        rerender(
+            <Log
+                session="mockmax-aaaaaaaaaaaaaaaaaaaaaaa"
+                origin="http://localhost"
+                browser={{ caps: { enableLog: true } }}
+                fullscreen
+                onToggleFullscreen={onToggleFullscreen}
+            />
+        );
+        expect(screen.getByTestId("session-log-fullscreen")).toHaveAttribute("title", "Exit fullscreen");
     });
 
     it("does not resize xterm for each mock live log line", () => {

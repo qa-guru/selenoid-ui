@@ -36,9 +36,12 @@ export default class VncCard extends Component<any, any> {
     };
 
     handleFullscreen = () => {
-        const fullscreen = !this.state.fullscreen;
-        this.props.onVNCFullscreenChange(fullscreen);
-        this.setState({ fullscreen });
+        const current = this.props.fullscreen ?? this.state.fullscreen;
+        const fullscreen = !current;
+        this.props.onVNCFullscreenChange?.(fullscreen);
+        if (this.props.fullscreen === undefined) {
+            this.setState({ fullscreen });
+        }
     };
 
     handleLock = () => {
@@ -49,7 +52,8 @@ export default class VncCard extends Component<any, any> {
 
     render() {
         const { origin, session, browser = {} } = this.props;
-        const { connection, fullscreen, unlocked } = this.state;
+        const { connection, unlocked } = this.state;
+        const fullscreen = this.props.fullscreen ?? this.state.fullscreen ?? false;
 
         if (browser.caps && !browser.caps.enableVNC) {
             return <span />;
@@ -71,7 +75,6 @@ export default class VncCard extends Component<any, any> {
                     const file = videoFileName(session, browser.caps);
                     triggerDownload(`/video/${file}`, file);
                 }}
-                labels={{ copy: "Copy from Selenoid", paste: "Paste to Selenoid" }}
             >
                 <VncScreen
                     ref={(instance: any) => {

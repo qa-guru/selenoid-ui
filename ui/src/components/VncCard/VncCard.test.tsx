@@ -66,19 +66,31 @@ describe("VncCard", () => {
             "icon-btn",
             "panel__action"
         );
+        expect(screen.getByRole("button", { name: "Enter fullscreen" })).toHaveAttribute(
+            "title",
+            "Enter fullscreen"
+        );
         expect(screen.queryByRole("link", { name: "Back" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Back" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Kill session" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Kill container" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Stop session" })).toBeNull();
         expect(screen.queryByRole("button", { name: "Close window" })).toBeNull();
-        expect(screen.getByRole("button", { name: "Copy from Selenoid" })).toHaveClass(
+        expect(screen.getByRole("button", { name: "Copy from session" })).toHaveClass(
             "icon-btn",
             "panel__action"
         );
-        expect(screen.getByRole("button", { name: "Paste to Selenoid" })).toHaveClass(
+        expect(screen.getByRole("button", { name: "Copy from session" })).toHaveAttribute(
+            "title",
+            "Copy from session"
+        );
+        expect(screen.getByRole("button", { name: "Paste into session" })).toHaveClass(
             "icon-btn",
             "panel__action"
+        );
+        expect(screen.getByRole("button", { name: "Paste into session" })).toHaveAttribute(
+            "title",
+            "Paste into session"
         );
         expect(screen.getByTestId("vnc-window-download")).toHaveClass("icon-btn", "panel__action");
         expect(container.querySelector(".window-control")).toBeNull();
@@ -124,7 +136,7 @@ describe("VncCard", () => {
         });
 
         renderVnc();
-        await user.click(screen.getByRole("button", { name: "Copy from Selenoid" }));
+        await user.click(screen.getByRole("button", { name: "Copy from session" }));
 
         expect(fetchMock!).toHaveBeenCalledWith("/clipboard/sess-123", { method: "GET" });
         vi.unstubAllGlobals();

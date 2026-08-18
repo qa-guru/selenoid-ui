@@ -94,6 +94,40 @@ describe("HarViewer", () => {
         expect(fetch!).toHaveBeenCalledWith("/har/sess-1.har", { cache: "no-store" });
         expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR Viewer");
         expect(screen.getByTestId("session-har-download")).toHaveAttribute("aria-label", "Download");
+        expect(screen.getByTestId("session-har-download")).toHaveAttribute("title", "Download");
+    });
+
+    it("renders fullscreen control with a hover title", async () => {
+        const user = userEvent.setup();
+        const onToggleFullscreen = vi.fn();
+        const { rerender } = render(
+            <HarViewer
+                session="sess-1"
+                browser={{ caps: { enableHAR: true } }}
+                sessionAlive={false}
+                onToggleFullscreen={onToggleFullscreen}
+            />
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-har-fullscreen")).toBeInTheDocument();
+        });
+        const btn = screen.getByTestId("session-har-fullscreen");
+        expect(btn).toHaveAttribute("title", "Enter fullscreen");
+        expect(btn).toHaveAttribute("aria-label", "Enter fullscreen");
+        await user.click(btn);
+        expect(onToggleFullscreen).toHaveBeenCalledOnce();
+
+        rerender(
+            <HarViewer
+                session="sess-1"
+                browser={{ caps: { enableHAR: true } }}
+                sessionAlive={false}
+                fullscreen
+                onToggleFullscreen={onToggleFullscreen}
+            />
+        );
+        expect(screen.getByTestId("session-har-fullscreen")).toHaveAttribute("title", "Exit fullscreen");
     });
 
     it("renders when an explicit finished-session file is provided without caps", async () => {

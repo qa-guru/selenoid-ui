@@ -5,6 +5,7 @@ import { IconDownload, Panel } from "@zero-design-system/react";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 import { mockLivePreview } from "../../lib/mockSessions";
+import { fullscreenAction } from "../fullscreenAction";
 
 import "xterm/css/xterm.css";
 import { StyledLog } from "./style.css";
@@ -336,11 +337,32 @@ export default class Log extends Component<any, any> {
     }
 
     render() {
-        const { hidden, className, session, browser = {} } = this.props;
+        const { hidden, className, session, browser = {}, fullscreen, onToggleFullscreen } = this.props;
         const logFile = session ? logFileName(session, browser.caps) : "";
+        const hostClass = [className, `hidden-${hidden}`, fullscreen ? "panel-host--fullscreen" : ""]
+            .filter(Boolean)
+            .join(" ");
+        const actions = [
+            ...(onToggleFullscreen ? [fullscreenAction(Boolean(fullscreen), onToggleFullscreen, "session-log-fullscreen")] : []),
+            ...(logFile
+                ? [
+                      {
+                          icon: <IconDownload />,
+                          label: "Download",
+                          onClick: () => {
+                              const a = document.createElement("a");
+                              a.href = `/logs/${logFile}`;
+                              a.download = logFile;
+                              a.click();
+                          },
+                          "data-testid": "session-log-download",
+                      },
+                  ]
+                : []),
+        ];
 
         return (
-            <StyledLog className={`${className} hidden-${hidden}`}>
+            <StyledLog className={hostClass}>
                 <Panel
                     variant="terminal"
                     title="Session logs"
@@ -349,23 +371,7 @@ export default class Log extends Component<any, any> {
                     titleTestId="session-log-title"
                     className="log-card"
                     bodyClassName="log-card__body"
-                    actions={
-                        logFile
-                            ? [
-                                  {
-                                      icon: <IconDownload />,
-                                      label: "Download",
-                                      onClick: () => {
-                                          const a = document.createElement("a");
-                                          a.href = `/logs/${logFile}`;
-                                          a.download = logFile;
-                                          a.click();
-                                      },
-                                      "data-testid": "session-log-download",
-                                  },
-                              ]
-                            : undefined
-                    }
+                    actions={actions.length ? actions : undefined}
                 >
                     <div
                         className="term"
