@@ -19,7 +19,7 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
     const hasArtifacts = Boolean(artifacts.video || artifacts.log || artifacts.har);
     const canStop = Boolean(live && session);
     const canDelete = Boolean(session && !live && hasArtifacts);
-    const starting = Boolean(live && !browser.quota);
+    const starting = Boolean(live && browser.starting);
     const { name, displayName } = sessionName(caps);
     const showIdentity = Boolean(browser.quota || caps.browserName || caps.version || name);
     const manual = isManualSession(caps);
@@ -72,11 +72,11 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
                                 <span className="session__quota session__quota_starting" title="Starting…">
                                     <BeatLoader size={4} color={"#fff"} loading />
                                 </span>
-                            ) : browser.quota ? (
-                                <span className="session__quota" title={browser.quota}>
-                                    {browser.quota}
+                            ) : (
+                                <span className="session__quota" title={browser.quota || undefined}>
+                                    {browser.quota || "—"}
                                 </span>
-                            ) : null}
+                            )}
                             {(caps.browserName || caps.version || displayName || name) && (
                                 <div className="session__fields">
                                     <SessionIdentity caps={caps} />

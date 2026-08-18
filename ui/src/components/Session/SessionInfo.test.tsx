@@ -109,6 +109,39 @@ describe("SessionInfo", () => {
         expect(screen.getByText("No resolution")).not.toHaveClass("badge");
     });
 
+    it("matches the table: empty quota is an em dash, spinner only while starting", () => {
+        const { rerender } = render(
+            <MemoryRouter>
+                <SessionInfo
+                    session="abc-def-12345678"
+                    live
+                    browser={{ quota: "", caps: { browserName: "chrome", version: "149.0" } }}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.queryByTitle("Starting…")).not.toBeInTheDocument();
+        expect(
+            screen.getByText("chrome").closest(".session-info__main")?.querySelector(".session__quota")
+        ).toHaveTextContent("—");
+
+        rerender(
+            <MemoryRouter>
+                <SessionInfo
+                    session="abc-def-12345678"
+                    live
+                    browser={{
+                        quota: "",
+                        starting: true,
+                        caps: { browserName: "chrome", version: "149.0" },
+                    }}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByTitle("Starting…")).toHaveClass("session__quota_starting");
+    });
+
     it("finished mode shows Close window and artifact badges", () => {
         render(
             <MemoryRouter>
