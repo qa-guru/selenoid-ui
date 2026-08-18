@@ -75,6 +75,7 @@ export default class VncCard extends Component<any, any> {
                     const file = videoFileName(session, browser.caps);
                     triggerDownload(`/video/${file}`, file);
                 }}
+                labels={{ copy: "Copy from session", paste: "Paste into session" }}
             >
                 <VncScreen
                     ref={(instance: any) => {
