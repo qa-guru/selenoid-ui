@@ -25,9 +25,10 @@ describe("SessionInfo", () => {
         expect(screen.getByTestId("session-info-panel")).toBeInTheDocument();
         expect(screen.getByTestId("session-info-title")).toHaveTextContent("Session details");
         const close = screen.getByTestId("session-close");
-        expect(close).toHaveClass("icon-btn", "panel__action");
+        expect(close).toHaveClass("btn", "btn--secondary");
         expect(close).toHaveAttribute("href", "/sessions");
-        expect(close).toHaveAttribute("aria-label", "Close window");
+        expect(close).toHaveTextContent("Close session window");
+        expect(screen.getByTestId("session-info-panel").querySelector(".panel__actions")).toBeNull();
         expect(screen.getByText("alice")).toBeInTheDocument();
         expect(screen.getByText("chrome")).toBeInTheDocument();
         expect(screen.getByText("120.0")).toBeInTheDocument();
@@ -110,7 +111,8 @@ describe("SessionInfo", () => {
 
         const close = screen.getByTestId("session-close");
         expect(close).toHaveAttribute("href", "/sessions");
-        expect(close).toHaveClass("icon-btn", "panel__action");
+        expect(close).toHaveClass("btn", "btn--secondary");
+        expect(close).toHaveTextContent("Close session window");
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
         expect(screen.getByText("VIDEO")).toBeInTheDocument();
         expect(screen.getByText("LOG")).toBeInTheDocument();
@@ -138,7 +140,7 @@ describe("SessionInfo", () => {
         );
     });
 
-    it("live mode exposes Stop, disabled Delete, and Close in Session panel bar", () => {
+    it("live mode exposes labeled Stop, Delete, and Close after the session id", () => {
         render(
             <MemoryRouter>
                 <SessionInfo session="abc-def-12345678" browser={browser} live />
@@ -146,16 +148,20 @@ describe("SessionInfo", () => {
         );
 
         const stop = screen.getByTestId("session-stop");
-        expect(stop).toHaveClass("icon-btn", "panel__action");
-        expect(stop).toHaveAttribute("aria-label", "Stop session");
+        expect(stop).toHaveClass("btn", "btn--danger");
+        expect(stop).toHaveTextContent("Stop session");
         expect(stop).toBeEnabled();
-        expect(stop.querySelector("svg")).toBeTruthy();
 
         const del = screen.getByTestId("session-delete");
-        expect(del).toHaveAttribute("aria-label", "Delete session");
+        expect(del).toHaveClass("btn", "btn--danger");
+        expect(del).toHaveTextContent("Delete session");
         expect(del).toBeDisabled();
 
-        expect(screen.getByTestId("session-close")).toHaveAttribute("aria-label", "Close window");
+        const close = screen.getByTestId("session-close");
+        expect(close).toHaveTextContent("Close session window");
+        const id = screen.getByTestId("session-info-id");
+        expect(id.nextElementSibling).toHaveClass("session-info__actions");
+        expect(screen.getByTestId("session-info-panel").querySelector(".panel__bar .panel__actions")).toBeNull();
     });
 
     it("stop issues DELETE /wd/hub/session/{id} and stays on the page", async () => {

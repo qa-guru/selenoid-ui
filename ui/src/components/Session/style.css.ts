@@ -213,7 +213,7 @@ export const StyledSession = styled.div`
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             gap: var(--space-3, 12px);
 
             .session-browser {
@@ -270,6 +270,18 @@ export const StyledSession = styled.div`
 
         &__id {
             flex-shrink: 0;
+        }
+
+        &__actions {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2, 8px);
+            flex-shrink: 0;
+
+            .btn {
+                text-decoration: none;
+                white-space: nowrap;
+            }
         }
     }
 

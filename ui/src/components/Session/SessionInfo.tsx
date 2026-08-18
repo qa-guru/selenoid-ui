@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader";
-import { Badge, IconClose, IconStop, IconTrash, Panel } from "@zero-design-system/react";
+import { Badge, Button, Panel } from "@zero-design-system/react";
 import { deleteSession } from "../Sessions/service";
 import { useDeleteSession } from "../SessionArchive/service";
 import { sessionsListTo } from "../../lib/sessionNav";
@@ -58,30 +58,6 @@ const SessionInfo = ({
         deleteArtifacts();
     }, [canDelete, deleting, deleteArtifacts]);
 
-    const actions = [
-        {
-            icon: stopping ? <BeatLoader size={2} color={"#fff"} /> : <IconStop />,
-            label: "Stop session",
-            disabled: !canStop || stopping,
-            onClick: onStop,
-            "data-testid": "session-stop",
-        },
-        {
-            icon: deleting ? <BeatLoader size={2} color={"#fff"} /> : <IconTrash />,
-            label: "Delete session",
-            disabled: !canDelete || deleting,
-            onClick: onDelete,
-            "data-testid": "session-delete",
-        },
-        {
-            as: Link,
-            to: backTo,
-            icon: <IconClose />,
-            label: "Close window",
-            "data-testid": "session-close",
-        },
-    ];
-
     return (
         <Panel
             title="Session details"
@@ -89,7 +65,6 @@ const SessionInfo = ({
             titleTestId="session-info-title"
             className="session-info-panel"
             bodyClassName="session-info-panel__body"
-            actions={actions}
         >
             <div className="session-info">
                 <div className="session-info__main">
@@ -128,6 +103,34 @@ const SessionInfo = ({
 
                     <div className="session-info__id" data-testid="session-info-id">
                         {shortId}
+                    </div>
+
+                    <div className="session-info__actions">
+                        <Button
+                            variant="danger"
+                            disabled={!canStop || stopping}
+                            onClick={onStop}
+                            data-testid="session-stop"
+                        >
+                            {stopping ? <BeatLoader size={2} color={"#fff"} /> : null}
+                            Stop session
+                        </Button>
+                        <Button
+                            variant="danger"
+                            disabled={!canDelete || deleting}
+                            onClick={onDelete}
+                            data-testid="session-delete"
+                        >
+                            {deleting ? <BeatLoader size={2} color={"#fff"} /> : null}
+                            Delete session
+                        </Button>
+                        <Link
+                            to={backTo}
+                            className="btn btn--secondary"
+                            data-testid="session-close"
+                        >
+                            Close session window
+                        </Link>
                     </div>
                 </div>
             </div>
