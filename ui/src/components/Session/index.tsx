@@ -263,14 +263,6 @@ const Session = ({ origin, session, browser }: any) => {
                 </div>
             )}
 
-            {showFinished && !showHar && (
-                <div className="session-har-slot">
-                    <div className="session-missing" data-testid="session-no-har">
-                        No HAR
-                    </div>
-                </div>
-            )}
-
             {showColdLoading && (
                 <Panel
                     title="Session"

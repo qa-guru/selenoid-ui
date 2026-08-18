@@ -328,6 +328,36 @@ describe("Session detail page", () => {
         expect(screen.getByTestId("session-har-title")).toHaveTextContent("HAR Viewer");
     });
 
+    it("omits No HAR when a finished session has video but no HAR file", async () => {
+        (fetch as any).mockImplementation(async (url: any) => {
+            if (String(url).startsWith("/sessions/?")) {
+                return {
+                    ok: true,
+                    json: async () => ({
+                        sessions: [{ id: "video-only", video: "video-only.mp4" }],
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                    }),
+                };
+            }
+            if (String(url) === "/video/video-only.mp4") {
+                return { ok: true, status: 200 };
+            }
+            return { ok: false, status: 404, json: async () => ({}), text: async () => "" };
+        });
+
+        renderSession({ session: "video-only", browser: undefined });
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-detail-video")).toBeInTheDocument();
+        });
+        expect(screen.queryByTestId("session-no-har")).toBeNull();
+        expect(screen.queryByText("No HAR")).toBeNull();
+        expect(screen.queryByTestId("session-har-viewer")).toBeNull();
+        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+    });
+
     it("swaps finished video and log file for mock VNC + logs when mock is toggled", async () => {
         (fetch as any).mockImplementation(async (url: any) => {
             if (String(url).startsWith("/sessions/?")) {
