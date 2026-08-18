@@ -13,7 +13,7 @@ yarn --cwd ui typecheck
 yarn --cwd ui test
 test -d ui/allure-results
 yarn --cwd ui playwright install --with-deps chromium
-yarn --cwd ui test:visual --update-snapshots
+yarn --cwd ui test:visual
 yarn --cwd ui build
 test -f ui/build/index.html
 
