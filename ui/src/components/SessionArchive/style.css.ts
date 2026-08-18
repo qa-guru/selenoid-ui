@@ -18,27 +18,99 @@ export const StyledArchive = styled.div`
         min-height: 52px;
     }
 
-    .archive__sort-bar {
-        display: flex;
-        flex-wrap: wrap;
+    /* rem/px only — em would follow header 0.72rem vs row 0.82em and drift. */
+    --archive-cols: 76px 96px minmax(0, 1fr) 110px 90px 120px 22px;
+
+    .archive__grid-wrap {
+        overflow-x: auto;
+        padding: 0 var(--space-5, 16px);
+        box-sizing: border-box;
+    }
+
+    .archive__sort-bar,
+    .archive__list .archive__row {
+        display: grid;
+        grid-template-columns: var(--archive-cols);
+        column-gap: var(--space-4, 15px);
         align-items: center;
-        gap: 0.35rem 1rem;
-        padding: 10px var(--space-5, 16px) 8px;
+        min-width: 720px;
+        box-sizing: border-box;
+    }
+
+    .archive__sort-bar {
+        padding: 10px 0 8px;
         border-bottom: 1px solid ${colorBorder};
         color: var(--color-text-muted, #aaa);
         font-size: 0.72rem;
         font-weight: 600;
         letter-spacing: 0.03em;
         text-transform: uppercase;
-        box-sizing: border-box;
     }
 
     .archive__list {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        padding: 0 var(--space-5, 16px);
+        padding: 0;
         box-sizing: border-box;
+    }
+
+    .archive__list .archive__row {
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .archive__list .archive__row::after {
+        content: none;
+        display: none;
+    }
+
+    .archive__list .archive__row .session__id,
+    .archive__list .archive__row .session__quota,
+    .archive__list .archive__row .session__fields,
+    .archive__list .archive__row .session__date,
+    .archive__list .archive__row .session__duration,
+    .archive__list .archive__row .session__caps,
+    .archive__list .archive__row .session__actions {
+        order: 0;
+        margin-left: 0;
+        min-width: 0;
+    }
+
+    .archive__list .archive__row .session__quota {
+        flex: none;
+        max-width: none;
+    }
+
+    .archive__list .archive__row .session__date,
+    .archive__list .archive__row .session__duration {
+        color: var(--color-text-muted, #aaa);
+        font-size: 0.95em;
+        font-weight: 300;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .archive__list .archive__row .session__caps {
+        justify-self: end;
+        flex-wrap: nowrap;
+    }
+
+    .archive__list .archive__row .session__actions {
+        justify-self: end;
+    }
+
+    @media (max-width: 720px) {
+        .archive__list .archive__row {
+            flex-wrap: nowrap;
+        }
+
+        .archive__list .archive__row .session__quota {
+            flex: none;
+            max-width: none;
+        }
     }
 
     .archive__sort {
@@ -56,6 +128,7 @@ export const StyledArchive = styled.div`
         cursor: pointer;
         text-align: left;
         white-space: nowrap;
+        justify-self: start;
 
         &:hover {
             color: var(--color-text, #fff);

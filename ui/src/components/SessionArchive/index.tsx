@@ -183,30 +183,34 @@ const SessionArchive = ({ query = "" }: any) => {
                 className="archive-panel"
                 bodyClassName="archive-panel__body"
             >
-                <div className="archive__sort-bar" data-testid="archive-sort">
-                    <SortHeader label="Session" field="id" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
-                    <SortHeader
-                        label="Finished"
-                        field="finished"
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={onSort}
-                    />
-                    <SortHeader
-                        label="Duration"
-                        field="duration"
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={onSort}
-                    />
-                    <SortHeader label="User" field="quota" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
-                    <SortHeader label="Name" field="name" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
-                </div>
-                {/* No TransitionGroup: page swaps would stack exit+enter and double list height. */}
-                <div className="archive__list" data-testid="archive-list">
-                    {sessions.map((session: any) => (
-                        <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
-                    ))}
+                <div className="archive__grid-wrap">
+                    <div className="archive__sort-bar" data-testid="archive-sort">
+                        <SortHeader label="Session" field="id" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
+                        <SortHeader label="User" field="quota" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
+                        <SortHeader label="Name" field="name" sortBy={sortBy} sortOrder={sortOrder} onSort={onSort} />
+                        <SortHeader
+                            label="Finished"
+                            field="finished"
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                            onSort={onSort}
+                        />
+                        <SortHeader
+                            label="Duration"
+                            field="duration"
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                            onSort={onSort}
+                        />
+                        <span className="archive__sort-spacer" aria-hidden="true" />
+                        <span className="archive__sort-spacer" aria-hidden="true" />
+                    </div>
+                    {/* No TransitionGroup: page swaps would stack exit+enter and double list height. */}
+                    <div className="archive__list" data-testid="archive-list">
+                        {sessions.map((session: any) => (
+                            <SessionRow key={session.id} session={session} onDeleted={onDeleted} />
+                        ))}
+                    </div>
                 </div>
 
                 {showPager && (
@@ -293,7 +297,7 @@ const SessionRow = ({ session, onDeleted }: any) => {
     const identity = hasSessionIdentity(caps);
 
     return (
-        <div className="session" data-testid="session-card" data-session={session.id}>
+        <div className="session archive__row" data-testid="session-card" data-session={session.id}>
             <Link to={detailTo} className="link id session__id" data-testid="session-detail-link" title={session.id}>
                 {sessionIdShort(session.id)}
             </Link>
@@ -307,20 +311,12 @@ const SessionRow = ({ session, onDeleted }: any) => {
             ) : (
                 <span className="session__fields" />
             )}
-            {dateLabel || durationLabel ? (
-                <span className="session__meta">
-                    {dateLabel ? (
-                        <span className="session__date" data-testid="session-date">
-                            {dateLabel}
-                        </span>
-                    ) : null}
-                    {durationLabel ? (
-                        <span className="session__duration" data-testid="session-duration">
-                            {durationLabel}
-                        </span>
-                    ) : null}
-                </span>
-            ) : null}
+            <span className="session__date" data-testid="session-date">
+                {dateLabel}
+            </span>
+            <span className="session__duration" data-testid="session-duration">
+                {durationLabel}
+            </span>
 
             <div className="session__caps">
                 <SessionCapBadges artifacts={{ video: session.video, log: session.log, har: session.har }} />

@@ -93,9 +93,30 @@ describe("SessionArchive", () => {
         await waitFor(() => expect(screen.getByTestId("session-card")).toBeInTheDocument());
         expect(screen.getByTestId("archive-list")).toBeInTheDocument();
         expect(screen.getByTestId("archive-sort")).toBeInTheDocument();
-        expect(screen.getByTestId("session-card")).toHaveClass("session");
+        expect(screen.getByTestId("session-card")).toHaveClass("session", "archive__row");
         expect(screen.queryByRole("table")).not.toBeInTheDocument();
         expect(screen.queryByTestId("archive-table")).not.toBeInTheDocument();
+        expect(
+            [...screen.getByTestId("archive-sort").querySelectorAll(".archive__sort")].map((el) =>
+                el.getAttribute("data-testid")
+            )
+        ).toEqual([
+            "archive-sort-id",
+            "archive-sort-quota",
+            "archive-sort-name",
+            "archive-sort-finished",
+            "archive-sort-duration",
+        ]);
+        const row = screen.getByTestId("session-card");
+        expect([...row.children].map((el) => el.className)).toEqual([
+            expect.stringContaining("session__id"),
+            expect.stringContaining("session__quota"),
+            expect.stringContaining("session__fields"),
+            expect.stringContaining("session__date"),
+            expect.stringContaining("session__duration"),
+            expect.stringContaining("session__caps"),
+            expect.stringContaining("session__actions"),
+        ]);
     });
 
     it("renders a list row with meta, cap badges, and detail link (no video preview)", async () => {
