@@ -10,9 +10,9 @@ export const StyledSession = styled.div`
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    min-height: 0;
-    height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
-    max-height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
+    min-height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
+    height: auto;
+    max-height: none;
     /* Page shell gutter — same as Sessions list (.sessions-page). */
     padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
 
@@ -150,22 +150,23 @@ export const StyledSession = styled.div`
         }
     }
 
-    /* Full-width HAR under the VNC + Log row — own scrollport, does not move VNC. */
+    /* Full-width HAR under VNC + Log. Hug rows; grow down when a row expands.
+       Page scrolls — VNC row stays above, not resized. */
     .session-har-slot {
         box-sizing: border-box;
         width: 100%;
-        flex: 1 1 0;
-        min-height: 0;
-        overflow: hidden;
+        flex: 1 1 auto;
+        min-height: auto;
+        overflow: visible;
         display: flex;
         flex-direction: column;
         padding: 0 0 var(--wt-post-gap, 14px);
 
         .har-viewer,
         .har-card {
-            flex: 1 1 auto;
-            min-height: 0;
-            height: 100%;
+            flex: 1 0 auto;
+            min-height: 100%;
+            height: auto;
             display: flex;
             flex-direction: column;
         }
@@ -181,11 +182,11 @@ export const StyledSession = styled.div`
         }
 
         .har-card.panel--terminal > .har-card__body {
-            flex: 1 1 auto;
-            min-height: 0;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            overscroll-behavior-y: contain;
+            flex: 1 0 auto;
+            min-height: 160px;
+            height: auto;
+            max-height: none;
+            overflow: visible;
         }
     }
 
