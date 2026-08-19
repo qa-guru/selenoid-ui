@@ -97,9 +97,9 @@ describe("Docs", () => {
         expect(sequence).toHaveTextContent("17890");
         expect(sequence).not.toHaveTextContent("docker run");
         expect(sequence).not.toHaveTextContent("14441");
-        expect(wall).toHaveTextContent("~0.7s /run");
+        expect(wall).toHaveTextContent("~0.6s /run");
         expect(wall).toHaveTextContent("~0.3s pipeline/shell");
-        expect(wall).toHaveTextContent("#80");
+        expect(wall).toHaveTextContent("#95");
         expect(screen.queryByTestId("docs-wall-layer-docker-run")).not.toBeInTheDocument();
         expect(screen.getByTestId("docs-wall-layer-jenkins-shell")).toBeInTheDocument();
 

@@ -44,7 +44,7 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 4.342,
+            "wall_time_s": 3.578,
             "note": "headless; enableHar forces cold docker; no Allure; job #8 SUCCESS; Gradle 3s",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool/"
         },
@@ -90,7 +90,7 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 11.677,
+            "wall_time_s": 6.311,
             "note": "video+VNC+HAR+screenshot+page source+console \u2192 cold docker; job #8 SUCCESS; Gradle 7s",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/"
         },
@@ -136,9 +136,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 4.33,
+            "wall_time_s": 2.934,
             "note": "container-reuse job #14 SUCCESS; Gradle ~3s; no Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/17/"
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/21/"
         },
         {
             "language": "java",
@@ -182,9 +182,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 6.819,
+            "wall_time_s": 4.578,
             "note": "job #8 SUCCESS; Allure lite screenshot/page source/console in results; 3 attachments; not allure generate on wall (#2 18.568s npm ci+post); not #14 none 4.216s; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/9/"
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/12/"
         },
         {
             "language": "java",
@@ -220,7 +220,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-17T15:43:54Z",
+            "measured_at": "2026-08-19T11:50:21Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -229,8 +229,8 @@
                 "har": "off"
             },
             "wall_time_s": 0.9,
-            "note": "job #80 SUCCESS; Test stage 961 ms; display 0.9; /run 678 ms; Jenkins wall 1300 ms; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #59 1.3s Jenkins wall; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/80/"
+            "note": "job #95 SUCCESS; Test stage 928 ms; display 0.9; /run 622 ms; Jenkins wall 1243 ms; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #59 1.3s Jenkins wall; not Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/95/"
         },
         {
             "language": "java",
