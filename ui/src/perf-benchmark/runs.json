@@ -44,7 +44,7 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 9.414,
+            "wall_time_s": 4.342,
             "note": "headless; enableHar forces cold docker; no Allure; job #8 SUCCESS; Gradle 3s",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool/"
         },
@@ -90,7 +90,7 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 18.897,
+            "wall_time_s": 11.677,
             "note": "video+VNC+HAR+screenshot+page source+console \u2192 cold docker; job #8 SUCCESS; Gradle 7s",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/"
         },
@@ -136,9 +136,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 4.216,
+            "wall_time_s": 4.33,
             "note": "container-reuse job #14 SUCCESS; Gradle ~3s; no Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/14/"
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/17/"
         },
         {
             "language": "java",
@@ -182,9 +182,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 6.662,
+            "wall_time_s": 6.819,
             "note": "job #8 SUCCESS; Allure lite screenshot/page source/console in results; 3 attachments; not allure generate on wall (#2 18.568s npm ci+post); not #14 none 4.216s; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/8/"
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/9/"
         },
         {
             "language": "java",
@@ -596,7 +596,7 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 5.596,
+            "wall_time_s": 3.756,
             "note": "Playwright WS always cold docker; no Allure; job #2 SUCCESS",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool/"
         },
@@ -642,7 +642,7 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 13.311,
+            "wall_time_s": 4.227,
             "note": "video+VNC+HAR+screenshot+page source+console \u2192 PW WS cold docker; job #3 SUCCESS; Allure 3",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool-full-attachments/"
         },
