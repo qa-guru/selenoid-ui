@@ -661,7 +661,7 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     Python none: cold 5.4 · warm 3.5 · hot 0.9.
                 </p>
                 <p className="benchmarks__hint">
-                    JS none: cold 3.8 · warm 3.0 · hot 0.9.
+                    JS none: cold 3.8 · warm 3.0 · hot 0.6.
                 </p>
                 <JenkinsLoginTable runs={runs} />
             </section>

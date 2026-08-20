@@ -195,7 +195,7 @@
             "browser": "chrome/149.0-min",
             "versions": {
                 "hub": "3.0.13",
-                "ui": "3.0.43",
+                "ui": "3.0.48",
                 "cm": "3.0.3",
                 "browser_image": "149-min"
             },
@@ -220,7 +220,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-19T11:50:21Z",
+            "measured_at": "2026-08-20T22:11:56Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -228,9 +228,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 0.9,
-            "note": "job #95 SUCCESS; Test stage 928 ms; display 0.9; /run 622 ms; Jenkins wall 1243 ms; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse; not #59 1.3s Jenkins wall; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/95/"
+            "wall_time_s": 0.942,
+            "note": "job #115 SUCCESS; Test stage 942 ms; display 0.942; /run 641 ms; Jenkins wall 1405 ms; one sh lease+/run+trap release; POST /pool/lease; daemon reuse :17890; not Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/115/"
         },
         {
             "language": "java",
@@ -241,7 +241,7 @@
             "browser": "chrome/149.0-min",
             "versions": {
                 "hub": "3.0.13",
-                "ui": "3.0.37",
+                "ui": "3.0.48",
                 "cm": "3.0.3",
                 "browser_image": "149-min"
             },
@@ -266,7 +266,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T12:10:04Z",
+            "measured_at": "2026-08-20T22:22:22Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -274,9 +274,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 2.88,
-            "note": "job #8 SUCCESS; live pin is java-hot-pool-light-attachments; Allure lite screenshot/page source/console; 3 attachments; no allure generate on wall; /run 1865 ms; POST /pool/lease created:false; daemon reuse :17891; not old full-attachments #6 2.617s; not #5 10.653s kit+archive; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-light-attachments/8/"
+            "wall_time_s": 1.357,
+            "note": "job #2 SUCCESS; live pin is java-hot-pool-lite (not light-attachments); Allure lite screenshot/page source/console; 3 attachments; no allure generate on wall; /run 801 ms; Test 1357 ms; Jenkins wall 2036 ms; daemon :17891; not video/VNC/HAR",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-lite/2/"
         },
         {
             "language": "python",
@@ -471,7 +471,7 @@
             "browser": "chrome/149.0-min",
             "versions": {
                 "hub": "3.0.11",
-                "ui": "3.0.32",
+                "ui": "3.0.48",
                 "cm": "3.0.2",
                 "browser_image": "149-min"
             },
@@ -496,7 +496,7 @@
             "failed": 0,
             "id": "jenkins-python-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T13:40:13Z",
+            "measured_at": "2026-08-20T22:11:56Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -504,9 +504,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 0.9,
-            "note": "job #17 SUCCESS; Test stage 894 ms; display 0.9; /run 650 ms; Jenkins wall 1269 ms; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse :17980 attach pool-hot-chrome-min-2; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/17/"
+            "wall_time_s": 0.942,
+            "note": "job #22 SUCCESS; Test stage 942 ms; display 0.942; /run 612 ms; Jenkins wall 1404 ms; daemon reuse :17980; slot pool-hot-chrome-min-2; not Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/22/"
         },
         {
             "language": "python",
@@ -517,7 +517,7 @@
             "browser": "chrome/149.0-min",
             "versions": {
                 "hub": "3.0.11",
-                "ui": "3.0.32",
+                "ui": "3.0.48",
                 "cm": "3.0.2",
                 "browser_image": "149-min"
             },
@@ -542,7 +542,7 @@
             "failed": 0,
             "id": "jenkins-python-wd-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T13:40:24Z",
+            "measured_at": "2026-08-20T22:22:22Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -550,9 +550,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 0.9,
-            "note": "job #4 SUCCESS; Test stage 877 ms; display 0.9; /run 631 ms; Jenkins wall 1288 ms; live pin is python-hot-pool-light-attachments; Allure lite screenshot/page source/console; 3 attachments; no generate; daemon :17981; slot pool-hot-chrome-min-2; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-light-attachments/4/"
+            "wall_time_s": 0.971,
+            "note": "job #2 SUCCESS; live pin is python-hot-pool-lite (not light-attachments); Allure lite screenshot/page source/console; 3 attachments; no generate; /run 719 ms; Test 971 ms; Jenkins wall 1660 ms; daemon :17981; slot pool-hot-chrome-min-2",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-lite/2/"
         },
         {
             "language": "js",
@@ -747,7 +747,7 @@
             "browser": "playwright-chromium/1.61.1-min",
             "versions": {
                 "hub": "3.0.11",
-                "ui": "3.0.32",
+                "ui": "3.0.48",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1-min"
             },
@@ -772,7 +772,7 @@
             "failed": 0,
             "id": "jenkins-js-pw-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T02:23:27Z",
+            "measured_at": "2026-08-20T22:11:56Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -780,9 +780,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 0.9,
-            "note": "job #6 SUCCESS; Test stage 935 ms; display 0.9; /run 357 ms; Jenkins wall 935 ms; one sh lease+/run+trap release; POST /pool/lease created:false; daemon reuse :17990; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/6/"
+            "wall_time_s": 0.623,
+            "note": "job #12 SUCCESS; Test stage 623 ms; display 0.623; /run 291 ms; Jenkins wall 1021 ms; daemon reuse :17990; not Allure",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/12/"
         },
         {
             "language": "js",
@@ -793,7 +793,7 @@
             "browser": "playwright-chromium/1.61.1-min",
             "versions": {
                 "hub": "3.0.11",
-                "ui": "3.0.32",
+                "ui": "3.0.48",
                 "cm": "3.0.2",
                 "browser_image": "1.61.1-min"
             },
@@ -818,7 +818,7 @@
             "failed": 0,
             "id": "jenkins-js-pw-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T12:10:04Z",
+            "measured_at": "2026-08-20T22:22:22Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -826,9 +826,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 1.176,
-            "note": "job #6 SUCCESS; live pin is js-hot-pool-light-attachments; Allure lite screenshot/page source/console; 3 attachments; no allure generate on wall; /run 339 ms; POST /pool/lease created:false; daemon :17991; not #5 12.891s generate; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-light-attachments/6/"
+            "wall_time_s": 0.666,
+            "note": "job #2 SUCCESS; live pin is js-hot-pool-lite (not light-attachments); Allure lite screenshot/page source/console; 12 attachments; no generate; /run 347 ms; Test 666 ms; Jenkins wall 1358 ms; daemon :17991",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-lite/2/"
         },
         {
             "id": "catalog-go-pw-warm-few-p5-none",
