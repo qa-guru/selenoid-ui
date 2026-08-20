@@ -113,17 +113,23 @@ export function parseScreenSize(screenResolution: unknown): ScreenSize | null {
     return { width, height };
 }
 
-/** Chromium-family launch args so the window opens already at screenResolution. */
+/**
+ * Docker Chromium/Edge as root. Without these, ChromeDriver returns
+ * "session not created: Chrome instance exited" (no X/sandbox in the container).
+ */
+export const CHROMIUM_CONTAINER_ARGS = ["--no-sandbox", "--disable-dev-shm-usage"];
+
+/** Chromium-family launch args: container sandbox flags + window at screenResolution. */
 export function browserWindowOptions(
     browserName: unknown,
     screenResolution: unknown
 ): Record<string, { args: string[] }> | null {
-    const size = parseScreenSize(screenResolution);
-    if (!size) {
-        return null;
-    }
-    const args = [`--window-size=${size.width},${size.height}`, "--window-position=0,0"];
     const name = String(browserName || "").toLowerCase();
+    const size = parseScreenSize(screenResolution);
+    const args = [...CHROMIUM_CONTAINER_ARGS];
+    if (size) {
+        args.push(`--window-size=${size.width},${size.height}`, "--window-position=0,0");
+    }
     if (name === "chrome" || name === "chromium" || name === "opera") {
         return { "goog:chromeOptions": { args } };
     }
@@ -196,6 +202,21 @@ export async function resizeSessionWindow(
         signal
     );
     return Boolean(wire && wire.ok);
+}
+
+/** POST /session/:id/url — open a page in the live session (course probe, not a grid app). */
+export async function openSessionUrl(
+    sessionId: string,
+    url: string,
+    fetchImpl: typeof fetch = fetch,
+    authToken: any = "",
+    signal?: AbortSignal
+): Promise<boolean> {
+    if (!sessionId || !String(url || "").trim()) {
+        return false;
+    }
+    const res = await postSessionCommand(sessionId, "/url", { url }, fetchImpl, authToken, signal);
+    return Boolean(res && res.ok);
 }
 
 export function isPlaywrightBrowser(

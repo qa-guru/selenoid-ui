@@ -137,6 +137,14 @@ export const StyledCapabilities = styled.div`
     color: ${grayColor};
   }
 
+  .capabilities-mobile-hint {
+    margin: 0;
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: ${grayColor};
+  }
+
   .capabilities-launch {
     display: flex;
     flex-direction: column;

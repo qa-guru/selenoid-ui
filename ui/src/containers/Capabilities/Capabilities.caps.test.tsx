@@ -153,6 +153,8 @@ describe("Capabilities boolean caps (seg canon)", () => {
             fetchMock.mock.calls.some(([url]: any[]) => String(url) === "/wd/hub/session/sess-1/window/rect")
         ).toBe(false);
         expect(body.capabilities.alwaysMatch["goog:chromeOptions"].args).toEqual([
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
             "--window-size=1280,1024",
             "--window-position=0,0",
         ]);

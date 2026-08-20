@@ -14,6 +14,7 @@ import {
     isPlaywrightBrowser,
     pickDefaultWebdriverBrowser,
     resizeSessionWindow,
+    openSessionUrl,
     sessionIdFrom,
     hubSessionErrorMessage,
     createSessionCatchMessage,
@@ -23,6 +24,17 @@ import {
 import { waitForLiveSession } from "../../util/waitForLiveSession";
 import { sameOriginURL } from "../../util/uiFeed";
 import { DEFAULT_PLAYWRIGHT_SESSION, playwrightEndpoint, playwrightSnippet } from "../../util/capabilitiesPlaywright";
+import {
+    MOBILE_EMULATION_OFF,
+    MOBILE_DEVICE_OPTIONS,
+    buildMobileEmulationOptions,
+    mergeChromiumOptions,
+    mobileDeviceById,
+    mobileEmulationProbeUrl,
+    mobileEmulationSnippetBlocks,
+    mobileScreenResolution,
+    supportsMobileEmulation,
+} from "../../util/capabilitiesMobileEmulation";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
 import {
     defaultHubAccessKey,
@@ -83,6 +95,7 @@ import "@zero-design-system/react/styles.css";
  * | proxyPreset      | PlaqueSelect | solo   | WD: alwaysMatch.proxy / PW: socksProxy query |
  * | proxyServer      | PlaqueField  | duo    | host half of socksProxy                      |
  * | proxyPort        | PlaqueField  | duo    | port half of socksProxy                      |
+ * | mobileDevice     | PlaqueSelect | solo   | goog:chromeOptions / ms:edgeOptions.mobileEmulation (chrome/msedge; off default; course, not grid) |
  *
  * Playwright session panel mirrors Remote hub (+ headless). Proxy panel is shared:
  * WebDriver → W3C alwaysMatch.proxy; Playwright → socksProxy WS query → hub PW_PROXY.
@@ -522,6 +535,7 @@ const DEFAULT_SESSION_OPTS: Record<string, any> = {
     proxyPreset: PROXY_PRESET_OFF,
     proxyServer: "",
     proxyPort: "",
+    mobileDevice: MOBILE_EMULATION_OFF,
     headless: DEFAULT_PLAYWRIGHT_SESSION.headless ? "true" : "false",
     androidApp: DEFAULT_ANDROID_OPTS.app,
     androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
@@ -608,6 +622,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             proxyServer: sessionOpts.proxyServer || "",
             proxyPort: sessionOpts.proxyPort || "",
             proxyEndpoint: proxyEndpoint || "",
+            mobileDevice: sessionOpts.mobileDevice || MOBILE_EMULATION_OFF,
         });
         if (sessionOpts.enableHar) {
             payload.harContent = sessionOpts.harContent || "meta";
@@ -721,6 +736,11 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             `- proxyPreset: **${payload.proxyPreset}**`,
             `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
             `- socksProxy: **${payload.proxyEndpoint || "—"}**`,
+            "",
+            "## Mobile emulation",
+            `- mobileDevice: **${
+                payload.mobileDevice || MOBILE_EMULATION_OFF
+            }** (Chrome/Edge deviceMetrics + UA; off = desktop)`,
         ])
         .join("\n");
 };
@@ -867,16 +887,18 @@ const code = (browser = "UNKNOWN", version = "", origin = "", session: any = {})
         proxyPreset = DEFAULT_SESSION_OPTS.proxyPreset,
         proxyServer: customProxyHost = DEFAULT_SESSION_OPTS.proxyServer,
         proxyPort: customProxyPort = DEFAULT_SESSION_OPTS.proxyPort,
+        mobileDevice = DEFAULT_SESSION_OPTS.mobileDevice,
     } = session;
     const accessKey = formatAccessKey(authUser, authPass);
     const hubUrl = hubSessionUrl(origin, accessKey);
     const hubSessionEndpoint = `${hubBase}/wd/hub/session`;
     const proxyServer = resolveProxyServer(proxyPreset, customProxyHost, customProxyPort);
     const proxy = buildProxyCapability(proxyServer);
+    const snippetResolution = mobileScreenResolution(mobileDevice) || screenResolution;
     const selenoidOpts = buildSelenoidOptions({
         sessionTimeout,
         name: sessionName,
-        screenResolution,
+        screenResolution: snippetResolution,
         enableVnc,
         enableVideo,
         enableHar,
@@ -988,10 +1010,15 @@ caps["proxy"] = {
         "socksVersion": 5
     ],`
         : "";
+    const mobileSnippets = mobileEmulationSnippetBlocks(browser, mobileDevice);
+    const javaMobileBlock = mobileSnippets.java;
+    const pythonMobileBlock = mobileSnippets.python;
+    const jsMobileBlock = mobileSnippets.javascript;
+    const curlMobileBlock = mobileSnippets.curl;
     const browserName = browser != "UNKNOWN" ? browser : "chrome";
     const nameJson = JSON.stringify(sessionName);
     const timeoutJson = JSON.stringify(sessionTimeout);
-    const resolutionJson = JSON.stringify(screenResolution);
+    const resolutionJson = JSON.stringify(snippetResolution);
     const curlSelenoidJson = indentJsonLines(JSON.stringify(selenoidOpts, null, 4), 12);
     let optionsClass = "SpecificBrowserOptions";
     switch (browser) {
@@ -1075,14 +1102,14 @@ caps["proxy"] = {
         "alwaysMatch": {
             "browserName": "${browserName}",
             ${version == "" ? "" : '"browserVersion": "' + version + '",'}
-            ${curlProxyBlock}"selenoid:options": ${curlSelenoidJson}
+            ${curlProxyBlock}${curlMobileBlock}"selenoid:options": ${curlSelenoidJson}
         }
     }
 }'
 `,
         java: `${optionsClass} options = new ${optionsClass}();
 ${version != "" ? 'options.setCapability("browserVersion", "' + version + '");' : ""}
-${javaProxyBlock}options.setCapability("selenoid:options", new HashMap<String, Object>() {{
+${javaProxyBlock}${javaMobileBlock}options.setCapability("selenoid:options", new HashMap<String, Object>() {{
     put("name", ${nameJson});
     put("sessionTimeout", ${timeoutJson});
     put("screenResolution", ${resolutionJson});
@@ -1178,7 +1205,7 @@ IWebDriver driver = new RemoteWebDriver(new Uri("${hubUrl}"), options);
         
 capabilities = {
     "browserName": "${browserName}",
-    "browserVersion": "${version}",${pythonProxyBlock}
+    "browserVersion": "${version}",${pythonProxyBlock}${pythonMobileBlock}
     "selenoid:options": {
         "name": ${nameJson},
         "sessionTimeout": ${timeoutJson},
@@ -1203,7 +1230,7 @@ var options = {
     protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
     capabilities: { 
         browserName: '${browserName}',
-        browserVersion: '${version}',${jsProxyBlock}
+        browserVersion: '${version}',${jsProxyBlock}${jsMobileBlock}
         'selenoid:options': {
             name: ${nameJson},
             sessionTimeout: ${timeoutJson},
@@ -1226,7 +1253,7 @@ const options: RemoteOptions = {
     protocol: '${window.location.protocol == "https:" ? "https" : "http"}',
     capabilities: {
         browserName: '${browserName}',
-        browserVersion: '${version}',${jsProxyBlock}
+        browserVersion: '${version}',${jsProxyBlock}${jsMobileBlock}
         'selenoid:options': {
             name: ${nameJson},
             sessionTimeout: ${timeoutJson},
@@ -1567,6 +1594,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const [proxyPreset, setProxyPreset] = useState(DEFAULT_SESSION_OPTS.proxyPreset);
     const [proxyServer, setProxyServer] = useState(DEFAULT_SESSION_OPTS.proxyServer);
     const [proxyPort, setProxyPort] = useState(DEFAULT_SESSION_OPTS.proxyPort);
+    const [mobileDevice, setMobileDevice] = useState(DEFAULT_SESSION_OPTS.mobileDevice);
     // Playwright-only headless; Android-only appium caps. name/timeout/vnc/video are shared.
     const [headless, setHeadless] = useState(DEFAULT_SESSION_OPTS.headless);
     const [androidApp, setAndroidApp] = useState(DEFAULT_SESSION_OPTS.androidApp);
@@ -1656,6 +1684,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         proxyPreset,
         proxyServer,
         proxyPort,
+        mobileDevice,
         headless: headless === "true",
         androidApp,
         androidNoReset: androidNoReset === "true",
@@ -1683,6 +1712,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         proxyPreset,
         proxyServer,
         proxyPort,
+        mobileDevice,
         headless,
         androidApp,
         androidNoReset,
@@ -1773,6 +1803,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         }
         setProxyServer(nextHost);
         setProxyPort(nextPort);
+        setMobileDevice(next.mobileDevice || MOBILE_EMULATION_OFF);
         setHeadless(next.headless || DEFAULT_SESSION_OPTS.headless);
         setAndroidApp(next.androidApp || DEFAULT_ANDROID_OPTS.app);
         setAndroidNoReset(next.androidNoReset || DEFAULT_ANDROID_OPTS.noReset);
@@ -1812,6 +1843,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
             proxyPreset: PROXY_PRESET_OFF,
             proxyServer: "",
             proxyPort: "",
+            mobileDevice: MOBILE_EMULATION_OFF,
             headless: DEFAULT_SESSION_OPTS.headless,
             androidApp: DEFAULT_ANDROID_OPTS.app,
             androidNoReset: DEFAULT_ANDROID_OPTS.noReset,
@@ -2140,6 +2172,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                             touchOptions();
                             setProxyPort(v);
                         }}
+                        mobileDevice={mobileDevice}
+                        setMobileDevice={(v: any) => {
+                            touchOptions();
+                            setMobileDevice(v);
+                        }}
                         authUser={authUser}
                         setAuthUser={(v: any) => {
                             touchOptions();
@@ -2337,6 +2374,8 @@ const Launch = ({
     setProxyServer,
     proxyPort,
     setProxyPort,
+    mobileDevice,
+    setMobileDevice,
     authUser,
     setAuthUser,
     authPass,
@@ -2430,10 +2469,11 @@ const Launch = ({
         const har = enableHar === "true";
         const resolvedProxy = resolveProxyServer(proxyPreset, proxyServer, proxyPort);
         const proxy = buildProxyCapability(resolvedProxy);
+        const effectiveResolution = mobileScreenResolution(mobileDevice) || screenResolution;
         const selenoidOptions = buildSelenoidOptions({
             sessionTimeout,
             name: sessionName,
-            screenResolution,
+            screenResolution: effectiveResolution,
             enableVnc: vnc,
             enableVideo: video,
             enableHar: har,
@@ -2456,7 +2496,7 @@ const Launch = ({
             labels: selenoidOptions.labels,
             sessionTimeout,
             name: sessionName,
-            screenResolution,
+            screenResolution: effectiveResolution,
         };
         if (selenoidOptions.env) {
             desiredCapabilities.env = selenoidOptions.env;
@@ -2483,10 +2523,12 @@ const Launch = ({
         if (proxy) {
             alwaysMatch.proxy = proxy;
         }
-        const windowOpts = browserWindowOptions(name, screenResolution);
-        if (windowOpts) {
-            Object.assign(alwaysMatch, windowOpts);
-            Object.assign(desiredCapabilities, windowOpts);
+        const windowOpts = browserWindowOptions(name, effectiveResolution);
+        const mobileOpts = buildMobileEmulationOptions(name, mobileDevice);
+        const chromiumOpts = mergeChromiumOptions(windowOpts, mobileOpts);
+        if (chromiumOpts) {
+            Object.assign(alwaysMatch, chromiumOpts);
+            Object.assign(desiredCapabilities, chromiumOpts);
         }
 
         if (isMockSessionsEnabled()) {
@@ -2531,7 +2573,7 @@ const Launch = ({
                 try {
                     // Chromium/Edge already get --window-size via browserWindowOptions; only
                     // POST window/rect for drivers that ignore launch args (e.g. Firefox).
-                    if (!windowOpts) {
+                    if (!windowOpts && !mobileOpts) {
                         const resizeController = new AbortController();
                         await Promise.race([
                             resizeSessionWindow(
@@ -2552,6 +2594,14 @@ const Launch = ({
                 } catch (resizeErr) {
                     if (!(resizeErr instanceof DOMException && resizeErr.name === "AbortError")) {
                         console.warn("Can't resize session window to screenResolution", resizeErr);
+                    }
+                }
+                const device = mobileDeviceById(mobileDevice);
+                if (device) {
+                    try {
+                        await openSessionUrl(sessionId, mobileEmulationProbeUrl(device), fetch, wdAuthToken);
+                    } catch (probeErr) {
+                        console.warn("Can't open mobileEmulation probe page", probeErr);
                     }
                 }
                 await waitForLiveSession(sessionId, { initialSessions: sessions });
@@ -2594,6 +2644,7 @@ const Launch = ({
         proxyPreset,
         proxyServer,
         proxyPort,
+        mobileDevice,
         authUser,
         authPass,
         wdAuthToken,
@@ -3253,6 +3304,43 @@ const Launch = ({
                                 data-testid="caps-playwright-labels"
                             />
                         </PlaqueFieldGrid>
+                    </div>
+                </Panel>
+            ) : null}
+            {isWebdriver && supportsMobileEmulation(name) ? (
+                <Panel
+                    title="Mobile emulation"
+                    testId="capabilities-mobile-panel"
+                    titleTestId="capabilities-mobile-title"
+                    className="capabilities-config-panel"
+                >
+                    {/*
+                      Chrome/Edge goog:chromeOptions / ms:edgeOptions.mobileEmulation.
+                      deviceMetrics + userAgent from the course catalog. Off = desktop.
+                      Not Android/iOS grid images.
+                    */}
+                    <div
+                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        data-testid="capabilities-mobile-caps"
+                    >
+                        <PlaqueFieldGrid
+                            layout="solo"
+                            aria-label="Mobile device"
+                            data-testid="capabilities-mobile-device"
+                        >
+                            <PlaqueSelect
+                                label="mobileDevice"
+                                paramId="mobileDevice"
+                                value={mobileDevice}
+                                options={MOBILE_DEVICE_OPTIONS}
+                                onChange={setMobileDevice}
+                                data-testid="caps-mobile-device"
+                            />
+                        </PlaqueFieldGrid>
+                        <p className="capabilities-mobile-hint" data-testid="capabilities-mobile-hint">
+                            Off = desktop 1920×1080. Выбери устройство — окно VNC и UA станут как в Chrome DevTools
+                            (не Android/iOS).
+                        </p>
                     </div>
                 </Panel>
             ) : null}

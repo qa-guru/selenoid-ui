@@ -1,0 +1,101 @@
+{
+    "comment": "Chrome DevTools mobileEmulation catalog for the course (deviceMetrics + userAgent). Not Android/iOS grid images.",
+    "devices": [
+        {
+            "id": "iphone-se",
+            "label": "iPhone SE",
+            "width": 375,
+            "height": 667,
+            "pixelRatio": 2,
+            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "iphone-xr",
+            "label": "iPhone XR",
+            "width": 414,
+            "height": 896,
+            "pixelRatio": 2,
+            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "iphone-12-pro",
+            "label": "iPhone 12 Pro",
+            "width": 390,
+            "height": 844,
+            "pixelRatio": 3,
+            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "iphone-14-pro-max",
+            "label": "iPhone 14 Pro Max",
+            "width": 430,
+            "height": 932,
+            "pixelRatio": 3,
+            "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "pixel-5",
+            "label": "Pixel 5",
+            "width": 393,
+            "height": 851,
+            "pixelRatio": 2.75,
+            "userAgent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36"
+        },
+        {
+            "id": "pixel-7",
+            "label": "Pixel 7",
+            "width": 412,
+            "height": 915,
+            "pixelRatio": 2.625,
+            "userAgent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36"
+        },
+        {
+            "id": "galaxy-s8-plus",
+            "label": "Galaxy S8+",
+            "width": 360,
+            "height": 740,
+            "pixelRatio": 4,
+            "userAgent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36"
+        },
+        {
+            "id": "galaxy-s20-ultra",
+            "label": "Galaxy S20 Ultra",
+            "width": 412,
+            "height": 915,
+            "pixelRatio": 3.5,
+            "userAgent": "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36"
+        },
+        {
+            "id": "ipad-mini",
+            "label": "iPad Mini",
+            "width": 768,
+            "height": 1024,
+            "pixelRatio": 2,
+            "userAgent": "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "ipad-air",
+            "label": "iPad Air",
+            "width": 820,
+            "height": 1180,
+            "pixelRatio": 2,
+            "userAgent": "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "ipad-pro",
+            "label": "iPad Pro",
+            "width": 1024,
+            "height": 1366,
+            "pixelRatio": 2,
+            "userAgent": "Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        },
+        {
+            "id": "surface-pro-7",
+            "label": "Surface Pro 7",
+            "width": 912,
+            "height": 1368,
+            "pixelRatio": 2,
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+        }
+    ]
+}

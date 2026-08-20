@@ -7,6 +7,7 @@ import {
     parseScreenSize,
     pickDefaultWebdriverBrowser,
     resizeSessionWindow,
+    openSessionUrl,
     scheduleCreateSessionAbort,
     sessionIdFrom,
 } from "./capabilitiesLogic";
@@ -52,12 +53,22 @@ describe("capabilitiesLogic", () => {
     it("builds chromium/edge window launch options from screenResolution", () => {
         expect(browserWindowOptions("chrome", "1920x1080x24")).toEqual({
             "goog:chromeOptions": {
-                args: ["--window-size=1920,1080", "--window-position=0,0"],
+                args: [
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--window-size=1920,1080",
+                    "--window-position=0,0",
+                ],
             },
         });
         expect(browserWindowOptions("msedge", "1280x1024x24")).toEqual({
             "ms:edgeOptions": {
-                args: ["--window-size=1280,1024", "--window-position=0,0"],
+                args: [
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--window-size=1280,1024",
+                    "--window-position=0,0",
+                ],
             },
         });
         expect(browserWindowOptions("firefox", "1920x1080x24")).toBeNull();
@@ -88,6 +99,18 @@ describe("capabilitiesLogic", () => {
                 }),
             })
         );
+    });
+
+    it("opens a URL in the live session", async () => {
+        const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+        await expect(openSessionUrl("sess-1", "data:text/html,hi", fetchImpl)).resolves.toBe(true);
+        expect(fetchImpl).toHaveBeenCalledWith("/wd/hub/session/sess-1/url", {
+            method: "POST",
+            credentials: "omit",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: "data:text/html,hi" }),
+            signal: undefined,
+        });
     });
 
     it("falls back to window/current/size when rect fails with unsupported status", async () => {
