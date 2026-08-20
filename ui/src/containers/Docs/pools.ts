@@ -66,7 +66,7 @@ export const FEATURE_ROWS: FeatureRow[] = [
     },
     {
         label: "A Playwright container is standing by",
-        detail: "The container is up. The Java login job does not use it.",
+        detail: "The container is up. The JS Playwright login job uses the hot -min slot; Java uses Chrome.",
         cold: false,
         warm: true,
         hot: true,
@@ -364,8 +364,8 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             tech: "Slots on ports 14501 and 14502 are up. There is no Playwright container-reuse.",
         },
         hot: {
-            human: "A smaller “-min” Playwright is running, but the Java login job does not use it.",
-            tech: "The slot on port 16441 is up. The Java hot-pool job talks to Chrome on port 16440.",
+            human: "The JS Playwright login job talks to the standing -min Chromium. Java still uses Chrome.",
+            tech: "POST /pool/lease protocol=playwright. Agent uses Docker DNS ws://hot-pw-min-1:3000/. Loopback :16441 is host-only.",
         },
     },
 ];
