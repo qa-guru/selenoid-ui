@@ -110,6 +110,13 @@ export const FEATURE_ROWS: FeatureRow[] = [
         hot: true,
     },
     {
+        label: "A Node daemon stays on the JS agent; the build does not start npm test",
+        detail: "hot-pw-daemon listens on 127.0.0.1:17990. Restart it when the Playwright tests tree changes.",
+        cold: false,
+        warm: false,
+        hot: true,
+    },
+    {
         label: "Git is off the test job; a separate sync job updates the files",
         cold: false,
         warm: false,
@@ -365,7 +372,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
         },
         hot: {
             human: "The JS Playwright login job talks to the standing -min Chromium. Java still uses Chrome.",
-            tech: "POST /pool/lease protocol=playwright. Agent uses Docker DNS ws://hot-pw-min-1:3000/. Loopback :16441 is host-only.",
+            tech: "POST /pool/lease protocol=playwright. Agent POST /run to hot-pw-daemon :17990. Docker DNS ws://hot-pw-min-1:3000/. Loopback :16441 is host-only.",
         },
     },
 ];
