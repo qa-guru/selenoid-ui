@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 import perfDoc from "../../perf-benchmark/runs.json";
+import isolationWarmDoc from "../../perf-benchmark/isolation-warm.json";
 import type {
     BenchmarkFilters,
     ImageFlavor,
@@ -27,6 +28,26 @@ import {
 import { StyledBenchmarks } from "./style.css";
 
 const doc = perfDoc as PerfBenchmarkDoc;
+
+type WarmIsolationRow = {
+    variant: string;
+    label: string;
+    wall_ms: number;
+    delta_vs_none_ms: number | null;
+    delta_vs_allure3_empty_ms: number | null;
+    att_count: number;
+    weight_kb: number;
+    weight_note?: string;
+};
+
+type WarmIsolationDoc = {
+    measured_at: string;
+    host: string;
+    method: string;
+    rows: WarmIsolationRow[];
+};
+
+const isolationWarm = isolationWarmDoc as WarmIsolationDoc;
 
 const PARALLEL_COLS = [1, 5, 10, 25] as const;
 const SUITE_ROWS: SuiteSize[] = ["1", "few", "many"];
@@ -173,6 +194,55 @@ function JenkinsLoginTable({ runs }: { runs: PerfRun[] }) {
                             </tr>
                         );
                     })}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function fmtMs(ms: number | null | undefined): string {
+    if (ms === null || ms === undefined) {
+        return "—";
+    }
+    return `${(ms / 1000).toFixed(3)}s`;
+}
+
+function fmtDeltaMs(ms: number | null | undefined): string {
+    if (ms === null || ms === undefined) {
+        return "—";
+    }
+    const s = ms / 1000;
+    const sign = s > 0 ? "+" : "";
+    return `${sign}${s.toFixed(3)}s`;
+}
+
+function WarmIsolationTable({ data }: { data: WarmIsolationDoc }) {
+    return (
+        <div className="benchmarks__scroll">
+            <table className="benchmarks__table" data-testid="benchmarks-warm-isolation">
+                <thead>
+                    <tr>
+                        <th>variant</th>
+                        <th>wall</th>
+                        <th>Δ vs none</th>
+                        <th>Δ vs allure3-empty</th>
+                        <th>att</th>
+                        <th>weight_kb</th>
+                        <th>note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.rows.map((row) => (
+                        <tr key={row.variant} data-variant={row.variant}>
+                            <td>{row.label}</td>
+                            <td>{fmtMs(row.wall_ms)}</td>
+                            <td>{fmtDeltaMs(row.delta_vs_none_ms)}</td>
+                            <td>{fmtDeltaMs(row.delta_vs_allure3_empty_ms)}</td>
+                            <td>{row.att_count}</td>
+                            <td>{row.weight_kb}</td>
+                            <td>{row.weight_note || "—"}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
@@ -664,6 +734,16 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     JS none: cold 3.8 · warm 3.0 · hot 0.6.
                 </p>
                 <JenkinsLoginTable runs={runs} />
+            </section>
+
+            <section className="benchmarks__section" data-testid="benchmarks-warm-isolation-section">
+                <h2>0b. Warm isolation (one option)</h2>
+                <p className="benchmarks__hint">
+                    {isolationWarm.host}. {isolationWarm.method}. Measured {isolationWarm.measured_at}.
+                    Compare attaches to <code>allure3-empty</code>, not to <code>none</code> (Allure tax
+                    ~+1.2s).
+                </p>
+                <WarmIsolationTable data={isolationWarm} />
             </section>
 
             <section className="benchmarks__section">

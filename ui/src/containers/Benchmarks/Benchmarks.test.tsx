@@ -130,6 +130,16 @@ describe("Benchmarks", () => {
         expect(screen.getByTestId("benchmarks-artifacts")).toBeInTheDocument();
     });
 
+    it("renders warm isolation one-option table", () => {
+        render(<Benchmarks data={fixture} />);
+
+        const table = screen.getByTestId("benchmarks-warm-isolation");
+        expect(table.querySelector('[data-variant="screenshot"]')).toHaveTextContent("52");
+        expect(table.querySelector('[data-variant="video"]')).toHaveTextContent("44");
+        expect(table.querySelector('[data-variant="har"]')).toHaveTextContent("49");
+        expect(within(table).getByText("allure3-empty (no attaches)")).toBeInTheDocument();
+    });
+
     it("pins Java and JS login-test walls; heavy ≠ lite", () => {
         render(<Benchmarks />);
         const table = screen.getByTestId("benchmarks-jenkins");
