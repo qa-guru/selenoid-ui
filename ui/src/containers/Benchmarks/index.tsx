@@ -658,6 +658,9 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     Java none: cold 3.6 · warm 2.9 · hot 0.9. Lite/heavy не сравнивать между пулами.
                 </p>
                 <p className="benchmarks__hint">
+                    Python none: cold 5.4 · warm 3.5 · hot 0.9.
+                </p>
+                <p className="benchmarks__hint">
                     JS none: cold 3.8 · warm 3.0 · hot 0.9.
                 </p>
                 <JenkinsLoginTable runs={runs} />

@@ -189,13 +189,36 @@ describe("Benchmarks", () => {
         );
         expect(hotLite).toHaveAttribute("data-status", "ok");
         expect(hotLite).toHaveAttribute("data-variant", "allure-lite");
-        expect(hotLite).toHaveTextContent("2.617");
+        expect(hotLite).toHaveTextContent("2.88");
         const hotLitePin = within(table).getByRole("link", {
-            name: /hot-pool-full-attachments #6/,
+            name: /hot-pool-light-attachments #8/,
         });
         expect(hotLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-full-attachments/6/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-light-attachments/8/"
+        );
+
+        const pyHotNone = table.querySelector('[data-run-id="jenkins-python-wd-hot-1-p1-none"]');
+        expect(pyHotNone).toHaveAttribute("data-status", "ok");
+        expect(pyHotNone).toHaveTextContent("0.9");
+        const pyHotPin = within(table).getByRole("link", { name: /python-hot-pool #17/ });
+        expect(pyHotPin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/17/"
+        );
+
+        const pyHotLite = table.querySelector(
+            '[data-run-id="jenkins-python-wd-hot-1-p1-full-attachments"]'
+        );
+        expect(pyHotLite).toHaveAttribute("data-status", "ok");
+        expect(pyHotLite).toHaveAttribute("data-variant", "allure-lite");
+        expect(pyHotLite).toHaveTextContent("0.9");
+        const pyHotLitePin = within(table).getByRole("link", {
+            name: /python-hot-pool-light-attachments #4/,
+        });
+        expect(pyHotLitePin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-light-attachments/4/"
         );
 
         const jsHotLite = table.querySelector(
@@ -203,13 +226,13 @@ describe("Benchmarks", () => {
         );
         expect(jsHotLite).toHaveAttribute("data-status", "ok");
         expect(jsHotLite).toHaveAttribute("data-variant", "allure-lite");
-        expect(jsHotLite).toHaveTextContent("12.891");
+        expect(jsHotLite).toHaveTextContent("1.176");
         const jsHotLitePin = within(table).getByRole("link", {
-            name: /js-hot-pool-light-attachments #5/,
+            name: /js-hot-pool-light-attachments #6/,
         });
         expect(jsHotLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-light-attachments/5/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-light-attachments/6/"
         );
 
         const heavy = table.querySelector(
