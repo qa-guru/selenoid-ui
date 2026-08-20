@@ -245,13 +245,21 @@ describe("Benchmarks", () => {
         expect(lite).toHaveAttribute("data-variant", "allure-lite");
         expect(heavy).toHaveTextContent("allure-heavy");
         expect(lite).toHaveTextContent("allure-lite");
-        expect(lite).toHaveTextContent("5.616");
+        expect(heavy).toHaveTextContent("6.797");
+        expect(lite).toHaveTextContent("4.69");
+        const coldHeavyPin = within(table).getByRole("link", {
+            name: /^cold-pool-full-attachments #33$/,
+        });
+        expect(coldHeavyPin).toHaveAttribute(
+            "href",
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/33/"
+        );
         const warmLitePin = within(table).getByRole("link", {
-            name: /^warm-pool-full-attachments #28$/,
+            name: /^warm-pool-full-attachments #32$/,
         });
         expect(warmLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/28/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/32/"
         );
         expect(table.querySelectorAll("tbody tr")).toHaveLength(18);
     });

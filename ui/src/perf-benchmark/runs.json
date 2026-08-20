@@ -82,7 +82,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-cold-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-14T16:16:43Z",
+            "measured_at": "2026-08-20T23:13:22Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -90,9 +90,9 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 6.311,
-            "note": "video+VNC+HAR+screenshot+page source+console \u2192 cold docker; job #8 SUCCESS; Gradle 7s",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/"
+            "wall_time_s": 6.797,
+            "note": "job #33 SUCCESS UserIdCause; heavy video+VNC+HAR+screenshot+page source+console → cold docker; 6 attachments; no allure generate on wall (wfapi: Checkout NOT_EXECUTED + Test 6.302s, no Post); not #32 22.9s with Post 8.2s; not #8 6.311; vs cold none #8 3.578",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/33/"
         },
         {
             "language": "java",
@@ -174,7 +174,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-warm-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T17:58:20Z",
+            "measured_at": "2026-08-20T19:29:40Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -182,9 +182,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 5.616,
-            "note": "job #28 SUCCESS UserIdCause; Allure lite screenshot/page source/console in results; 3 attachments; not allure generate on wall (#2 18.568s npm ci+post); Checkout skipped; Test 5.224s; gradle --rerun; not #14 none 4.216s; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/28/"
+            "wall_time_s": 4.69,
+            "note": "job #32 SUCCESS UserIdCause; Allure lite screenshot/page source/console in results; 3 attachments; no allure generate on wall (wfapi: Checkout 0.064s + Test 4.300s, no Post); not #2 18.568s; not #14 none 4.216s; not video/VNC/HAR",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/32/"
         },
         {
             "language": "java",
@@ -367,7 +367,7 @@
                 "har": "bodies"
             },
             "wall_time_s": 25.884,
-            "note": "video+VNC+HAR+screenshot+page source+console \u2192 cold docker; job #3 SUCCESS; Allure 3",
+            "note": "video+VNC+HAR+screenshot+page source+console → cold docker; job #3 SUCCESS; Allure 3",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool-full-attachments/"
         },
         {
@@ -643,7 +643,7 @@
                 "har": "bodies"
             },
             "wall_time_s": 4.227,
-            "note": "video+VNC+HAR+screenshot+page source+console \u2192 PW WS cold docker; job #3 SUCCESS; Allure 3",
+            "note": "video+VNC+HAR+screenshot+page source+console → PW WS cold docker; job #3 SUCCESS; Allure 3",
             "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool-full-attachments/"
         },
         {
@@ -858,7 +858,7 @@
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
-                "note": "placeholder \u2014 fill after first measured run"
+                "note": "placeholder — fill after first measured run"
             },
             "wall_time_s": null,
             "session_create_p50_ms": null,
@@ -873,7 +873,7 @@
             "artifacts_total_kb": 0,
             "passed": null,
             "failed": null,
-            "note": "scale\u00d7parallel cell: few \u00d75, artifacts off"
+            "note": "scale×parallel cell: few ×5, artifacts off"
         },
         {
             "id": "scale-go-pw-warm-1-p1-none",
@@ -1132,7 +1132,7 @@
             "artifacts_total_kb": 0,
             "passed": null,
             "failed": null,
-            "note": "warm-pool delta vs cold few\u00d75"
+            "note": "warm-pool delta vs cold few×5"
         },
         {
             "id": "art-go-wd-warm-1-p1-none",
