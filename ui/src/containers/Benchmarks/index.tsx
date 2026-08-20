@@ -458,7 +458,7 @@ function ProtocolImageTable({ runs }: { runs: PerfRun[] }) {
 function ArtifactsCostTable({ runs }: { runs: PerfRun[] }) {
     const base = runs.filter(
         (r) =>
-            r.language === "go" &&
+            r.language === "java" &&
             r.protocol === "webdriver" &&
             r.image_flavor === "warm" &&
             r.pool === "cold" &&
@@ -492,7 +492,11 @@ function ArtifactsCostTable({ runs }: { runs: PerfRun[] }) {
                                 ? Math.round((run.wall_time_s - noneWall) * 100) / 100
                                 : null;
                         return (
-                            <tr key={preset.key} data-status={run?.status ?? "pending"}>
+                            <tr
+                                key={preset.key}
+                                data-preset={preset.key}
+                                data-status={run?.status ?? "pending"}
+                            >
                                 <td>{preset.label}</td>
                                 <td>{fmt(run?.wall_time_s ?? null)}</td>
                                 <td>{preset.key === "none" ? "0" : fmt(delta)}</td>
@@ -769,7 +773,8 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
             <section className="benchmarks__section">
                 <h2>4. Artifacts cost</h2>
                 <p className="benchmarks__hint">
-                    Fixed: go · webdriver · warm · cold · suite=1 · parallel=1. Weights in KB.
+                    Fixed: java · webdriver · warm · cold · suite=1 · parallel=1. Weights in KB.
+                    Filled rows from Jenkins cold none / cold full; other combos pending.
                 </p>
                 <ArtifactsCostTable runs={filtered} />
             </section>

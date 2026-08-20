@@ -130,6 +130,19 @@ describe("Benchmarks", () => {
         expect(screen.getByTestId("benchmarks-artifacts")).toBeInTheDocument();
     });
 
+    it("fills Artifacts cost from Java cold pins, not go", () => {
+        render(<Benchmarks />);
+        const table = screen.getByTestId("benchmarks-artifacts");
+        const none = table.querySelector('[data-preset="none"]');
+        const full = table.querySelector('[data-preset="video+log+har-bodies"]');
+        expect(none).toHaveAttribute("data-status", "ok");
+        expect(none).toHaveTextContent("3.279");
+        expect(full).toHaveAttribute("data-status", "ok");
+        expect(full).toHaveTextContent("6.747");
+        expect(full).toHaveTextContent("165");
+        expect(screen.getByText(/Fixed: java · webdriver/)).toBeInTheDocument();
+    });
+
     it("renders warm isolation one-option table", () => {
         render(<Benchmarks data={fixture} />);
 
