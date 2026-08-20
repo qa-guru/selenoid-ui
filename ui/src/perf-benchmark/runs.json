@@ -149,7 +149,7 @@
             "browser": "chrome/149.0",
             "versions": {
                 "hub": "3.0.13",
-                "ui": "3.0.38",
+                "ui": "3.0.46",
                 "cm": "3.0.3",
                 "browser_image": "149"
             },
@@ -174,7 +174,7 @@
             "failed": 0,
             "id": "jenkins-java-wd-warm-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-17T04:28:45Z",
+            "measured_at": "2026-08-20T17:58:20Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -182,9 +182,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 4.578,
-            "note": "job #8 SUCCESS; Allure lite screenshot/page source/console in results; 3 attachments; not allure generate on wall (#2 18.568s npm ci+post); not #14 none 4.216s; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/12/"
+            "wall_time_s": 5.616,
+            "note": "job #28 SUCCESS UserIdCause; Allure lite screenshot/page source/console in results; 3 attachments; not allure generate on wall (#2 18.568s npm ci+post); Checkout skipped; Test 5.224s; gradle --rerun; not #14 none 4.216s; not video/VNC/HAR",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/28/"
         },
         {
             "language": "java",

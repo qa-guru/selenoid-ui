@@ -245,13 +245,13 @@ describe("Benchmarks", () => {
         expect(lite).toHaveAttribute("data-variant", "allure-lite");
         expect(heavy).toHaveTextContent("allure-heavy");
         expect(lite).toHaveTextContent("allure-lite");
-        expect(lite).toHaveTextContent("4.578");
+        expect(lite).toHaveTextContent("5.616");
         const warmLitePin = within(table).getByRole("link", {
-            name: /^warm-pool-full-attachments #12$/,
+            name: /^warm-pool-full-attachments #28$/,
         });
         expect(warmLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/12/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/28/"
         );
         expect(table.querySelectorAll("tbody tr")).toHaveLength(18);
     });
