@@ -458,6 +458,7 @@ function ProtocolImageTable({ runs }: { runs: PerfRun[] }) {
 function ArtifactsCostTable({ runs }: { runs: PerfRun[] }) {
     const base = runs.filter(
         (r) =>
+            r.id.startsWith("art-java-") &&
             r.language === "java" &&
             r.protocol === "webdriver" &&
             r.image_flavor === "warm" &&
@@ -774,7 +775,8 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                 <h2>4. Artifacts cost</h2>
                 <p className="benchmarks__hint">
                     Fixed: java · webdriver · warm · cold · suite=1 · parallel=1. Weights in KB.
-                    Filled rows from Jenkins cold none / cold full; other combos pending.
+                    One-shot gradlew (not Jenkins job wall). Java HAR = CDP meta;{" "}
+                    <code>har bodies</code> rows mirror meta until response-body capture exists.
                 </p>
                 <ArtifactsCostTable runs={filtered} />
             </section>
