@@ -365,9 +365,16 @@ var Input = forwardRef(function Input2({ className, ...rest }, ref) {
   return /* @__PURE__ */ jsx9("input", { ref, className: cn("input", className), ...rest });
 });
 
+// src/Textarea.tsx
+import { forwardRef as forwardRef2 } from "react";
+import { jsx as jsx10 } from "react/jsx-runtime";
+var Textarea = forwardRef2(function Textarea2({ className, ...rest }, ref) {
+  return /* @__PURE__ */ jsx10("textarea", { ref, className: cn("textarea", className), ...rest });
+});
+
 // src/Panel.tsx
 import { useLayoutEffect, useRef as useRef2 } from "react";
-import { jsx as jsx10, jsxs as jsxs5 } from "react/jsx-runtime";
+import { jsx as jsx11, jsxs as jsxs5 } from "react/jsx-runtime";
 var WRAP = "panel__bar--wrap";
 var WRAP_META = "panel__bar--wrap-meta";
 var SLACK_ENTER = 1;
@@ -487,19 +494,19 @@ function Panel({
       children: [
         /* @__PURE__ */ jsxs5("div", { className: "panel__bar", ref: barRef, children: [
           /* @__PURE__ */ jsxs5("div", { className: "panel__dots", "aria-hidden": "true", children: [
-            /* @__PURE__ */ jsx10("span", { className: "panel__dot" }),
-            /* @__PURE__ */ jsx10("span", { className: "panel__dot" }),
-            /* @__PURE__ */ jsx10("span", { className: "panel__dot" })
+            /* @__PURE__ */ jsx11("span", { className: "panel__dot" }),
+            /* @__PURE__ */ jsx11("span", { className: "panel__dot" }),
+            /* @__PURE__ */ jsx11("span", { className: "panel__dot" })
           ] }),
           /* @__PURE__ */ jsxs5("div", { className: "panel__trail", children: [
-            title != null && title !== "" ? /* @__PURE__ */ jsx10("span", { className: "panel__title", "data-testid": titleTestId, children: title }) : null,
+            title != null && title !== "" ? /* @__PURE__ */ jsx11("span", { className: "panel__title", "data-testid": titleTestId, children: title }) : null,
             trail
           ] }),
-          barEnd != null ? /* @__PURE__ */ jsx10("div", { className: "panel__bar-end", children: barEnd }) : null,
-          hasActions ? /* @__PURE__ */ jsx10("div", { className: "panel__actions", children: actions.map((action, index) => {
+          barEnd != null ? /* @__PURE__ */ jsx11("div", { className: "panel__bar-end", children: barEnd }) : null,
+          hasActions ? /* @__PURE__ */ jsx11("div", { className: "panel__actions", children: actions.map((action, index) => {
             const ActionTag = action.as ?? "button";
             const isButton = ActionTag === "button";
-            return /* @__PURE__ */ jsx10(
+            return /* @__PURE__ */ jsx11(
               ActionTag,
               {
                 ...isButton ? { type: "button", disabled: action.disabled } : { href: action.href, to: action.to },
@@ -508,21 +515,21 @@ function Panel({
                 title: action.label,
                 "data-testid": action["data-testid"],
                 onClick: action.onClick,
-                children: /* @__PURE__ */ jsx10("span", { className: "icon", "aria-hidden": "true", children: action.icon })
+                children: /* @__PURE__ */ jsx11("span", { className: "icon", "aria-hidden": "true", children: action.icon })
               },
               action["data-testid"] ?? `${action.label}-${index}`
             );
           }) }) : null
         ] }),
-        /* @__PURE__ */ jsx10("div", { className: cn("panel__body", bodyClassName), children }),
-        foot != null ? /* @__PURE__ */ jsx10("div", { className: "panel__foot", children: foot }) : null
+        /* @__PURE__ */ jsx11("div", { className: cn("panel__body", bodyClassName), children }),
+        foot != null ? /* @__PURE__ */ jsx11("div", { className: "panel__foot", children: foot }) : null
       ]
     }
   );
 }
 
 // src/PlaqueField.tsx
-import { jsx as jsx11, jsxs as jsxs6 } from "react/jsx-runtime";
+import { jsx as jsx12, jsxs as jsxs6 } from "react/jsx-runtime";
 var PARAM_AUTOCOMPLETE = {
   authUser: "username",
   authPass: "current-password"
@@ -552,6 +559,10 @@ function PlaqueField({
   id,
   name,
   autoComplete,
+  multiline = false,
+  rows = 3,
+  onChange,
+  type,
   ...inputProps
 }) {
   const labelClass = labelVariant === "param" ? "plaque-field__label" : "plaque-field__text";
@@ -573,16 +584,29 @@ function PlaqueField({
       ),
       "data-param-id": paramId,
       children: [
-        /* @__PURE__ */ jsx11("span", { className: labelClass, title: labelVariant === "param" ? label : void 0, children: label }),
-        divided ? /* @__PURE__ */ jsx11("span", { className: "plaque-divider", "aria-hidden": "true" }) : null,
-        /* @__PURE__ */ jsx11(
-          Input,
+        /* @__PURE__ */ jsx12("span", { className: labelClass, title: labelVariant === "param" ? label : void 0, children: label }),
+        divided ? /* @__PURE__ */ jsx12("span", { className: "plaque-divider", "aria-hidden": "true" }) : null,
+        multiline ? /* @__PURE__ */ jsx12(
+          Textarea,
           {
             className: "plaque-field__control",
             ...inputProps,
             id: controlId,
             name: controlName,
-            autoComplete: resolvedAutoComplete
+            rows,
+            autoComplete: resolvedAutoComplete,
+            onChange
+          }
+        ) : /* @__PURE__ */ jsx12(
+          Input,
+          {
+            className: "plaque-field__control",
+            ...inputProps,
+            type,
+            id: controlId,
+            name: controlName,
+            autoComplete: resolvedAutoComplete,
+            onChange
           }
         )
       ]
@@ -591,7 +615,7 @@ function PlaqueField({
 }
 
 // src/PlaqueSelect.tsx
-import { jsx as jsx12, jsxs as jsxs7 } from "react/jsx-runtime";
+import { jsx as jsx13, jsxs as jsxs7 } from "react/jsx-runtime";
 function PlaqueSelect({
   label,
   value,
@@ -623,9 +647,9 @@ function PlaqueSelect({
       "data-param-id": paramId,
       "data-testid": testId,
       children: [
-        /* @__PURE__ */ jsx12("span", { className: "plaque-field__label", title: label, children: label }),
-        /* @__PURE__ */ jsx12("span", { className: "plaque-divider", "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx12(
+        /* @__PURE__ */ jsx13("span", { className: "plaque-field__label", title: label, children: label }),
+        /* @__PURE__ */ jsx13("span", { className: "plaque-divider", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx13(
           "select",
           {
             className: "plaque-field__control",
@@ -637,7 +661,7 @@ function PlaqueSelect({
             id: controlId,
             name: controlName,
             autoComplete: paramId ? "off" : void 0,
-            children: options.map((option) => /* @__PURE__ */ jsx12("option", { value: option.value, children: option.label ?? option.value }, option.value))
+            children: options.map((option) => /* @__PURE__ */ jsx13("option", { value: option.value, children: option.label ?? option.value }, option.value))
           }
         )
       ]
@@ -647,7 +671,7 @@ function PlaqueSelect({
 
 // src/PlaqueFieldSeg.tsx
 import { useState as useState3 } from "react";
-import { jsx as jsx13, jsxs as jsxs8 } from "react/jsx-runtime";
+import { jsx as jsx14, jsxs as jsxs8 } from "react/jsx-runtime";
 var DEFAULT_OPTIONS = [
   { value: "true" },
   { value: "false" }
@@ -681,11 +705,11 @@ function PlaqueFieldSeg({
       "data-param-id": paramId,
       "data-testid": testId,
       children: [
-        /* @__PURE__ */ jsx13("span", { className: "plaque-field__label", title: label, children: label }),
-        /* @__PURE__ */ jsx13("span", { className: "plaque-divider", "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx13("div", { className: "plaque-field-seg-track plaque-field-seg-track--many plaque-field__control", children: /* @__PURE__ */ jsx13("div", { className: "plaque-field-seg", role: "radiogroup", "aria-label": ariaLabel ?? label, children: options.map((option) => {
+        /* @__PURE__ */ jsx14("span", { className: "plaque-field__label", title: label, children: label }),
+        /* @__PURE__ */ jsx14("span", { className: "plaque-divider", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx14("div", { className: "plaque-field-seg-track plaque-field-seg-track--many plaque-field__control", children: /* @__PURE__ */ jsx14("div", { className: "plaque-field-seg", role: "radiogroup", "aria-label": ariaLabel ?? label, children: options.map((option) => {
           const on = option.value === selected;
-          return /* @__PURE__ */ jsx13(
+          return /* @__PURE__ */ jsx14(
             "button",
             {
               type: "button",
@@ -705,7 +729,7 @@ function PlaqueFieldSeg({
 }
 
 // src/PlaqueTagstrip.tsx
-import { jsx as jsx14, jsxs as jsxs9 } from "react/jsx-runtime";
+import { jsx as jsx15, jsxs as jsxs9 } from "react/jsx-runtime";
 function PlaqueTagstrip({
   label,
   options,
@@ -723,11 +747,11 @@ function PlaqueTagstrip({
       "data-param-id": paramId,
       "data-testid": testId,
       children: [
-        /* @__PURE__ */ jsx14("span", { className: "plaque-field__label", title: label, children: label }),
-        /* @__PURE__ */ jsx14("span", { className: "plaque-divider", "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx14("div", { className: "plaque-field-seg-track plaque-field-seg-track--many plaque-field__control", children: /* @__PURE__ */ jsx14("div", { className: "plaque-field-seg", role: "group", "aria-label": ariaLabel ?? label, children: options.map((option) => {
+        /* @__PURE__ */ jsx15("span", { className: "plaque-field__label", title: label, children: label }),
+        /* @__PURE__ */ jsx15("span", { className: "plaque-divider", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx15("div", { className: "plaque-field-seg-track plaque-field-seg-track--many plaque-field__control", children: /* @__PURE__ */ jsx15("div", { className: "plaque-field-seg", role: "group", "aria-label": ariaLabel ?? label, children: options.map((option) => {
           const on = values.includes(option.value);
-          return /* @__PURE__ */ jsx14(
+          return /* @__PURE__ */ jsx15(
             "button",
             {
               type: "button",
@@ -775,7 +799,7 @@ function usePlaqueFieldMagnet({
 }
 
 // src/PlaqueFieldSegGrid.tsx
-import { jsx as jsx15 } from "react/jsx-runtime";
+import { jsx as jsx16 } from "react/jsx-runtime";
 function PlaqueFieldSegGrid({
   children,
   pair = false,
@@ -793,9 +817,9 @@ function PlaqueFieldSegGrid({
   });
   const cells = wrapCells ? Children.map(
     children,
-    (child, index) => isValidElement(child) ? /* @__PURE__ */ jsx15("div", { className: "plaque-field-grid__cell", children: child }, child.key ?? index) : child
+    (child, index) => isValidElement(child) ? /* @__PURE__ */ jsx16("div", { className: "plaque-field-grid__cell", children: child }, child.key ?? index) : child
   ) : children;
-  return /* @__PURE__ */ jsx15(
+  return /* @__PURE__ */ jsx16(
     "div",
     {
       className: cn(
@@ -814,7 +838,7 @@ function PlaqueFieldSegGrid({
 
 // src/PlaqueFieldGrid.tsx
 import { Children as Children2, isValidElement as isValidElement2 } from "react";
-import { jsx as jsx16 } from "react/jsx-runtime";
+import { jsx as jsx17 } from "react/jsx-runtime";
 function PlaqueFieldGrid({
   children,
   layout = "duo",
@@ -834,9 +858,9 @@ function PlaqueFieldGrid({
   const cellClass = cn("plaque-field-grid__cell", cellSpan && `plaque-field-grid__cell--${cellSpan}`);
   const cells = wrapCells ? Children2.map(
     children,
-    (child, index) => isValidElement2(child) ? /* @__PURE__ */ jsx16("div", { className: cellClass, children: child }, child.key ?? index) : child
+    (child, index) => isValidElement2(child) ? /* @__PURE__ */ jsx17("div", { className: cellClass, children: child }, child.key ?? index) : child
   ) : children;
-  const grid = /* @__PURE__ */ jsx16(
+  const grid = /* @__PURE__ */ jsx17(
     "div",
     {
       className: cn(
@@ -852,7 +876,7 @@ function PlaqueFieldGrid({
     }
   );
   if (stackMagnet) {
-    return /* @__PURE__ */ jsx16("div", { className: "plaque-field-grid-stack plaque-field-grid-stack--magnet", children: grid });
+    return /* @__PURE__ */ jsx17("div", { className: "plaque-field-grid-stack plaque-field-grid-stack--magnet", children: grid });
   }
   return grid;
 }
@@ -861,26 +885,26 @@ function PlaqueFieldGrid({
 import { useCallback as useCallback3, useEffect as useEffect4, useState as useState4 } from "react";
 
 // src/theme-icons.tsx
-import { jsx as jsx17, jsxs as jsxs10 } from "react/jsx-runtime";
+import { jsx as jsx18, jsxs as jsxs10 } from "react/jsx-runtime";
 function ThemeIconSun() {
   return /* @__PURE__ */ jsxs10("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", children: [
-    /* @__PURE__ */ jsx17("circle", { cx: "12", cy: "12", r: "4" }),
-    /* @__PURE__ */ jsx17("path", { d: "M12 2v2" }),
-    /* @__PURE__ */ jsx17("path", { d: "M12 20v2" }),
-    /* @__PURE__ */ jsx17("path", { d: "M4.93 4.93l1.41 1.41" }),
-    /* @__PURE__ */ jsx17("path", { d: "M17.66 17.66l1.41 1.41" }),
-    /* @__PURE__ */ jsx17("path", { d: "M2 12h2" }),
-    /* @__PURE__ */ jsx17("path", { d: "M20 12h2" }),
-    /* @__PURE__ */ jsx17("path", { d: "M4.93 19.07l1.41-1.41" }),
-    /* @__PURE__ */ jsx17("path", { d: "M17.66 6.34l1.41-1.41" })
+    /* @__PURE__ */ jsx18("circle", { cx: "12", cy: "12", r: "4" }),
+    /* @__PURE__ */ jsx18("path", { d: "M12 2v2" }),
+    /* @__PURE__ */ jsx18("path", { d: "M12 20v2" }),
+    /* @__PURE__ */ jsx18("path", { d: "M4.93 4.93l1.41 1.41" }),
+    /* @__PURE__ */ jsx18("path", { d: "M17.66 17.66l1.41 1.41" }),
+    /* @__PURE__ */ jsx18("path", { d: "M2 12h2" }),
+    /* @__PURE__ */ jsx18("path", { d: "M20 12h2" }),
+    /* @__PURE__ */ jsx18("path", { d: "M4.93 19.07l1.41-1.41" }),
+    /* @__PURE__ */ jsx18("path", { d: "M17.66 6.34l1.41-1.41" })
   ] });
 }
 function ThemeIconMoon() {
-  return /* @__PURE__ */ jsx17("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx17("path", { d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" }) });
+  return /* @__PURE__ */ jsx18("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx18("path", { d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" }) });
 }
 
 // src/ThemeToggle.tsx
-import { jsx as jsx18 } from "react/jsx-runtime";
+import { jsx as jsx19 } from "react/jsx-runtime";
 function readTheme(storageKey) {
   if (typeof document === "undefined") {
     return "dark";
@@ -908,7 +932,7 @@ function ThemeToggle({
     setTheme((current) => current === "light" ? "dark" : "light");
   }, []);
   const isLight = theme === "light";
-  return /* @__PURE__ */ jsx18(
+  return /* @__PURE__ */ jsx19(
     "button",
     {
       type: "button",
@@ -916,13 +940,13 @@ function ThemeToggle({
       "data-testid": testId,
       "aria-label": isLight ? "Switch to dark theme" : "Switch to light theme",
       onClick: toggle,
-      children: /* @__PURE__ */ jsx18("span", { className: "icon", "aria-hidden": "true", children: isLight ? /* @__PURE__ */ jsx18(ThemeIconSun, {}) : /* @__PURE__ */ jsx18(ThemeIconMoon, {}) })
+      children: /* @__PURE__ */ jsx19("span", { className: "icon", "aria-hidden": "true", children: isLight ? /* @__PURE__ */ jsx19(ThemeIconSun, {}) : /* @__PURE__ */ jsx19(ThemeIconMoon, {}) })
     }
   );
 }
 
 // src/panel-icons.tsx
-import { jsx as jsx19, jsxs as jsxs11 } from "react/jsx-runtime";
+import { jsx as jsx20, jsxs as jsxs11 } from "react/jsx-runtime";
 function IconReset() {
   return /* @__PURE__ */ jsxs11(
     "svg",
@@ -934,16 +958,16 @@ function IconReset() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx19("path", { d: "M2.5 8a5.5 5.5 0 1 0 5.5-5.5 6 6 0 0 0-4.1 1.83L2.5 3.5" }),
-        /* @__PURE__ */ jsx19("path", { d: "M2.5 2.5v3h3" })
+        /* @__PURE__ */ jsx20("path", { d: "M2.5 8a5.5 5.5 0 1 0 5.5-5.5 6 6 0 0 0-4.1 1.83L2.5 3.5" }),
+        /* @__PURE__ */ jsx20("path", { d: "M2.5 2.5v3h3" })
       ]
     }
   );
 }
 function IconCopy() {
   return /* @__PURE__ */ jsxs11("svg", { viewBox: "0 0 16 16", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
-    /* @__PURE__ */ jsx19("rect", { x: "5", y: "5", width: "8", height: "9", rx: "1.5", stroke: "currentColor", strokeWidth: "1.5" }),
-    /* @__PURE__ */ jsx19(
+    /* @__PURE__ */ jsx20("rect", { x: "5", y: "5", width: "8", height: "9", rx: "1.5", stroke: "currentColor", strokeWidth: "1.5" }),
+    /* @__PURE__ */ jsx20(
       "path",
       {
         d: "M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1",
@@ -965,16 +989,16 @@ function IconDownload() {
       strokeLinejoin: "round",
       xmlns: "http://www.w3.org/2000/svg",
       children: [
-        /* @__PURE__ */ jsx19("path", { d: "M8 2.5v7" }),
-        /* @__PURE__ */ jsx19("path", { d: "m5.25 7 2.75 2.75L10.75 7" }),
-        /* @__PURE__ */ jsx19("path", { d: "M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" })
+        /* @__PURE__ */ jsx20("path", { d: "M8 2.5v7" }),
+        /* @__PURE__ */ jsx20("path", { d: "m5.25 7 2.75 2.75L10.75 7" }),
+        /* @__PURE__ */ jsx20("path", { d: "M3 11v1.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V11" })
       ]
     }
   );
 }
 
 // src/WindowControl.tsx
-import { jsx as jsx20 } from "react/jsx-runtime";
+import { jsx as jsx21 } from "react/jsx-runtime";
 function WindowControl({
   as,
   tone = "neutral",
@@ -985,7 +1009,7 @@ function WindowControl({
 }) {
   const Component = as ?? "button";
   const buttonType = Component === "button" ? { type: "button" } : {};
-  return /* @__PURE__ */ jsx20(
+  return /* @__PURE__ */ jsx21(
     Component,
     {
       ...buttonType,
@@ -996,18 +1020,18 @@ function WindowControl({
         className
       ),
       ...rest,
-      children: /* @__PURE__ */ jsx20("span", { className: "icon", "aria-hidden": "true", children })
+      children: /* @__PURE__ */ jsx21("span", { className: "icon", "aria-hidden": "true", children })
     }
   );
 }
 
 // src/vnc-icons.tsx
-import { Fragment, jsx as jsx21, jsxs as jsxs12 } from "react/jsx-runtime";
+import { Fragment, jsx as jsx22, jsxs as jsxs12 } from "react/jsx-runtime";
 function IconClose() {
-  return /* @__PURE__ */ jsx21("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx21("path", { d: "m4 4 8 8M12 4l-8 8" }) });
+  return /* @__PURE__ */ jsx22("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx22("path", { d: "m4 4 8 8M12 4l-8 8" }) });
 }
 function IconStop() {
-  return /* @__PURE__ */ jsx21(
+  return /* @__PURE__ */ jsx22(
     "svg",
     {
       viewBox: "0 0 16 16",
@@ -1016,7 +1040,7 @@ function IconStop() {
       strokeWidth: "1.5",
       strokeLinecap: "round",
       strokeLinejoin: "round",
-      children: /* @__PURE__ */ jsx21("rect", { x: "4.5", y: "4.5", width: "7", height: "7", rx: "1.25" })
+      children: /* @__PURE__ */ jsx22("rect", { x: "4.5", y: "4.5", width: "7", height: "7", rx: "1.25" })
     }
   );
 }
@@ -1031,10 +1055,10 @@ function IconTrash() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("path", { d: "M2.5 4.5h11" }),
-        /* @__PURE__ */ jsx21("path", { d: "M6 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" }),
-        /* @__PURE__ */ jsx21("path", { d: "M4.5 4.5l.7 8a1.5 1.5 0 0 0 1.5 1.3h3.6a1.5 1.5 0 0 0 1.5-1.3l.7-8" }),
-        /* @__PURE__ */ jsx21("path", { d: "M6.5 7v4M9.5 7v4" })
+        /* @__PURE__ */ jsx22("path", { d: "M2.5 4.5h11" }),
+        /* @__PURE__ */ jsx22("path", { d: "M6 4.5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" }),
+        /* @__PURE__ */ jsx22("path", { d: "M4.5 4.5l.7 8a1.5 1.5 0 0 0 1.5 1.3h3.6a1.5 1.5 0 0 0 1.5-1.3l.7-8" }),
+        /* @__PURE__ */ jsx22("path", { d: "M6.5 7v4M9.5 7v4" })
       ]
     }
   );
@@ -1050,14 +1074,14 @@ function IconDocumentRemove() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("path", { d: "M4 2.5h5l3 3v8H4z" }),
-        /* @__PURE__ */ jsx21("path", { d: "M9 2.5v3h3M6 10h4" })
+        /* @__PURE__ */ jsx22("path", { d: "M4 2.5h5l3 3v8H4z" }),
+        /* @__PURE__ */ jsx22("path", { d: "M9 2.5v3h3M6 10h4" })
       ]
     }
   );
 }
 function IconDotsHorizontal() {
-  return /* @__PURE__ */ jsx21("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx21("path", { d: "M3 8h.01M8 8h.01M13 8h.01" }) });
+  return /* @__PURE__ */ jsx22("svg", { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", children: /* @__PURE__ */ jsx22("path", { d: "M3 8h.01M8 8h.01M13 8h.01" }) });
 }
 function IconLock() {
   return /* @__PURE__ */ jsxs12(
@@ -1070,8 +1094,8 @@ function IconLock() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("rect", { x: "3.5", y: "7", width: "9", height: "6.5", rx: "1.5" }),
-        /* @__PURE__ */ jsx21("path", { d: "M5.5 7V5a2.5 2.5 0 0 1 5 0v2" })
+        /* @__PURE__ */ jsx22("rect", { x: "3.5", y: "7", width: "9", height: "6.5", rx: "1.5" }),
+        /* @__PURE__ */ jsx22("path", { d: "M5.5 7V5a2.5 2.5 0 0 1 5 0v2" })
       ]
     }
   );
@@ -1087,14 +1111,14 @@ function IconUnlock() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("rect", { x: "3.5", y: "7", width: "9", height: "6.5", rx: "1.5" }),
-        /* @__PURE__ */ jsx21("path", { d: "M10.5 7V5a2.5 2.5 0 0 0-4.75-1.1" })
+        /* @__PURE__ */ jsx22("rect", { x: "3.5", y: "7", width: "9", height: "6.5", rx: "1.5" }),
+        /* @__PURE__ */ jsx22("path", { d: "M10.5 7V5a2.5 2.5 0 0 0-4.75-1.1" })
       ]
     }
   );
 }
 function IconChevronUp() {
-  return /* @__PURE__ */ jsx21(
+  return /* @__PURE__ */ jsx22(
     "svg",
     {
       viewBox: "0 0 16 16",
@@ -1103,12 +1127,12 @@ function IconChevronUp() {
       strokeWidth: "1.5",
       strokeLinecap: "round",
       strokeLinejoin: "round",
-      children: /* @__PURE__ */ jsx21("path", { d: "m4 10 4-4 4 4" })
+      children: /* @__PURE__ */ jsx22("path", { d: "m4 10 4-4 4 4" })
     }
   );
 }
 function IconChevronDown() {
-  return /* @__PURE__ */ jsx21(
+  return /* @__PURE__ */ jsx22(
     "svg",
     {
       viewBox: "0 0 16 16",
@@ -1117,7 +1141,7 @@ function IconChevronDown() {
       strokeWidth: "1.5",
       strokeLinecap: "round",
       strokeLinejoin: "round",
-      children: /* @__PURE__ */ jsx21("path", { d: "m4 6 4 4 4-4" })
+      children: /* @__PURE__ */ jsx22("path", { d: "m4 6 4 4 4-4" })
     }
   );
 }
@@ -1132,10 +1156,10 @@ function IconFullscreen() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("path", { d: "M3 6.25V3h3.25" }),
-        /* @__PURE__ */ jsx21("path", { d: "M13 6.25V3h-3.25" }),
-        /* @__PURE__ */ jsx21("path", { d: "M3 9.75V13h3.25" }),
-        /* @__PURE__ */ jsx21("path", { d: "M13 9.75V13h-3.25" })
+        /* @__PURE__ */ jsx22("path", { d: "M3 6.25V3h3.25" }),
+        /* @__PURE__ */ jsx22("path", { d: "M13 6.25V3h-3.25" }),
+        /* @__PURE__ */ jsx22("path", { d: "M3 9.75V13h3.25" }),
+        /* @__PURE__ */ jsx22("path", { d: "M13 9.75V13h-3.25" })
       ]
     }
   );
@@ -1151,18 +1175,18 @@ function IconFullscreenExit() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("path", { d: "M6.25 3v3.25H3" }),
-        /* @__PURE__ */ jsx21("path", { d: "M9.75 3v3.25H13" }),
-        /* @__PURE__ */ jsx21("path", { d: "M6.25 13v-3.25H3" }),
-        /* @__PURE__ */ jsx21("path", { d: "M9.75 13v-3.25H13" })
+        /* @__PURE__ */ jsx22("path", { d: "M6.25 3v3.25H3" }),
+        /* @__PURE__ */ jsx22("path", { d: "M9.75 3v3.25H13" }),
+        /* @__PURE__ */ jsx22("path", { d: "M6.25 13v-3.25H3" }),
+        /* @__PURE__ */ jsx22("path", { d: "M9.75 13v-3.25H13" })
       ]
     }
   );
 }
 function IconVncCopy() {
   return /* @__PURE__ */ jsxs12("svg", { viewBox: "0 0 16 16", fill: "none", children: [
-    /* @__PURE__ */ jsx21("rect", { x: "5", y: "5", width: "8", height: "9", rx: "1.5", stroke: "currentColor", strokeWidth: "1.5" }),
-    /* @__PURE__ */ jsx21(
+    /* @__PURE__ */ jsx22("rect", { x: "5", y: "5", width: "8", height: "9", rx: "1.5", stroke: "currentColor", strokeWidth: "1.5" }),
+    /* @__PURE__ */ jsx22(
       "path",
       {
         d: "M5 11H4a1.5 1.5 0 0 1-1.5-1.5V4A1.5 1.5 0 0 1 4 2.5h5.5A1.5 1.5 0 0 1 11 4v1",
@@ -1173,8 +1197,8 @@ function IconVncCopy() {
   ] });
 }
 var clipboardSheets = /* @__PURE__ */ jsxs12(Fragment, { children: [
-  /* @__PURE__ */ jsx21("rect", { x: "4", y: "4.5", width: "6.25", height: "8", rx: "1.25", stroke: "currentColor", strokeWidth: "1.5" }),
-  /* @__PURE__ */ jsx21(
+  /* @__PURE__ */ jsx22("rect", { x: "4", y: "4.5", width: "6.25", height: "8", rx: "1.25", stroke: "currentColor", strokeWidth: "1.5" }),
+  /* @__PURE__ */ jsx22(
     "path",
     {
       d: "M4 10.75H3.25A1.25 1.25 0 0 1 2 9.5V3.5A1.25 1.25 0 0 1 3.25 2.25h4.25A1.25 1.25 0 0 1 8.75 3.5V4.5",
@@ -1186,7 +1210,7 @@ var clipboardSheets = /* @__PURE__ */ jsxs12(Fragment, { children: [
 function IconCopyOut() {
   return /* @__PURE__ */ jsxs12("svg", { viewBox: "0 0 16 16", fill: "none", children: [
     clipboardSheets,
-    /* @__PURE__ */ jsx21(
+    /* @__PURE__ */ jsx22(
       "path",
       {
         d: "M11.25 8.5H14.5M13 6.75 14.75 8.5 13 10.25",
@@ -1202,7 +1226,7 @@ function IconCopyOut() {
 function IconCopyIn() {
   return /* @__PURE__ */ jsxs12("svg", { viewBox: "0 0 16 16", fill: "none", children: [
     clipboardSheets,
-    /* @__PURE__ */ jsx21(
+    /* @__PURE__ */ jsx22(
       "path",
       {
         d: "M14.5 8.5H11.25M12.75 6.75 11 8.5 12.75 10.25",
@@ -1226,15 +1250,15 @@ function IconUpload() {
       strokeLinecap: "round",
       strokeLinejoin: "round",
       children: [
-        /* @__PURE__ */ jsx21("path", { d: "M8 10V3m0 0L5.25 5.75M8 3l2.75 2.75" }),
-        /* @__PURE__ */ jsx21("path", { d: "M3 10v2.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V10" })
+        /* @__PURE__ */ jsx22("path", { d: "M8 10V3m0 0L5.25 5.75M8 3l2.75 2.75" }),
+        /* @__PURE__ */ jsx22("path", { d: "M3 10v2.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V10" })
       ]
     }
   );
 }
 
 // src/ConnectionStatus.tsx
-import { jsx as jsx22 } from "react/jsx-runtime";
+import { jsx as jsx23 } from "react/jsx-runtime";
 function ConnectionStatus({
   state,
   className,
@@ -1242,21 +1266,21 @@ function ConnectionStatus({
   "aria-label": ariaLabel,
   ...rest
 }) {
-  const glyph = state === "connected" ? null : state === "disconnected" ? /* @__PURE__ */ jsx22(IconDocumentRemove, {}) : /* @__PURE__ */ jsx22(IconDotsHorizontal, {});
-  return /* @__PURE__ */ jsx22(
+  const glyph = state === "connected" ? null : state === "disconnected" ? /* @__PURE__ */ jsx23(IconDocumentRemove, {}) : /* @__PURE__ */ jsx23(IconDotsHorizontal, {});
+  return /* @__PURE__ */ jsx23(
     "span",
     {
       role,
       "aria-label": ariaLabel ?? `VNC ${state}`,
       className: cn("connection-status", `connection-status--${state}`, className),
       ...rest,
-      children: glyph && /* @__PURE__ */ jsx22("span", { className: "icon", "aria-hidden": "true", children: glyph })
+      children: glyph && /* @__PURE__ */ jsx23("span", { className: "icon", "aria-hidden": "true", children: glyph })
     }
   );
 }
 
 // src/VncWindow.tsx
-import { jsx as jsx23, jsxs as jsxs13 } from "react/jsx-runtime";
+import { jsx as jsx24, jsxs as jsxs13 } from "react/jsx-runtime";
 var defaultLabels = {
   back: "Back",
   lock: "Lock screen",
@@ -1278,7 +1302,7 @@ function VncBarAction({
   testId,
   children
 }) {
-  return /* @__PURE__ */ jsx23(
+  return /* @__PURE__ */ jsx24(
     "button",
     {
       type: "button",
@@ -1287,7 +1311,7 @@ function VncBarAction({
       title: label,
       "data-testid": testId,
       onClick,
-      children: /* @__PURE__ */ jsx23("span", { className: "icon", "aria-hidden": "true", children })
+      children: /* @__PURE__ */ jsx24("span", { className: "icon", "aria-hidden": "true", children })
     }
   );
 }
@@ -1316,9 +1340,9 @@ function VncWindow({
   const aspectStyle = screenSize && screenSize.width > 0 && screenSize.height > 0 ? {
     ["--vnc-aspect"]: `${screenSize.width} / ${screenSize.height}`
   } : void 0;
-  const backControl = back !== void 0 ? back : onBack ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.back, onClick: onBack, children: /* @__PURE__ */ jsx23(IconClose, {}) }) : null;
-  const killControl = kill ?? (onKill ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.kill, sessionControl: true, onClick: onKill, children: /* @__PURE__ */ jsx23(IconTrash, {}) }) : null);
-  return /* @__PURE__ */ jsx23("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: /* @__PURE__ */ jsxs13(
+  const backControl = back !== void 0 ? back : onBack ? /* @__PURE__ */ jsx24(VncBarAction, { label: l.back, onClick: onBack, children: /* @__PURE__ */ jsx24(IconClose, {}) }) : null;
+  const killControl = kill ?? (onKill ? /* @__PURE__ */ jsx24(VncBarAction, { label: l.kill, sessionControl: true, onClick: onKill, children: /* @__PURE__ */ jsx24(IconTrash, {}) }) : null);
+  return /* @__PURE__ */ jsx24("div", { className: cn("vnc-window-frame", fullscreen && "vnc-window-frame--fullscreen"), children: /* @__PURE__ */ jsxs13(
     "div",
     {
       className: cn(
@@ -1338,41 +1362,41 @@ function VncWindow({
       children: [
         /* @__PURE__ */ jsxs13("div", { className: "panel__bar", children: [
           /* @__PURE__ */ jsxs13("div", { className: "panel__dots", "aria-hidden": "true", children: [
-            /* @__PURE__ */ jsx23("span", { className: "panel__dot" }),
-            /* @__PURE__ */ jsx23("span", { className: "panel__dot" }),
-            /* @__PURE__ */ jsx23("span", { className: "panel__dot" })
+            /* @__PURE__ */ jsx24("span", { className: "panel__dot" }),
+            /* @__PURE__ */ jsx24("span", { className: "panel__dot" }),
+            /* @__PURE__ */ jsx24("span", { className: "panel__dot" })
           ] }),
           /* @__PURE__ */ jsxs13("div", { className: "panel__trail", children: [
-            /* @__PURE__ */ jsx23("span", { className: "panel__title vnc-window__title", "data-testid": titleTestId, children: titleText }),
-            state !== "connected" ? /* @__PURE__ */ jsx23("span", { className: "vnc-window__status-label", "aria-hidden": "true", children: state }) : null
+            /* @__PURE__ */ jsx24("span", { className: "panel__title vnc-window__title", "data-testid": titleTestId, children: titleText }),
+            state !== "connected" ? /* @__PURE__ */ jsx24("span", { className: "vnc-window__status-label", "aria-hidden": "true", children: state }) : null
           ] }),
           /* @__PURE__ */ jsxs13("div", { className: "panel__actions vnc-window__actions", children: [
             backControl,
-            /* @__PURE__ */ jsx23(
+            /* @__PURE__ */ jsx24(
               VncBarAction,
               {
                 label: unlocked ? l.lock : l.unlock,
                 sessionControl: true,
                 onClick: onToggleLock,
-                children: unlocked ? /* @__PURE__ */ jsx23(IconUnlock, {}) : /* @__PURE__ */ jsx23(IconLock, {})
+                children: unlocked ? /* @__PURE__ */ jsx24(IconUnlock, {}) : /* @__PURE__ */ jsx24(IconLock, {})
               }
             ),
             killControl,
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx23(IconCopyOut, {}) }),
-            /* @__PURE__ */ jsx23(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx23(IconCopyIn, {}) }),
-            /* @__PURE__ */ jsx23(
+            /* @__PURE__ */ jsx24(VncBarAction, { label: l.copy, sessionControl: true, onClick: onCopy, children: /* @__PURE__ */ jsx24(IconCopyOut, {}) }),
+            /* @__PURE__ */ jsx24(VncBarAction, { label: l.paste, sessionControl: true, onClick: onPaste, children: /* @__PURE__ */ jsx24(IconCopyIn, {}) }),
+            /* @__PURE__ */ jsx24(
               VncBarAction,
               {
                 label: fullscreen ? l.exitFullscreen : l.enterFullscreen,
                 sessionControl: true,
                 onClick: onToggleFullscreen,
-                children: fullscreen ? /* @__PURE__ */ jsx23(IconFullscreenExit, {}) : /* @__PURE__ */ jsx23(IconFullscreen, {})
+                children: fullscreen ? /* @__PURE__ */ jsx24(IconFullscreenExit, {}) : /* @__PURE__ */ jsx24(IconFullscreen, {})
               }
             ),
-            onDownload ? /* @__PURE__ */ jsx23(VncBarAction, { label: l.download, testId: "vnc-window-download", onClick: onDownload, children: /* @__PURE__ */ jsx23(IconDownload, {}) }) : null
+            onDownload ? /* @__PURE__ */ jsx24(VncBarAction, { label: l.download, testId: "vnc-window-download", onClick: onDownload, children: /* @__PURE__ */ jsx24(IconDownload, {}) }) : null
           ] })
         ] }),
-        /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx23("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })
+        /* @__PURE__ */ jsx24("div", { className: "vnc-window__screen", children: /* @__PURE__ */ jsx24("div", { className: "vnc-window__screen-mount", "aria-label": "noVNC mount point", children }) })
       ]
     }
   ) });
@@ -1380,7 +1404,7 @@ function VncWindow({
 
 // src/HarViewer.tsx
 import { Fragment as Fragment2 } from "react";
-import { jsx as jsx24, jsxs as jsxs14 } from "react/jsx-runtime";
+import { jsx as jsx25, jsxs as jsxs14 } from "react/jsx-runtime";
 var HAR_TIMING_KEYS = [
   "blocked",
   "dns",
@@ -1435,10 +1459,10 @@ function headerPairs(headers) {
 function HeaderKv({ title, headers }) {
   const pairs = headerPairs(headers);
   return /* @__PURE__ */ jsxs14("div", { className: "har-section", children: [
-    /* @__PURE__ */ jsx24("div", { className: "har-section__title", children: title }),
-    pairs.length === 0 ? /* @__PURE__ */ jsx24("div", { className: "har-muted", children: "No headers captured." }) : /* @__PURE__ */ jsx24("div", { className: "har-kv", children: pairs.map((h, i) => /* @__PURE__ */ jsxs14(Fragment2, { children: [
-      /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: h.name }),
-      /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: h.value || "\u2014" })
+    /* @__PURE__ */ jsx25("div", { className: "har-section__title", children: title }),
+    pairs.length === 0 ? /* @__PURE__ */ jsx25("div", { className: "har-muted", children: "No headers captured." }) : /* @__PURE__ */ jsx25("div", { className: "har-kv", children: pairs.map((h, i) => /* @__PURE__ */ jsxs14(Fragment2, { children: [
+      /* @__PURE__ */ jsx25("div", { className: "har-kv__k", children: h.name }),
+      /* @__PURE__ */ jsx25("div", { className: "har-kv__v", children: h.value || "\u2014" })
     ] }, `${h.name}-${i}`)) })
   ] });
 }
@@ -1463,7 +1487,7 @@ function EntryDetail({
   const bodyText = typeof content.text === "string" ? content.text : "";
   const bodyNote = bodyText ? bodyText : "Body not captured (meta / headers + size only).";
   return /* @__PURE__ */ jsxs14("div", { className: "har-detail", "data-testid": "session-har-detail", children: [
-    /* @__PURE__ */ jsx24("div", { className: "har-tabs", role: "tablist", "aria-label": "HAR entry details", children: TABS.map((t) => /* @__PURE__ */ jsx24(
+    /* @__PURE__ */ jsx25("div", { className: "har-tabs", role: "tablist", "aria-label": "HAR entry details", children: TABS.map((t) => /* @__PURE__ */ jsx25(
       "button",
       {
         type: "button",
@@ -1480,32 +1504,32 @@ function EntryDetail({
       t.id
     )) }),
     tab === "headers" && /* @__PURE__ */ jsxs14("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-headers", children: [
-      /* @__PURE__ */ jsx24(HeaderKv, { title: "Response Headers", headers: resp.headers }),
-      /* @__PURE__ */ jsx24(HeaderKv, { title: "Request Headers", headers: req.headers })
+      /* @__PURE__ */ jsx25(HeaderKv, { title: "Response Headers", headers: resp.headers }),
+      /* @__PURE__ */ jsx25(HeaderKv, { title: "Request Headers", headers: req.headers })
     ] }),
-    tab === "timings" && /* @__PURE__ */ jsx24("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-timings", children: /* @__PURE__ */ jsxs14("div", { className: "har-kv", children: [
+    tab === "timings" && /* @__PURE__ */ jsx25("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-timings", children: /* @__PURE__ */ jsxs14("div", { className: "har-kv", children: [
       HAR_TIMING_KEYS.map((key) => /* @__PURE__ */ jsxs14(Fragment2, { children: [
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: key }),
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: formatTiming(timings[key]) })
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__k", children: key }),
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__v", children: formatTiming(timings[key]) })
       ] }, key)),
-      /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: "total" }),
-      /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: formatTiming(entry.time) })
+      /* @__PURE__ */ jsx25("div", { className: "har-kv__k", children: "total" }),
+      /* @__PURE__ */ jsx25("div", { className: "har-kv__v", children: formatTiming(entry.time) })
     ] }) }),
     tab === "response" && /* @__PURE__ */ jsxs14("div", { className: "har-tab-panel", role: "tabpanel", "data-testid": "session-har-panel-response", children: [
       /* @__PURE__ */ jsxs14("div", { className: "har-kv", children: [
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: "status" }),
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__k", children: "status" }),
         /* @__PURE__ */ jsxs14("div", { className: "har-kv__v", children: [
           status || "\u2014",
           statusText ? ` ${statusText}` : ""
         ] }),
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: "mimeType" }),
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: mime }),
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__k", children: "size" }),
-        /* @__PURE__ */ jsx24("div", { className: "har-kv__v", children: size })
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__k", children: "mimeType" }),
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__v", children: mime }),
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__k", children: "size" }),
+        /* @__PURE__ */ jsx25("div", { className: "har-kv__v", children: size })
       ] }),
       /* @__PURE__ */ jsxs14("div", { className: "har-section", children: [
-        /* @__PURE__ */ jsx24("div", { className: "har-section__title", children: "Body" }),
-        /* @__PURE__ */ jsx24("pre", { className: bodyText ? "har-body" : "har-body har-muted", children: bodyNote })
+        /* @__PURE__ */ jsx25("div", { className: "har-section__title", children: "Body" }),
+        /* @__PURE__ */ jsx25("pre", { className: bodyText ? "har-body" : "har-body har-muted", children: bodyNote })
       ] })
     ] })
   ] });
@@ -1521,18 +1545,18 @@ function HarViewer({
   testId = "har-viewer"
 }) {
   if (!entries.length) {
-    return /* @__PURE__ */ jsx24("div", { className: cn("har-viewer", className), "data-testid": testId, children: /* @__PURE__ */ jsx24("div", { className: "har-empty", "data-testid": "session-har-empty", children: empty ?? "No network entries." }) });
+    return /* @__PURE__ */ jsx25("div", { className: cn("har-viewer", className), "data-testid": testId, children: /* @__PURE__ */ jsx25("div", { className: "har-empty", "data-testid": "session-har-empty", children: empty ?? "No network entries." }) });
   }
-  return /* @__PURE__ */ jsx24("div", { className: cn("har-viewer", className), "data-testid": testId, children: /* @__PURE__ */ jsx24("div", { className: "har-table-wrap", children: /* @__PURE__ */ jsxs14("table", { className: "har-table", children: [
-    /* @__PURE__ */ jsx24("thead", { children: /* @__PURE__ */ jsxs14("tr", { children: [
-      /* @__PURE__ */ jsx24("th", { children: "Method" }),
-      /* @__PURE__ */ jsx24("th", { children: "Status" }),
-      /* @__PURE__ */ jsx24("th", { children: "URL" }),
-      /* @__PURE__ */ jsx24("th", { children: "Type" }),
-      /* @__PURE__ */ jsx24("th", { children: "Size" }),
-      /* @__PURE__ */ jsx24("th", { children: "Time" })
+  return /* @__PURE__ */ jsx25("div", { className: cn("har-viewer", className), "data-testid": testId, children: /* @__PURE__ */ jsx25("div", { className: "har-table-wrap", children: /* @__PURE__ */ jsxs14("table", { className: "har-table", children: [
+    /* @__PURE__ */ jsx25("thead", { children: /* @__PURE__ */ jsxs14("tr", { children: [
+      /* @__PURE__ */ jsx25("th", { children: "Method" }),
+      /* @__PURE__ */ jsx25("th", { children: "Status" }),
+      /* @__PURE__ */ jsx25("th", { children: "URL" }),
+      /* @__PURE__ */ jsx25("th", { children: "Type" }),
+      /* @__PURE__ */ jsx25("th", { children: "Size" }),
+      /* @__PURE__ */ jsx25("th", { children: "Time" })
     ] }) }),
-    /* @__PURE__ */ jsx24("tbody", { children: entries.map((entry, idx) => {
+    /* @__PURE__ */ jsx25("tbody", { children: entries.map((entry, idx) => {
       const req = entry.request || {};
       const resp = entry.response || {};
       const content = resp.content || {};
@@ -1558,11 +1582,11 @@ function HarViewer({
               }
             },
             children: [
-              /* @__PURE__ */ jsx24("td", { className: "har-method", children: req.method || "" }),
-              /* @__PURE__ */ jsx24("td", { className: harStatusClass(status), children: status || "\u2014" }),
-              /* @__PURE__ */ jsx24("td", { className: "har-url", title: req.url, children: req.url || "" }),
-              /* @__PURE__ */ jsx24("td", { className: "har-mime", children: content.mimeType || "\u2014" }),
-              /* @__PURE__ */ jsx24("td", { children: formatSize(content.size) }),
+              /* @__PURE__ */ jsx25("td", { className: "har-method", children: req.method || "" }),
+              /* @__PURE__ */ jsx25("td", { className: harStatusClass(status), children: status || "\u2014" }),
+              /* @__PURE__ */ jsx25("td", { className: "har-url", title: req.url, children: req.url || "" }),
+              /* @__PURE__ */ jsx25("td", { className: "har-mime", children: content.mimeType || "\u2014" }),
+              /* @__PURE__ */ jsx25("td", { children: formatSize(content.size) }),
               /* @__PURE__ */ jsxs14("td", { children: [
                 Math.round(Number(entry.time) || 0),
                 " ms"
@@ -1570,18 +1594,18 @@ function HarViewer({
             ]
           }
         ),
-        open && /* @__PURE__ */ jsx24(
+        open && /* @__PURE__ */ jsx25(
           "tr",
           {
             id: `har-detail-${idx}`,
             className: "har-detail-row",
             "data-testid": `session-har-detail-row-${idx}`,
-            children: /* @__PURE__ */ jsx24(
+            children: /* @__PURE__ */ jsx25(
               "td",
               {
                 colSpan: 6,
                 onClick: (e) => e.stopPropagation(),
-                children: /* @__PURE__ */ jsx24(
+                children: /* @__PURE__ */ jsx25(
                   EntryDetail,
                   {
                     entry,
@@ -1881,6 +1905,7 @@ export {
   PollToggle,
   SelenoidMetrics,
   StatusTile,
+  Textarea,
   ThemeIconMoon,
   ThemeIconSun,
   ThemeToggle,
