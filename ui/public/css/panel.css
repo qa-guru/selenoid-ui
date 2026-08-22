@@ -19,6 +19,12 @@
   background: var(--panel-bg);
 }
 
+/* Author `display` beats UA `[hidden]` — flex/grid would keep the panel in layout.
+   `!important` also wins later `.panel.panel--foot-rail { display: grid }`. */
+.panel[hidden] {
+  display: none !important;
+}
+
 .panel--terminal {
   --panel-bg: #1a1917;
   --panel-border: rgba(255, 255, 255, 0.08);
