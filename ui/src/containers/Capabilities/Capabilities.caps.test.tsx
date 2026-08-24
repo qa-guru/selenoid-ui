@@ -148,10 +148,10 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.capabilities.alwaysMatch.proxy).toBeUndefined();
         expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
 
-        // Chromium gets --window-size via launch args; window/rect is Firefox-only.
+        // Chromium still gets --window-size; window/rect is required (Xvfb ignores launch args).
         expect(
             fetchMock.mock.calls.some(([url]: any[]) => String(url) === "/wd/hub/session/sess-1/window/rect")
-        ).toBe(false);
+        ).toBe(true);
         expect(body.capabilities.alwaysMatch["goog:chromeOptions"].args).toEqual([
             "--no-sandbox",
             "--disable-dev-shm-usage",

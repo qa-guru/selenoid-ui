@@ -71,14 +71,23 @@ describe("capabilitiesLogic", () => {
                 ],
             },
         });
-        expect(browserWindowOptions("firefox", "1920x1080x24")).toBeNull();
+        expect(browserWindowOptions("firefox", "1920x1080x24")).toEqual({
+            "moz:firefoxOptions": { args: ["--width=1920", "--height=1080"] },
+        });
     });
 
     it("sets window/rect from screenResolution", async () => {
         const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200 });
         await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(true);
-        expect(fetchImpl).toHaveBeenCalledTimes(1);
-        expect(fetchImpl).toHaveBeenCalledWith("/wd/hub/session/sess-1/window/rect", {
+        expect(fetchImpl).toHaveBeenCalledTimes(2);
+        expect(fetchImpl).toHaveBeenNthCalledWith(1, "/wd/hub/session/sess-1/window/maximize", {
+            method: "POST",
+            credentials: "omit",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+            signal: undefined,
+        });
+        expect(fetchImpl).toHaveBeenNthCalledWith(2, "/wd/hub/session/sess-1/window/rect", {
             method: "POST",
             credentials: "omit",
             headers: { "Content-Type": "application/json" },
@@ -116,11 +125,12 @@ describe("capabilitiesLogic", () => {
     it("falls back to window/current/size when rect fails with unsupported status", async () => {
         const fetchImpl = vi
             .fn()
+            .mockResolvedValueOnce({ ok: true, status: 200 })
             .mockResolvedValueOnce({ ok: false, status: 405 })
             .mockResolvedValueOnce({ ok: true, status: 200 });
         await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(true);
         expect(fetchImpl).toHaveBeenNthCalledWith(
-            2,
+            3,
             "/wd/hub/session/sess-1/window/current/size",
             expect.objectContaining({
                 body: JSON.stringify({ width: 1920, height: 1080 }),
@@ -129,9 +139,9 @@ describe("capabilitiesLogic", () => {
     });
 
     it("does not fall back when rect returns invalid session", async () => {
-        const fetchImpl = vi.fn().mockResolvedValueOnce({ ok: false, status: 404 });
+        const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 404 });
         await expect(resizeSessionWindow("sess-1", "1920x1080x24", fetchImpl)).resolves.toBe(false);
-        expect(fetchImpl).toHaveBeenCalledTimes(1);
+        expect(fetchImpl).toHaveBeenCalledTimes(2);
     });
 
     it("skips resize when sessionId or resolution is missing", async () => {

@@ -2571,9 +2571,9 @@ const Launch = ({
                 const sessionId = sessionIdFrom({ response: data });
                 rememberHubAuthToken(wdAuthToken);
                 try {
-                    // Chromium/Edge already get --window-size via browserWindowOptions; only
-                    // POST window/rect for drivers that ignore launch args (e.g. Firefox).
-                    if (!windowOpts && !mobileOpts) {
+                    // --window-size is ignored by Chrome/Edge in Xvfb. Always POST
+                    // window/rect except mobileEmulation (phone-shaped viewport).
+                    if (!mobileOpts) {
                         const resizeController = new AbortController();
                         await Promise.race([
                             resizeSessionWindow(

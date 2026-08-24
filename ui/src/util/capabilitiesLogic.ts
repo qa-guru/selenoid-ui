@@ -136,6 +136,16 @@ export function browserWindowOptions(
     if (name === "msedge" || name === "edge" || name === "microsoftedge") {
         return { "ms:edgeOptions": { args } };
     }
+    if (name === "firefox") {
+        if (!size) {
+            return null;
+        }
+        return {
+            "moz:firefoxOptions": {
+                args: [`--width=${size.width}`, `--height=${size.height}`],
+            },
+        };
+    }
     return null;
 }
 
@@ -176,6 +186,10 @@ export async function resizeSessionWindow(
     if (!sessionId || !size) {
         return false;
     }
+
+    // Firefox often rejects a full-screen window/rect until maximize.
+    // Chrome/Edge in Xvfb ignore --window-size; rect is the real resize.
+    await postSessionCommand(sessionId, "/window/maximize", {}, fetchImpl, authToken, signal);
 
     const rect = await postSessionCommand(
         sessionId,
