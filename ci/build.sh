@@ -22,10 +22,12 @@ if [[ "$statik_size" -lt 100000 ]]; then
   exit 1
 fi
 
-go install github.com/mitchellh/gox@latest
-CGO_ENABLED=0 gox -os "linux darwin windows" -arch "amd64" -osarch="darwin/arm64" -osarch="windows/386" -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X main.buildStamp=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.gitRevision=`git describe --tags || git rev-parse HEAD`"
+GIT_REVISION="${GIT_REVISION:-$(git describe --tags --always --dirty 2>/dev/null || git rev-parse --short HEAD)}"
+BUILD_STAMP="$(date -u '+%Y-%m-%d_%I:%M:%S%p')"
+LDFLAGS="-X main.buildStamp=${BUILD_STAMP} -X main.gitRevision=${GIT_REVISION}"
 
-LDFLAGS="-X main.buildStamp=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.gitRevision=`git describe --tags || git rev-parse HEAD`"
+go install github.com/mitchellh/gox@latest
+CGO_ENABLED=0 gox -os "linux darwin windows" -arch "amd64" -osarch="darwin/arm64" -osarch="windows/386" -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "$LDFLAGS"
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o selenoid-ui -ldflags "$LDFLAGS"
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o health-check healthcheck/main.go
 
