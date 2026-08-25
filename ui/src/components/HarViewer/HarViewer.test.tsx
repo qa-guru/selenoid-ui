@@ -202,6 +202,19 @@ describe("HarViewer", () => {
         expect(fetch).not.toHaveBeenCalled();
     });
 
+    it("starts polling HAR when the live session ends", async () => {
+        const { rerender } = render(
+            <HarViewer session="s1" browser={{ caps: { enableHAR: true } }} sessionAlive />
+        );
+        expect(fetch).not.toHaveBeenCalled();
+
+        rerender(<HarViewer session="s1" browser={{ caps: { enableHAR: true } }} sessionAlive={false} />);
+
+        await waitFor(() => {
+            expect(fetch).toHaveBeenCalledWith("/har/s1.har", { cache: "no-store" });
+        });
+    });
+
     it("renders fixture HAR rows while live when mockEnabled", async () => {
         const user = userEvent.setup();
         render(

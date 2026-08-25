@@ -213,7 +213,7 @@ const HarViewer = ({
             cancelled = true;
             clearInterval(id);
         };
-    }, [enabled, session, poll]);
+    }, [enabled, session, poll, sessionAlive]);
 
     const entries = useMemo(() => {
         const list = har?.log?.entries || [];

@@ -304,6 +304,70 @@ describe("Session detail page", () => {
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
     });
 
+    it("switches live log to the finished log file once the archive has it", async () => {
+        const liveBrowser = {
+            quota: "alice",
+            caps: {
+                browserName: "playwright-chromium",
+                version: "1.61.1",
+                enableLog: true,
+                enableHAR: true,
+                enableVNC: false,
+            },
+        };
+
+        (fetch as any).mockImplementation(async (url: any) => {
+            if (String(url).startsWith("/sessions/?")) {
+                return {
+                    ok: true,
+                    json: async () => ({
+                        sessions: [{ id: "pw-kill-1", log: "pw-kill-1.log", har: "pw-kill-1.har" }],
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                    }),
+                };
+            }
+            if (String(url) === "/logs/pw-kill-1.log") {
+                return { ok: true, text: async () => "playwright server ready\n" };
+            }
+            if (String(url) === "/har/pw-kill-1.har") {
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        log: {
+                            version: "1.2",
+                            creator: { name: "selenoid" },
+                            entries: [],
+                        },
+                    }),
+                };
+            }
+            return { ok: true, json: async () => ({}) };
+        });
+
+        const { rerender } = renderSession({
+            session: "pw-kill-1",
+            browser: liveBrowser,
+        });
+
+        expect(screen.getByTestId("live-log")).toBeInTheDocument();
+
+        rerender(
+            <MemoryRouter>
+                <Session origin="http://localhost" session="pw-kill-1" browser={undefined} />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("playwright server ready");
+        });
+        expect(screen.queryByTestId("live-log")).toBeNull();
+        expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
+        expect(screen.getByText("FINISHED")).toBeInTheDocument();
+    });
+
     it("omits empty video/log placeholders when finished session has only HAR", async () => {
         (fetch as any).mockImplementation(async (url: any) => {
             if (String(url).startsWith("/sessions/?")) {

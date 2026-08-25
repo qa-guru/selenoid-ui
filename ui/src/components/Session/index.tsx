@@ -157,7 +157,8 @@ const Session = ({ origin, session, browser }: any) => {
     const finishedInfo = !hubLive && hasArchive;
     const wasLive = wasLiveRef.current;
     const showSessionInfo = showLive || showMockPreview || (wasLive && !browser) || finishedInfo;
-    const keepLiveLog = wasLive && !hubLive && !showMockPreview && fullscreenSlot !== "vnc";
+    const keepLiveLog =
+        wasLive && !hubLive && !showMockPreview && fullscreenSlot !== "vnc" && !artifacts?.log;
     const displayBrowser = detailsBrowser || endedBrowser || {
         quota: artifacts?.quota || "",
         caps: {
