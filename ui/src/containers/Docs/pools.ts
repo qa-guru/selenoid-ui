@@ -340,7 +340,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             human:
                 "The test job does not touch git. A separate sync job updates the files. If there is no code, the test fails with a hint to run that sync job first.",
             tech:
-                "The test job does not run git ls-remote, fetch, or checkout. If gradlew is missing, the job fails with “run the sync job first”.",
+                "The test job does not run git ls-remote, fetch, or checkout. If GET /health on :17890 fails, the job fails with “run the sync job first”.",
         },
     },
     {
@@ -402,7 +402,7 @@ export const ONE_RUN_ROWS: OneRunRow[] = [
             human:
                 "Mark the slot busy, then tell the running Java process to log in on the Chrome that is already open, then clear the lock.",
             tech:
-                "POST /pool/lease, then ensure.sh reuses the daemon on :17890, then POST /run, then login, then release without killSession or quit. Docker DNS hot-chrome-min-1:4444/, not 127.0.0.1:16440.",
+                "POST /pool/lease, then GET /health on :17890 (daemon from java-hot-pool-sync / gradle hotJunitDaemon), then POST /run, then login, then release without killSession or quit. Docker DNS hot-chrome-min-1:4444/, not 127.0.0.1:16440.",
         },
     },
 ];
@@ -433,7 +433,7 @@ export const SEQUENCE_STEPS: Record<PoolId, string[]> = {
     hot: [
         "POST /pool/lease",
         "hot-chrome-min-1:4444/",
-        "ensure.sh reuse daemon :17890",
+        "gradle hotJunitDaemon :17890",
         "POST /run",
         "login",
         "release without killSession / quit",

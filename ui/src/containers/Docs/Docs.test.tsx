@@ -47,6 +47,8 @@ describe("Docs", () => {
         const oneRun = screen.getByTestId("docs-one-run");
         expect(oneRun.querySelectorAll("tbody tr")).toHaveLength(ONE_RUN_ROWS.length);
         expect(oneRun).toHaveTextContent("release without killSession or quit");
+        expect(oneRun).toHaveTextContent("hotJunitDaemon");
+        expect(oneRun).not.toHaveTextContent("ensure.sh");
     });
 
     it("drives topology, sequence, and wall from one Cold | Warm | Hot selector", async () => {
@@ -94,7 +96,9 @@ describe("Docs", () => {
         expect(screen.getByTestId("docs-topo-node-docker")).toHaveAttribute("data-live", "false");
         expect(sequence).toHaveTextContent("POST /pool/lease");
         expect(sequence).toHaveTextContent("hot-chrome-min-1:4444");
+        expect(sequence).toHaveTextContent("hotJunitDaemon");
         expect(sequence).toHaveTextContent("17890");
+        expect(sequence).not.toHaveTextContent("ensure.sh");
         expect(sequence).not.toHaveTextContent("docker run");
         expect(sequence).not.toHaveTextContent("14441");
         expect(wall).toHaveTextContent("~0.6s /run");
