@@ -45,6 +45,14 @@ function segButton(fieldTestId: any, value: any) {
         .find((btn: any) => btn.dataset.value === value);
 }
 
+/** Paste instead of per-key `type` — coverage CI otherwise exceeds the 5s default. */
+async function fillCapsField(user: ReturnType<typeof userEvent.setup>, testId: string, value: string) {
+    const el = screen.getByTestId(testId);
+    await user.clear(el);
+    await user.click(el);
+    await user.paste(value);
+}
+
 describe("Capabilities boolean caps (seg canon)", () => {
     it("shows Remote hub caps when default WebDriver chrome is auto-selected", () => {
         renderCapabilities();
@@ -176,18 +184,18 @@ describe("Capabilities boolean caps (seg canon)", () => {
 
         await user.click(segButton("caps-enable-log", "true")!);
         await user.selectOptions(screen.getByRole("combobox", { name: "timeZone" }), "Europe/Moscow");
-        await user.clear(screen.getByTestId("caps-env"));
-        await user.type(screen.getByTestId("caps-env"), "LANG=C,FOO=bar");
-        await user.clear(screen.getByTestId("caps-labels"));
-        await user.type(screen.getByTestId("caps-labels"), "manual=true,team=qa");
-        await user.clear(screen.getByTestId("caps-video-name"));
-        await user.type(screen.getByTestId("caps-video-name"), "demo.mp4");
-        await user.clear(screen.getByTestId("caps-log-name"));
-        await user.type(screen.getByTestId("caps-log-name"), "demo.log");
+        await fillCapsField(user, "caps-env", "LANG=C,FOO=bar");
+        await fillCapsField(user, "caps-labels", "manual=true,team=qa");
+        await fillCapsField(user, "caps-video-name", "demo.mp4");
+        await fillCapsField(user, "caps-log-name", "demo.log");
 
         await user.click(screen.getByTestId("capabilities-create-session"));
 
-        await waitFor(() => expect(fetchMock!).toHaveBeenCalled());
+        await waitFor(() => {
+            expect(
+                fetchMock.mock.calls.some(([url]: [any]) => String(url).includes("/wd/hub/session"))
+            ).toBe(true);
+        });
         const sessionCall = fetchMock.mock.calls.find(([url]: [any]) => String(url).includes("/wd/hub/session"));
         expect(sessionCall!).toBeTruthy();
         const opts = JSON.parse(String(sessionCall[1].body)).capabilities.alwaysMatch["selenoid:options"];
@@ -200,7 +208,7 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(opts.proxy).toBeUndefined();
 
         fetchMock.mockRestore();
-    });
+    }, 15_000);
 
     it("wires enableHAR to WebDriver session caps when toggled on", async () => {
         const user = userEvent.setup();
