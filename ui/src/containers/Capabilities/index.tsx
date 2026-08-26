@@ -1975,7 +1975,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                         title="Browser / device image"
                         testId="capabilities-driver-panel"
                         titleTestId="capabilities-driver-title"
-                        className="capabilities-config-panel"
+                        className="capabilities-config-panel capabilities-images-panel"
                     >
                         {/*
                           Driver rows → createSession: exclusive Tagstrip (library

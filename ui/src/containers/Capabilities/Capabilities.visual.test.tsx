@@ -73,7 +73,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         renderCapabilities();
 
         const driver = screen.getByTestId("capabilities-driver-panel");
-        expect(driver!).toHaveClass("panel", "panel--content");
+        expect(driver!).toHaveClass("panel", "panel--content", "capabilities-images-panel");
         expect(screen.getByTestId("capabilities-driver-title")).toHaveTextContent("Browser / device image");
 
         const stack = screen.getByTestId("capabilities-driver-browsers");
@@ -215,13 +215,15 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(css!).not.toMatch(/@media\s*\(\s*min-width:\s*\d+px\)\s+and\s*\(\s*max-width:/);
     });
 
-    it("desktop columns are independent scrollports (setup zone + terminal code)", async () => {
+    it("desktop columns are independent scrollports (images + launch + terminal)", async () => {
         const fs = await import("node:fs/promises");
         const path = await import("node:path");
         const { fileURLToPath } = await import("node:url");
         const dir = path.dirname(fileURLToPath(import.meta.url));
         const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
 
+        expect(css!).toMatch(/capabilities-images-panel/);
+        expect(css!).toMatch(/\.setup > \.capabilities-launch/);
         expect(css!).toMatch(/overflow-y:\s*auto/);
         expect(css!).toMatch(/\.panel__body\s*\{[\s\S]*?overflow:\s*visible/);
         expect(css!).toMatch(/overscroll-behavior:\s*contain/);
