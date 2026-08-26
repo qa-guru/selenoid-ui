@@ -61,7 +61,7 @@ UI не заменяет hub — он **подключается к уже за�
 - **Sessions** (`#/sessions`) — живые сессии сверху и архив завершённых с артефактами (видео + логи + HAR, удаление сессии целиком). Заменяет прежнюю вкладку Videos;
 - **New Session** (`#/new-session`) — создание сессии и сниппеты для WebDriver / Playwright (бывшая Capabilities);
 - **Benchmarks** (`#/benchmarks`) — каталог замеров login-теста;
-- **Docs** (`#/docs`) — Cold / Warm / Hot пулы; **Resources** (`#/docs/resources`) — GitHub / Docker Hub / live (без github.com/aerokube);
+- **Docs** (`#/docs`) — Cold / Warm / Hot пулы; **Catalog** (`#/docs/catalog`) — copy `browsers.json` + `docker pull` + SIGHUP хабу, UI не рестартится; **Resources** (`#/docs/resources`) — GitHub / Docker Hub / live (без github.com/aerokube);
 - VNC-просмотр браузера и логи сессии;
 - прокси WebSocket `/playwright/` → hub (нужно для Create Session из браузера).
 

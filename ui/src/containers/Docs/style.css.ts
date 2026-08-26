@@ -122,6 +122,17 @@ export const StyledDocs = styled.div`
         width: 100%;
     }
 
+    .docs__stat--static {
+        cursor: default;
+    }
+
+    .docs-seq__body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
     .docs__stat.is-selected {
         border-color: var(--color-info, #5b9fd6);
         box-shadow: inset 0 0 0 1px var(--color-info, #5b9fd6);
@@ -294,13 +305,22 @@ export const StyledDocs = styled.div`
         text-decoration: underline;
     }
 
-    .docs__lead a {
+    .docs__lead a,
+    .docs__meta a {
         color: var(--color-success, #59a781);
         text-decoration: none;
     }
 
-    .docs__lead a:hover {
+    .docs__lead a:hover,
+    .docs__meta a:hover {
         text-decoration: underline;
+    }
+
+    .docs__lead code,
+    .docs__meta code,
+    .docs__callout code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.92em;
     }
 
     table.docs__table--marks {

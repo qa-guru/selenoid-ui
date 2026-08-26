@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
+import { CATALOG_EFFECTS, CATALOG_STEPS } from "./catalog";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
 import { RESOURCE_SERVICES } from "./resources";
 
@@ -116,6 +117,42 @@ describe("Docs", () => {
         expect(screen.getByTestId("docs-diagram-caption")).toHaveTextContent(
             "The UI only watches hub status. It does not start a session or claim a slot."
         );
+    });
+
+    it("renders the catalog reload without bouncing hub or UI", async () => {
+        const user = userEvent.setup();
+        renderDocs();
+
+        await user.click(screen.getByTestId("docs-nav-catalog"));
+
+        expect(screen.getByTestId("docs-nav-catalog")).toHaveClass("is-active");
+        expect(screen.getByTestId("docs-nav-pools")).not.toHaveClass("is-active");
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+            "Catalog — new versions without restarting"
+        );
+
+        const page = screen.getByTestId("docs-catalog");
+        expect(page).toHaveTextContent("SIGHUP");
+        expect(page).toHaveTextContent("browsers.json");
+        expect(page).toHaveTextContent("docker pull");
+        expect(page).toHaveTextContent("This UI is not restarted");
+        expect(page).toHaveTextContent("watch does not set those");
+        expect(page.querySelector('a[href="https://github.com/qa-guru/browser-image"]')).toBeTruthy();
+        expect(
+            page.querySelector('a[href="https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md"]')
+        ).toBeTruthy();
+        expect(page).toHaveTextContent("Not systemctl restart");
+        expect(page).not.toHaveTextContent("remote-update");
+        expect(page).not.toHaveTextContent("zero-design-system");
+        expect(page).not.toHaveTextContent("v3.0.");
+        expect(page.innerHTML).not.toMatch(/github\.com\/aerokube/i);
+
+        expect(screen.getByTestId("docs-catalog-steps").querySelectorAll("li")).toHaveLength(CATALOG_STEPS.length);
+        expect(screen.getByTestId("docs-catalog-effects").querySelectorAll("tbody tr")).toHaveLength(
+            CATALOG_EFFECTS.length
+        );
+        expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("Do not send SIGHUP to the UI");
+        expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("-browsers-conf");
     });
 
     it("renders the Resources catalog without aerokube GitHub links", async () => {

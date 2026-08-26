@@ -118,6 +118,17 @@ describe("Viewport", () => {
         expect(screen.getByTestId("docs-nav-resources")).toBeInTheDocument();
     });
 
+    it("shows Docs catalog page on the docs/catalog route", () => {
+        injectHeaderSlots();
+        renderViewport(["/docs/catalog"]);
+
+        expect(screen.getByTestId("docs-page")).toBeInTheDocument();
+        expect(screen.getByTestId("docs-catalog")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+            "Catalog — new versions without restarting"
+        );
+    });
+
     it("shows Docs Resources catalog on the docs/resources route", () => {
         injectHeaderSlots();
         renderViewport(["/docs/resources"]);
