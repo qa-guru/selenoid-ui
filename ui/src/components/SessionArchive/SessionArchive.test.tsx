@@ -214,10 +214,19 @@ describe("SessionArchive", () => {
         await user.click(screen.getByTestId("session-delete"));
 
         await waitFor(() => {
-            expect(fetch!).toHaveBeenCalledWith("/video/sess-3.mp4", { method: "DELETE" });
+            expect(fetch!).toHaveBeenCalledWith(
+                "/video/sess-3.mp4",
+                expect.objectContaining({ method: "DELETE", credentials: "omit" })
+            );
         });
-        expect(fetch!).toHaveBeenCalledWith("/logs/sess-3.log", { method: "DELETE" });
-        expect(fetch!).toHaveBeenCalledWith("/har/sess-3.har", { method: "DELETE" });
+        expect(fetch!).toHaveBeenCalledWith(
+            "/logs/sess-3.log",
+            expect.objectContaining({ method: "DELETE", credentials: "omit" })
+        );
+        expect(fetch!).toHaveBeenCalledWith(
+            "/har/sess-3.har",
+            expect.objectContaining({ method: "DELETE", credentials: "omit" })
+        );
     });
 
     it("shows empty state with local SVG hourglass", async () => {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { IconDownload, Panel } from "@zero-design-system/react";
 
+import { downloadWithHubAuth, hubFetch } from "../../config/hubAuth";
+import { resolveHubAuthToken } from "../../config/hubSessionAuth";
 import { StyledLog } from "../Log/style.css";
 import { fullscreenAction } from "../fullscreenAction";
 
@@ -26,7 +28,7 @@ const SessionLogFile = ({ file, fullscreen, onToggleFullscreen }: any) => {
         setPhase("loading");
         setError("");
 
-        fetch(href, { cache: "no-store" })
+        hubFetch(href, resolveHubAuthToken(), { cache: "no-store" })
             .then(async (res: any) => {
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}`);
@@ -76,10 +78,9 @@ const SessionLogFile = ({ file, fullscreen, onToggleFullscreen }: any) => {
                         icon: <IconDownload />,
                         label: "Download",
                         onClick: () => {
-                            const a = document.createElement("a");
-                            a.href = href!;
-                            a.download = file;
-                            a.click();
+                            void downloadWithHubAuth(href!, file, resolveHubAuthToken()).catch((err: unknown) => {
+                                console.error("Can't download session log", err);
+                            });
                         },
                         "data-testid": "session-log-download",
                     },

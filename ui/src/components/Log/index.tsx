@@ -5,6 +5,8 @@ import { IconDownload, Panel } from "@zero-design-system/react";
 import urlTo from "../../util/urlTo";
 import isSecure from "../../util/isSecure";
 import { mockLivePreview } from "../../lib/mockSessions";
+import { downloadWithHubAuth } from "../../config/hubAuth";
+import { resolveHubAuthToken } from "../../config/hubSessionAuth";
 import { DEFAULT_STACK_AUTH_LOGIN, DEFAULT_STACK_AUTH_ME, DEFAULT_STACK_LOGIN, DEFAULT_STACK_USER } from "../../lib/defaultStack";
 import { fullscreenAction } from "../fullscreenAction";
 
@@ -351,10 +353,13 @@ export default class Log extends Component<any, any> {
                           icon: <IconDownload />,
                           label: "Download",
                           onClick: () => {
-                              const a = document.createElement("a");
-                              a.href = `/logs/${logFile}`;
-                              a.download = logFile;
-                              a.click();
+                              void downloadWithHubAuth(
+                                  `/logs/${logFile}`,
+                                  logFile,
+                                  resolveHubAuthToken()
+                              ).catch((err: unknown) => {
+                                  console.error("Can't download session log", err);
+                              });
                           },
                           "data-testid": "session-log-download",
                       },

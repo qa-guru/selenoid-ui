@@ -290,9 +290,18 @@ describe("SessionInfo", () => {
         );
 
         await user.click(screen.getByTestId("session-delete"));
-        expect(fetchMock).toHaveBeenCalledWith("/video/fin-sess-1.mp4", { method: "DELETE" });
-        expect(fetchMock).toHaveBeenCalledWith("/logs/fin-sess-1.log", { method: "DELETE" });
-        expect(fetchMock).toHaveBeenCalledWith("/har/fin-sess-1.har", { method: "DELETE" });
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/video/fin-sess-1.mp4",
+            expect.objectContaining({ method: "DELETE", credentials: "omit" })
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/logs/fin-sess-1.log",
+            expect.objectContaining({ method: "DELETE", credentials: "omit" })
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/har/fin-sess-1.har",
+            expect.objectContaining({ method: "DELETE", credentials: "omit" })
+        );
         vi.unstubAllGlobals();
     });
 

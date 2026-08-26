@@ -87,7 +87,7 @@ describe("Session detail page", () => {
                     }),
                 };
             }
-            if (String(url) === "/logs/fin-1.log") {
+            if (String(url).includes("/logs/fin-1.log")) {
                 return { ok: true, text: async () => "line one\nline two\n" };
             }
             if (String(url) === "/video/fin-1.mp4") {
@@ -123,6 +123,9 @@ describe("Session detail page", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("line one");
         });
+        const logFetch = (fetch as any).mock.calls.find((call: any) => String(call[0]).includes("/logs/fin-1.log"));
+        expect(logFetch?.[1]?.credentials).toBe("omit");
+        expect(logFetch?.[1]?.headers?.Authorization).toMatch(/^Basic /);
         expect(screen.getByTestId("session-log-download")).toHaveAttribute("aria-label", "Download");
         expect(screen.getByTestId("session-video-download")).toHaveAttribute("aria-label", "Download");
         expect(screen.getByTestId("session-har-download")).toHaveAttribute("aria-label", "Download");
@@ -328,7 +331,7 @@ describe("Session detail page", () => {
                     }),
                 };
             }
-            if (String(url) === "/logs/pw-kill-1.log") {
+            if (String(url).includes("/logs/pw-kill-1.log")) {
                 return { ok: true, text: async () => "playwright server ready\n" };
             }
             if (String(url) === "/har/pw-kill-1.har") {
@@ -459,7 +462,7 @@ describe("Session detail page", () => {
                     }),
                 };
             }
-            if (String(url) === "/logs/fin-toggle-1.log") {
+            if (String(url).includes("/logs/fin-toggle-1.log")) {
                 return { ok: true, text: async () => "Starting ChromeDriver 149.0\n" };
             }
             if (String(url) === "/video/fin-toggle-1.mp4") {

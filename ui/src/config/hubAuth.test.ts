@@ -8,6 +8,7 @@ import {
     formatAccessKey,
     hubAuthCurlFlag,
     hubAuthHeaders,
+    hubFetch,
     parseAccessKey,
 } from "./hubAuth";
 
@@ -78,5 +79,22 @@ describe("hubAuth", () => {
         expect(hubAuthCurlFlag("u:p")).toBe("-u 'u:p' ");
         expect(hubAuthCurlFlag("u:p'x")).toBe("-u 'u:p'\\''x' ");
         expect(hubAuthCurlFlag("")).toBe("");
+    });
+
+    it("fetches artifacts with Authorization and credentials=omit", async () => {
+        const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+        vi.stubGlobal("fetch", fetchMock);
+
+        await hubFetch("/logs/sess.log", "u:p", { cache: "no-store" });
+        expect(fetchMock).toHaveBeenCalledWith(
+            expect.stringMatching(/\/logs\/sess\.log$/),
+            expect.objectContaining({
+                cache: "no-store",
+                credentials: "omit",
+                headers: { Authorization: `Basic ${btoa("u:p")}` },
+            })
+        );
+
+        vi.unstubAllGlobals();
     });
 });

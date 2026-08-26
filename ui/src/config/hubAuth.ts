@@ -98,6 +98,41 @@ export const hubFetchInit = (authToken: unknown, init: RequestInit = {}): Reques
     },
 });
 
+/**
+ * Same-origin fetch that never lets the browser cache HTTP Basic Auth.
+ * credentials:omit + Authorization header — Chrome must not show a native
+ * login dialog when nginx returns 401.
+ */
+export const hubFetch = (path: string, authToken: unknown, init: RequestInit = {}): Promise<Response> => {
+    const url =
+        typeof window === "undefined" || !window.location?.origin || /^https?:\/\//i.test(path)
+            ? path
+            : new URL(path, window.location.origin).href;
+    return fetch(url, hubFetchInit(authToken, init));
+};
+
+/** Download a hub artifact via fetch+blob so <a href> cannot trigger Basic Auth. */
+export const downloadWithHubAuth = async (
+    path: string,
+    filename: string,
+    authToken: unknown
+): Promise<void> => {
+    const res = await hubFetch(path, authToken, { cache: "no-store" });
+    if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+};
+
 /** Warm Basic Auth on the hub proxy before session create / Playwright WS. */
 export const primeHubAuth = (authToken: unknown): Promise<Response | void> => {
     const headers = hubAuthHeaders(authToken);
