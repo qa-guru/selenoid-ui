@@ -1,4 +1,4 @@
-# Stack pin: main / v3.0.52 (Selenoid 3)
+# Stack pin: main / v3.0.53 (Selenoid 3)
 
 **Репозиторий:** Web UI (qa-guru/selenoid-ui)
 
@@ -7,7 +7,7 @@
 | Поле            | Значение                                                                                                                                     |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Линия           | Selenoid 3                                                                                                                                   |
-| Stack semver    | hub **v3.0.14** / cm **v3.0.3**; UI cut **v3.0.52** (prod pin **v3.0.52**)                                                                   |
+| Stack semver    | hub **v3.0.14** / cm **v3.0.3**; UI cut **v3.0.53** (prod pin **v3.0.53**)                                                                   |
 | Docker API      | TBD (paired с hub)                                                                                                                           |
 | Docker Engine   | TBD (paired с hub)                                                                                                                           |
 | Go              | 1.26.6                                                                                                                                       |
