@@ -214,4 +214,17 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(css!).not.toMatch(/@media\s*\(\s*min-width:\s*(900|1100|1280|1600)px\s*\)/);
         expect(css!).not.toMatch(/@media\s*\(\s*min-width:\s*\d+px\)\s+and\s*\(\s*max-width:/);
     });
+
+    it("desktop columns are independent scrollports (setup zone + terminal code)", async () => {
+        const fs = await import("node:fs/promises");
+        const path = await import("node:path");
+        const { fileURLToPath } = await import("node:url");
+        const dir = path.dirname(fileURLToPath(import.meta.url));
+        const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
+
+        expect(css!).toMatch(/overflow-y:\s*auto/);
+        expect(css!).toMatch(/\.panel__body\s*\{[\s\S]*?overflow:\s*visible/);
+        expect(css!).toMatch(/overscroll-behavior:\s*contain/);
+        expect(css!).not.toMatch(/overflow-x:\s*(hidden|clip)/);
+    });
 });

@@ -45,6 +45,17 @@ export const StyledCapabilities = styled.div`
   }
 
   @media (min-width: 769px) {
+    /*
+     * Independent column scrollports (layout-standard § Scrollports).
+     * Lock this page to the viewport below the header — not html/body
+     * (other routes still page-scroll). Columns fill the grid; left zone
+     * scrolls, terminal chrome stays put and .panel__code / foot rail scroll.
+     */
+    height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
     .capabilities-body {
       /*
        * Body sits full-bleed (page-pad is our own padding). Configurator's
@@ -67,6 +78,7 @@ export const StyledCapabilities = styled.div`
         var(--page-padding-x, 16px) + var(--capabilities-gutter) +
           var(--capabilities-gutter-gap)
       );
+      padding-bottom: 20px;
       --capabilities-cfg: clamp(
         var(--capabilities-col-rest),
         calc(100% - var(--capabilities-span-2) - var(--capabilities-gap)),
@@ -76,14 +88,50 @@ export const StyledCapabilities = styled.div`
         100% - var(--capabilities-cfg) - var(--capabilities-gap)
       );
       grid-template-columns: var(--capabilities-cfg) var(--capabilities-term);
+      grid-template-rows: minmax(0, 1fr);
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      /* Stretch columns as scrollport bounds — panel chrome on the left
+         stays content-height (no bottom magnet). */
+      align-items: stretch;
     }
 
     .setup {
       grid-column: 1 / 2;
+      align-self: stretch;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      overscroll-behavior: contain;
+
+      /* Column is the left scrollport — do not nest .panel__body. */
+      .panel__body {
+        overflow: visible;
+      }
     }
 
     .code-panel {
       grid-column: 2 / 3;
+      align-self: stretch;
+      min-height: 0;
+      overflow: hidden;
+
+      .panel {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: 100%;
+      }
+
+      .capabilities-terminal-body {
+        min-height: 0;
+      }
+
+      .panel__code {
+        flex: 1 1 auto;
+        min-height: 0;
+        overscroll-behavior: contain;
+      }
     }
   }
 
@@ -158,20 +206,13 @@ export const StyledCapabilities = styled.div`
     flex-direction: column;
     min-height: 0;
 
-    .panel {
-      flex: 0 1 auto;
-    }
-
     .capabilities-terminal-body {
       padding: 0;
       display: flex;
       flex-direction: column;
-      min-height: 320px;
     }
 
     .panel__code {
-      flex: 0 1 auto;
-      min-height: 320px;
       margin: 0;
       max-width: 100%;
     }
@@ -226,6 +267,21 @@ export const StyledCapabilities = styled.div`
   @media (max-width: 768px) {
     .capabilities-body {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .code-panel {
+      .panel {
+        flex: 0 1 auto;
+      }
+
+      .capabilities-terminal-body {
+        min-height: 320px;
+      }
+
+      .panel__code {
+        flex: 0 1 auto;
+        min-height: 320px;
+      }
     }
   }
 

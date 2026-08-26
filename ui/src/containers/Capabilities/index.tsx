@@ -1969,7 +1969,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 
     return (
         <StyledCapabilities>
-            <div className="capabilities-body">
+            <div className="capabilities-body" data-testid="capabilities-body">
                 <div className="setup" data-testid="capabilities-setup">
                     <Panel
                         title="Browser / device image"
