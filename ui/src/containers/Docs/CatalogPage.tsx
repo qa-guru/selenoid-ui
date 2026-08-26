@@ -9,6 +9,20 @@ import {
     CATALOG_WATCH_HREF,
     CATALOG_WATCH_LABEL,
 } from "./catalog";
+import { CATALOG_HUB_SCRIPTS, CATALOG_PLANES } from "./catalogHub";
+import { BROWSERS_FILE, listCatalogImages, type CatalogImageRow } from "./catalogImages";
+
+type HubBrowsers = Record<string, Record<string, unknown>>;
+type Protocols = Record<string, Record<string, { protocol?: string }>>;
+
+export type CatalogPageProps = {
+    hubBrowsers?: unknown;
+    browserProtocols?: Protocols;
+};
+
+function isHubBrowsers(value: unknown): value is HubBrowsers {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
 
 function WatchMark({ on }: { on: boolean }) {
     return (
@@ -18,21 +32,72 @@ function WatchMark({ on }: { on: boolean }) {
     );
 }
 
-const CatalogPage = () => {
+function ImagesTable({ rows, live }: { rows: CatalogImageRow[]; live: boolean }) {
+    return (
+        <section className="docs__section">
+            <h2>Images on this hub</h2>
+            <p className="docs__hint">
+                {live
+                    ? "Versions the hub currently advertises. Image names come from browsers.json when that version is in the file, otherwise the qaguru naming convention."
+                    : "From this UI's browsers.json (hub status not loaded in this view). On a live hub the table follows the hub after it re-reads the list."}
+            </p>
+            <div className="docs__scroll">
+                <table className="docs__table docs__table--links docs__table--images" data-testid="docs-catalog-images">
+                    <thead>
+                        <tr>
+                            <th>Browser</th>
+                            <th>Version</th>
+                            <th>Image</th>
+                            <th>Default</th>
+                            <th>Protocol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map((row) => (
+                            <tr
+                                key={`${row.name}:${row.version}`}
+                                data-testid={`docs-catalog-image-${row.name}-${row.version.replace(/[^a-z0-9]+/gi, "-")}`}
+                            >
+                                <th scope="row">{row.name}</th>
+                                <td>
+                                    <code>{row.version}</code>
+                                </td>
+                                <td>
+                                    <a href={row.dockerHub} target="_blank" rel="noreferrer">
+                                        <code>{row.image}</code>
+                                    </a>
+                                </td>
+                                <td>
+                                    <WatchMark on={row.isDefault} />
+                                </td>
+                                <td>{row.protocol}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    );
+}
+
+const CatalogPage = ({ hubBrowsers, browserProtocols }: CatalogPageProps) => {
+    const liveMap = isHubBrowsers(hubBrowsers) ? hubBrowsers : undefined;
+    const live = Boolean(liveMap && Object.keys(liveMap).length > 0);
+    const rows = listCatalogImages(BROWSERS_FILE, liveMap, browserProtocols);
+
     return (
         <div data-testid="docs-catalog">
-            <h1>Catalog — new versions without restarting</h1>
+            <h1>Browsers Catalog</h1>
             <p className="docs__lead">
-                New Session shows whatever the hub currently has. A catalog update copies <code>browsers.json</code>,
-                pulls the images, and sends <strong>SIGHUP</strong> to the hub. Running sessions stay. This UI is not
-                restarted.
+                Every image this hub can start. New browser tags update the list — Selenoid keeps running. A new
+                Selenoid program is a GitHub Release on qa-guru/selenoid, not this catalog.
             </p>
             <p className="docs__meta">
-                The version window is maintained in{" "}
+                Image window:{" "}
                 <a href={CATALOG_WATCH_HREF} target="_blank" rel="noreferrer">
                     {CATALOG_WATCH_LABEL}
-                </a>
-                :{" "}
+                </a>{" "}
+                (
                 <a href={`${CATALOG_WATCH_HREF}/blob/main/pins.json`} target="_blank" rel="noreferrer">
                     pins.json
                 </a>
@@ -40,12 +105,128 @@ const CatalogPage = () => {
                 <a href={`${CATALOG_WATCH_HREF}/blob/main/.github/workflows/watch.yml`} target="_blank" rel="noreferrer">
                     watch.yml
                 </a>
-                . A UI or hub release tag is separate — watch does not set those. Version table:{" "}
+                ). Hub and UI tags are GitHub Releases — watch does not set those. Version table:{" "}
                 <a href={CATALOG_VERSIONS_HREF} target="_blank" rel="noreferrer">
                     selenoid/docs/browser-versions.md
                 </a>
                 .
             </p>
+
+            <ImagesTable rows={rows} live={live} />
+
+            <section className="docs__section">
+                <h2>How Selenoid itself updates</h2>
+                <p className="docs__hint">
+                    Selenoid is a program on the server (<code>selenoid_linux_amd64</code>). A GitHub Release on{" "}
+                    <a href="https://github.com/qa-guru/selenoid" target="_blank" rel="noreferrer">
+                        qa-guru/selenoid
+                    </a>{" "}
+                    publishes a new file.{" "}
+                    <a href="https://github.com/qa-guru/selenoid.qa.guru" target="_blank" rel="noreferrer">
+                        qa-guru/selenoid.qa.guru
+                    </a>{" "}
+                    can install that file. The catalog cron never downloads it and never touches the running hub.
+                </p>
+                <div className="docs__scroll">
+                    <table className="docs__table docs__table--run" data-testid="docs-catalog-planes">
+                        <thead>
+                            <tr>
+                                <th>What</th>
+                                <th>How it moves</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {CATALOG_PLANES.map((row) => (
+                                <tr key={row.label}>
+                                    <th scope="row">{row.label}</th>
+                                    <td>
+                                        <div className="docs-cell">
+                                            <p className="docs-cell__human">{row.human}</p>
+                                            <p className="docs-cell__tech">{row.tech}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="docs-pipeline" data-testid="docs-catalog-hub-scripts">
+                    {CATALOG_HUB_SCRIPTS.map((row) => (
+                        <article
+                            key={row.file}
+                            className="docs-pipeline__item"
+                            data-testid={`docs-catalog-hub-${row.file.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}`}
+                        >
+                            <h3>
+                                <a href={row.href} target="_blank" rel="noreferrer">
+                                    {row.file}
+                                </a>
+                            </h3>
+                            <p className="docs-cell__human">{row.human}</p>
+                            <p className="docs-cell__tech">{row.tech}</p>
+                            <pre className="docs-excerpt">
+                                <code>{row.excerpt}</code>
+                            </pre>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            <section className="docs__section">
+                <h2>How images auto-update</h2>
+                <p className="docs__hint">
+                    Copy the list, download the images, ask the hub to re-read. Open sessions stay. This UI is not
+                    restarted.
+                </p>
+            </section>
+
+            <div className="docs__stats" data-testid="docs-catalog-stats">
+                {CATALOG_STEPS.map((step, index) => (
+                    <div
+                        key={step.title}
+                        className="docs__stat docs__stat--static"
+                        data-testid={`docs-catalog-stat-${index + 1}`}
+                    >
+                        <span className="docs__stat-value">
+                            {index + 1}. {step.title}
+                        </span>
+                        <span className="docs__stat-label">{step.stat}</span>
+                    </div>
+                ))}
+            </div>
+
+            <section className="docs__section">
+                <div className="docs-diagram" data-testid="docs-catalog-steps">
+                    <h2>On the host</h2>
+                    <ol className="docs-seq">
+                        {CATALOG_STEPS.map((step, index) => (
+                            <li
+                                key={step.title}
+                                className="docs-seq__step"
+                                data-testid={`docs-catalog-step-${index + 1}`}
+                            >
+                                <span className="docs-seq__n">{index + 1}</span>
+                                <div className="docs-seq__body">
+                                    <p className="docs-cell__human">{step.human}</p>
+                                    <p className="docs-cell__tech">{step.tech}</p>
+                                    {step.excerpt ? (
+                                        <pre className="docs-excerpt">
+                                            <code>{step.excerpt}</code>
+                                        </pre>
+                                    ) : null}
+                                    {step.href ? (
+                                        <p className="docs-cell__tech">
+                                            <a href={step.href} target="_blank" rel="noreferrer">
+                                                selenoid.qa.guru/deploy/deploy.sh
+                                            </a>
+                                        </p>
+                                    ) : null}
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+            </section>
 
             <section className="docs__section">
                 <h2>Where versions are parsed</h2>
@@ -125,47 +306,11 @@ const CatalogPage = () => {
                 </div>
             </section>
 
-            <div className="docs__stats" data-testid="docs-catalog-stats">
-                {CATALOG_STEPS.map((step, index) => (
-                    <div
-                        key={step.title}
-                        className="docs__stat docs__stat--static"
-                        data-testid={`docs-catalog-stat-${index + 1}`}
-                    >
-                        <span className="docs__stat-value">
-                            {index + 1}. {step.title}
-                        </span>
-                        <span className="docs__stat-label">{step.stat}</span>
-                    </div>
-                ))}
-            </div>
-
-            <section className="docs__section">
-                <div className="docs-diagram" data-testid="docs-catalog-steps">
-                    <h2>On the host</h2>
-                    <ol className="docs-seq">
-                        {CATALOG_STEPS.map((step, index) => (
-                            <li
-                                key={step.title}
-                                className="docs-seq__step"
-                                data-testid={`docs-catalog-step-${index + 1}`}
-                            >
-                                <span className="docs-seq__n">{index + 1}</span>
-                                <div className="docs-seq__body">
-                                    <p className="docs-cell__human">{step.human}</p>
-                                    <p className="docs-cell__tech">{step.tech}</p>
-                                </div>
-                            </li>
-                        ))}
-                    </ol>
-                </div>
-            </section>
-
             <aside className="docs__callout" data-testid="docs-catalog-callout">
                 <h2>This UI only watches the hub</h2>
                 <p>
                     Protocol metadata is loaded once at UI start (<code>-browsers-conf</code>). The version list on New
-                    Session comes from the hub status feed. Do not send SIGHUP to the UI.
+                    Session comes from the hub status feed. Do not send kill -HUP to the UI — it would stop.
                 </p>
             </aside>
 

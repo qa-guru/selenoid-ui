@@ -5,6 +5,9 @@ import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
 import { CATALOG_EFFECTS, CATALOG_SCRIPTS, CATALOG_SOURCES, CATALOG_STEPS } from "./catalog";
+import { CATALOG_HUB_SCRIPTS, CATALOG_PLANES } from "./catalogHub";
+import { BROWSERS_FILE, listCatalogImages } from "./catalogImages";
+import CatalogPage from "./CatalogPage";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
 import { RESOURCE_SERVICES } from "./resources";
 
@@ -127,16 +130,20 @@ describe("Docs", () => {
 
         expect(screen.getByTestId("docs-nav-catalog")).toHaveClass("is-active");
         expect(screen.getByTestId("docs-nav-pools")).not.toHaveClass("is-active");
-        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-            "Catalog — new versions without restarting"
-        );
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Browsers Catalog");
 
         const page = screen.getByTestId("docs-catalog");
-        expect(page).toHaveTextContent("SIGHUP");
+        expect(page).toHaveTextContent("re-read");
+        expect(page).toHaveTextContent("kill -HUP");
         expect(page).toHaveTextContent("browsers.json");
         expect(page).toHaveTextContent("docker pull");
+        expect(page).toHaveTextContent('docker pull "$img"');
+        expect(page).toHaveTextContent("docker pull qaguru/webdriver-chrome:152");
         expect(page).toHaveTextContent("This UI is not restarted");
         expect(page).toHaveTextContent("watch does not set those");
+        expect(page).toHaveTextContent("qaguru/webdriver-chrome:152");
+        expect(page).toHaveTextContent("selenoid_linux_amd64");
+        expect(page).not.toHaveTextContent("stopped and started");
         expect(page.querySelector('a[href="https://github.com/qa-guru/browser-image"]')).toBeTruthy();
         expect(
             page.querySelector('a[href="https://github.com/qa-guru/browser-image/blob/main/pins.json"]')
@@ -159,7 +166,24 @@ describe("Docs", () => {
         expect(screen.getByTestId("docs-catalog-effects").querySelectorAll("tbody tr")).toHaveLength(
             CATALOG_EFFECTS.length
         );
-        expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("Do not send SIGHUP to the UI");
+        expect(screen.getByTestId("docs-catalog-planes").querySelectorAll("tbody tr")).toHaveLength(
+            CATALOG_PLANES.length
+        );
+        expect(screen.getByTestId("docs-catalog-images").querySelectorAll("tbody tr")).toHaveLength(
+            listCatalogImages(BROWSERS_FILE).length
+        );
+        expect(screen.getByTestId("docs-catalog-images")).toHaveTextContent("qaguru/playwright-chromium:1.62.1");
+        expect(screen.getByTestId("docs-catalog-images")).toHaveTextContent("qaguru/android:16");
+        expect(screen.getByTestId("docs-catalog-hub-scripts").querySelectorAll("article")).toHaveLength(
+            CATALOG_HUB_SCRIPTS.length
+        );
+        expect(screen.getByTestId("docs-catalog-hub-scripts")).toHaveTextContent("selenoid_linux_amd64");
+        expect(
+            screen.getByTestId("docs-catalog-hub-scripts").querySelector(
+                'a[href="https://github.com/qa-guru/selenoid/blob/main/.github/workflows/release.yml"]'
+            )
+        ).toBeTruthy();
+        expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("Do not send kill -HUP to the UI");
         expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("-browsers-conf");
 
         const sources = screen.getByTestId("docs-catalog-sources");
@@ -221,6 +245,19 @@ describe("Docs", () => {
         expect(
             scripts.querySelector('a[href="https://github.com/qa-guru/selenoid-ui/blob/main/browsers.json"]')
         ).toBeTruthy();
+    });
+
+    it("lists live hub versions when the status feed is present", () => {
+        render(
+            <MemoryRouter>
+                <CatalogPage hubBrowsers={{ chrome: { "152.0": {}, "128.0": {} } }} />
+            </MemoryRouter>
+        );
+
+        const images = screen.getByTestId("docs-catalog-images");
+        expect(images).toHaveTextContent("qaguru/webdriver-chrome:152");
+        expect(images).toHaveTextContent("qaguru/webdriver-chrome:128");
+        expect(images).not.toHaveTextContent("firefox");
     });
 
     it("renders the Resources catalog without aerokube GitHub links", async () => {

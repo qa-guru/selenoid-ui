@@ -61,7 +61,7 @@ UI не заменяет hub — он **подключается к уже за�
 - **Sessions** (`#/sessions`) — живые сессии сверху и архив завершённых с артефактами (видео + логи + HAR, удаление сессии целиком). Заменяет прежнюю вкладку Videos;
 - **New Session** (`#/new-session`) — создание сессии и сниппеты для WebDriver / Playwright (бывшая Capabilities);
 - **Benchmarks** (`#/benchmarks`) — каталог замеров login-теста;
-- **Docs** (`#/docs`) — Cold / Warm / Hot пулы; **Catalog** (`#/docs/catalog`) — copy `browsers.json` + `docker pull` + SIGHUP хабу, UI не рестартится; **Resources** (`#/docs/resources`) — GitHub / Docker Hub / live (без github.com/aerokube);
+- **Docs** (`#/docs`) — Cold / Warm / Hot пулы; **Browsers catalog** (`#/docs/catalog`) — живой список образов; новые теги: copy `browsers.json` + `docker pull` + хаб перечитывает список (`kill -HUP`); новый Selenoid — GitHub Release `selenoid_linux_amd64`, каталог его не качает; **Resources** (`#/docs/resources`) — GitHub / Docker Hub / live (без github.com/aerokube);
 - VNC-просмотр браузера и логи сессии;
 - прокси WebSocket `/playwright/` → hub (нужно для Create Session из браузера).
 
@@ -123,11 +123,11 @@ bash scripts/catalog_sync.sh plan.json
 # catalog_sync.sh — этот UI только browsers.json; prod файл последним
 clone_repo qa-guru/selenoid-ui …
 commit_push … browsers.json
-clone_repo qa-guru/selenoid.qa.guru …   # LAST: copy + docker pull + SIGHUP
+clone_repo qa-guru/selenoid.qa.guru …   # LAST: copy + docker pull + hub re-reads the list
 commit_push … deploy/browsers-production.json
 ```
 
-На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб перечитывает конфиг по **SIGHUP**. UI не гасится — New Session берёт список версий с хаба (`/status`). Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**. Полный `deploy.sh` (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
+На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб **перечитывает** `browsers.json` (`kill -HUP` на pid, процесс не останавливается). UI не гасится — New Session берёт список версий с хаба (`/status`). Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**. Полный `deploy.sh` (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
 
 Таблица версий: [selenoid/docs/browser-versions.md](https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md).
 

@@ -3,6 +3,8 @@ export type CatalogStep = {
     stat: string;
     human: string;
     tech: string;
+    excerpt?: string;
+    href?: string;
 };
 
 export type CatalogEffect = {
@@ -11,25 +13,34 @@ export type CatalogEffect = {
     tech: string;
 };
 
-/** Facts only: hub SIGHUP reloads browsers.json; UI has no SIGHUP handler; chips come from hub status. */
+/** Facts only: hub re-reads browsers.json without stopping; UI has no such reload; chips come from hub status. */
 export const CATALOG_STEPS: CatalogStep[] = [
     {
         title: "Copy",
         stat: "browsers.json",
-        human: "The catalog file is placed where the hub already reads it.",
-        tech: "browsers.json on the host. The hub is not given a new binary.",
+        human: "The new list of browsers is written where the hub already looks.",
+        tech: "browsers.json on the host. The hub program file is not replaced.",
+        href: "https://github.com/qa-guru/selenoid.qa.guru/blob/main/deploy/deploy.sh",
+        excerpt: `cp "$BROWSERS_PRODUCTION" "$CONFIG_DIR/browsers.json"`,
     },
     {
         title: "Pull",
         stat: "docker pull",
-        human: "Images named in that file are downloaded first.",
-        tech: "docker pull. SIGHUP does not download images.",
+        human: "For each image name in that file the host runs docker pull, before the hub re-reads the list.",
+        tech: "Example: docker pull qaguru/webdriver-chrome:152. Re-reading the file does not download anything.",
+        href: "https://github.com/qa-guru/selenoid.qa.guru/blob/main/deploy/deploy.sh",
+        excerpt: `jq -r '.. | objects | select(has("image")) | .image' "$CONFIG_DIR/browsers.json"
+
+echo "--- docker pull \${img} ---"
+docker pull "$img"`,
     },
     {
-        title: "SIGHUP",
+        title: "Reload",
         stat: "hub stays up",
-        human: "The hub re-reads the file in place. It does not stop.",
-        tech: "SIGHUP reloads browsers.json in memory. Live sessions are not closed.",
+        human: "The hub is asked to re-read the list. It does not stop. Open sessions stay.",
+        tech: "On the host that is kill -HUP on the hub pid. Not systemctl restart, not docker stop.",
+        href: "https://github.com/qa-guru/selenoid.qa.guru/blob/main/deploy/deploy.sh",
+        excerpt: `kill -HUP "$pid"`,
     },
 ];
 
@@ -37,17 +48,17 @@ export const CATALOG_EFFECTS: CatalogEffect[] = [
     {
         label: "Sessions already running",
         human: "They stay connected.",
-        tech: "SIGHUP reloads the catalog, not the session map.",
+        tech: "The hub re-reads the list. It does not drop the session map.",
     },
     {
         label: "Hub process",
         human: "It stays up.",
-        tech: "Reload in memory. Not systemctl restart, not docker stop.",
+        tech: "Re-read in memory. Not systemctl restart, not docker stop.",
     },
     {
         label: "This UI",
         human: "It stays up.",
-        tech: "No SIGHUP handler here. A hangup would stop the process.",
+        tech: "This process does not re-read on hangup. The same kill -HUP would stop it.",
     },
     {
         label: "New Session chips",
@@ -161,12 +172,12 @@ image = qaguru/playwright-*:{semver}[-min]`,
         file: "scripts/catalog_sync.sh",
         href: `${BI}/scripts/catalog_sync.sh`,
         human: "After Hub 200, clones each catalog repo, runs update_catalog.py, commits, pushes. This UI is browsers.json only.",
-        tech: "Order: selenoid → cm → selenoid-tests → selenoid-ui → selenoid.qa.guru last. That last push is copy + docker pull + SIGHUP, not a hub/UI bounce.",
+        tech: "Order: selenoid → cm → selenoid-tests → selenoid-ui → selenoid.qa.guru last. That last push copies the list, pulls images, and asks the hub to re-read. It does not restart hub or UI.",
         excerpt: `clone_repo qa-guru/selenoid-ui ...
 python3 update_catalog.py --file .../selenoid-ui/browsers.json
 commit_push ... browsers.json
 
-# LAST — deploy.yml browsers-only: copy + docker pull + SIGHUP hub
+# LAST — browsers-only: copy + docker pull + hub re-reads the file
 clone_repo qa-guru/selenoid.qa.guru ...
 commit_push ... deploy/browsers-production.json`,
     },
@@ -174,7 +185,7 @@ commit_push ... deploy/browsers-production.json`,
         file: "selenoid-ui/browsers.json",
         href: "https://github.com/qa-guru/selenoid-ui/blob/main/browsers.json",
         human: "This repo's copy of the hub catalog. Watch overwrites it. A UI release does not.",
-        tech: "UI start flag -browsers-conf. New Session version chips still come from hub /status after SIGHUP.",
+        tech: "UI start flag -browsers-conf. New Session chips still come from hub /status after the hub re-reads the list.",
         excerpt: `"chrome": { "default": "152.0", "versions": { "152.0": { "image": "qaguru/webdriver-chrome:152" }, ... } }
 "android": { "default": "16.0", ... }   # watch does not rewrite this block`,
     },

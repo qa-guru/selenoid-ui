@@ -124,9 +124,7 @@ describe("Viewport", () => {
 
         expect(screen.getByTestId("docs-page")).toBeInTheDocument();
         expect(screen.getByTestId("docs-catalog")).toBeInTheDocument();
-        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-            "Catalog — new versions without restarting"
-        );
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Browsers Catalog");
     });
 
     it("shows Docs Resources catalog on the docs/resources route", () => {

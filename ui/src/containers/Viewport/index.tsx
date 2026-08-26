@@ -126,7 +126,10 @@ const Viewport = () => {
 
                     <Route path="/benchmarks" element={<Benchmarks />} />
 
-                    <Route path="/docs/*" element={<Docs />} />
+                    <Route
+                        path="/docs/*"
+                        element={<Docs hubBrowsers={state.browsers} browserProtocols={browserProtocols} />}
+                    />
 
                     <Route path="/sessions/:session" element={<SessionRoute origin={origin} sessions={sessions} />} />
                 </Routes>

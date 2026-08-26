@@ -279,6 +279,21 @@ export const StyledDocs = styled.div`
         font-weight: 400;
     }
 
+    table.docs__table--images tbody td,
+    table.docs__table--images thead th {
+        min-width: 0;
+    }
+
+    table.docs__table--images tbody td:nth-child(3) {
+        white-space: normal;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.92em;
+    }
+
+    table.docs__table--images a code {
+        color: inherit;
+    }
+
     table.docs__table--sources tbody th,
     table.docs__table--sources tbody td,
     table.docs__table--sources thead th {
