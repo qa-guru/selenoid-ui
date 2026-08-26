@@ -2,11 +2,20 @@ import React from "react";
 
 import {
     CATALOG_EFFECTS,
+    CATALOG_SOURCES,
     CATALOG_STEPS,
     CATALOG_VERSIONS_HREF,
     CATALOG_WATCH_HREF,
     CATALOG_WATCH_LABEL,
 } from "./catalog";
+
+function WatchMark({ on }: { on: boolean }) {
+    return (
+        <span className={on ? "docs-mark docs-mark--yes" : "docs-mark docs-mark--no"} aria-label={on ? "Yes" : "No"}>
+            {on ? "✓" : "—"}
+        </span>
+    );
+}
 
 const CatalogPage = () => {
     return (
@@ -29,6 +38,56 @@ const CatalogPage = () => {
                 </a>
                 .
             </p>
+
+            <section className="docs__section">
+                <h2>Where versions are parsed</h2>
+                <p className="docs__hint">
+                    Watch in {CATALOG_WATCH_LABEL} polls these URLs and writes <code>pins.json</code>. Android is a
+                    catalog pin — the same script does not touch it.
+                </p>
+                <div className="docs__scroll">
+                    <table
+                        className="docs__table docs__table--links docs__table--sources"
+                        data-testid="docs-catalog-sources"
+                    >
+                        <thead>
+                            <tr>
+                                <th>Family</th>
+                                <th>Watch</th>
+                                <th>Reads</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {CATALOG_SOURCES.map((row) => (
+                                <tr key={row.name} data-testid={`docs-catalog-source-${row.name.toLowerCase()}`}>
+                                    <th scope="row">{row.name}</th>
+                                    <td>
+                                        <WatchMark on={row.watch} />
+                                    </td>
+                                    <td>
+                                        <div className="docs-cell">
+                                            <p className="docs-cell__human">{row.human}</p>
+                                            <p className="docs-cell__tech">{row.tech}</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <ul className="docs-catalog__links">
+                                            {row.links.map((link) => (
+                                                <li key={link.href}>
+                                                    <a href={link.href} target="_blank" rel="noreferrer">
+                                                        {link.label}
+                                                    </a>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
             <div className="docs__stats" data-testid="docs-catalog-stats">
                 {CATALOG_STEPS.map((step, index) => (

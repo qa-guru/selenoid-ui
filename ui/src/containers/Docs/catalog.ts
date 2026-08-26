@@ -65,3 +65,89 @@ export const CATALOG_EFFECTS: CatalogEffect[] = [
 export const CATALOG_WATCH_HREF = "https://github.com/qa-guru/browser-image";
 export const CATALOG_WATCH_LABEL = "qa-guru/browser-image";
 export const CATALOG_VERSIONS_HREF = "https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md";
+
+export type CatalogSourceLink = {
+    href: string;
+    label: string;
+};
+
+export type CatalogSource = {
+    name: string;
+    watch: boolean;
+    human: string;
+    tech: string;
+    links: CatalogSourceLink[];
+};
+
+/** URLs copied from browser-image/scripts/watch_upstream.py. Android is not on that cron. */
+export const CATALOG_SOURCES: CatalogSource[] = [
+    {
+        name: "Chrome",
+        watch: true,
+        human: "Stable from Chrome for Testing.",
+        tech: "JSON field channels.Stable.version. Zip + chromedriver must exist on chrome-for-testing-public.",
+        links: [
+            {
+                href: "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json",
+                label: "last-known-good-versions.json",
+            },
+        ],
+    },
+    {
+        name: "Firefox",
+        watch: true,
+        human: "Latest release from Mozilla product-details.",
+        tech: "JSON field LATEST_FIREFOX_VERSION. Linux tarball must exist on ftp.mozilla.org.",
+        links: [
+            {
+                href: "https://product-details.mozilla.org/1.0/firefox_versions.json",
+                label: "firefox_versions.json",
+            },
+        ],
+    },
+    {
+        name: "Edge",
+        watch: true,
+        human: "microsoft-edge-stable from the Microsoft apt repo.",
+        tech: "Highest Version: in Packages. Deb + msedgedriver zip must exist.",
+        links: [
+            {
+                href: "https://packages.microsoft.com/repos/edge/dists/stable/main/binary-amd64/Packages",
+                label: "edge …/Packages",
+            },
+        ],
+    },
+    {
+        name: "Playwright",
+        watch: true,
+        human: "Latest stable @playwright/test on npm.",
+        tech: "npm latest version, then MCR must have tag v{version}-noble.",
+        links: [
+            {
+                href: "https://registry.npmjs.org/@playwright/test/latest",
+                label: "npm @playwright/test/latest",
+            },
+            {
+                href: "https://mcr.microsoft.com/v2/playwright/tags/list",
+                label: "MCR playwright/tags/list",
+            },
+        ],
+    },
+    {
+        name: "Android",
+        watch: false,
+        human: "Pinned in browsers.json. Watch does not rewrite it.",
+        tech:
+            "qaguru/android via sdkmanager. cmdline-tools zip from dl.google.com/android/repository. Appium and UiAutomator2 are Dockerfile ARGs, not the watch cron.",
+        links: [
+            {
+                href: "https://github.com/qa-guru/browser-image/tree/main/android",
+                label: "browser-image/android",
+            },
+            {
+                href: "https://dl.google.com/android/repository/",
+                label: "dl.google.com/android/repository",
+            },
+        ],
+    },
+];

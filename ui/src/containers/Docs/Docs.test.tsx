@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
-import { CATALOG_EFFECTS, CATALOG_STEPS } from "./catalog";
+import { CATALOG_EFFECTS, CATALOG_SOURCES, CATALOG_STEPS } from "./catalog";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
 import { RESOURCE_SERVICES } from "./resources";
 
@@ -153,6 +153,38 @@ describe("Docs", () => {
         );
         expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("Do not send SIGHUP to the UI");
         expect(screen.getByTestId("docs-catalog-callout")).toHaveTextContent("-browsers-conf");
+
+        const sources = screen.getByTestId("docs-catalog-sources");
+        expect(sources.querySelectorAll("tbody tr")).toHaveLength(CATALOG_SOURCES.length);
+        expect(sources).toHaveTextContent("last-known-good-versions.json");
+        expect(sources).toHaveTextContent("LATEST_FIREFOX_VERSION");
+        expect(sources).toHaveTextContent("microsoft-edge-stable");
+        expect(sources).toHaveTextContent("@playwright/test");
+        expect(sources).toHaveTextContent("Watch does not rewrite it");
+        expect(
+            sources.querySelector(
+                'a[href="https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json"]'
+            )
+        ).toBeTruthy();
+        expect(
+            sources.querySelector('a[href="https://product-details.mozilla.org/1.0/firefox_versions.json"]')
+        ).toBeTruthy();
+        expect(
+            sources.querySelector(
+                'a[href="https://packages.microsoft.com/repos/edge/dists/stable/main/binary-amd64/Packages"]'
+            )
+        ).toBeTruthy();
+        expect(sources.querySelector('a[href="https://registry.npmjs.org/@playwright/test/latest"]')).toBeTruthy();
+        expect(sources.querySelector('a[href="https://mcr.microsoft.com/v2/playwright/tags/list"]')).toBeTruthy();
+        expect(
+            sources.querySelector('a[href="https://github.com/qa-guru/browser-image/tree/main/android"]')
+        ).toBeTruthy();
+        expect(sources.querySelector('a[href="https://dl.google.com/android/repository/"]')).toBeTruthy();
+        const android = screen.getByTestId("docs-catalog-source-android");
+        expect(android.querySelector('[aria-label="No"]')).toBeTruthy();
+        expect(android.querySelector('[aria-label="Yes"]')).toBeFalsy();
+        const chrome = screen.getByTestId("docs-catalog-source-chrome");
+        expect(chrome.querySelector('[aria-label="Yes"]')).toBeTruthy();
     });
 
     it("renders the Resources catalog without aerokube GitHub links", async () => {

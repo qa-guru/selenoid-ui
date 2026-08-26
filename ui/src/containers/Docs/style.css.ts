@@ -279,6 +279,32 @@ export const StyledDocs = styled.div`
         font-weight: 400;
     }
 
+    table.docs__table--sources tbody th,
+    table.docs__table--sources tbody td,
+    table.docs__table--sources thead th {
+        white-space: normal;
+    }
+
+    table.docs__table--sources tbody td:nth-child(2) {
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        width: 4.5em;
+    }
+
+    .docs-catalog__links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .docs-catalog__links a {
+        word-break: break-all;
+    }
+
     table.docs__table--links .docs-resource__empty {
         color: var(--color-text-muted, #aaa);
     }
@@ -318,6 +344,7 @@ export const StyledDocs = styled.div`
 
     .docs__lead code,
     .docs__meta code,
+    .docs__hint code,
     .docs__callout code {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 0.92em;
