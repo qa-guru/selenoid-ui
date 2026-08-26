@@ -136,4 +136,18 @@ describe("capabilitiesPlaywright", () => {
         );
         expect(parsed.searchParams.get("socksProxy")).toBe("proxy.qaguru.school:7777");
     });
+
+    it("does not send mobileDevice as a hub query param", () => {
+        const parsed = new URL(
+            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
+                screenResolution: "390x844x24",
+                mobileDevice: "iphone-12-pro",
+            } as any)
+        );
+        expect(parsed.searchParams.get("screenResolution")).toBe("390x844x24");
+        expect(parsed.searchParams.get("mobileDevice")).toBeNull();
+        expect(playwrightSelenoidOptions("", { mobileDevice: "iphone-12-pro" } as any)).not.toHaveProperty(
+            "mobileDevice"
+        );
+    });
 });

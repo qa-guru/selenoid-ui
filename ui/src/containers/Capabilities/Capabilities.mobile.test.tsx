@@ -1,7 +1,7 @@
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import Capabilities from "./index";
 import { mobileDeviceById } from "../../util/capabilitiesMobileEmulation";
 
@@ -179,5 +179,148 @@ describe("Capabilities Chrome mobileEmulation catalog", () => {
         expect(panel.textContent).toContain(pixel.userAgent);
 
         fetchMock.mockRestore();
+    });
+});
+
+const PW_BROWSERS = {
+    chrome: { "149.0": {} },
+    "playwright-chrome": { "1.61.0": {} },
+    "playwright-firefox": { "1.61.0": {} },
+};
+
+const PW_PROTOCOLS = {
+    chrome: { "149.0": { protocol: "webdriver" } },
+    "playwright-chrome": { "1.61.0": { protocol: "playwright" } },
+    "playwright-firefox": { "1.61.0": { protocol: "playwright" } },
+};
+
+function renderPlaywrightCapabilities() {
+    return render(
+        <MemoryRouter initialEntries={["/new-session"]}>
+            <Routes>
+                <Route
+                    path="/new-session"
+                    element={
+                        <Capabilities
+                            browsers={PW_BROWSERS}
+                            browserProtocols={PW_PROTOCOLS}
+                            sessions={{}}
+                            origin="https://selenoid.qa.guru"
+                        />
+                    }
+                />
+                <Route path="/sessions/:session" element={<div data-testid="session-route" />} />
+            </Routes>
+        </MemoryRouter>
+    );
+}
+
+describe("Capabilities Playwright mobileDevice catalog", () => {
+    let openedSockets: any[] = [];
+
+    beforeEach(() => {
+        openedSockets = [];
+        class CapturingWebSocket {
+            static CONNECTING = 0;
+            static OPEN = 1;
+            static CLOSING = 2;
+            static CLOSED = 3;
+            url: string;
+            readyState: number;
+            onopen: ((ev?: any) => void) | null = null;
+            onclose: ((ev?: any) => void) | null = null;
+            onmessage: ((ev?: any) => void) | null = null;
+            onerror: ((ev?: any) => void) | null = null;
+
+            constructor(url: string) {
+                this.url = url;
+                this.readyState = CapturingWebSocket.OPEN;
+                openedSockets.push(this);
+            }
+
+            close() {
+                this.readyState = CapturingWebSocket.CLOSED;
+            }
+
+            send(_data?: any) {}
+        }
+        CapturingWebSocket.CONNECTING = 0;
+        CapturingWebSocket.OPEN = 1;
+        CapturingWebSocket.CLOSING = 2;
+        CapturingWebSocket.CLOSED = 3;
+        (window as any).WebSocket = CapturingWebSocket;
+        (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({}),
+        });
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("shows the panel on playwright-chrome and playwright-firefox", async () => {
+        const user = userEvent.setup();
+        renderPlaywrightCapabilities();
+        await user.click(screen.getByRole("button", { name: "chrome: 1.61.0" }));
+
+        const panel = await screen.findByTestId("capabilities-mobile-panel");
+        expect(screen.getByRole("combobox", { name: "mobileDevice" })).toHaveValue("off");
+        expect(screen.getByTestId("capabilities-mobile-hint")).toHaveTextContent(/newContext/);
+        expect(within(panel!).getByRole("option", { name: "iPhone 12 Pro" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "firefox: 1.61.0" }));
+        expect(screen.getByTestId("capabilities-mobile-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("capabilities-mobile-hint")).toHaveTextContent(/newContext/);
+    });
+
+    it("puts viewport + UA into JS/Python/Java snippets and phone screenResolution on the WS", async () => {
+        const user = userEvent.setup();
+        const iphone = mobileDeviceById("iphone-12-pro")!;
+        renderPlaywrightCapabilities();
+        await user.click(screen.getByRole("button", { name: "chrome: 1.61.0" }));
+        await screen.findByTestId("capabilities-mobile-panel");
+        await user.selectOptions(screen.getByRole("combobox", { name: "mobileDevice" }), "iphone-12-pro");
+
+        const term = screen.getByTestId("capabilities-terminal-panel");
+        const tabs = within(term!).getByRole("tablist", { name: "Language" });
+
+        await user.click(within(tabs!).getByRole("tab", { name: "Javascript" }));
+        expect(term.textContent).toContain("newContext");
+        expect(term.textContent).toContain('"width": 390');
+        expect(term.textContent).toContain(iphone.userAgent);
+        expect(term.textContent).not.toContain("goog:chromeOptions");
+        expect(term.textContent).not.toContain("mobileEmulation");
+
+        await user.click(within(tabs!).getByRole("tab", { name: "Python" }));
+        expect(term.textContent).toContain("new_context");
+        expect(term.textContent).toContain("user_agent=");
+        expect(term.textContent).toContain("is_mobile=True");
+
+        await user.click(within(tabs!).getByRole("tab", { name: "Java" }));
+        expect(term.textContent).toContain("newContext");
+        expect(term.textContent).toContain("setViewportSize(390, 844)");
+        expect(term.textContent).toContain("setIsMobile(true)");
+
+        await user.click(screen.getByTestId("capabilities-create-session"));
+        await waitFor(() => expect(openedSockets!).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("screenResolution")).toBe("390x844x24");
+        expect(wsUrl.searchParams.get("mobileDevice")).toBeNull();
+    });
+
+    it("omits isMobile from the firefox snippet", async () => {
+        const user = userEvent.setup();
+        renderPlaywrightCapabilities();
+        await user.click(screen.getByRole("button", { name: "firefox: 1.61.0" }));
+        await screen.findByTestId("capabilities-mobile-panel");
+        await user.selectOptions(screen.getByRole("combobox", { name: "mobileDevice" }), "iphone-12-pro");
+
+        const term = screen.getByTestId("capabilities-terminal-panel");
+        const tabs = within(term!).getByRole("tablist", { name: "Language" });
+        await user.click(within(tabs!).getByRole("tab", { name: "Javascript" }));
+        expect(term.textContent).toContain("newContext");
+        expect(term.textContent).not.toContain("isMobile");
     });
 });

@@ -11,7 +11,11 @@ import {
     mobileEmulationProbeUrl,
     mobileEmulationSnippetBlocks,
     mobileScreenResolution,
+    playwrightMobileContextOptions,
+    playwrightMobileEngine,
+    playwrightPageBlocks,
     supportsMobileEmulation,
+    supportsPlaywrightMobileEmulation,
 } from "./capabilitiesMobileEmulation";
 import { browserWindowOptions } from "./capabilitiesLogic";
 
@@ -135,5 +139,63 @@ describe("Java / Python / JS snippets", () => {
         expect(edge.python).toContain('"ms:edgeOptions"');
         expect(edge.javascript).toContain('"ms:edgeOptions"');
         expect(mobileEmulationSnippetBlocks("firefox", "iphone-12-pro").java).toBe("");
+    });
+});
+
+describe("Playwright newContext mobile catalog", () => {
+    it("is a client context, not goog:chromeOptions", () => {
+        expect(supportsPlaywrightMobileEmulation("playwright-chrome")).toBe(true);
+        expect(supportsPlaywrightMobileEmulation("playwright-chromium")).toBe(true);
+        expect(supportsPlaywrightMobileEmulation("playwright-firefox")).toBe(true);
+        expect(supportsPlaywrightMobileEmulation("chrome")).toBe(false);
+        expect(playwrightMobileEngine("playwright-firefox")).toBe("firefox");
+        expect(playwrightMobileEngine("playwright-webkit")).toBe("webkit");
+        expect(playwrightMobileEngine("playwright-chrome")).toBe("chromium");
+        expect(playwrightMobileContextOptions("playwright-chrome", "off")).toBeNull();
+    });
+
+    it("builds viewport + UA + DPR; omits isMobile on Firefox and desktop UA", () => {
+        const iphone = playwrightMobileContextOptions("playwright-chrome", "iphone-12-pro");
+        expect(iphone).toEqual({
+            viewport: { width: 390, height: 844 },
+            userAgent: mobileDeviceById("iphone-12-pro")!.userAgent,
+            deviceScaleFactor: 3,
+            hasTouch: true,
+            isMobile: true,
+        });
+
+        const firefox = playwrightMobileContextOptions("playwright-firefox", "iphone-12-pro");
+        expect(firefox!.viewport).toEqual({ width: 390, height: 844 });
+        expect(firefox!.isMobile).toBeUndefined();
+        expect(firefox!.hasTouch).toBe(true);
+
+        const surface = playwrightMobileContextOptions("playwright-chrome", "surface-pro-7");
+        expect(surface!.isMobile).toBeUndefined();
+        expect(surface!.viewport.width).toBe(912);
+    });
+
+    it("emits newContext in JS/Python/Java and newPage when off", () => {
+        const off = playwrightPageBlocks("playwright-chrome", "off");
+        expect(off.javascript).toBe("const page = await browser.newPage();\n");
+        expect(off.python).toContain("browser.new_page()");
+        expect(off.java).toBe("Page page = browser.newPage();\n");
+
+        const on = playwrightPageBlocks("playwright-chrome", "iphone-12-pro");
+        expect(on.javascript).toContain("browser.newContext");
+        expect(on.javascript).toContain('"width": 390');
+        expect(on.javascript).toContain("isMobile");
+        expect(on.javascript).toContain(mobileDeviceById("iphone-12-pro")!.userAgent);
+        expect(on.python).toContain("browser.new_context");
+        expect(on.python).toContain("user_agent=");
+        expect(on.python).toContain("is_mobile=True");
+        expect(on.java).toContain("browser.newContext");
+        expect(on.java).toContain("setViewportSize(390, 844)");
+        expect(on.java).toContain("setIsMobile(true)");
+
+        const fx = playwrightPageBlocks("playwright-firefox", "iphone-12-pro");
+        expect(fx.javascript).toContain("newContext");
+        expect(fx.javascript).not.toContain("isMobile");
+        expect(fx.python).not.toContain("is_mobile");
+        expect(fx.java).not.toContain("setIsMobile");
     });
 });

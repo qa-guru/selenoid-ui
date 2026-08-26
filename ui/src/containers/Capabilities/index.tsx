@@ -33,6 +33,7 @@ import {
     mobileEmulationProbeUrl,
     mobileEmulationSnippetBlocks,
     mobileScreenResolution,
+    playwrightPageBlocks,
     supportsMobileEmulation,
 } from "../../util/capabilitiesMobileEmulation";
 import { hubRemoteUrl, hubSessionUrl, resolveHubOrigin } from "../../util/hubOrigin.js";
@@ -95,7 +96,7 @@ import "@zero-design-system/react/styles.css";
  * | proxyPreset      | PlaqueSelect | solo   | WD: alwaysMatch.proxy / PW: socksProxy query |
  * | proxyServer      | PlaqueField  | duo    | host half of socksProxy                      |
  * | proxyPort        | PlaqueField  | duo    | port half of socksProxy                      |
- * | mobileDevice     | PlaqueSelect | solo   | goog:chromeOptions / ms:edgeOptions.mobileEmulation (chrome/msedge; off default; course, not grid) |
+ * | mobileDevice     | PlaqueSelect | solo   | WD: goog:/ms: mobileEmulation (chrome/msedge). PW: newContext + screenResolution (not a hub query; off default; course, not grid) |
  *
  * Playwright session panel mirrors Remote hub (+ headless). Proxy panel is shared:
  * WebDriver → W3C alwaysMatch.proxy; Playwright → socksProxy WS query → hub PW_PROXY.
@@ -629,7 +630,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
         }
     } else if (family === "playwright") {
         Object.assign(payload, {
-            screenResolution: sessionOpts.screenResolution,
+            screenResolution: mobileScreenResolution(sessionOpts.mobileDevice) || sessionOpts.screenResolution,
             enableHar: String(sessionOpts.enableHar),
             enableLog: String(sessionOpts.enableLog),
             timeZone: sessionOpts.timeZone || "UTC",
@@ -642,6 +643,7 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
             proxyServer: sessionOpts.proxyServer || "",
             proxyPort: sessionOpts.proxyPort || "",
             proxyEndpoint: proxyEndpoint || "",
+            mobileDevice: sessionOpts.mobileDevice || MOBILE_EMULATION_OFF,
         });
         if (sessionOpts.enableHar) {
             payload.harContent = sessionOpts.harContent || "meta";
@@ -693,6 +695,11 @@ const buildAgentPrompt = ({ vectorId, name, version, family = "webdriver", sessi
                 `- proxyPreset: **${payload.proxyPreset}**`,
                 `- proxyServer / proxyPort: **${payload.proxyServer || "—"}** / **${payload.proxyPort || "—"}**`,
                 `- socksProxy: **${payload.proxyEndpoint || "—"}** (hub → PW_PROXY → launchServer)`,
+                "",
+                "## Mobile emulation",
+                `- mobileDevice: **${
+                    payload.mobileDevice || MOBILE_EMULATION_OFF
+                }** (Playwright newContext viewport + UA + DPR; VNC follows screenResolution; off = desktop)`,
             ])
             .join("\n");
     }
@@ -1347,14 +1354,14 @@ const playwrightCode = (browser: any, version: any, accessKey = "", session: any
     const pw = playwrightClient(browser);
     const jsSelenoidOptions = JSON.stringify(selenoidOptions, null, 2);
     const pySelenoidOptions = JSON.stringify(selenoidOptions, null, 4);
+    const pages = playwrightPageBlocks(browser, session.mobileDevice);
     return {
         curl: `curl --websocket "${base}?${query}"`,
         java: `Playwright playwright = Playwright.create();
 Map<String, String> selenoidOptions = ${javaSelenoidOptionsBlock(selenoidOptions)};
 String wsEndpoint = "${base}" + "?${query}";
 Browser browser = playwright.${pw.java}().connect(wsEndpoint);
-Page page = browser.newPage();
-page.navigate("${DEFAULT_STACK_UI}");
+${pages.java}page.navigate("${DEFAULT_STACK_UI}");
 browser.close();
 playwright.close();
 `,
@@ -1362,8 +1369,7 @@ playwright.close();
 val selenoidOptions = ${kotlinSelenoidOptionsBlock(selenoidOptions)}
 val wsEndpoint = "${base}?${query}"
 val browser = playwright.${pw.java}().connect(wsEndpoint)
-val page = browser.newPage()
-page.navigate("${DEFAULT_STACK_UI}")
+${pages.kotlin}page.navigate("${DEFAULT_STACK_UI}")
 browser.close()
 playwright.close()
 `,
@@ -1376,10 +1382,9 @@ wsEndpoint := "${base}" + "?" + params.Encode()
 
 browser, err := pw.${pw.go}.Connect(wsEndpoint)
 if err != nil {
-\tlog.Fatalf("connect: %v", err)
+	log.Fatalf("connect: %v", err)
 }
-page, err := browser.NewPage()
-defer browser.Close()
+${pages.go}defer browser.Close()
 `,
         rust: `use std::collections::HashMap;
 use url::Url;
@@ -1395,8 +1400,7 @@ println!("{}", endpoint);
 var wsEndpoint = "${base}" + "?${query}";
 var playwright = await Playwright.CreateAsync();
 var browser = await playwright.${pw.cs}.ConnectAsync(wsEndpoint);
-var page = await browser.NewPageAsync();
-await page.GotoAsync("${DEFAULT_STACK_UI}");
+${pages.csharp}await page.GotoAsync("${DEFAULT_STACK_UI}");
 await browser.CloseAsync();
 `,
         python: `from urllib.parse import urlencode
@@ -1407,8 +1411,7 @@ ws_endpoint = "${base}?" + urlencode(selenoid_options)
 
 with sync_playwright() as p:
     browser = p.${pw.py}.connect(ws_endpoint)
-    page = browser.new_page()
-    page.goto("${DEFAULT_STACK_UI}")
+${pages.python}    page.goto("${DEFAULT_STACK_UI}")
     browser.close()
 `,
         javascript: `const { ${pw.js} } = require('playwright');
@@ -1417,8 +1420,7 @@ const selenoidOptions = ${jsSelenoidOptions};
 const wsEndpoint = \`${base}?\${new URLSearchParams(selenoidOptions)}\`;
 
 const browser = await ${pw.js}.connect(wsEndpoint);
-const page = await browser.newPage();
-await page.goto('${DEFAULT_STACK_UI}');
+${pages.javascript}await page.goto('${DEFAULT_STACK_UI}');
 await browser.close();
 `,
         typescript: `import { ${pw.js} } from 'playwright';
@@ -1427,16 +1429,14 @@ const selenoidOptions: Record<string, string> = ${jsSelenoidOptions};
 const wsEndpoint = \`${base}?\${new URLSearchParams(selenoidOptions)}\`;
 
 const browser = await ${pw.js}.connect(wsEndpoint);
-const page = await browser.newPage();
-await page.goto('${DEFAULT_STACK_UI}');
+${pages.typescript}await page.goto('${DEFAULT_STACK_UI}');
 await browser.close();
 `,
         PHP: `$selenoidOptions = ${phpSelenoidOptionsBlock(selenoidOptions)};
 $wsEndpoint = '${base}' . '?' . http_build_query($selenoidOptions);
 
 $browser = Playwright::create()->${pw.py}()->connect($wsEndpoint);
-$page = $browser->newPage();
-$page->goto('${DEFAULT_STACK_UI}');
+${pages.php}$page->goto('${DEFAULT_STACK_UI}');
 $browser->close();
 `,
         ruby: `require 'uri'
@@ -1446,8 +1446,7 @@ ws_endpoint = '${base}' + '?' + URI.encode_www_form(selenoid_options)
 
 Playwright.create do |playwright|
   browser = playwright.${pw.rb}.connect(ws_endpoint)
-  page = browser.new_page
-  page.goto('${DEFAULT_STACK_UI}')
+${pages.ruby}  page.goto('${DEFAULT_STACK_UI}')
   browser.close
 end
 `,
@@ -1633,10 +1632,11 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const isIos = name === "ios";
     const isWebdriver = Boolean(name) && !isPlaywright && !isAndroid && !isIos;
     const family = isPlaywright ? "playwright" : isAndroid ? "android" : isIos ? "ios" : "webdriver";
+    const pwEffectiveResolution = mobileScreenResolution(mobileDevice) || screenResolution;
     const pwSession = {
         name: sessionName,
         sessionTimeout,
-        screenResolution,
+        screenResolution: pwEffectiveResolution,
         enableVnc: enableVnc === "true",
         enableVideo: enableVideo === "true",
         enableHar: enableHar === "true",
@@ -1649,6 +1649,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
         logName,
         socksProxy: resolveProxyServer(proxyPreset, proxyServer, proxyPort),
         headless: headless === "true",
+        mobileDevice,
     };
     const androidSession = {
         authUser,
@@ -3307,7 +3308,7 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
-            {isWebdriver && supportsMobileEmulation(name) ? (
+            {isPlaywright || (isWebdriver && supportsMobileEmulation(name)) ? (
                 <Panel
                     title="Mobile emulation"
                     testId="capabilities-mobile-panel"
@@ -3315,9 +3316,9 @@ const Launch = ({
                     className="capabilities-config-panel"
                 >
                     {/*
-                      Chrome/Edge goog:chromeOptions / ms:edgeOptions.mobileEmulation.
-                      deviceMetrics + userAgent from the course catalog. Off = desktop.
-                      Not Android/iOS grid images.
+                      WD: Chrome/Edge goog:chromeOptions / ms:edgeOptions.mobileEmulation.
+                      PW: newContext viewport + UA + DPR; hub query only screenResolution.
+                      Course catalog. Off = desktop. Not Android/iOS grid images.
                     */}
                     <div
                         className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
@@ -3338,8 +3339,9 @@ const Launch = ({
                             />
                         </PlaqueFieldGrid>
                         <p className="capabilities-mobile-hint" data-testid="capabilities-mobile-hint">
-                            Off = desktop 1920×1080. Выбери устройство — окно VNC и UA станут как в Chrome DevTools
-                            (не Android/iOS).
+                            {isPlaywright
+                                ? "Off = desktop 1920×1080. Выбери устройство — окно VNC станет как телефон. UA, viewport и DPR — в newContext после connect (не Android/iOS)."
+                                : "Off = desktop 1920×1080. Выбери устройство — окно VNC и UA станут как в Chrome DevTools (не Android/iOS)."}
                         </p>
                     </div>
                 </Panel>

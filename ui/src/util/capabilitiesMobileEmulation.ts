@@ -209,3 +209,210 @@ options.setExperimentalOption("mobileEmulation", mobileEmulation);
         curl,
     };
 }
+
+export type PlaywrightMobileEngine = "chromium" | "firefox" | "webkit";
+
+/** playwright-chrome / playwright-chromium / playwright-msedge → chromium. */
+export function playwrightMobileEngine(browserName: unknown): PlaywrightMobileEngine {
+    const name = String(browserName || "").toLowerCase();
+    if (name.includes("firefox")) {
+        return "firefox";
+    }
+    if (name.includes("webkit")) {
+        return "webkit";
+    }
+    return "chromium";
+}
+
+export function supportsPlaywrightMobileEmulation(browserName: unknown): boolean {
+    return String(browserName || "")
+        .toLowerCase()
+        .startsWith("playwright-");
+}
+
+function deviceLooksMobile(device: MobileDevice): boolean {
+    return /Mobile|iPhone|iPad|Android/i.test(device.userAgent);
+}
+
+export type PlaywrightMobileContext = {
+    viewport: { width: number; height: number };
+    userAgent: string;
+    deviceScaleFactor: number;
+    hasTouch: boolean;
+    isMobile?: boolean;
+};
+
+/** Client newContext payload. Hub query stays screenResolution only — no image rebuild. */
+export function playwrightMobileContextOptions(
+    browserName: unknown,
+    deviceId: unknown
+): PlaywrightMobileContext | null {
+    const device = mobileDeviceById(deviceId);
+    if (!device) {
+        return null;
+    }
+    const ctx: PlaywrightMobileContext = {
+        viewport: { width: device.width, height: device.height },
+        userAgent: device.userAgent,
+        deviceScaleFactor: device.pixelRatio,
+        hasTouch: true,
+    };
+    // Playwright Firefox throws if isMobile is set.
+    if (playwrightMobileEngine(browserName) !== "firefox" && deviceLooksMobile(device)) {
+        ctx.isMobile = true;
+    }
+    return ctx;
+}
+
+export type PlaywrightPageBlocks = {
+    java: string;
+    kotlin: string;
+    go: string;
+    csharp: string;
+    python: string;
+    javascript: string;
+    typescript: string;
+    php: string;
+    ruby: string;
+};
+
+const PLAYWRIGHT_DESKTOP_PAGE_BLOCKS: PlaywrightPageBlocks = {
+    java: `Page page = browser.newPage();
+`,
+    kotlin: `val page = browser.newPage()
+`,
+    go: `page, err := browser.NewPage()
+`,
+    csharp: `var page = await browser.NewPageAsync();
+`,
+    python: `    page = browser.new_page()
+`,
+    javascript: `const page = await browser.newPage();
+`,
+    typescript: `const page = await browser.newPage();
+`,
+    php: `$page = $browser->newPage();
+`,
+    ruby: `  page = browser.new_page
+`,
+};
+
+function javaContextOptions(ctx: PlaywrightMobileContext): string {
+    const uaJson = JSON.stringify(ctx.userAgent);
+    const mobile = ctx.isMobile ? "\n    .setIsMobile(true)" : "";
+    return `new Browser.NewContextOptions()
+    .setViewportSize(${ctx.viewport.width}, ${ctx.viewport.height})
+    .setUserAgent(${uaJson})
+    .setDeviceScaleFactor(${ctx.deviceScaleFactor})${mobile}
+    .setHasTouch(true)`;
+}
+
+function pythonContextArgs(ctx: PlaywrightMobileContext): string {
+    const uaJson = JSON.stringify(ctx.userAgent);
+    const mobile = ctx.isMobile ? ",\n        is_mobile=True" : "";
+    return `viewport={"width": ${ctx.viewport.width}, "height": ${ctx.viewport.height}},
+        user_agent=${uaJson},
+        device_scale_factor=${ctx.deviceScaleFactor},
+        has_touch=True${mobile}`;
+}
+
+function jsContextObject(ctx: PlaywrightMobileContext): string {
+    const payload: Record<string, unknown> = {
+        viewport: ctx.viewport,
+        userAgent: ctx.userAgent,
+        deviceScaleFactor: ctx.deviceScaleFactor,
+        hasTouch: ctx.hasTouch,
+    };
+    if (ctx.isMobile) {
+        payload.isMobile = true;
+    }
+    return indentJson(payload, 0);
+}
+
+function csharpContextOptions(ctx: PlaywrightMobileContext): string {
+    const uaJson = JSON.stringify(ctx.userAgent);
+    const mobile = ctx.isMobile ? "\n    IsMobile = true," : "";
+    return `new BrowserNewContextOptions {
+    ViewportSize = new ViewportSize { Width = ${ctx.viewport.width}, Height = ${ctx.viewport.height} },
+    UserAgent = ${uaJson},
+    DeviceScaleFactor = ${ctx.deviceScaleFactor},${mobile}
+    HasTouch = true
+}`;
+}
+
+function goContextOptions(ctx: PlaywrightMobileContext): string {
+    const uaJson = JSON.stringify(ctx.userAgent);
+    const mobile = ctx.isMobile ? "\n\t\tIsMobile:          playwright.Bool(true)," : "";
+    return `playwright.BrowserNewContextOptions{
+		Viewport:          &playwright.Size{Width: ${ctx.viewport.width}, Height: ${ctx.viewport.height}},
+		UserAgent:         playwright.String(${uaJson}),
+		DeviceScaleFactor: playwright.Float(${ctx.deviceScaleFactor}),
+		HasTouch:          playwright.Bool(true),${mobile}
+	}`;
+}
+
+function phpContextArray(ctx: PlaywrightMobileContext): string {
+    const payload: Record<string, unknown> = {
+        viewport: ctx.viewport,
+        userAgent: ctx.userAgent,
+        deviceScaleFactor: ctx.deviceScaleFactor,
+        hasTouch: true,
+    };
+    if (ctx.isMobile) {
+        payload.isMobile = true;
+    }
+    return indentJson(payload, 0);
+}
+
+function rubyContextArgs(ctx: PlaywrightMobileContext): string {
+    const uaJson = JSON.stringify(ctx.userAgent);
+    const mobile = ctx.isMobile ? ",\n    is_mobile: true" : "";
+    return `viewport: { width: ${ctx.viewport.width}, height: ${ctx.viewport.height} },
+    user_agent: ${uaJson},
+    device_scale_factor: ${ctx.deviceScaleFactor},
+    has_touch: true${mobile}`;
+}
+
+export function playwrightPageBlocks(browserName: unknown, deviceId: unknown): PlaywrightPageBlocks {
+    const ctx = playwrightMobileContextOptions(browserName, deviceId);
+    if (!ctx) {
+        return PLAYWRIGHT_DESKTOP_PAGE_BLOCKS;
+    }
+    const jsObject = jsContextObject(ctx);
+    return {
+        java: `BrowserContext context = browser.newContext(${javaContextOptions(ctx)});
+Page page = context.newPage();
+`,
+        kotlin: `val context = browser.newContext(${javaContextOptions(ctx)})
+val page = context.newPage()
+`,
+        go: `context, err := browser.NewContext(${goContextOptions(ctx)})
+if err != nil {
+	log.Fatalf("context: %v", err)
+}
+page, err := context.NewPage()
+`,
+        csharp: `var context = await browser.NewContextAsync(${csharpContextOptions(ctx)});
+var page = await context.NewPageAsync();
+`,
+        python: `    context = browser.new_context(
+        ${pythonContextArgs(ctx)},
+    )
+    page = context.new_page()
+`,
+        javascript: `const context = await browser.newContext(${jsObject});
+const page = await context.newPage();
+`,
+        typescript: `const context = await browser.newContext(${jsObject});
+const page = await context.newPage();
+`,
+        php: `$context = $browser->newContext(${phpContextArray(ctx)});
+$page = $context->newPage();
+`,
+        ruby: `  context = browser.new_context(
+    ${rubyContextArgs(ctx)}
+  )
+  page = context.new_page
+`,
+    };
+}
