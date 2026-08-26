@@ -92,8 +92,8 @@ UI не заменяет hub — он **подключается к уже за�
 Окно default + regression (warm + min) на [selenoid.qa.guru](https://selenoid.qa.guru) **не едет в релизе UI**. Его пишет watch [qa-guru/browser-image](https://github.com/qa-guru/browser-image):
 
 1. Cron [`watch.yml`](https://github.com/qa-guru/browser-image/blob/main/.github/workflows/watch.yml) резолвит stable → [`pins.json`](https://github.com/qa-guru/browser-image/blob/main/pins.json).
-2. После Docker Hub 200 тот же пайплайн переписывает `browsers.json` в hub / cm / tests / **этом репо** (корневой [`browsers.json`](browsers.json)) и **последним** `deploy/browsers-production.json` — Box1 подтягивает образы сам.
-3. Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**: watch не передаёт `version` / `ui_version` в deploy.
+2. После Docker Hub 200 тот же пайплайн переписывает `browsers.json` в hub / cm / tests / **этом репо** и **последним** `deploy/browsers-production.json`. На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб перечитывает конфиг по **SIGHUP**. UI не гасится — New Session берёт список версий с хаба (`/status`).
+3. Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**: watch не передаёт `version` / `ui_version`. Полный deploy.sh (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
 
 UI только **читает** каталог (`-browsers-conf` → New Session) и `/status` с хаба. Таблица версий: [selenoid/docs/browser-versions.md](https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md).
 
