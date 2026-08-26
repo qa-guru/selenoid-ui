@@ -48,8 +48,9 @@ export const StyledCapabilities = styled.div`
     /*
      * Independent column scrollports (layout-standard § Scrollports).
      * Lock this page to the viewport below the header — not html/body
-     * (other routes still page-scroll). Terminal chrome stays put;
-     * images and session options each keep their own scrollport.
+     * (other routes still page-scroll). Config column scrolls as one stack
+     * (panels keep content height). Terminal chrome stays put; .panel__code
+     * / foot rail scroll.
      */
     height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
     overflow: hidden;
@@ -101,7 +102,25 @@ export const StyledCapabilities = styled.div`
       grid-column: 1 / 2;
       align-self: stretch;
       min-height: 0;
-      overflow: hidden;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      overscroll-behavior: contain;
+
+      /* Column is the only left scrollport — panels stay content-height. */
+      .panel {
+        flex: 0 0 auto;
+        min-height: auto;
+      }
+
+      .panel__body {
+        overflow: visible;
+      }
+
+      .capabilities-launch {
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow: visible;
+      }
     }
 
     .code-panel {
@@ -143,37 +162,6 @@ export const StyledCapabilities = styled.div`
       width: 100%;
       margin-top: 10px;
       cursor: pointer;
-    }
-  }
-
-  @media (min-width: 769px) {
-    /*
-     * Left column: images stay on screen (chip list scrolls in the panel).
-     * Session options / proxy live in .capabilities-launch (own scrollport).
-     * Do not use .setup as a single column scrollport — that hid images.
-     */
-    .setup .panel__body {
-      overflow: visible;
-    }
-
-    .setup > .capabilities-images-panel {
-      flex: 1 1 0;
-      min-height: 0;
-      overflow: hidden;
-
-      .panel__body {
-        overflow-y: auto;
-        scrollbar-width: thin;
-        overscroll-behavior: contain;
-      }
-    }
-
-    .setup > .capabilities-launch {
-      flex: 1 1 0;
-      min-height: 0;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      overscroll-behavior: contain;
     }
   }
 
