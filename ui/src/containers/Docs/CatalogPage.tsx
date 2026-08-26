@@ -2,6 +2,7 @@ import React from "react";
 
 import {
     CATALOG_EFFECTS,
+    CATALOG_SCRIPTS,
     CATALOG_SOURCES,
     CATALOG_STEPS,
     CATALOG_VERSIONS_HREF,
@@ -30,9 +31,16 @@ const CatalogPage = () => {
                 The version window is maintained in{" "}
                 <a href={CATALOG_WATCH_HREF} target="_blank" rel="noreferrer">
                     {CATALOG_WATCH_LABEL}
-                </a>{" "}
-                (<code>pins.json</code>, watch). A UI or hub release tag is separate — watch does not set those. Version
-                table:{" "}
+                </a>
+                :{" "}
+                <a href={`${CATALOG_WATCH_HREF}/blob/main/pins.json`} target="_blank" rel="noreferrer">
+                    pins.json
+                </a>
+                ,{" "}
+                <a href={`${CATALOG_WATCH_HREF}/blob/main/.github/workflows/watch.yml`} target="_blank" rel="noreferrer">
+                    watch.yml
+                </a>
+                . A UI or hub release tag is separate — watch does not set those. Version table:{" "}
                 <a href={CATALOG_VERSIONS_HREF} target="_blank" rel="noreferrer">
                     selenoid/docs/browser-versions.md
                 </a>
@@ -86,6 +94,34 @@ const CatalogPage = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <section className="docs__section">
+                <h2>Scripts that move the window</h2>
+                <p className="docs__hint">
+                    Same files the cron runs. Open the GitHub blob, then the excerpt under it — that is the actual
+                    source, trimmed.
+                </p>
+                <div className="docs-pipeline" data-testid="docs-catalog-scripts">
+                    {CATALOG_SCRIPTS.map((row) => (
+                        <article
+                            key={row.file}
+                            className="docs-pipeline__item"
+                            data-testid={`docs-catalog-script-${row.file.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}`}
+                        >
+                            <h3>
+                                <a href={row.href} target="_blank" rel="noreferrer">
+                                    {row.file}
+                                </a>
+                            </h3>
+                            <p className="docs-cell__human">{row.human}</p>
+                            <p className="docs-cell__tech">{row.tech}</p>
+                            <pre className="docs-excerpt">
+                                <code>{row.excerpt}</code>
+                            </pre>
+                        </article>
+                    ))}
                 </div>
             </section>
 

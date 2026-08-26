@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
 import Docs from "./index";
-import { CATALOG_EFFECTS, CATALOG_SOURCES, CATALOG_STEPS } from "./catalog";
+import { CATALOG_EFFECTS, CATALOG_SCRIPTS, CATALOG_SOURCES, CATALOG_STEPS } from "./catalog";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
 import { RESOURCE_SERVICES } from "./resources";
 
@@ -139,6 +139,14 @@ describe("Docs", () => {
         expect(page).toHaveTextContent("watch does not set those");
         expect(page.querySelector('a[href="https://github.com/qa-guru/browser-image"]')).toBeTruthy();
         expect(
+            page.querySelector('a[href="https://github.com/qa-guru/browser-image/blob/main/pins.json"]')
+        ).toBeTruthy();
+        expect(
+            page.querySelector(
+                'a[href="https://github.com/qa-guru/browser-image/blob/main/.github/workflows/watch.yml"]'
+            )
+        ).toBeTruthy();
+        expect(
             page.querySelector('a[href="https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md"]')
         ).toBeTruthy();
         expect(page).toHaveTextContent("Not systemctl restart");
@@ -185,6 +193,34 @@ describe("Docs", () => {
         expect(android.querySelector('[aria-label="Yes"]')).toBeFalsy();
         const chrome = screen.getByTestId("docs-catalog-source-chrome");
         expect(chrome.querySelector('[aria-label="Yes"]')).toBeTruthy();
+
+        const scripts = screen.getByTestId("docs-catalog-scripts");
+        expect(scripts.querySelectorAll("article")).toHaveLength(CATALOG_SCRIPTS.length);
+        expect(scripts).toHaveTextContent("7,22,37,52");
+        expect(scripts).toHaveTextContent("wait-hub");
+        expect(scripts).toHaveTextContent("channels.Stable.version");
+        expect(scripts).toHaveTextContent("git push origin");
+        expect(scripts).toHaveTextContent("browser-image-webdriver-");
+        expect(scripts).toHaveTextContent("Does not touch android");
+        expect(scripts).toHaveTextContent("qa-guru/selenoid-ui");
+        expect(scripts).toHaveTextContent("browsers-production.json");
+        expect(
+            scripts.querySelector('a[href="https://github.com/qa-guru/browser-image/blob/main/scripts/watch_upstream.py"]')
+        ).toBeTruthy();
+        expect(
+            scripts.querySelector('a[href="https://github.com/qa-guru/browser-image/blob/main/scripts/catalog_sync.sh"]')
+        ).toBeTruthy();
+        expect(
+            scripts.querySelector('a[href="https://github.com/qa-guru/browser-image/blob/main/scripts/push_watch_tags.sh"]')
+        ).toBeTruthy();
+        expect(
+            scripts.querySelector(
+                'a[href="https://github.com/qa-guru/browser-image/blob/main/.github/workflows/publish-webdriver.yml"]'
+            )
+        ).toBeTruthy();
+        expect(
+            scripts.querySelector('a[href="https://github.com/qa-guru/selenoid-ui/blob/main/browsers.json"]')
+        ).toBeTruthy();
     });
 
     it("renders the Resources catalog without aerokube GitHub links", async () => {

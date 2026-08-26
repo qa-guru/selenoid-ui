@@ -332,13 +332,15 @@ export const StyledDocs = styled.div`
     }
 
     .docs__lead a,
-    .docs__meta a {
+    .docs__meta a,
+    .docs__hint a {
         color: var(--color-success, #59a781);
         text-decoration: none;
     }
 
     .docs__lead a:hover,
-    .docs__meta a:hover {
+    .docs__meta a:hover,
+    .docs__hint a:hover {
         text-decoration: underline;
     }
 
@@ -412,6 +414,58 @@ export const StyledDocs = styled.div`
         color: var(--color-text-muted, #aaa);
         font-size: 0.92em;
         font-weight: 300;
+    }
+
+    .docs-pipeline {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        max-width: 88ch;
+    }
+
+    .docs-pipeline__item {
+        border: 1px solid var(--color-border-strong, #555f6a);
+        border-radius: 4px;
+        padding: 12px 14px;
+        background: var(--color-surface, #2a3038);
+    }
+
+    .docs-pipeline__item h3 {
+        margin: 0 0 6px;
+        font-size: 0.92em;
+        font-weight: 400;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .docs-pipeline__item h3 a {
+        color: var(--color-success, #59a781);
+        text-decoration: none;
+    }
+
+    .docs-pipeline__item h3 a:hover {
+        text-decoration: underline;
+    }
+
+    .docs-pipeline__item .docs-cell__human {
+        margin-bottom: 4px;
+    }
+
+    .docs-excerpt {
+        margin: 10px 0 0;
+        padding: 10px 12px;
+        overflow-x: auto;
+        border-radius: 4px;
+        background: var(--color-surface, #1e242c);
+        color: var(--color-text, #d7dde5);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.75em;
+        font-weight: 400;
+        line-height: 1.45;
+        white-space: pre;
+    }
+
+    .docs-excerpt code {
+        font: inherit;
     }
 
     .docs__diagrams {

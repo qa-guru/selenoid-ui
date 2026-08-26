@@ -89,13 +89,47 @@ UI не заменяет hub — он **подключается к уже за�
 
 ## Каталог браузеров (без релиза UI)
 
-Окно default + regression (warm + min) на [selenoid.qa.guru](https://selenoid.qa.guru) **не едет в релизе UI**. Его пишет watch [qa-guru/browser-image](https://github.com/qa-guru/browser-image):
+Окно default + regression (warm + min) на [selenoid.qa.guru](https://selenoid.qa.guru) **не едет в релизе UI**. Его пишет watch [qa-guru/browser-image](https://github.com/qa-guru/browser-image). В UI то же самое: Docs → Catalog (`#/docs/catalog`).
 
-1. Cron [`watch.yml`](https://github.com/qa-guru/browser-image/blob/main/.github/workflows/watch.yml) резолвит stable → [`pins.json`](https://github.com/qa-guru/browser-image/blob/main/pins.json).
-2. После Docker Hub 200 тот же пайплайн переписывает `browsers.json` в hub / cm / tests / **этом репо** и **последним** `deploy/browsers-production.json`. На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб перечитывает конфиг по **SIGHUP**. UI не гасится — New Session берёт список версий с хаба (`/status`).
-3. Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**: watch не передаёт `version` / `ui_version`. Полный deploy.sh (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
+| Что происходит                                | Файл (открой blob)                                                                                                    |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Окно версий                                   | [`pins.json`](https://github.com/qa-guru/browser-image/blob/main/pins.json)                                           |
+| Cron 15 мин + оркестрация                     | [`watch.yml`](https://github.com/qa-guru/browser-image/blob/main/.github/workflows/watch.yml)                         |
+| Резолв CfT / Firefox / Edge / npm+MCR         | [`scripts/watch_upstream.py`](https://github.com/qa-guru/browser-image/blob/main/scripts/watch_upstream.py)           |
+| Теги по одному (иначе Actions не стартует)    | [`scripts/push_watch_tags.sh`](https://github.com/qa-guru/browser-image/blob/main/scripts/push_watch_tags.sh)         |
+| Сборка одного WD-образа с тега                | [`publish-webdriver.yml`](https://github.com/qa-guru/browser-image/blob/main/.github/workflows/publish-webdriver.yml) |
+| Перепись `browsers.json` (Android не трогает) | [`scripts/update_catalog.py`](https://github.com/qa-guru/browser-image/blob/main/scripts/update_catalog.py)           |
+| Push каталога, **этот репо** → prod last      | [`scripts/catalog_sync.sh`](https://github.com/qa-guru/browser-image/blob/main/scripts/catalog_sync.sh)               |
+| Копия каталога в UI                           | [`browsers.json`](browsers.json)                                                                                      |
 
-UI только **читает** каталог (`-browsers-conf` → New Session) и `/status` с хаба. Таблица версий: [selenoid/docs/browser-versions.md](https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md).
+```json
+{
+  "chrome": { "default_major": 152, "regression_major": 151 },
+  "playwright": { "default": "1.62.1", "regression": "1.61.1" }
+}
+```
+
+```yaml
+# watch.yml — не передаёт version/ui_version (иначе rewind хаба/UI)
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+# …
+python3 scripts/watch_upstream.py wait-hub --plan plan.json
+bash scripts/catalog_sync.sh plan.json
+```
+
+```bash
+# catalog_sync.sh — этот UI только browsers.json; prod файл последним
+clone_repo qa-guru/selenoid-ui …
+commit_push … browsers.json
+clone_repo qa-guru/selenoid.qa.guru …   # LAST: copy + docker pull + SIGHUP
+commit_push … deploy/browsers-production.json
+```
+
+На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб перечитывает конфиг по **SIGHUP**. UI не гасится — New Session берёт список версий с хаба (`/status`). Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**. Полный `deploy.sh` (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
+
+Таблица версий: [selenoid/docs/browser-versions.md](https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md).
 
 Upstream docs: [aerokube/selenoid-ui](https://github.com/qa-guru/selenoid-ui) · [aerokube.com/selenoid-ui](https://aerokube.com/selenoid-ui/latest/). AsciiDoc `docs/*.adoc` — **deprecated** (оставлены как upstream history); канон — этот README + `docs/RELEASE_*.md`.
 
