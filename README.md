@@ -87,6 +87,16 @@ UI не заменяет hub — он **подключается к уже за�
 - Нужен тот же `browsers.json`, что у hub — иначе Playwright-версии в UI не совпадут с hub.
 - **SSE resilience:** immediate `GET /status`, fallback poll каждые 4s, reconnect с backoff, индикатор **STALE** вместо мгновенного сброса в UNKNOWN.
 
+## Каталог браузеров (без релиза UI)
+
+Окно default + regression (warm + min) на [selenoid.qa.guru](https://selenoid.qa.guru) **не едет в релизе UI**. Его пишет watch [qa-guru/browser-image](https://github.com/qa-guru/browser-image):
+
+1. Cron [`watch.yml`](https://github.com/qa-guru/browser-image/blob/main/.github/workflows/watch.yml) резолвит stable → [`pins.json`](https://github.com/qa-guru/browser-image/blob/main/pins.json).
+2. После Docker Hub 200 тот же пайплайн переписывает `browsers.json` в hub / cm / tests / **этом репо** (корневой [`browsers.json`](browsers.json)) и **последним** `deploy/browsers-production.json` — Box1 подтягивает образы сам.
+3. Пины хаба (`qaguru/selenoid:v3.0.14`) и UI (`qaguru/selenoid-ui:v3.0.52`) **отдельные**: watch не передаёт `version` / `ui_version` в deploy.
+
+UI только **читает** каталог (`-browsers-conf` → New Session) и `/status` с хаба. Таблица версий: [selenoid/docs/browser-versions.md](https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md).
+
 Upstream docs: [aerokube/selenoid-ui](https://github.com/qa-guru/selenoid-ui) · [aerokube.com/selenoid-ui](https://aerokube.com/selenoid-ui/latest/). AsciiDoc `docs/*.adoc` — **deprecated** (оставлены как upstream history); канон — этот README + `docs/RELEASE_*.md`.
 
 ## Сборка и запуск
@@ -116,7 +126,7 @@ Current `main` / v3-dev toolchain — [`STACK-PIN.md`](STACK-PIN.md) + [`ui/pack
 | Router    | react-router-dom 7 (`HashRouter` / `Routes` / `useNavigate`) |
 | Bundler   | Vite 6                                                       |
 | Test      | Vitest 3 + React Testing Library (jsdom)                     |
-| Node (CI) | 24                                                           |
+| Node (CI) | 26                                                           |
 
 ```bash
 yarn --cwd ui install
@@ -153,7 +163,7 @@ Nav: [Statistics](http://127.0.0.1:8080/#/statistics) · [Sessions](http://127.0
 docker run -d --name selenoid-ui \
   -p 8080:8080 \
   -v "$PWD:/etc/selenoid:ro" \
-  qaguru/selenoid-ui:v2.2.1 \
+  qaguru/selenoid-ui:v3.0.52 \
   --selenoid-uri http://host.docker.internal:4444 \
   --browsers-conf /etc/selenoid/browsers.json
 ```
@@ -165,7 +175,7 @@ Compose: [`docker-compose.yml`](docker-compose.yml) монтирует `$PWD` в
 1. Соберите hub (`go build -o selenoid .` в [qa-guru/selenoid](https://github.com/qa-guru/selenoid)) и поднимите с `config/browsers.json`
 2. Соберите UI (команды выше)
 3. Запустите UI с `-browsers-conf`, указывающим на тот же `browsers.json`
-4. New Session → **playwright-chromium: 1.61.1** → **Create Session** → должен открыться экран сессии с VNC
+4. New Session → **playwright-chromium: 1.62.1** → **Create Session** → должен открыться экран сессии с VNC
 5. Для chrome/firefox — создание сессии через WebDriver без изменений
 
 Проверка только Go-backend (без React):

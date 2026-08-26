@@ -4,23 +4,24 @@
 
 Этот файл на **этой ветке** (`main`, `feat/selenoid-3-*` и др. v3-dev) описывает **живой** toolchain checkout’а. Источник правды по фронту — [`ui/package.json`](ui/package.json).
 
-| Поле            | Значение                                                                       |
-| --------------- | ------------------------------------------------------------------------------ |
-| Линия           | Selenoid 3                                                                     |
-| Stack semver    | hub **v3.0.14** / cm **v3.0.3**; UI cut **v3.0.52** (prod pin **v3.0.52**)     |
-| Docker API      | TBD (paired с hub)                                                             |
-| Docker Engine   | TBD (paired с hub)                                                             |
-| Go              | 1.26.6                                                                         |
-| Go (примечание) | Факт `go.mod` + `toolchain go1.26.6`                                           |
-| React           | 19                                                                             |
-| Router          | react-router-dom 7                                                             |
-| UI              | Vite 6                                                                         |
-| TypeScript      | **7** full `ui/src` (`strict`, `allowJs: false`; Vite bundler retained)        |
-| Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL      |
-| Typecheck       | `yarn --cwd ui typecheck` → `tsc -p tsconfig.json --noEmit` (CI: `ci/test.sh`) |
-| Node CI         | 26                                                                             |
-| Git anchor      | `main` / `feat/selenoid-3-*`                                                   |
-| PWA             | landed (`vite-plugin-pwa`: shell precache, live API/SSE online-only)           |
+| Поле            | Значение                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Линия           | Selenoid 3                                                                                                                                   |
+| Stack semver    | hub **v3.0.14** / cm **v3.0.3**; UI cut **v3.0.52** (prod pin **v3.0.52**)                                                                   |
+| Docker API      | TBD (paired с hub)                                                                                                                           |
+| Docker Engine   | TBD (paired с hub)                                                                                                                           |
+| Go              | 1.26.6                                                                                                                                       |
+| Go (примечание) | Факт `go.mod` + `toolchain go1.26.6`                                                                                                         |
+| React           | 19                                                                                                                                           |
+| Router          | react-router-dom 7                                                                                                                           |
+| UI              | Vite 6                                                                                                                                       |
+| TypeScript      | **7** full `ui/src` (`strict`, `allowJs: false`; Vite bundler retained)                                                                      |
+| Frontend        | Vite 6, React 19 (`^19.2.7`), react-router-dom 7 (`^7.1.1`), Vitest + RTL                                                                    |
+| Typecheck       | `yarn --cwd ui typecheck` → `tsc -p tsconfig.json --noEmit` (CI: `ci/test.sh`)                                                               |
+| Node CI         | 26                                                                                                                                           |
+| Git anchor      | `main` / `feat/selenoid-3-*`                                                                                                                 |
+| Browser catalog | Watch [qa-guru/browser-image](https://github.com/qa-guru/browser-image) `pins.json` / `watch.yml` — **не** этот UI-пин; хаб/UI теги отдельно |
+| PWA             | landed (`vite-plugin-pwa`: shell precache, live API/SSE online-only)                                                                         |
 
 ## Selenoid 2 maintenance pin (не путать)
 
