@@ -41,6 +41,26 @@
           "/tmp": "size=512m"
         },
         "hosts": ["host.docker.internal:host-gateway"]
+      },
+      "148.0": {
+        "image": "qaguru/webdriver-chrome:148",
+        "port": "4444",
+        "path": "/",
+        "shmSize": 2147483648,
+        "tmpfs": {
+          "/tmp": "size=512m"
+        },
+        "hosts": ["host.docker.internal:host-gateway"]
+      },
+      "148.0-min": {
+        "image": "qaguru/webdriver-chrome:148-min",
+        "port": "4444",
+        "path": "/",
+        "shmSize": 2147483648,
+        "tmpfs": {
+          "/tmp": "size=512m"
+        },
+        "hosts": ["host.docker.internal:host-gateway"]
       }
     }
   },
