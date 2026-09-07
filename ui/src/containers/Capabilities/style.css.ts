@@ -207,6 +207,14 @@ export const StyledCapabilities = styled.div`
     .panel__code {
       margin: 0;
       max-width: 100%;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Beat stale vendor highlight CSS: opacity on inline punct ghosts braces left of the snippet. */
+    .ch-tok-punct {
+      color: rgba(212, 212, 212, 0.55);
+      opacity: 1;
     }
 
     .capabilities-vector-input {
@@ -247,9 +255,9 @@ export const StyledCapabilities = styled.div`
     pre code,
     pre code.hljs,
     pre .hljs {
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere;
+      white-space: pre;
+      overflow-wrap: normal;
+      word-break: normal;
       min-width: 0;
       max-width: 100%;
       box-sizing: border-box;
