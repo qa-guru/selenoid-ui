@@ -198,12 +198,29 @@ describe("capabilitiesLogic", () => {
         }
     });
 
-    it("pickDefaultWebdriverBrowser prefers chrome 149.0", () => {
+    it("pickDefaultWebdriverBrowser prefers newest chrome over older", () => {
         const picked = pickDefaultWebdriverBrowser([
             { value: "chrome_148.0", name: "chrome", version: "148.0", protocol: "webdriver" },
             { value: "chrome_149.0", name: "chrome", version: "149.0", protocol: "webdriver" },
             { value: "playwright-chromium_1.61.1", name: "playwright-chromium", version: "1.61.1", protocol: "playwright" },
         ]);
         expect(picked?.value).toBe("chrome_149.0");
+    });
+
+    it("pickDefaultWebdriverBrowser prefers newest chrome without -min", () => {
+        const picked = pickDefaultWebdriverBrowser([
+            { value: "chrome_151.0", name: "chrome", version: "151.0", protocol: "webdriver" },
+            { value: "chrome_152.0-min", name: "chrome", version: "152.0-min", protocol: "webdriver" },
+            { value: "chrome_152.0", name: "chrome", version: "152.0", protocol: "webdriver" },
+        ]);
+        expect(picked?.value).toBe("chrome_152.0");
+    });
+
+    it("pickDefaultWebdriverBrowser falls back to -min when no full chrome exists", () => {
+        const picked = pickDefaultWebdriverBrowser([
+            { value: "chrome_152.0-min", name: "chrome", version: "152.0-min", protocol: "webdriver" },
+            { value: "firefox_151.0", name: "firefox", version: "151.0", protocol: "webdriver" },
+        ]);
+        expect(picked?.value).toBe("chrome_152.0-min");
     });
 });

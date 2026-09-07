@@ -290,7 +290,15 @@ export function findPlaywrightSession(
 
 type BrowserPick = { value: string; name: string; version: string; protocol?: string };
 
-/** First manual session default — chrome catalog default, else newest chrome, else first WD row. */
+function isMinBrowserVersion(version: string): boolean {
+    return version.endsWith("-min");
+}
+
+function newestByVersion(items: BrowserPick[]): BrowserPick | undefined {
+    return [...items].sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))[0];
+}
+
+/** First manual session default — newest full chrome (not -min), else newest chrome, else first WD row. */
 export function pickDefaultWebdriverBrowser(available: BrowserPick[]): BrowserPick | undefined {
     const webdriver = available.filter(
         (item) => item.protocol !== "playwright" && item.name !== "android" && item.name !== "ios"
@@ -298,13 +306,7 @@ export function pickDefaultWebdriverBrowser(available: BrowserPick[]): BrowserPi
     if (!webdriver.length) {
         return undefined;
     }
-    const preferredVersion = "149.0";
-    const chromeDefault = webdriver.find((item) => item.name === "chrome" && item.version === preferredVersion);
-    if (chromeDefault) {
-        return chromeDefault;
-    }
-    const chromeNewest = webdriver
-        .filter((item) => item.name === "chrome")
-        .sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))[0];
-    return chromeNewest || webdriver[0];
+    const chrome = webdriver.filter((item) => item.name === "chrome");
+    const chromeFull = chrome.filter((item) => !isMinBrowserVersion(item.version));
+    return newestByVersion(chromeFull.length ? chromeFull : chrome) || webdriver[0];
 }

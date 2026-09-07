@@ -83,7 +83,14 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(webdriver!).toHaveClass("capabilities-browser-select");
         expect(webdriver!).toHaveAttribute("data-param-id", "webdriver");
         expect(within(webdriver!).getByRole("group")).toBeInTheDocument();
-        expect(within(webdriver!).getByRole("button", { name: "chrome: 149.0" })).toBeInTheDocument();
+        expect(within(webdriver!).getByRole("button", { name: "chrome: 149.0" })).toHaveAttribute(
+            "aria-pressed",
+            "true"
+        );
+        expect(within(webdriver!).getByRole("button", { name: "chrome: 149.0-min" })).toHaveAttribute(
+            "aria-pressed",
+            "false"
+        );
         expect(within(webdriver!).getByRole("button", { name: "firefox: 151.0" })).toBeInTheDocument();
 
         expect(screen.getByTestId("capabilities-browser-select-playwright")).toHaveAttribute(
