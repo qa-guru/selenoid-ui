@@ -207,8 +207,8 @@ export const StyledCapabilities = styled.div`
     .panel__code {
       margin: 0;
       max-width: 100%;
-      white-space: pre;
-      overflow-x: auto;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
     }
 
     /* Beat stale vendor highlight CSS: opacity on inline punct ghosts braces left of the snippet. */
@@ -255,8 +255,8 @@ export const StyledCapabilities = styled.div`
     pre code,
     pre code.hljs,
     pre .hljs {
-      white-space: pre;
-      overflow-wrap: normal;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
       word-break: normal;
       min-width: 0;
       max-width: 100%;

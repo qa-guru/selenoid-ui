@@ -254,7 +254,8 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
 
         expect(css!).not.toMatch(/overflow-wrap:\s*anywhere/);
-        expect(css!).toMatch(/white-space:\s*pre;/);
+        expect(css!).toMatch(/overflow-wrap:\s*break-word/);
+        expect(css!).toMatch(/white-space:\s*pre-wrap/);
     });
 
     it("keeps Dark+ terminal chrome when the page is theme-light", async () => {
