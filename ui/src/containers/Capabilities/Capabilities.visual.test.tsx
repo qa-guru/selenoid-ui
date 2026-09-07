@@ -104,6 +104,15 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(within(ios!).getByRole("button", { name: "iOS (coming soon)" })).toBeInTheDocument();
         // Default WebDriver chrome is auto-selected → Remote hub is visible on load.
         expect(screen.getByTestId("capabilities-remote-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("capabilities-setup-side")).toContainElement(
+            screen.getByTestId("capabilities-remote-panel")
+        );
+        expect(screen.getByTestId("capabilities-setup")).not.toContainElement(
+            screen.getByTestId("capabilities-remote-panel")
+        );
+        expect(screen.getByTestId("capabilities-setup-side")).toBeInTheDocument();
+        expect(screen.getByTestId("capabilities-mobile-panel")).toBeInTheDocument();
+        expect(screen.getByTestId("capabilities-browser-panel")).toBeInTheDocument();
     });
 
     it("keeps disabled Create Session as solid dark grey, not translucent", async () => {
@@ -204,20 +213,19 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(within(stack!).getByTestId("capabilities-browser-select")).toBeInTheDocument();
     });
 
-    it("locks Capabilities body to continuous 6-col clamp (no discrete fr ladder)", async () => {
+    it("locks Capabilities body to full-bleed 1:1:2 (no 6-col gutter clamp)", async () => {
         const fs = await import("node:fs/promises");
         const path = await import("node:path");
         const { fileURLToPath } = await import("node:url");
         const dir = path.dirname(fileURLToPath(import.meta.url));
         const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
 
-        // Canon: one cfg|term formula ≥769. Ban the old 1:2:2 / stage rebuilds.
-        expect(css!).toMatch(/grid-template-columns:\s*var\(--capabilities-cfg\)\s+var\(--capabilities-term\)/);
-        expect(css!).toMatch(/--capabilities-col-rest:\s*calc\(/);
-        expect(css!).toMatch(/--capabilities-span-2:\s*calc\(/);
-        expect(css!).toMatch(/--capabilities-gutter:\s*clamp\(/);
-        expect(css!).not.toMatch(/1fr\)\s+minmax\(0,\s*2fr\)\s+minmax\(0,\s*2fr\)/);
-        expect(css!).not.toMatch(/1fr\)\s+minmax\(0,\s*2fr\)\s+minmax\(0,\s*3fr\)/);
+        expect(css!).toMatch(
+            /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)\s+minmax\(0,\s*2fr\)/
+        );
+        expect(css!).toMatch(/\.setup-side\s*\{/);
+        expect(css!).not.toMatch(/--capabilities-gutter:\s*clamp\(/);
+        expect(css!).not.toMatch(/--capabilities-cfg:/);
         expect(css!).not.toMatch(/@media\s*\(\s*min-width:\s*(900|1100|1280|1600)px\s*\)/);
         expect(css!).not.toMatch(/@media\s*\(\s*min-width:\s*\d+px\)\s+and\s*\(\s*max-width:/);
     });
@@ -229,7 +237,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         const dir = path.dirname(fileURLToPath(import.meta.url));
         const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
 
-        expect(css!).toMatch(/\.setup\s*\{[\s\S]*?overflow-y:\s*auto/);
+        expect(css!).toMatch(/\.setup,\s*\.setup-side\s*\{[\s\S]*?overflow-y:\s*auto/);
         expect(css!).toMatch(/flex:\s*0 0 auto/);
         expect(css!).toMatch(/min-height:\s*auto/);
         expect(css!).toMatch(/\.panel__body\s*\{[\s\S]*?overflow:\s*visible/);

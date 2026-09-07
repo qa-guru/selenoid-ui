@@ -1970,86 +1970,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     return (
         <StyledCapabilities>
             <div className="capabilities-body" data-testid="capabilities-body">
-                <div className="setup" data-testid="capabilities-setup">
-                    <Panel
-                        title="Browser / device image"
-                        testId="capabilities-driver-panel"
-                        titleTestId="capabilities-driver-title"
-                        className="capabilities-config-panel"
-                    >
-                        {/*
-                          Driver rows → createSession: exclusive Tagstrip (library
-                          PlaqueTagstrip; ≠ react-select). Selection unlocks Launch.
-                          Magnet stack — dividers flush on longest label (Webdriver).
-                          Tagstrips still wrap chips (--many); magnet does not lock 32px.
-                          todo: Windows · Linux · Mac
-                        */}
-                        <div
-                            className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                            data-testid="capabilities-driver-browsers"
-                        >
-                            <PlaqueFieldGrid
-                                layout="solo"
-                                aria-label="WebDriver"
-                                data-testid="capabilities-driver-webdriver"
-                            >
-                                <PlaqueTagstrip
-                                    label="WebDriver"
-                                    paramId="webdriver"
-                                    className="capabilities-browser-select"
-                                    options={webdriverOptions}
-                                    values={value ? [value] : []}
-                                    onToggle={onBrowserToggle}
-                                    aria-label={driverStripAria(webdriverAvailable, "WebDriver browsers")}
-                                    data-testid="capabilities-browser-select"
-                                />
-                            </PlaqueFieldGrid>
-                            <PlaqueFieldGrid
-                                layout="solo"
-                                aria-label="Playwright"
-                                data-testid="capabilities-driver-playwright"
-                            >
-                                <PlaqueTagstrip
-                                    label="Playwright"
-                                    paramId="playwright"
-                                    className="capabilities-browser-select"
-                                    options={playwrightOptions}
-                                    values={value ? [value] : []}
-                                    onToggle={onBrowserToggle}
-                                    aria-label={driverStripAria(playwrightAvailable, "Playwright browsers")}
-                                    data-testid="capabilities-browser-select-playwright"
-                                />
-                            </PlaqueFieldGrid>
-                            <PlaqueFieldGrid
-                                layout="solo"
-                                aria-label="Android"
-                                data-testid="capabilities-driver-android"
-                            >
-                                <PlaqueTagstrip
-                                    label="Android"
-                                    paramId="android"
-                                    className="capabilities-browser-select"
-                                    options={androidOptions}
-                                    values={value ? [value] : []}
-                                    onToggle={onBrowserToggle}
-                                    aria-label={driverStripAria(androidAvailable, "Android devices")}
-                                    data-testid="capabilities-browser-select-android"
-                                />
-                            </PlaqueFieldGrid>
-                            <PlaqueFieldGrid layout="solo" aria-label="iOS" data-testid="capabilities-driver-ios">
-                                <PlaqueTagstrip
-                                    label="iOS"
-                                    paramId="ios"
-                                    className="capabilities-browser-select"
-                                    options={iosOptions}
-                                    values={value ? [value] : []}
-                                    onToggle={onBrowserToggle}
-                                    aria-label={driverStripAria(iosAvailable, "iOS devices")}
-                                    data-testid="capabilities-browser-select-ios"
-                                />
-                            </PlaqueFieldGrid>
-                        </div>
-                    </Panel>
                     <Launch
                         browser={browser}
                         navigate={navigate}
@@ -2193,8 +2113,87 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                             touchOptions();
                             setAccessKey(v);
                         }}
-                    />
-                </div>
+                    >
+                    <Panel
+                        title="Browser / device image"
+                        testId="capabilities-driver-panel"
+                        titleTestId="capabilities-driver-title"
+                        className="capabilities-config-panel"
+                    >
+                        {/*
+                          Driver rows → createSession: exclusive Tagstrip (library
+                          PlaqueTagstrip; ≠ react-select). Selection unlocks Launch.
+                          Magnet stack — dividers flush on longest label (Webdriver).
+                          Tagstrips still wrap chips (--many); magnet does not lock 32px.
+                          todo: Windows · Linux · Mac
+                        */}
+                        <div
+                            className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                            data-testid="capabilities-driver-browsers"
+                        >
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="WebDriver"
+                                data-testid="capabilities-driver-webdriver"
+                            >
+                                <PlaqueTagstrip
+                                    label="WebDriver"
+                                    paramId="webdriver"
+                                    className="capabilities-browser-select"
+                                    options={webdriverOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(webdriverAvailable, "WebDriver browsers")}
+                                    data-testid="capabilities-browser-select"
+                                />
+                            </PlaqueFieldGrid>
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="Playwright"
+                                data-testid="capabilities-driver-playwright"
+                            >
+                                <PlaqueTagstrip
+                                    label="Playwright"
+                                    paramId="playwright"
+                                    className="capabilities-browser-select"
+                                    options={playwrightOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(playwrightAvailable, "Playwright browsers")}
+                                    data-testid="capabilities-browser-select-playwright"
+                                />
+                            </PlaqueFieldGrid>
+                            <PlaqueFieldGrid
+                                layout="solo"
+                                aria-label="Android"
+                                data-testid="capabilities-driver-android"
+                            >
+                                <PlaqueTagstrip
+                                    label="Android"
+                                    paramId="android"
+                                    className="capabilities-browser-select"
+                                    options={androidOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(androidAvailable, "Android devices")}
+                                    data-testid="capabilities-browser-select-android"
+                                />
+                            </PlaqueFieldGrid>
+                            <PlaqueFieldGrid layout="solo" aria-label="iOS" data-testid="capabilities-driver-ios">
+                                <PlaqueTagstrip
+                                    label="iOS"
+                                    paramId="ios"
+                                    className="capabilities-browser-select"
+                                    options={iosOptions}
+                                    values={value ? [value] : []}
+                                    onToggle={onBrowserToggle}
+                                    aria-label={driverStripAria(iosAvailable, "iOS devices")}
+                                    data-testid="capabilities-browser-select-ios"
+                                />
+                            </PlaqueFieldGrid>
+                        </div>
+                    </Panel>
+                </Launch>
                 <div className="code-panel">
                     <Panel
                         variant="terminal"
@@ -2323,6 +2322,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
 };
 
 const Launch = ({
+    children,
     browser: { name, version },
     navigate,
     sessions,
@@ -2827,6 +2827,8 @@ const Launch = ({
 
     const proxyOff = proxyPreset === PROXY_PRESET_OFF;
     const proxyPresetLocked = proxyPreset === PROXY_PRESET_QA_GURU;
+    const showMobile = isPlaywright || (isWebdriver && supportsMobileEmulation(name));
+    const showProxy = isWebdriver || isPlaywright;
 
     const renderWdAuthRow = () => (
         <PlaqueFieldGrid layout="duo" aria-label="Hub authentication" data-testid="capabilities-caps-auth">
@@ -2869,7 +2871,21 @@ const Launch = ({
     );
 
     return (
-        <div className="capabilities-launch">
+        <>
+            <div className="setup" data-testid="capabilities-setup">
+                {children}
+                <div className="capabilities-launch">
+                    <CapabilitiesLaunchActions
+                        loading={loading}
+                        disabled={!name || loading || isIos}
+                        error={error}
+                        onCreateSession={onCreateSession}
+                        onClearError={() => onError("")}
+                    />
+                </div>
+            </div>
+            {name ? (
+                <div className="setup-side" data-testid="capabilities-setup-side">
             {isWebdriver ? (
                 <Panel
                     title="Session options"
@@ -3308,102 +3324,6 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
-            {isPlaywright || (isWebdriver && supportsMobileEmulation(name)) ? (
-                <Panel
-                    title="Mobile emulation"
-                    testId="capabilities-mobile-panel"
-                    titleTestId="capabilities-mobile-title"
-                    className="capabilities-config-panel"
-                >
-                    {/*
-                      WD: Chrome/Edge goog:chromeOptions / ms:edgeOptions.mobileEmulation.
-                      PW: newContext viewport + UA + DPR; hub query only screenResolution.
-                      Course catalog. Off = desktop. Not Android/iOS grid images.
-                    */}
-                    <div
-                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                        data-testid="capabilities-mobile-caps"
-                    >
-                        <PlaqueFieldGrid
-                            layout="solo"
-                            aria-label="Mobile device"
-                            data-testid="capabilities-mobile-device"
-                        >
-                            <PlaqueSelect
-                                label="mobileDevice"
-                                paramId="mobileDevice"
-                                value={mobileDevice}
-                                options={MOBILE_DEVICE_OPTIONS}
-                                onChange={setMobileDevice}
-                                data-testid="caps-mobile-device"
-                            />
-                        </PlaqueFieldGrid>
-                        <p className="capabilities-mobile-hint" data-testid="capabilities-mobile-hint">
-                            {isPlaywright
-                                ? "Off = desktop 1920×1080. Выбери устройство — окно VNC станет как телефон. UA, viewport и DPR — в newContext после connect (не Android/iOS)."
-                                : "Off = desktop 1920×1080. Выбери устройство — окно VNC и UA станут как в Chrome DevTools (не Android/iOS)."}
-                        </p>
-                    </div>
-                </Panel>
-            ) : null}
-            {isWebdriver || isPlaywright ? (
-                <Panel
-                    title="Browser proxy"
-                    testId="capabilities-browser-panel"
-                    titleTestId="capabilities-browser-title"
-                    className="capabilities-config-panel"
-                >
-                    <div
-                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                        data-testid="capabilities-browser-caps"
-                    >
-                        <PlaqueFieldGrid
-                            layout="solo"
-                            aria-label="Proxy preset"
-                            data-testid="capabilities-browser-proxy-preset"
-                        >
-                            <PlaqueSelect
-                                label="proxyPreset"
-                                paramId="proxyPreset"
-                                value={proxyPreset}
-                                options={PROXY_PRESET_OPTIONS}
-                                onChange={setProxyPreset}
-                                data-testid="caps-proxy-preset"
-                            />
-                        </PlaqueFieldGrid>
-                        <PlaqueFieldGrid
-                            layout="duo"
-                            aria-label="Proxy endpoint"
-                            data-testid="capabilities-browser-proxy"
-                        >
-                            <PlaqueField
-                                label="proxyServer"
-                                paramId="proxyServer"
-                                labelVariant="param"
-                                type="text"
-                                value={proxyOff ? "" : proxyServer}
-                                placeholder="host"
-                                readOnly={proxyOff || proxyPresetLocked}
-                                disabled={proxyOff}
-                                onChange={(e: any) => setProxyServer(e.target.value)}
-                                data-testid="caps-proxy-server"
-                            />
-                            <PlaqueField
-                                label="proxyPort"
-                                paramId="proxyPort"
-                                labelVariant="param"
-                                type="text"
-                                value={proxyOff ? "" : proxyPort}
-                                placeholder="port"
-                                readOnly={proxyOff || proxyPresetLocked}
-                                disabled={proxyOff}
-                                onChange={(e: any) => setProxyPort(e.target.value)}
-                                data-testid="caps-proxy-port"
-                            />
-                        </PlaqueFieldGrid>
-                    </div>
-                </Panel>
-            ) : null}
             {isAndroid ? (
                 <Panel
                     title="Session options"
@@ -3544,14 +3464,105 @@ const Launch = ({
                     </div>
                 </Panel>
             ) : null}
-            <CapabilitiesLaunchActions
-                loading={loading}
-                disabled={!name || loading || isIos}
-                error={error}
-                onCreateSession={onCreateSession}
-                onClearError={() => onError("")}
-            />
-        </div>
+                    {showMobile ? (
+                        <Panel
+                            title="Mobile emulation"
+                            testId="capabilities-mobile-panel"
+                            titleTestId="capabilities-mobile-title"
+                            className="capabilities-config-panel"
+                        >
+                            {/*
+                              WD: Chrome/Edge goog:chromeOptions / ms:edgeOptions.mobileEmulation.
+                              PW: newContext viewport + UA + DPR; hub query only screenResolution.
+                              Course catalog. Off = desktop. Not Android/iOS grid images.
+                            */}
+                            <div
+                                className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                                data-testid="capabilities-mobile-caps"
+                            >
+                                <PlaqueFieldGrid
+                                    layout="solo"
+                                    aria-label="Mobile device"
+                                    data-testid="capabilities-mobile-device"
+                                >
+                                    <PlaqueSelect
+                                        label="mobileDevice"
+                                        paramId="mobileDevice"
+                                        value={mobileDevice}
+                                        options={MOBILE_DEVICE_OPTIONS}
+                                        onChange={setMobileDevice}
+                                        data-testid="caps-mobile-device"
+                                    />
+                                </PlaqueFieldGrid>
+                                <p className="capabilities-mobile-hint" data-testid="capabilities-mobile-hint">
+                                    {isPlaywright
+                                        ? "Off = desktop 1920×1080. Выбери устройство — окно VNC станет как телефон. UA, viewport и DPR — в newContext после connect (не Android/iOS)."
+                                        : "Off = desktop 1920×1080. Выбери устройство — окно VNC и UA станут как в Chrome DevTools (не Android/iOS)."}
+                                </p>
+                            </div>
+                        </Panel>
+                    ) : null}
+                    {showProxy ? (
+                        <Panel
+                            title="Browser proxy"
+                            testId="capabilities-browser-panel"
+                            titleTestId="capabilities-browser-title"
+                            className="capabilities-config-panel"
+                        >
+                            <div
+                                className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                                data-testid="capabilities-browser-caps"
+                            >
+                                <PlaqueFieldGrid
+                                    layout="solo"
+                                    aria-label="Proxy preset"
+                                    data-testid="capabilities-browser-proxy-preset"
+                                >
+                                    <PlaqueSelect
+                                        label="proxyPreset"
+                                        paramId="proxyPreset"
+                                        value={proxyPreset}
+                                        options={PROXY_PRESET_OPTIONS}
+                                        onChange={setProxyPreset}
+                                        data-testid="caps-proxy-preset"
+                                    />
+                                </PlaqueFieldGrid>
+                                <PlaqueFieldGrid
+                                    layout="duo"
+                                    aria-label="Proxy endpoint"
+                                    data-testid="capabilities-browser-proxy"
+                                >
+                                    <PlaqueField
+                                        label="proxyServer"
+                                        paramId="proxyServer"
+                                        labelVariant="param"
+                                        type="text"
+                                        value={proxyOff ? "" : proxyServer}
+                                        placeholder="host"
+                                        readOnly={proxyOff || proxyPresetLocked}
+                                        disabled={proxyOff}
+                                        onChange={(e: any) => setProxyServer(e.target.value)}
+                                        data-testid="caps-proxy-server"
+                                    />
+                                    <PlaqueField
+                                        label="proxyPort"
+                                        paramId="proxyPort"
+                                        labelVariant="param"
+                                        type="text"
+                                        value={proxyOff ? "" : proxyPort}
+                                        placeholder="port"
+                                        readOnly={proxyOff || proxyPresetLocked}
+                                        disabled={proxyOff}
+                                        onChange={(e: any) => setProxyPort(e.target.value)}
+                                        data-testid="caps-proxy-port"
+                                    />
+                                </PlaqueFieldGrid>
+                            </div>
+                        </Panel>
+                    ) : null}
+                </div>
+            ) : null}
+        </>
     );
 };
 

@@ -13,31 +13,24 @@ export const StyledCapabilities = styled.div`
   position: relative;
 
   /*
-   * SSOT copy of configurator__layout--terminal (docs/layout-standard.md).
-   * Mental 6-col: 1░ + cfg 2–3 + term 4–6. ░ = padding-left, NOT a track.
-   * Tracks ALWAYS cfg | term — one formula ≥769 via clamp. No 1100/1280/1600
-   * track rebuilds. No 1fr 2fr 2fr. No discrete ratio stages.
+   * Full-bleed 1 : 1 : 2 (image | session+mobile+proxy | terminal).
+   * No empty first-column gutter. One desktop media (769). No 1100/1280/1600
+   * track rebuilds. No selected image → collapse to 1 : 2.
    */
   .capabilities-body {
     display: grid;
     align-items: start;
-    justify-content: start;
-    /* Same gap cfg↔term as Driver↔Remote hub (.setup gap) */
+    justify-content: stretch;
     --capabilities-gap: var(--space-3, 12px);
     column-gap: var(--capabilities-gap);
     row-gap: var(--capabilities-gap);
     width: 100%;
     box-sizing: border-box;
     padding: 20px var(--page-padding-x, 16px) 40px;
-    --capabilities-col-rest: calc(
-      (1600px - 2 * var(--page-padding-x, 16px) - 5 * var(--capabilities-gap)) / 6
-    );
-    --capabilities-span-2: calc(
-      2 * var(--capabilities-col-rest) + var(--capabilities-gap)
-    );
   }
 
   .setup,
+  .setup-side,
   .code-panel {
     grid-column: auto;
     min-width: 0;
@@ -58,55 +51,27 @@ export const StyledCapabilities = styled.div`
     flex-direction: column;
 
     .capabilities-body {
-      /*
-       * Body sits full-bleed (page-pad is our own padding). Configurator's
-       * layout 100% is already inside page-shell pad — subtract pads here so
-       * the 6-col math matches SSOT.
-       */
-      --capabilities-gutter: clamp(
-        0px,
-        calc(
-          100% - 2 * var(--page-padding-x, 16px) - 2 * var(--capabilities-span-2) -
-            2 * var(--capabilities-gap)
-        ),
-        var(--capabilities-col-rest)
-      );
-      --capabilities-gutter-gap: min(
-        var(--capabilities-gap),
-        var(--capabilities-gutter)
-      );
-      padding-left: calc(
-        var(--page-padding-x, 16px) + var(--capabilities-gutter) +
-          var(--capabilities-gutter-gap)
-      );
       padding-bottom: 20px;
-      --capabilities-cfg: clamp(
-        var(--capabilities-col-rest),
-        calc(100% - var(--capabilities-span-2) - var(--capabilities-gap)),
-        var(--capabilities-span-2)
-      );
-      --capabilities-term: calc(
-        100% - var(--capabilities-cfg) - var(--capabilities-gap)
-      );
-      grid-template-columns: var(--capabilities-cfg) var(--capabilities-term);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
       grid-template-rows: minmax(0, 1fr);
       flex: 1 1 auto;
       min-height: 0;
       overflow: hidden;
-      /* Stretch columns as scrollport bounds — panel chrome on the left
-         stays content-height (no bottom magnet). */
       align-items: stretch;
     }
 
-    .setup {
-      grid-column: 1 / 2;
+    .capabilities-body:not(:has(.setup-side)) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    }
+
+    .setup,
+    .setup-side {
       align-self: stretch;
       min-height: 0;
       overflow-y: auto;
       scrollbar-width: thin;
       overscroll-behavior: contain;
 
-      /* Column is the only left scrollport — panels stay content-height. */
       .panel {
         flex: 0 0 auto;
         min-height: auto;
@@ -123,8 +88,20 @@ export const StyledCapabilities = styled.div`
       }
     }
 
-    .code-panel {
+    .setup {
+      grid-column: 1 / 2;
+    }
+
+    .setup-side {
       grid-column: 2 / 3;
+    }
+
+    .capabilities-body:not(:has(.setup-side)) .code-panel {
+      grid-column: 2 / 3;
+    }
+
+    .code-panel {
+      grid-column: 3 / 4;
       align-self: stretch;
       min-height: 0;
       overflow: hidden;
@@ -147,7 +124,8 @@ export const StyledCapabilities = styled.div`
     }
   }
 
-  .setup {
+  .setup,
+  .setup-side {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -157,7 +135,9 @@ export const StyledCapabilities = styled.div`
     .panel {
       flex: 0 0 auto;
     }
+  }
 
+  .setup {
     button.new-session {
       width: 100%;
       margin-top: 10px;
