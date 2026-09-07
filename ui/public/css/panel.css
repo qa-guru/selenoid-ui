@@ -40,18 +40,11 @@
   --panel-tab-hover-border: rgba(255, 255, 255, 0.28);
   --panel-tab-hover-color: rgba(255, 255, 255, 0.72);
   --panel-tab-active-color: rgba(255, 255, 255, 0.92);
-  /* Island: html.theme-light --color-* must not restyle Dark+ chrome (tabs/badge/inherit). */
-  --color-surface: #1a1917;
-  --color-surface-soft: #262523;
-  --color-text: #e6edf3;
-  --color-text-muted: rgba(255, 255, 255, 0.45);
-  --color-primary: #e8e4df;
-  --color-primary-on: #1c1917;
-  --color-border: rgba(255, 255, 255, 0.1);
   color: var(--panel-code-color);
 }
 
-/* Light output chrome — independent of html.theme-light */
+/* Light paper: page theme-light or explicit tone="light". */
+html.theme-light .panel--terminal,
 .panel--terminal.panel--terminal-light {
   --panel-bg: #ffffff;
   --panel-border: rgba(28, 25, 23, 0.12);
@@ -67,13 +60,6 @@
   --panel-tab-hover-border: rgba(28, 25, 23, 0.28);
   --panel-tab-hover-color: rgba(28, 25, 23, 0.72);
   --panel-tab-active-color: rgba(28, 25, 23, 0.92);
-  --color-surface: #ffffff;
-  --color-surface-soft: #eef0f3;
-  --color-text: #1c1917;
-  --color-text-muted: rgba(28, 25, 23, 0.55);
-  --color-primary: #111827;
-  --color-primary-on: #f8fafc;
-  --color-border: rgba(28, 25, 23, 0.12);
   color: var(--panel-code-color);
 }
 

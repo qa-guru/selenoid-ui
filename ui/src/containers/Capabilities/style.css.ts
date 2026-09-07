@@ -211,9 +211,8 @@ export const StyledCapabilities = styled.div`
       overflow-wrap: break-word;
     }
 
-    /* Beat stale vendor highlight CSS: opacity on inline punct ghosts braces left of the snippet. */
+    /* opacity on inline punct ghosts braces; color follows vscode / theme-light. */
     .ch-tok-punct {
-      color: rgba(212, 212, 212, 0.55);
       opacity: 1;
     }
 
@@ -318,6 +317,40 @@ export const StyledCapabilities = styled.div`
     &.error-true {
       border-color: ${errorColor};
       color: ${errorColor};
+    }
+  }
+
+  html.theme-light & {
+    .panel.panel--terminal {
+      --panel-bg: #ffffff;
+      --panel-border: rgba(28, 25, 23, 0.12);
+      --panel-bar-bg: rgba(28, 25, 23, 0.03);
+      --panel-title-color: rgba(28, 25, 23, 0.55);
+      --panel-code-color: #1c1917;
+      --panel-action-color: rgba(28, 25, 23, 0.55);
+      --panel-action-hover-color: rgba(28, 25, 23, 0.92);
+      --panel-action-hover-bg: rgba(28, 25, 23, 0.06);
+      --panel-action-focus: rgba(28, 25, 23, 0.65);
+      --panel-tab-border: rgba(28, 25, 23, 0.12);
+      --panel-tab-color: rgba(28, 25, 23, 0.45);
+      --panel-tab-hover-border: rgba(28, 25, 23, 0.28);
+      --panel-tab-hover-color: rgba(28, 25, 23, 0.72);
+      --panel-tab-active-color: rgba(28, 25, 23, 0.92);
+      background: #ffffff;
+      color: #1c1917;
+    }
+
+    .panel--terminal.ch-theme--vscode .ch-tok-key { color: #0451a5; }
+    .panel--terminal.ch-theme--vscode .ch-tok-str { color: #a31515; }
+    .panel--terminal.ch-theme--vscode .ch-tok-num { color: #098658; }
+    .panel--terminal.ch-theme--vscode .ch-tok-bool,
+    .panel--terminal.ch-theme--vscode .ch-tok-null { color: #0000ff; }
+    .panel--terminal.ch-theme--vscode .ch-tok-punct { color: rgba(57, 58, 52, 0.55); }
+    .panel--terminal.ch-theme--vscode .ch-tok-comment { color: #008000; }
+    .panel--terminal.ch-theme--vscode .ch-tok-cmd { color: #795e26; }
+
+    code.hljs {
+      color: #1c1917;
     }
   }
 

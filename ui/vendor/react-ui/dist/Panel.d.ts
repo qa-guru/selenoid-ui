@@ -44,7 +44,7 @@ export interface PanelProps {
     /**
      * Terminal output tone. Only applies when `variant="terminal"`.
      * `dark` (default) → `#1a1917`; `light` → `panel--terminal-light` paper.
-     * Independent of `html.theme-light`.
+     * Page `html.theme-light` also switches default terminal paper to light.
      */
     tone?: PanelTone;
     /**

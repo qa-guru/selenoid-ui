@@ -258,7 +258,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(css!).toMatch(/white-space:\s*pre-wrap/);
     });
 
-    it("keeps Dark+ terminal chrome when the page is theme-light", async () => {
+    it("switches terminal paper with html.theme-light", async () => {
         const fs = await import("node:fs/promises");
         const path = await import("node:path");
         const { fileURLToPath } = await import("node:url");
@@ -267,20 +267,11 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
             path.join(dir, "../../../public/css/panel.css"),
             "utf8"
         );
+        const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
 
         expect(panelCss!).toMatch(
-            /\.panel--terminal\s*\{[\s\S]*?--color-primary:\s*#e8e4df/
+            /html\.theme-light\s+\.panel--terminal[\s\S]*?--panel-bg:\s*#ffffff/
         );
-        expect(panelCss!).toMatch(/html\.theme-light --color-\* must not restyle Dark\+/);
-
-        document.documentElement.classList.add("theme-light");
-        try {
-            renderCapabilities();
-            const panel = screen.getByTestId("capabilities-terminal-panel");
-            expect(panel!).toHaveClass("panel--terminal");
-            expect(panel!).not.toHaveClass("panel--terminal-light");
-        } finally {
-            document.documentElement.classList.remove("theme-light");
-        }
+        expect(css!).toMatch(/html\.theme-light\s+&/);
     });
 });

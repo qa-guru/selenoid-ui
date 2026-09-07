@@ -2116,18 +2116,11 @@ html.theme-light .plaque-field-checkstrip--pill .plaque-field-checkstrip__item:h
   --panel-tab-hover-border: rgba(255, 255, 255, 0.28);
   --panel-tab-hover-color: rgba(255, 255, 255, 0.72);
   --panel-tab-active-color: rgba(255, 255, 255, 0.92);
-  /* Island: html.theme-light --color-* must not restyle Dark+ chrome (tabs/badge/inherit). */
-  --color-surface: #1a1917;
-  --color-surface-soft: #262523;
-  --color-text: #e6edf3;
-  --color-text-muted: rgba(255, 255, 255, 0.45);
-  --color-primary: #e8e4df;
-  --color-primary-on: #1c1917;
-  --color-border: rgba(255, 255, 255, 0.1);
   color: var(--panel-code-color);
 }
 
-/* Light output chrome — independent of html.theme-light */
+/* Light paper: page theme-light or explicit tone="light". */
+html.theme-light .panel--terminal,
 .panel--terminal.panel--terminal-light {
   --panel-bg: #ffffff;
   --panel-border: rgba(28, 25, 23, 0.12);
@@ -2143,13 +2136,6 @@ html.theme-light .plaque-field-checkstrip--pill .plaque-field-checkstrip__item:h
   --panel-tab-hover-border: rgba(28, 25, 23, 0.28);
   --panel-tab-hover-color: rgba(28, 25, 23, 0.72);
   --panel-tab-active-color: rgba(28, 25, 23, 0.92);
-  --color-surface: #ffffff;
-  --color-surface-soft: #eef0f3;
-  --color-text: #1c1917;
-  --color-text-muted: rgba(28, 25, 23, 0.55);
-  --color-primary: #111827;
-  --color-primary-on: #f8fafc;
-  --color-border: rgba(28, 25, 23, 0.12);
   color: var(--panel-code-color);
 }
 
@@ -2660,14 +2646,22 @@ html.theme-light .plaque-field-checkstrip--pill .plaque-field-checkstrip__item:h
 .ch-theme--contrast .ch-tok-comment { color: rgba(255, 255, 255, 0.4); }
 .ch-theme--contrast .ch-tok-cmd { color: #c084fc; }
 
-/* Light terminal paper — readable on panel--terminal-light */
+/* Light terminal paper — page theme-light or panel--terminal-light */
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-key,
 .panel--terminal-light.ch-theme--vscode .ch-tok-key { color: #0451a5; }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-str,
 .panel--terminal-light.ch-theme--vscode .ch-tok-str { color: #a31515; }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-num,
 .panel--terminal-light.ch-theme--vscode .ch-tok-num { color: #098658; }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-bool,
 .panel--terminal-light.ch-theme--vscode .ch-tok-bool { color: #0000ff; }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-null,
 .panel--terminal-light.ch-theme--vscode .ch-tok-null { color: #0000ff; }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-punct,
 .panel--terminal-light.ch-theme--vscode .ch-tok-punct { color: rgba(57, 58, 52, 0.55); }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-comment,
 .panel--terminal-light.ch-theme--vscode .ch-tok-comment { color: #008000; }
+html.theme-light .panel--terminal.ch-theme--vscode .ch-tok-cmd,
 .panel--terminal-light.ch-theme--vscode .ch-tok-cmd { color: #795e26; }
 
 /* link.css */
