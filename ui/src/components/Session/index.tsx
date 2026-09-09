@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { Panel } from "@zero-design-system/react";
 import SessionInfo from "./SessionInfo";
@@ -11,10 +11,9 @@ import { fetchSessionById } from "../SessionArchive/api";
 import { LIVE_SESSION_GRACE_MS } from "../../util/waitForLiveSession";
 import { useMockSessionsEnabled } from "../../hooks/useMockSessionsEnabled";
 import { mockDetailsSession } from "../../lib/mockSessions";
+import { clearOptimisticLiveSession } from "../../lib/optimisticLive";
 import { StyledSession } from "./style.css";
-
-const ARTIFACT_POLL_MS = 2500;
-const ARTIFACT_POLL_TIMEOUT_MS = 120_000;
+import { ARTIFACT_POLL_MS, ARTIFACT_POLL_TIMEOUT_MS } from "./sessionArtifactPoll";
 
 /** Empty-state hourglass — same composition as Sessions / Archive. */
 function IconHourglass() {
@@ -57,10 +56,22 @@ function SessionVideoWaiting() {
 const Session = ({ origin, session, browser }: any) => {
     const mockEnabled = useMockSessionsEnabled();
     const wasLiveRef = useRef(false);
+    const [stoppedHere, setStoppedHere] = useState(false);
     const [endedCaps, setEndedCaps] = useState<any>(null);
     const [endedBrowser, setEndedBrowser] = useState<any>(null);
     const [artifacts, setArtifacts] = useState<any>(null);
     const [artifactsStatus, setArtifactsStatus] = useState(() => (browser ? "idle" : "loading"));
+    const liveBrowser = stoppedHere ? undefined : browser;
+
+    useEffect(() => {
+        setStoppedHere(false);
+    }, [session]);
+
+    const onStopping = useCallback(() => {
+        clearOptimisticLiveSession(session);
+        setStoppedHere(true);
+    }, [session]);
+    const onStopFailed = useCallback(() => setStoppedHere(false), []);
 
     useEffect(() => {
         if (browser) {
@@ -75,8 +86,8 @@ const Session = ({ origin, session, browser }: any) => {
     // Live sessions appear in SSE a moment after Create Session; finished ones live
     // in /sessions/. After a live session ends, poll the archive for video/HAR.
     useEffect(() => {
-        if (browser || !session) {
-            if (browser) {
+        if (liveBrowser || !session) {
+            if (liveBrowser) {
                 setArtifactsStatus("idle");
             }
             return undefined;
@@ -142,21 +153,21 @@ const Session = ({ origin, session, browser }: any) => {
             cancelled = true;
             window.clearTimeout(graceTimer);
         };
-    }, [browser, session]);
+    }, [liveBrowser, session]);
 
     const [fullscreenSlot, setFullscreenSlot] = useState<null | "vnc" | "log" | "har">(null);
-    const hubLive = Boolean(browser);
+    const hubLive = Boolean(liveBrowser);
     const detailsBrowser = mockEnabled
-        ? mockDetailsSession(session, browser, artifacts, endedBrowser)
-        : browser;
+        ? mockDetailsSession(session, liveBrowser, artifacts, endedBrowser)
+        : liveBrowser;
     const showMockPreview = Boolean(mockEnabled && detailsBrowser);
-    const capsForHar = browser?.caps || endedCaps || artifacts?.caps || {};
+    const capsForHar = liveBrowser?.caps || endedCaps || artifacts?.caps || {};
     const showLive = hubLive;
     const hasArchive = artifactsStatus === "ready" && Boolean(artifacts);
     const showFinished = !hubLive && !showMockPreview && hasArchive;
     const finishedInfo = !hubLive && hasArchive;
     const wasLive = wasLiveRef.current;
-    const showSessionInfo = showLive || showMockPreview || (wasLive && !browser) || finishedInfo;
+    const showSessionInfo = showLive || showMockPreview || (wasLive && !liveBrowser) || finishedInfo;
     const keepLiveLog =
         wasLive && !hubLive && !showMockPreview && fullscreenSlot !== "vnc" && !artifacts?.log;
     const displayBrowser = detailsBrowser || endedBrowser || {
@@ -190,8 +201,10 @@ const Session = ({ origin, session, browser }: any) => {
                         browser: displayBrowser,
                         live: showLive,
                         wasLive: wasLive && !showMockPreview,
-                        finished: finishedInfo,
+                        finished: finishedInfo || stoppedHere,
                         artifacts: artifacts || {},
+                        onStopping,
+                        onStopFailed,
                     }}
                 />
             )}
@@ -201,16 +214,15 @@ const Session = ({ origin, session, browser }: any) => {
                     {hasMediaColumn && (
                         <div className="session-interactive-card session-media-slot" data-testid="session-media-slot">
                             {showLive || showMockPreview ? (
-                                <VncContainer
-                                    {...{
-                                        origin,
-                                        session,
-                                        browser: displayBrowser,
-                                        mockEnabled,
-                                        fullscreen: fullscreenSlot === "vnc",
-                                        onVNCFullscreenChange: (on: boolean) =>
-                                            setFullscreenSlot(on ? "vnc" : null),
-                                    }}
+                                <VncCard
+                                    origin={origin}
+                                    session={session}
+                                    browser={displayBrowser}
+                                    mockEnabled={mockEnabled}
+                                    fullscreen={fullscreenSlot === "vnc"}
+                                    onVNCFullscreenChange={(on: boolean) =>
+                                        setFullscreenSlot(on ? "vnc" : null)
+                                    }
                                 />
                             ) : artifacts?.video ? (
                                 <SessionVideo file={artifacts.video} />
@@ -325,22 +337,3 @@ const Session = ({ origin, session, browser }: any) => {
 };
 
 export default Session;
-
-function VncContainer({ origin, session, browser = {}, mockEnabled, fullscreen, onVNCFullscreenChange }: any) {
-    if (browser.caps && !browser.caps.enableVNC) {
-        return <span />;
-    }
-
-    return (
-        <VncCard
-            {...{
-                origin,
-                session,
-                browser,
-                mockEnabled,
-                fullscreen,
-                onVNCFullscreenChange,
-            }}
-        />
-    );
-}

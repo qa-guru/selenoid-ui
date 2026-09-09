@@ -1,9 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+    asBool,
+    browserProtocol,
     browserWindowOptions,
+    buildAndroidCapabilities,
+    buildAndroidSelenoidOptions,
+    buildSelenoidOptions,
     CREATE_SESSION_TIMEOUT_MS,
     createSessionCatchMessage,
+    DEFAULT_ANDROID_ORIENTATION,
+    findPlaywrightSession,
     hubSessionErrorMessage,
+    isPlaywrightBrowser,
+    parseEnvList,
+    parseLabelsMap,
     parseScreenSize,
     pickDefaultWebdriverBrowser,
     resizeSessionWindow,
@@ -222,5 +232,216 @@ describe("capabilitiesLogic", () => {
             { value: "firefox_151.0", name: "firefox", version: "151.0", protocol: "webdriver" },
         ]);
         expect(picked?.value).toBe("chrome_152.0-min");
+    });
+
+    it("pickDefaultWebdriverBrowser returns the first webdriver row when chrome is absent", () => {
+        const picked = pickDefaultWebdriverBrowser([
+            { value: "firefox_151.0", name: "firefox", version: "151.0", protocol: "webdriver" },
+        ]);
+        expect(picked?.value).toBe("firefox_151.0");
+    });
+
+    it("pickDefaultWebdriverBrowser returns undefined when only playwright/android/ios are listed", () => {
+        expect(pickDefaultWebdriverBrowser([])).toBeUndefined();
+        expect(
+            pickDefaultWebdriverBrowser([
+                { value: "playwright-chromium_1.61.0", name: "playwright-chromium", version: "1.61.0", protocol: "playwright" },
+                { value: "android_16.0", name: "android", version: "16.0", protocol: "webdriver" },
+                { value: "ios_18.0", name: "ios", version: "18.0", protocol: "ios" },
+            ])
+        ).toBeUndefined();
+    });
+
+    it("asBool treats the string false as false", () => {
+        expect(asBool("false")).toBe(false);
+        expect(asBool(false)).toBe(false);
+        expect(asBool("true")).toBe(true);
+        expect(asBool(true)).toBe(true);
+    });
+
+    it("parseEnvList / parseLabelsMap split CSV and flag-only tokens", () => {
+        expect(parseEnvList("LANG=C, FOO=bar\nBAZ=qux")).toEqual(["LANG=C", "FOO=bar", "BAZ=qux"]);
+        expect(parseEnvList("")).toEqual([]);
+        expect(parseLabelsMap("manual=true,team=qa,debug")).toEqual({
+            manual: "true",
+            team: "qa",
+            debug: "true",
+        });
+        expect(parseLabelsMap("=orphan")).toEqual({});
+        expect(parseLabelsMap("")).toEqual({});
+    });
+
+    it("buildSelenoidOptions uses asBool so string false does not become true", () => {
+        const off = buildSelenoidOptions({
+            sessionTimeout: "15m",
+            name: "n",
+            screenResolution: "1280x1024x24",
+            enableVnc: "false",
+            enableVideo: "false",
+            enableHar: "false",
+            enableLog: "false",
+            timeZone: "",
+            env: "",
+            labels: "manual=true",
+            videoName: "ignored.mp4",
+            logName: "ignored.log",
+            harName: "ignored.har",
+            harContent: "bodies",
+        });
+        expect(off.enableVNC).toBe(false);
+        expect(off.enableVideo).toBe(false);
+        expect(off.enableHAR).toBe(false);
+        expect(off.enableLog).toBe(false);
+        expect(off.timeZone).toBe("UTC");
+        expect(off.videoName).toBeUndefined();
+        expect(off.logName).toBeUndefined();
+        expect(off.harName).toBeUndefined();
+        expect(off.harContent).toBeUndefined();
+        expect(off.env).toBeUndefined();
+        expect(off.labels).toEqual({ manual: "true" });
+    });
+
+    it("buildSelenoidOptions includes names, env list, and harContent=bodies when flags are on", () => {
+        const on = buildSelenoidOptions({
+            sessionTimeout: "60m",
+            name: "Manual session",
+            screenResolution: "1920x1080x24",
+            enableVnc: true,
+            enableVideo: true,
+            enableHar: true,
+            enableLog: true,
+            timeZone: "Europe/Moscow",
+            env: ["LANG=C", "FOO=bar"],
+            labels: { team: "qa" },
+            videoName: " demo.mp4 ",
+            logName: "demo.log",
+            harName: "demo.har",
+            harContent: "bodies",
+        });
+        expect(on.enableVNC).toBe(true);
+        expect(on.enableHAR).toBe(true);
+        expect(on.env).toEqual(["LANG=C", "FOO=bar"]);
+        expect(on.labels).toEqual({ team: "qa" });
+        expect(on.videoName).toBe("demo.mp4");
+        expect(on.logName).toBe("demo.log");
+        expect(on.harName).toBe("demo.har");
+        expect(on.harContent).toBe("bodies");
+    });
+
+    it("buildAndroidCapabilities omits appium:app when empty and defaults orientation", () => {
+        const opts = buildAndroidSelenoidOptions({
+            name: "Manual session",
+            sessionTimeout: "2m",
+            enableVnc: "true",
+            enableVideo: "false",
+        });
+        expect(opts).toEqual({
+            enableVNC: true,
+            enableVideo: false,
+            name: "Manual session",
+            sessionTimeout: "2m",
+        });
+        const caps = buildAndroidCapabilities({
+            version: "16.0",
+            app: "  ",
+            noReset: "false",
+            autoGrantPermissions: "true",
+            orientation: "",
+            selenoidOptions: opts,
+        });
+        expect(caps["appium:app"]).toBeUndefined();
+        expect(caps["appium:orientation"]).toBe(DEFAULT_ANDROID_ORIENTATION);
+        expect(caps["appium:noReset"]).toBe(false);
+        expect(caps["appium:autoGrantPermissions"]).toBe(true);
+
+        const withApp = buildAndroidCapabilities({
+            version: "16.0",
+            app: "https://example.org/app.apk",
+            noReset: true,
+            autoGrantPermissions: false,
+            orientation: "LANDSCAPE",
+            selenoidOptions: opts,
+        });
+        expect(withApp["appium:app"]).toBe("https://example.org/app.apk");
+        expect(withApp["appium:orientation"]).toBe("LANDSCAPE");
+    });
+
+    it("formats hub session error without JSON / with error-only / with top-level message", async () => {
+        await expect(hubSessionErrorMessage(new Response("not-json", { status: 502 }))).resolves.toBe(
+            "Create Session failed: HTTP 502"
+        );
+        await expect(
+            hubSessionErrorMessage(new Response(JSON.stringify({ value: { error: "unknown error" } }), { status: 500 }))
+        ).resolves.toBe("Create Session failed: HTTP 500 — unknown error");
+        await expect(
+            hubSessionErrorMessage(new Response(JSON.stringify({ error: "bad gateway" }), { status: 502 }))
+        ).resolves.toBe("Create Session failed: HTTP 502 — bad gateway");
+        await expect(hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 500 }))).resolves.toBe(
+            "Create Session failed: HTTP 500"
+        );
+    });
+
+    it("createSessionCatchMessage covers abort-like strings and empty errors", () => {
+        expect(createSessionCatchMessage("The operation was aborted")).toContain("timed out after 5m");
+        expect(createSessionCatchMessage("signal is aborted without reason")).toContain("timed out after 5m");
+        expect(createSessionCatchMessage("")).toContain("timed out after 5m");
+        expect(createSessionCatchMessage(null)).toContain("timed out after 5m");
+        expect(createSessionCatchMessage(42)).toBe("Create Session failed: 42");
+    });
+
+    it("browserWindowOptions covers chromium-family aliases and firefox without size", () => {
+        expect(browserWindowOptions("opera", "800x600x24")).toEqual({
+            "goog:chromeOptions": {
+                args: ["--no-sandbox", "--disable-dev-shm-usage", "--window-size=800,600", "--window-position=0,0"],
+            },
+        });
+        expect(browserWindowOptions("chromium", "800x600")).toHaveProperty("goog:chromeOptions");
+        expect(browserWindowOptions("edge", "800x600")).toHaveProperty("ms:edgeOptions");
+        expect(browserWindowOptions("microsoftedge", "800x600")).toHaveProperty("ms:edgeOptions");
+        expect(browserWindowOptions("firefox", "bad")).toBeNull();
+        expect(browserWindowOptions("safari", "1920x1080x24")).toBeNull();
+        expect(browserWindowOptions("chrome", "")).toEqual({
+            "goog:chromeOptions": { args: ["--no-sandbox", "--disable-dev-shm-usage"] },
+        });
+        expect(browserWindowOptions("chrome", "0x0")).toEqual({
+            "goog:chromeOptions": { args: ["--no-sandbox", "--disable-dev-shm-usage"] },
+        });
+        expect(parseScreenSize("0x0")).toBeNull();
+    });
+
+    it("openSessionUrl skips empty targets", async () => {
+        const fetchImpl = vi.fn();
+        await expect(openSessionUrl("sess-1", "  ", fetchImpl)).resolves.toBe(false);
+        expect(fetchImpl).not.toHaveBeenCalled();
+    });
+
+    it("isPlaywrightBrowser / browserProtocol read the catalog and well-known names", () => {
+        expect(isPlaywrightBrowser(undefined, undefined)).toBe(false);
+        expect(isPlaywrightBrowser(undefined, "playwright-chromium")).toBe(true);
+        expect(
+            isPlaywrightBrowser({ chrome: { "149.0": { protocol: "playwright" } } }, "chrome", "149.0")
+        ).toBe(true);
+        expect(browserProtocol({ chrome: { "149.0": { protocol: "webdriver" } } }, "chrome", "149.0")).toBe(
+            "webdriver"
+        );
+        expect(browserProtocol(undefined, "playwright-webkit")).toBe("playwright");
+        expect(browserProtocol({ firefox: { "151.0": { protocol: "playwright" } } }, "firefox", "151.0")).toBe(
+            "playwright"
+        );
+    });
+
+    it("findPlaywrightSession matches a new id by browser/version/name", () => {
+        const sessions = {
+            old: { caps: { browserName: "playwright-chrome", version: "1.61.0", name: "Manual session" } },
+            next: { caps: { browserName: "playwright-chrome", version: "1.61.0", name: "Manual session" } },
+            other: { caps: { browserName: "chrome", version: "149.0" } },
+            mismatchVer: { caps: { browserName: "playwright-chrome", version: "1.60.0", name: "Manual session" } },
+            mismatchName: { caps: { browserName: "playwright-chrome", version: "1.61.0", name: "other" } },
+        };
+        expect(findPlaywrightSession(sessions, new Set(["old"]), "playwright-chrome", "1.61.0", "Manual session")).toBe(
+            "next"
+        );
+        expect(findPlaywrightSession(sessions, new Set(), "playwright-chrome", "1.61.0", "nope")).toBe("");
+        expect(findPlaywrightSession(undefined, new Set(), "playwright-chrome", "1.61.0")).toBe("");
     });
 });

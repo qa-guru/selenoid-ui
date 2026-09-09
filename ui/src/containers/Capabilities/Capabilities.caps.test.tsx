@@ -142,6 +142,12 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.desiredCapabilities.sessionTimeout).toBe("15m");
         expect(body.desiredCapabilities.name).toBe("RTL session");
         expect(body.desiredCapabilities.screenResolution).toBe("1280x1024x24");
+        expect(body.desiredCapabilities.enableVNC).toBe(true);
+        expect(body.desiredCapabilities.enableVideo).toBe(true);
+        expect(body.desiredCapabilities.enableHAR).toBe(false);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableVNC).toBe(true);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableVideo).toBe(true);
+        expect(body.capabilities.alwaysMatch["selenoid:options"].enableHAR).toBe(false);
         expect(body.capabilities.alwaysMatch["selenoid:options"].sessionTimeout).toBe("15m");
         expect(body.capabilities.alwaysMatch["selenoid:options"].name).toBe("RTL session");
         expect(body.capabilities.alwaysMatch["selenoid:options"].screenResolution).toBe("1280x1024x24");
@@ -166,6 +172,8 @@ describe("Capabilities boolean caps (seg canon)", () => {
             "--window-size=1280,1024",
             "--window-position=0,0",
         ]);
+
+        await waitFor(() => expect(screen.getByTestId("session-route")).toBeInTheDocument());
 
         fetchMock.mockRestore();
     });
@@ -321,6 +329,8 @@ describe("Capabilities boolean caps (seg canon)", () => {
         expect(body.desiredCapabilities.proxy).toEqual(expectedProxy);
         expect(body.capabilities.alwaysMatch["selenoid:options"].proxy).toBeUndefined();
 
+        await waitFor(() => expect(screen.getByTestId("session-route")).toBeInTheDocument());
+
         fetchMock.mockRestore();
     });
 
@@ -369,5 +379,71 @@ describe("Capabilities boolean caps (seg canon)", () => {
 
         expect(segButton("caps-enable-har", "true")).toHaveAttribute("aria-pressed", "true");
         expect(segButton("caps-enable-har", "false")).toHaveAttribute("aria-pressed", "false");
+    });
+
+    it("sends enableVNC=false when the VNC seg is toggled off", async () => {
+        const user = userEvent.setup();
+        const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ value: { sessionId: "sess-novnc" } }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+        await user.click(segButton("caps-enable-vnc", "false")!);
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(fetchMock!).toHaveBeenCalled());
+        const sessionCall = fetchMock.mock.calls.find(([url]: [any]) => String(url).includes("/wd/hub/session"));
+        const opts = JSON.parse(String(sessionCall[1].body)).capabilities.alwaysMatch["selenoid:options"];
+        expect(opts.enableVNC).toBe(false);
+        expect(opts.enableVideo).toBe(true);
+
+        fetchMock.mockRestore();
+    });
+
+    it("failed Create Session stays on New Session, re-enables the button, and surfaces the hub error", async () => {
+        const user = userEvent.setup();
+        const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
+            ok: false,
+            status: 500,
+            json: async () => ({
+                value: { error: "session not created", message: "Chrome instance exited" },
+            }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        const create = screen.getByTestId("capabilities-create-session");
+        await waitFor(() => expect(create).toHaveClass("error-true"));
+        expect(create).toBeEnabled();
+        expect(create).toHaveAttribute("title", "Create Session failed: HTTP 500 — Chrome instance exited");
+        expect(screen.getByTestId("capabilities-setup")).toBeInTheDocument();
+        expect(screen.queryByTestId("session-route")).toBeNull();
+
+        fetchMock.mockRestore();
+    });
+
+    it("network reject on Create Session stays on New Session with a failed title", async () => {
+        const user = userEvent.setup();
+        const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockRejectedValue(new TypeError("Failed to fetch"));
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        const create = screen.getByTestId("capabilities-create-session");
+        await waitFor(() => expect(create).toHaveClass("error-true"));
+        expect(create).toBeEnabled();
+        expect(create).toHaveAttribute("title", "Create Session failed: Failed to fetch");
+        expect(screen.queryByTestId("session-route")).toBeNull();
+
+        fetchMock.mockRestore();
     });
 });

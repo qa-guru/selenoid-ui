@@ -273,5 +273,32 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
             /html\.theme-light\s+\.panel--terminal[\s\S]*?--panel-bg:\s*#ffffff/
         );
         expect(css!).toMatch(/html\.theme-light\s+&/);
+        expect(css!).toMatch(
+            /html\.theme-light\s+&[\s\S]*?\.new-session\s*\{[\s\S]*?background-color:\s*#ffffff/
+        );
+    });
+
+    it("switches Create Session paper with html.theme-light", async () => {
+        const user = userEvent.setup();
+        renderCapabilities();
+
+        document.documentElement.classList.add("theme-light");
+        try {
+            await user.click(screen.getByRole("button", { name: "chrome: 149.0" }));
+            const enabled = screen.getByTestId("capabilities-create-session");
+            expectColor(window.getComputedStyle(enabled).backgroundColor, "#ffffff");
+            expectColor(window.getComputedStyle(enabled).color, "#1c1917");
+
+            await user.click(
+                within(screen.getByTestId("capabilities-browser-select-ios")).getByRole("button", {
+                    name: "iOS (coming soon)",
+                })
+            );
+            const disabled = screen.getByTestId("capabilities-create-session");
+            expect(disabled!).toBeDisabled();
+            expectColor(window.getComputedStyle(disabled).backgroundColor, "#eef0f3");
+        } finally {
+            document.documentElement.classList.remove("theme-light");
+        }
     });
 });

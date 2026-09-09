@@ -352,6 +352,29 @@ export const StyledCapabilities = styled.div`
     code.hljs {
       color: #1c1917;
     }
+
+    .new-session {
+      background-color: #ffffff;
+      border-color: rgba(28, 25, 23, 0.12);
+      color: #1c1917;
+
+      &:hover {
+        border-color: rgba(28, 25, 23, 0.28);
+        background-color: rgba(28, 25, 23, 0.03);
+      }
+
+      &:disabled,
+      &.disabled-true {
+        border-color: #eef0f3;
+        background-color: #eef0f3;
+        color: rgba(15, 23, 42, 0.45);
+        -webkit-text-fill-color: rgba(15, 23, 42, 0.45);
+
+        &:hover {
+          border-color: #eef0f3;
+        }
+      }
+    }
   }
 
 }

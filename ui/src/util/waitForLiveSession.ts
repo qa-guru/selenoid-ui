@@ -1,4 +1,5 @@
 import type { SessionsMap } from "../types/hub";
+import { seedOptimisticLiveSession } from "../lib/optimisticLive";
 import { isUiStatusPayload, sameOriginURL } from "./uiFeed";
 
 /** Grace before Session page treats a missing live feed entry as not-found. */
@@ -59,6 +60,7 @@ export function waitForLiveSession(sessionId: string, options: WaitOptions = {})
         fetchStatus = defaultFetchStatus,
     } = options;
     if (hasLiveSession(initialSessions, target)) {
+        seedOptimisticLiveSession(target, initialSessions[target]);
         return Promise.resolve(true);
     }
 
@@ -83,6 +85,7 @@ export function waitForLiveSession(sessionId: string, options: WaitOptions = {})
         const check = (payload: unknown) => {
             const sessions = sessionsFromPayload(payload);
             if (hasLiveSession(sessions, target)) {
+                seedOptimisticLiveSession(target, sessions?.[target]);
                 finish(true);
             }
         };

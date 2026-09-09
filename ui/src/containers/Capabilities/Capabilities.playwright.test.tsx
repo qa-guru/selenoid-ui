@@ -128,6 +128,9 @@ describe("Capabilities Playwright Create Session", () => {
         expect(wsUrl.searchParams.get("accessKey")).toBe(ACCESS_KEY);
         expect(wsUrl.searchParams.get("name")).toBe("Manual session");
         expect(wsUrl.searchParams.get("screenResolution")).toBe("1920x1080x24");
+        expect(wsUrl.searchParams.get("enableVNC")).toBe("true");
+        expect(wsUrl.searchParams.get("enableVideo")).toBe("true");
+        expect(wsUrl.searchParams.get("enableHAR")).toBe("false");
         expect(wsUrl.searchParams.get("enableLog")).toBe("false");
         expect(wsUrl.searchParams.get("timeZone")).toBe("UTC");
         expect(wsUrl.searchParams.get("labels.manual")).toBe("true");
@@ -283,5 +286,20 @@ describe("Capabilities Playwright Create Session", () => {
         const wsUrl = new URL(openedSockets[0].url);
         expect(wsUrl.searchParams.get("enableHAR")).toBe("true");
         expect(wsUrl.searchParams.get("harContent")).toBeNull();
+    });
+
+    it("mirrors enableVNC=false into the Playwright WebSocket query", async () => {
+        const user = userEvent.setup();
+        renderCapabilities(ACCESS_KEY);
+        await selectPlaywrightChrome(user);
+
+        const vnc = screen.getByTestId("caps-playwright-enable-vnc");
+        await user.click(within(vnc!).getByRole("button", { name: "false" }));
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        await waitFor(() => expect(openedSockets!).toHaveLength(1));
+        const wsUrl = new URL(openedSockets[0].url);
+        expect(wsUrl.searchParams.get("enableVNC")).toBe("false");
+        expect(wsUrl.searchParams.get("enableVideo")).toBe("true");
     });
 });

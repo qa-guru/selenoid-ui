@@ -6,8 +6,11 @@ export function retainPlaywrightSocket(sessionId: string, socket: WebSocket): vo
 
 export function releasePlaywrightSocket(sessionId: string): void {
     const socket = activeSockets[sessionId];
-    if (socket) {
+    if (!socket) {
+        return;
+    }
+    delete activeSockets[sessionId];
+    if (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN) {
         socket.close();
-        delete activeSockets[sessionId];
     }
 }

@@ -1,4 +1,5 @@
 import type { PlaywrightSessionForm } from "../types/hub";
+import { parseEnvList, parseLabelsMap } from "./capabilitiesLogic";
 
 /** Playwright session defaults — mirrored by the Playwright session panel. */
 export const DEFAULT_PLAYWRIGHT_SESSION: PlaywrightSessionForm = {
@@ -26,34 +27,6 @@ export type PlaywrightSessionInput = Partial<PlaywrightSessionForm> & Record<str
 
 /** Accept "true"/"false" strings or real booleans → query string value. */
 const boolStr = (value: unknown): string => (typeof value === "string" ? value : value ? "true" : "false");
-
-/** CSV / newline `KEY=value` → env string[]. */
-const parseEnvList = (raw: unknown): string[] =>
-    String(raw || "")
-        .split(/[\n,]+/)
-        .map((s: any) => s.trim())
-        .filter(Boolean);
-
-/** CSV / newline `key=value` → labels map. */
-const parseLabelsMap = (raw: unknown): Record<string, string> => {
-    const out: Record<string, string> = {};
-    for (const part of String(raw || "").split(/[\n,]+/)) {
-        const trimmed = part.trim();
-        if (!trimmed) {
-            continue;
-        }
-        const eq = trimmed.indexOf("=");
-        if (eq === -1) {
-            out[trimmed] = "true";
-        } else {
-            const key = trimmed.slice(0, eq).trim();
-            if (key) {
-                out[key] = trimmed.slice(eq + 1).trim();
-            }
-        }
-    }
-    return out;
-};
 
 /**
  * selenoid:options as a query-param map for a Playwright WebSocket session.

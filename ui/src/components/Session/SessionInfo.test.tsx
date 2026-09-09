@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi, afterEach } from "vitest";
 import SessionInfo from "./SessionInfo";
 import { setMockSessionsEnabled, spawnCreatedMockSession, resetMockLiveSessionOverlay } from "../../lib/mockSessions";
+import { retainPlaywrightSocket } from "../../util/playwrightSessions";
 
 const browser = {
     quota: "alice",
@@ -239,6 +240,28 @@ describe("SessionInfo", () => {
         vi.unstubAllGlobals();
     });
 
+    it("stop closes a retained Playwright socket before DELETE", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+        vi.stubGlobal("fetch", fetchMock);
+        const socket = { readyState: 1, close: vi.fn() } as any;
+        retainPlaywrightSocket("abc-def-12345678", socket);
+
+        render(
+            <MemoryRouter>
+                <SessionInfo session="abc-def-12345678" browser={browser} live />
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByTestId("session-stop"));
+        expect(socket.close).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/wd/hub/session/abc-def-12345678",
+            expect.objectContaining({ method: "DELETE" })
+        );
+        vi.unstubAllGlobals();
+    });
+
     it("stop of a created mock session skips the hub and returns to the list", async () => {
         const user = userEvent.setup();
         const fetchMock = vi.fn();
@@ -302,6 +325,28 @@ describe("SessionInfo", () => {
             "/har/fin-sess-1.har",
             expect.objectContaining({ method: "DELETE", credentials: "omit" })
         );
+        vi.unstubAllGlobals();
+    });
+
+    it("failed hub DELETE restores Stop and calls onStopFailed", async () => {
+        const user = userEvent.setup();
+        const onStopFailed = vi.fn();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+        vi.stubGlobal("fetch", fetchMock);
+        const err = vi.spyOn(console, "error").mockImplementation(() => {});
+
+        render(
+            <MemoryRouter>
+                <SessionInfo session="abc-def-12345678" browser={browser} live onStopFailed={onStopFailed} />
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByTestId("session-stop"));
+        await waitFor(() => {
+            expect(onStopFailed).toHaveBeenCalledTimes(1);
+        });
+        expect(screen.getByTestId("session-stop")).toBeEnabled();
+        err.mockRestore();
         vi.unstubAllGlobals();
     });
 

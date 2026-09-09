@@ -141,6 +141,29 @@ describe("Capabilities Android device panel", () => {
         expect(am.proxy).toBeUndefined();
         expect(body.desiredCapabilities).toBeUndefined();
 
+        await waitFor(() => expect(screen.getByTestId("session-route")).toBeInTheDocument());
+
+        fetchMock.mockRestore();
+    });
+
+    it("failed Android Create Session stays on New Session with the hub error", async () => {
+        const user = userEvent.setup();
+        const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
+            ok: false,
+            status: 500,
+            json: async () => ({ value: { message: "android container failed" } }),
+        });
+
+        renderCapabilities();
+        await selectAndroid(user, "16.0");
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        const create = screen.getByTestId("capabilities-create-session");
+        await waitFor(() => expect(create).toHaveClass("error-true"));
+        expect(create).toBeEnabled();
+        expect(create).toHaveAttribute("title", "Create Session failed: HTTP 500 — android container failed");
+        expect(screen.queryByTestId("session-route")).toBeNull();
+
         fetchMock.mockRestore();
     });
 

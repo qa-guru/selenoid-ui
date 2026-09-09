@@ -97,6 +97,165 @@ export function createSessionCatchMessage(
     return `Create Session failed: ${message}`;
 }
 
+/** CSV / newline `KEY=value` → env string[]. Shared by WD caps and Playwright WS query. */
+export function parseEnvList(raw: unknown): string[] {
+    return String(raw || "")
+        .split(/[\n,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+}
+
+/** CSV / newline `key=value` → labels map. Flag-only tokens become `"true"`. */
+export function parseLabelsMap(raw: unknown): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const part of String(raw || "").split(/[\n,]+/)) {
+        const trimmed = part.trim();
+        if (!trimmed) {
+            continue;
+        }
+        const eq = trimmed.indexOf("=");
+        if (eq === -1) {
+            out[trimmed] = "true";
+        } else {
+            const key = trimmed.slice(0, eq).trim();
+            if (key) {
+                out[key] = trimmed.slice(eq + 1).trim();
+            }
+        }
+    }
+    return out;
+}
+
+/** Coerce `"true"`/`"false"` strings or booleans → boolean. `Boolean("false")` is true — do not use it. */
+export function asBool(value: unknown): boolean {
+    return value === true || value === "true";
+}
+
+export type SelenoidOptionsInput = {
+    sessionTimeout?: unknown;
+    name?: unknown;
+    screenResolution?: unknown;
+    enableVnc?: unknown;
+    enableVideo?: unknown;
+    enableHar?: unknown;
+    enableLog?: unknown;
+    timeZone?: unknown;
+    env?: unknown;
+    labels?: unknown;
+    videoName?: unknown;
+    logName?: unknown;
+    harName?: unknown;
+    harContent?: unknown;
+};
+
+/** SSOT for Create Session + snippets — all keys go to selenoid:options. */
+export function buildSelenoidOptions({
+    sessionTimeout,
+    name,
+    screenResolution,
+    enableVnc,
+    enableVideo,
+    enableHar,
+    enableLog,
+    timeZone,
+    env,
+    labels,
+    videoName,
+    logName,
+    harName,
+    harContent,
+}: SelenoidOptionsInput): Record<string, any> {
+    const opts: Record<string, any> = {
+        enableVNC: asBool(enableVnc),
+        enableVideo: asBool(enableVideo),
+        enableHAR: asBool(enableHar),
+        enableLog: asBool(enableLog),
+        sessionTimeout,
+        name,
+        screenResolution,
+        timeZone: timeZone || "UTC",
+        labels: typeof labels === "string" ? parseLabelsMap(labels) : labels || {},
+    };
+    const envList = typeof env === "string" ? parseEnvList(env) : Array.isArray(env) ? env : [];
+    if (envList.length) {
+        opts.env = envList;
+    }
+    const video = String(videoName || "").trim();
+    const log = String(logName || "").trim();
+    const har = String(harName || "").trim();
+    if (opts.enableVideo && video) {
+        opts.videoName = video;
+    }
+    if (opts.enableLog && log) {
+        opts.logName = log;
+    }
+    if (opts.enableHAR && har) {
+        opts.harName = har;
+    }
+    if (opts.enableHAR && String(harContent || "").trim() === "bodies") {
+        opts.harContent = "bodies";
+    }
+    return opts;
+}
+
+export const DEFAULT_ANDROID_ORIENTATION = "PORTRAIT";
+
+/** Minimal selenoid:options for a mobile (Android) session — no proxy/har/log/env/skin. */
+export function buildAndroidSelenoidOptions({
+    name,
+    sessionTimeout,
+    enableVnc,
+    enableVideo,
+}: {
+    name?: unknown;
+    sessionTimeout?: unknown;
+    enableVnc?: unknown;
+    enableVideo?: unknown;
+}): Record<string, any> {
+    return {
+        enableVNC: asBool(enableVnc),
+        enableVideo: asBool(enableVideo),
+        name,
+        sessionTimeout,
+    };
+}
+
+/**
+ * W3C alwaysMatch for Selenoid Android (appium:* caps).
+ * SSOT for Create Session + androidCode snippets.
+ */
+export function buildAndroidCapabilities({
+    version,
+    app,
+    noReset,
+    autoGrantPermissions,
+    orientation,
+    selenoidOptions,
+}: {
+    version?: unknown;
+    app?: unknown;
+    noReset?: unknown;
+    autoGrantPermissions?: unknown;
+    orientation?: unknown;
+    selenoidOptions?: unknown;
+}): Record<string, any> {
+    const caps: Record<string, any> = {
+        browserName: "android",
+        browserVersion: String(version || ""),
+        platformName: "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:noReset": asBool(noReset),
+        "appium:autoGrantPermissions": asBool(autoGrantPermissions),
+        "appium:orientation": orientation || DEFAULT_ANDROID_ORIENTATION,
+        "selenoid:options": selenoidOptions,
+    };
+    const appUrl = String(app || "").trim();
+    if (appUrl) {
+        caps["appium:app"] = appUrl;
+    }
+    return caps;
+}
+
 export type ScreenSize = { width: number; height: number };
 
 /** Parse `1920x1080` / `1920x1080x24` → outer window size. */
@@ -252,10 +411,7 @@ export function browserProtocol(
     name: string | undefined,
     version?: string
 ): "playwright" | "webdriver" {
-    if (isPlaywrightBrowser(browserProtocols, name, version)) {
-        return "playwright";
-    }
-    return browserProtocols?.[name || ""]?.[version || ""]?.protocol === "playwright" ? "playwright" : "webdriver";
+    return isPlaywrightBrowser(browserProtocols, name, version) ? "playwright" : "webdriver";
 }
 
 function playwrightSessionCaps(session: LiveSession | undefined) {

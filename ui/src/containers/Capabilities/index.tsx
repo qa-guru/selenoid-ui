@@ -20,6 +20,10 @@ import {
     createSessionCatchMessage,
     CREATE_SESSION_TIMEOUT_MS,
     scheduleCreateSessionAbort,
+    asBool,
+    buildSelenoidOptions,
+    buildAndroidSelenoidOptions,
+    buildAndroidCapabilities,
 } from "../../util/capabilitiesLogic";
 import { waitForLiveSession } from "../../util/waitForLiveSession";
 import { sameOriginURL } from "../../util/uiFeed";
@@ -151,7 +155,9 @@ const HAR_CONTENT_OPTIONS = [
 /** Android hub sessionTimeout — anti-flake default (cold start still bounded by hub service timeout). */
 const ANDROID_DEFAULT_SESSION_TIMEOUT = "2m";
 
-/** Android device caps beyond image DEFAULT_CAPABILITIES — mirrored by the Android panel. */
+/** Android device caps beyond image DEFAULT_CAPABILITIES — mirrored by the Android panel.
+ * Skin stays the image default (qaguru/android SKIN=1080x1920); sending QVGA/HVGA
+ * overrides hub SKIN and crops the emulator window. */
 const DEFAULT_ANDROID_OPTS: Record<string, any> = {
     app: "",
     noReset: "false",
@@ -235,129 +241,6 @@ const buildProxyCapability = (proxyServer: any) => {
         socksProxy: proxyServer,
         socksVersion: 5,
     };
-};
-
-/** CSV / newline `KEY=value` → env string[]. */
-const parseEnvList = (raw: any) =>
-    String(raw || "")
-        .split(/[\n,]+/)
-        .map((s: any) => s.trim())
-        .filter(Boolean);
-
-/** CSV / newline `key=value` → labels map. */
-const parseLabelsMap = (raw: any) => {
-    const out: Record<string, string> = {};
-    for (const part of String(raw || "").split(/[\n,]+/)) {
-        const trimmed = part.trim();
-        if (!trimmed) {
-            continue;
-        }
-        const eq = trimmed.indexOf("=");
-        if (eq === -1) {
-            out[trimmed] = "true";
-        } else {
-            const key = trimmed.slice(0, eq).trim();
-            if (key) {
-                out[key] = trimmed.slice(eq + 1).trim();
-            }
-        }
-    }
-    return out;
-};
-
-/** SSOT for createSession + snippets — all keys go to selenoid:options. */
-const buildSelenoidOptions = ({
-    sessionTimeout,
-    name,
-    screenResolution,
-    enableVnc,
-    enableVideo,
-    enableHar,
-    enableLog,
-    timeZone,
-    env,
-    labels,
-    videoName,
-    logName,
-    harName,
-    harContent,
-}: any) => {
-    const opts: Record<string, any> = {
-        enableVNC: Boolean(enableVnc),
-        enableVideo: Boolean(enableVideo),
-        // enableHAR: hub records browser network over CDP and writes /har/<id>.har (WebDriver Chromium)
-        enableHAR: Boolean(enableHar),
-        enableLog: Boolean(enableLog),
-        sessionTimeout,
-        name,
-        screenResolution,
-        timeZone: timeZone || "UTC",
-        labels: typeof labels === "string" ? parseLabelsMap(labels) : labels || {},
-    };
-    const envList = typeof env === "string" ? parseEnvList(env) : Array.isArray(env) ? env : [];
-    if (envList.length) {
-        opts.env = envList;
-    }
-    const video = String(videoName || "").trim();
-    const log = String(logName || "").trim();
-    const har = String(harName || "").trim();
-    if (opts.enableVideo && video) {
-        opts.videoName = video;
-    }
-    if (opts.enableLog && log) {
-        opts.logName = log;
-    }
-    if (opts.enableHAR && har) {
-        opts.harName = har;
-    }
-    // harContent only when enableHAR; omit or meta ≡ hub default meta; bodies is opt-in.
-    if (opts.enableHAR && String(harContent || "").trim() === "bodies") {
-        opts.harContent = "bodies";
-    }
-    return opts;
-};
-
-/** Coerce "true"/"false" strings or booleans → boolean. */
-const asBool = (value: any) => value === true || value === "true";
-
-/** Minimal selenoid:options for a mobile (Android) session — no proxy/har/log/env/skin.
- * Skin is the image default (qaguru/android SKIN=1080x1920). Sending QVGA/HVGA
- * overrides that via hub SKIN env and crops the emulator window. */
-const buildAndroidSelenoidOptions = ({ name, sessionTimeout, enableVnc, enableVideo }: any) => ({
-    enableVNC: asBool(enableVnc),
-    enableVideo: asBool(enableVideo),
-    name,
-    sessionTimeout,
-});
-
-/**
- * W3C alwaysMatch for Selenoid Android (appium:* caps). Image entrypoint sets
- * platformName / automationName / udid defaults; here we surface only the
- * caps the panel exposes. SSOT for createSession + androidCode snippets.
- */
-const buildAndroidCapabilities = ({
-    version,
-    app,
-    noReset,
-    autoGrantPermissions,
-    orientation,
-    selenoidOptions,
-}: any) => {
-    const caps: Record<string, any> = {
-        browserName: "android",
-        browserVersion: String(version || ""),
-        platformName: "Android",
-        "appium:automationName": "UiAutomator2",
-        "appium:noReset": asBool(noReset),
-        "appium:autoGrantPermissions": asBool(autoGrantPermissions),
-        "appium:orientation": orientation || DEFAULT_ANDROID_OPTS.orientation,
-        "selenoid:options": selenoidOptions,
-    };
-    const appUrl = String(app || "").trim();
-    if (appUrl) {
-        caps["appium:app"] = appUrl;
-    }
-    return caps;
 };
 
 const VECTOR_REGISTRY_KEY = "selenoid-capabilities-vector-registry";

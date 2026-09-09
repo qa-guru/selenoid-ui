@@ -13,7 +13,7 @@ export function CapabilitiesLaunchActions({ loading, disabled, error, onCreateSe
                 onMouseLeave={onClearError}
                 title={error}
             >
-                {loading ? <BeatLoader size={3} color={"#fff"} /> : "Create Session"}
+                {loading ? <BeatLoader size={3} color="currentColor" /> : "Create Session"}
             </button>
         </div>
     );

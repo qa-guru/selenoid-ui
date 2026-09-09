@@ -10,7 +10,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/sync-design-system-static.sh"
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
 yarn --cwd ui typecheck
-yarn --cwd ui test
+yarn --cwd ui test:coverage
 test -d ui/allure-results
 yarn --cwd ui playwright install --with-deps chromium
 yarn --cwd ui test:visual

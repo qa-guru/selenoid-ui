@@ -1,0 +1,2 @@
+export const ARTIFACT_POLL_MS = 2500;
+export const ARTIFACT_POLL_TIMEOUT_MS = 120_000;

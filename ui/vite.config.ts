@@ -217,6 +217,53 @@ export default defineConfig({
             reportsDirectory: "./coverage",
             include: ["src/**/*.{ts,tsx}"],
             exclude: ["src/**/*.test.{ts,tsx}", "src/test/**", "src/**/*.d.ts"],
+            thresholds: {
+                "src/components/Session/index.tsx": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/components/Session/SessionInfo.tsx": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/components/Sessions/service.ts": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/util/playwrightSessions.ts": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/components/VncCard/VncScreen.tsx": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/util/capabilitiesLogic.ts": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/util/capabilitiesPlaywright.ts": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/util/waitForLiveSession.ts": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+                "src/components/CapabilitiesLaunchActions/index.tsx": {
+                    lines: 100,
+                    functions: 100,
+                    statements: 100,
+                },
+            },
         },
     },
 });

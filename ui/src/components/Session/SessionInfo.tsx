@@ -7,10 +7,19 @@ import { deleteSession } from "../Sessions/service";
 import { useDeleteSession } from "../SessionArchive/service";
 import { sessionsListTo } from "../../lib/sessionNav";
 import { isMockLiveSession, isMockSessionsEnabled } from "../../lib/mockSessions";
+import { releasePlaywrightSocket } from "../../util/playwrightSessions";
 import { isManualSession, sessionBrowserName, sessionName } from "../../util/sessionIdentity";
 import { SessionCapBadges, SessionIdentity } from "../SessionIdentity";
 
-const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finished = false, artifacts = {} }: any) => {
+const SessionInfo = ({
+    session = "",
+    browser = { caps: {} },
+    live = false,
+    finished = false,
+    artifacts = {},
+    onStopping,
+    onStopFailed,
+}: any) => {
     const location = useLocation();
     const navigate = useNavigate();
     const backTo = sessionsListTo(location.search);
@@ -38,10 +47,11 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
     const [deleting, deleteArtifacts] = useDeleteSession({ id: session, ...artifacts }, onDeleted);
 
     const onStop = useCallback(() => {
-        if (!canStop || stopping) {
-            return;
-        }
         setStopping(true);
+        // Close the retained Playwright WS immediately so hub teardown does not
+        // wait on the UI socket. Drop live VNC/SSE locally — hub /events can lag.
+        releasePlaywrightSocket(session);
+        onStopping?.();
         const mockOverlay = isMockSessionsEnabled() && isMockLiveSession(session);
         deleteSession(session)
             .then(() => {
@@ -52,15 +62,13 @@ const SessionInfo = ({ session = "", browser = { caps: {} }, live = false, finis
             .catch((e: any) => {
                 console.error("Can't delete session", session, e);
                 setStopping(false);
+                onStopFailed?.();
             });
-    }, [session, canStop, stopping, navigate, backTo]);
+    }, [session, navigate, backTo, onStopping, onStopFailed]);
 
     const onDelete = useCallback(() => {
-        if (!canDelete || deleting) {
-            return;
-        }
         deleteArtifacts();
-    }, [canDelete, deleting, deleteArtifacts]);
+    }, [deleteArtifacts]);
 
     return (
         <Panel

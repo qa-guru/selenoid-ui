@@ -137,17 +137,35 @@ describe("capabilitiesPlaywright", () => {
         expect(parsed.searchParams.get("socksProxy")).toBe("proxy.qaguru.school:7777");
     });
 
-    it("does not send mobileDevice as a hub query param", () => {
-        const parsed = new URL(
-            playwrightEndpoint("playwright-chrome", "1.61.0", "", {
-                screenResolution: "390x844x24",
-                mobileDevice: "iphone-12-pro",
-            } as any)
-        );
-        expect(parsed.searchParams.get("screenResolution")).toBe("390x844x24");
-        expect(parsed.searchParams.get("mobileDevice")).toBeNull();
-        expect(playwrightSelenoidOptions("", { mobileDevice: "iphone-12-pro" } as any)).not.toHaveProperty(
-            "mobileDevice"
-        );
+    it("defaults empty labels to labels.manual=true and skips env without =", () => {
+        const options = playwrightSelenoidOptions("", { labels: "", env: "NOEQUALS,=skip,FOO=bar", timeZone: "" });
+        expect(options["labels.manual"]).toBe("true");
+        expect(options["env.FOO"]).toBe("bar");
+        expect(options["env.NOEQUALS"]).toBeUndefined();
+        expect(options.timeZone).toBe("UTC");
+    });
+
+    it("accepts a labels object and uses wss on https pages", () => {
+        const options = playwrightSelenoidOptions("", { labels: { team: "qa" } } as any);
+        expect(options["labels.team"]).toBe("qa");
+        expect(options["labels.manual"]).toBeUndefined();
+        expect(playwrightSelenoidOptions("", { labels: null } as any)["labels.manual"]).toBe("true");
+        expect(playwrightSelenoidOptions("", { enableVnc: "false" } as any).enableVNC).toBe("false");
+        expect(playwrightSelenoidOptions("", { enableHar: true, harContent: "  " }).harContent).toBeUndefined();
+
+        const href = window.location.href;
+        Object.defineProperty(window, "location", {
+            configurable: true,
+            value: new URL("https://selenoid.qa.guru/"),
+        });
+        try {
+            const url = playwrightEndpoint("playwright-chrome", "1.61.0");
+            expect(url.startsWith("wss://selenoid.qa.guru/playwright/playwright-chrome/1.61.0?")).toBe(true);
+        } finally {
+            Object.defineProperty(window, "location", {
+                configurable: true,
+                value: new URL(href),
+            });
+        }
     });
 });

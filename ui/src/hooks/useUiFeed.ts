@@ -11,6 +11,7 @@ import {
     sameOriginURL,
 } from "../util/uiFeed";
 import { mergeMockLiveSessions } from "../lib/mockSessions";
+import { mergeOptimisticLiveSessions, subscribeOptimisticLiveSessions } from "../lib/optimisticLive";
 import { useMockSessionsEnabled } from "./useMockSessionsEnabled";
 
 const EMPTY_FEED: UiStatusPayload = {
@@ -40,6 +41,9 @@ export function useUiFeed(): UiFeed {
     const [sseStatus, setSseStatus] = useState<HealthStatus>("unknown");
     const [selenoidStatus, setSelenoidStatus] = useState<HealthStatus>("unknown");
     const [lastUpdate, setLastUpdate] = useState<number | null>(null);
+    const [, setOptimisticTick] = useState(0);
+
+    useEffect(() => subscribeOptimisticLiveSessions(() => setOptimisticTick((n) => n + 1)), []);
 
     const dataRef = useRef<UiStatusPayload | null>(null);
     const lastSseAtRef = useRef<number | null>(null);
@@ -168,7 +172,10 @@ export function useUiFeed(): UiFeed {
     }, [applyPayload]);
 
     const feed = data || EMPTY_FEED;
-    const sessions = mockEnabled ? mergeMockLiveSessions(feed.sessions || {}) : feed.sessions || {};
+    const hubSessions = feed.sessions || {};
+    const sessions = mergeOptimisticLiveSessions(
+        mockEnabled ? mergeMockLiveSessions(hubSessions) : hubSessions
+    );
 
     return {
         origin: feed.origin,

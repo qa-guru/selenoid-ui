@@ -57,11 +57,33 @@ export const StyledSession = styled.div`
         align-self: start;
         min-width: 0;
         overflow: hidden;
+        contain: layout;
+        width: 100%;
 
         > * {
             flex: 0 1 auto;
             min-height: 0;
             width: 100%;
+        }
+
+        /* noVNC sets overflow:auto on its screen div — scrollbars shrink the
+           box, scaleViewport reflows, the window jumps. Keep the mount clipped. */
+        .vnc-window__screen,
+        .vnc-window__screen-mount,
+        .vnc-screen,
+        .vnc-screen > div {
+            overflow: hidden !important;
+        }
+
+        /* Keep lock/copy/paste/fs in the bar while connecting so chrome width
+           does not collapse when the session becomes connected (or the reverse
+           on Stop → video). Vendor vnc-window.css still uses display:none. */
+        .vnc-window--connecting .vnc-window__session-control,
+        .vnc-window--disconnecting .vnc-window__session-control,
+        .vnc-window--disconnected .vnc-window__session-control {
+            display: inline-flex;
+            visibility: hidden;
+            pointer-events: none;
         }
     }
 

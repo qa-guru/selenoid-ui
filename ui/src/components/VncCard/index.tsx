@@ -4,6 +4,7 @@ import "@zero-design-system/react/styles.css";
 
 import VncScreen from "./VncScreen";
 import { parseScreenSize } from "../../util/capabilitiesLogic";
+import { mockLivePreview } from "../../lib/mockSessions";
 
 function videoFileName(session: string, caps: any = {}) {
     const custom = String(caps.videoName || "").trim();
@@ -20,6 +21,17 @@ function triggerDownload(href: string, filename: string) {
     a.click();
 }
 
+function initialConnection(props: any) {
+    const preview = mockLivePreview(props.session, props.browser, props.mockEnabled);
+    if (preview === "active") {
+        return "connected";
+    }
+    if (preview === "stub") {
+        return "disconnected";
+    }
+    return "connecting";
+}
+
 /**
  * Selenoid VNC window — design-system `VncWindow` primitive wired to the noVNC
  * RFB screen and Selenoid clipboard endpoints. Chrome, states and fullscreen
@@ -29,7 +41,12 @@ function triggerDownload(href: string, filename: string) {
  */
 export default class VncCard extends Component<any, any> {
     screen: any;
-    state: any = { connection: "connecting", fullscreen: false, unlocked: false };
+    state: any;
+
+    constructor(props: any) {
+        super(props);
+        this.state = { connection: initialConnection(props), fullscreen: false, unlocked: false };
+    }
 
     connection = (connection: any) => {
         this.setState({ connection });

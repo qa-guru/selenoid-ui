@@ -8,11 +8,21 @@ import { MockVncDesktop } from "./MockVncDesktop";
 export default class VncScreen extends Component<any, any> {
     rfb: any;
     canvas: HTMLDivElement | null | undefined;
+    rfbClosed = false;
 
-    static resizeVnc(rfb: any) {
-        if (rfb) {
-            rfb.resizeSession = true;
-            rfb.scaleViewport = true;
+    /** Fit the remote desktop into the CSS box. Never ask the hub to resize —
+     *  that fights screenResolution / window/rect and re-runs on every parent
+     *  render (SSE), which is what makes the VNC window jump. */
+    static applyScale(rfb: any) {
+        if (!rfb) {
+            return;
+        }
+        rfb.scaleViewport = true;
+        rfb.resizeSession = false;
+        rfb.clipViewport = false;
+        const screen = rfb._screen as HTMLElement | undefined;
+        if (screen?.style) {
+            screen.style.overflow = "hidden";
         }
     }
 
@@ -20,16 +30,22 @@ export default class VncScreen extends Component<any, any> {
         return port || (protocol === "https:" ? "443" : "80");
     }
 
+    setCanvas = (screen: HTMLDivElement | null) => {
+        this.canvas = screen;
+    };
+
     connection(connection: any) {
         this.props.onUpdateState(connection);
     }
 
     onVNCDisconnect = () => {
+        this.rfbClosed = true;
         this.connection("disconnected");
     };
 
     onVNCConnect = () => {
         this.connection("connected");
+        VncScreen.applyScale(this.rfb);
     };
 
     componentDidMount() {
@@ -74,6 +90,7 @@ export default class VncScreen extends Component<any, any> {
         if (origin && session) {
             const link = urlTo(window.location.href);
             const port = VncScreen.defaultPort(link);
+            this.rfbClosed = false;
             this.rfb = this.createRFB(link, port, session, isSecure(link));
         }
     }
@@ -92,8 +109,7 @@ export default class VncScreen extends Component<any, any> {
         rfb.addEventListener("connect", this.onVNCConnect);
         rfb.addEventListener("disconnect", this.onVNCDisconnect);
 
-        rfb.scaleViewport = true;
-        rfb.resizeSession = true;
+        VncScreen.applyScale(rfb);
         (rfb as any).viewOnly = true;
         return rfb;
     }
@@ -105,16 +121,18 @@ export default class VncScreen extends Component<any, any> {
     }
 
     disconnect(rfb: any) {
-        if (rfb) {
-            rfb.disconnect();
+        if (!rfb || this.rfbClosed) {
+            return;
         }
+        this.rfbClosed = true;
+        rfb.disconnect();
     }
 
     render() {
         const preview = mockLivePreview(this.props.session, this.props.browser, this.props.mockEnabled);
         if (preview === "active") {
             return (
-                <div className="vnc-screen" style={{ width: "100%", height: "100%" }}>
+                <div className="vnc-screen" style={{ width: "100%", height: "100%", overflow: "hidden" }}>
                     <MockVncDesktop caps={this.props.browser?.caps} />
                 </div>
             );
@@ -123,11 +141,8 @@ export default class VncScreen extends Component<any, any> {
         return (
             <div
                 className="vnc-screen"
-                style={{ width: "100%", height: "100%" }}
-                ref={(screen: any) => {
-                    this.canvas = screen;
-                    VncScreen.resizeVnc(this.rfb);
-                }}
+                style={{ width: "100%", height: "100%", overflow: "hidden" }}
+                ref={this.setCanvas}
             ></div>
         );
     }

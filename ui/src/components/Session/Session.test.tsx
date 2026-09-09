@@ -1,4 +1,5 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
@@ -10,16 +11,36 @@ vi.mock("../../util/waitForLiveSession", async (importOriginal) => {
     };
 });
 
+vi.mock("./sessionArtifactPoll", () => ({
+    ARTIFACT_POLL_MS: 20,
+    ARTIFACT_POLL_TIMEOUT_MS: 40,
+}));
+
 import Session from "./index";
 import { setMockSessionsEnabled } from "../../lib/mockSessions";
+import { mergeOptimisticLiveSessions, resetOptimisticLiveSessions, seedOptimisticLiveSession } from "../../lib/optimisticLive";
 import { DEFAULT_STACK_UI } from "../../lib/defaultStack";
 
 vi.mock("../VncCard", () => ({
-    default: () => <div data-testid="vnc-card">VNC</div>,
+    default: ({ onVNCFullscreenChange }: any) => (
+        <div>
+            <div data-testid="vnc-card">VNC</div>
+            <button type="button" data-testid="vnc-fullscreen" onClick={() => onVNCFullscreenChange?.(true)}>
+                fs
+            </button>
+        </div>
+    ),
 }));
 
 vi.mock("../Log", () => ({
-    default: () => <div data-testid="live-log">Log</div>,
+    default: ({ onToggleFullscreen }: any) => (
+        <div>
+            <div data-testid="live-log">Log</div>
+            <button type="button" data-testid="log-fullscreen" onClick={() => onToggleFullscreen?.()}>
+                fs
+            </button>
+        </div>
+    ),
 }));
 
 function renderSession(props: any) {
@@ -38,6 +59,7 @@ describe("Session detail page", () => {
     afterEach(() => {
         vi.unstubAllGlobals();
         window.history.replaceState(null, "", "/");
+        resetOptimisticLiveSessions();
     });
 
     it("shows live VNC + log when browser is present", () => {
@@ -237,7 +259,7 @@ describe("Session detail page", () => {
         expect(screen.queryByTestId("session-not-found")).toBeNull();
     });
 
-    it("keeps the page after kill, preserves live log, and loads video + HAR", async () => {
+    it("SSE catch-up after the hub drops the session still loads video + HAR", async () => {
         const liveBrowser = {
             quota: "alice",
             caps: {
@@ -305,6 +327,66 @@ describe("Session detail page", () => {
         expect(screen.queryByTestId("session-video-waiting")).toBeNull();
         expect(screen.getAllByTestId("session-har-viewer")).toHaveLength(1);
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
+    });
+
+    it("stop drops VNC immediately while SSE still lists the session", async () => {
+        const user = userEvent.setup();
+        let archiveCalls = 0;
+        (fetch as any).mockImplementation(async (url: any, init: any) => {
+            if (init?.method === "DELETE" && String(url).includes("/wd/hub/session/")) {
+                return { ok: true, status: 200 };
+            }
+            if (String(url).startsWith("/sessions/?")) {
+                archiveCalls += 1;
+                if (archiveCalls === 1) {
+                    return { ok: true, json: async () => ({ sessions: [], total: 0, limit: 10, offset: 0 }) };
+                }
+                return {
+                    ok: true,
+                    json: async () => ({
+                        sessions: [{ id: "live-stop-1", video: "live-stop-1.mp4" }],
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                    }),
+                };
+            }
+            if (String(url) === "/video/live-stop-1.mp4") {
+                return { ok: true, status: 200 };
+            }
+            return { ok: true, json: async () => ({}) };
+        });
+
+        renderSession({
+            session: "live-stop-1",
+            browser: {
+                quota: "alice",
+                caps: { browserName: "chrome", version: "152.0", enableVNC: true, enableVideo: true },
+            },
+        });
+
+        seedOptimisticLiveSession("live-stop-1", {
+            caps: { browserName: "chrome", version: "152.0", enableVNC: true },
+        });
+        expect(mergeOptimisticLiveSessions({})["live-stop-1"]).toBeTruthy();
+
+        expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
+        await user.click(screen.getByTestId("session-stop"));
+
+        expect(mergeOptimisticLiveSessions({})["live-stop-1"]).toBeUndefined();
+
+        expect(screen.queryByTestId("vnc-card")).toBeNull();
+        expect(screen.getByTestId("session-finished")).toHaveTextContent("FINISHED");
+        expect(screen.getByTestId("session-video-waiting")).toBeInTheDocument();
+        expect(screen.getByTestId("session-delete")).toBeDisabled();
+
+        await waitFor(
+            () => {
+                expect(screen.getByTestId("session-detail-video")).toBeInTheDocument();
+            },
+            { timeout: 5000 }
+        );
+        expect(screen.getByTestId("session-delete")).toBeEnabled();
     });
 
     it("switches live log to the finished log file once the archive has it", async () => {
@@ -504,5 +586,93 @@ describe("Session detail page", () => {
         });
         expect(screen.getByText("FINISHED")).toBeInTheDocument();
         expect(screen.queryByTestId("vnc-card")).toBeNull();
+    });
+
+    it("toggles VNC and live-log fullscreen slots from the session page", async () => {
+        const user = userEvent.setup();
+        renderSession({
+            session: "live-fs-1",
+            browser: {
+                quota: "alice",
+                caps: { browserName: "chrome", version: "152.0", enableVNC: true },
+            },
+        });
+
+        await user.click(screen.getByTestId("vnc-fullscreen"));
+        await user.click(screen.getByTestId("log-fullscreen"));
+        expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
+        expect(screen.getByTestId("live-log")).toBeInTheDocument();
+    });
+
+    it("toggles finished log and HAR fullscreen", async () => {
+        const user = userEvent.setup();
+        (fetch as any).mockImplementation(async (url: any) => {
+            if (String(url).startsWith("/sessions/?")) {
+                return {
+                    ok: true,
+                    json: async () => ({
+                        sessions: [{ id: "fin-fs-1", log: "fin-fs-1.log", har: "fin-fs-1.har" }],
+                        total: 1,
+                        limit: 10,
+                        offset: 0,
+                    }),
+                };
+            }
+            if (String(url).includes("/logs/fin-fs-1.log")) {
+                return { ok: true, text: async () => "done\n" };
+            }
+            if (String(url) === "/har/fin-fs-1.har") {
+                return {
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        log: { version: "1.2", creator: { name: "selenoid" }, entries: [] },
+                    }),
+                };
+            }
+            return { ok: true, json: async () => ({}) };
+        });
+
+        renderSession({ session: "fin-fs-1", browser: undefined });
+        await waitFor(() => {
+            expect(screen.getByTestId("session-log-fullscreen")).toBeInTheDocument();
+        });
+        await user.click(screen.getByTestId("session-log-fullscreen"));
+        await user.click(screen.getByTestId("session-har-fullscreen"));
+        expect(screen.getByTestId("session-log-file")).toBeInTheDocument();
+        expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
+    });
+
+    it("shows ARTIFACTS NOT FOUND when Stop succeeds but the archive never lists the session", async () => {
+        const user = userEvent.setup();
+        (fetch as any).mockImplementation(async (url: any, init: any) => {
+            if (init?.method === "DELETE") {
+                return { ok: true, status: 200 };
+            }
+            if (String(url).startsWith("/sessions/?")) {
+                return { ok: true, json: async () => ({ sessions: [], total: 0, limit: 10, offset: 0 }) };
+            }
+            return { ok: true, json: async () => ({}) };
+        });
+
+        renderSession({
+            session: "gone-1",
+            browser: {
+                quota: "alice",
+                caps: { browserName: "chrome", version: "152.0", enableVNC: true, enableVideo: true },
+            },
+        });
+        await user.click(screen.getByTestId("session-stop"));
+        await waitFor(() => {
+            expect(screen.getByTestId("session-artifacts-not-found")).toBeInTheDocument();
+        });
+    });
+
+    it("cold-open archive fetch failure is SESSION NOT FOUND", async () => {
+        (fetch as any).mockRejectedValue(new Error("archive down"));
+        renderSession({ session: "missing-1", browser: undefined });
+        await waitFor(() => {
+            expect(screen.getByTestId("session-not-found")).toBeInTheDocument();
+        });
     });
 });

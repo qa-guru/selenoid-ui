@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
@@ -139,6 +139,43 @@ describe("VncCard", () => {
         await user.click(screen.getByRole("button", { name: "Copy from session" }));
 
         expect(fetchMock!).toHaveBeenCalledWith("/clipboard/sess-123", { method: "GET" });
+        vi.unstubAllGlobals();
+    });
+
+    it("downloads the session video from the chrome", async () => {
+        const user = userEvent.setup();
+        const click = vi.fn();
+        const orig = document.createElement.bind(document);
+        vi.spyOn(document, "createElement").mockImplementation((tag: any, opts?: any) => {
+            if (tag === "a") {
+                return { href: "", download: "", click } as any;
+            }
+            return orig(tag, opts);
+        });
+        renderVnc({
+            browser: { caps: { enableVNC: true, videoName: "custom-cap" } },
+        });
+        await user.click(screen.getByTestId("vnc-window-download"));
+        expect(click).toHaveBeenCalled();
+        vi.restoreAllMocks();
+    });
+
+    it("pastes clipboard text into the session", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+        vi.stubGlobal("fetch", fetchMock);
+        Object.defineProperty(navigator, "clipboard", {
+            configurable: true,
+            value: { writeText: vi.fn(), readText: vi.fn().mockResolvedValue("paste-me") },
+        });
+        renderVnc();
+        await user.click(screen.getByRole("button", { name: "Paste into session" }));
+        await waitFor(() => {
+            expect(fetchMock).toHaveBeenCalledWith(
+                "/clipboard/sess-123",
+                expect.objectContaining({ method: "POST", body: "paste-me" })
+            );
+        });
         vi.unstubAllGlobals();
     });
 });
