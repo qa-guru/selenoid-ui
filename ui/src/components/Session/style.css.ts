@@ -362,16 +362,19 @@ export const StyledSessionVideo = styled.div`
     .session-video-card__body {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        justify-content: center;
         padding: 0;
         flex: 0 1 auto;
         min-height: 0;
+        aspect-ratio: 16 / 9;
         background-color: var(--color-surface-deep, #131614);
     }
 
     video {
         width: 100%;
-        height: auto;
-        aspect-ratio: 16 / 9;
+        height: 100%;
+        object-fit: contain;
         background: #000;
     }
 `;

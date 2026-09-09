@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
     clearOptimisticLiveSession,
+    markLiveSessionEnded,
     mergeOptimisticLiveSessions,
     resetOptimisticLiveSessions,
+    reviveLiveSession,
     seedOptimisticLiveSession,
     subscribeOptimisticLiveSessions,
 } from "./optimisticLive";
@@ -31,5 +33,28 @@ describe("optimisticLive", () => {
         off();
         seedOptimisticLiveSession("sess-2", { caps: { browserName: "chrome" } });
         expect(listener.n).toBe(2);
+    });
+
+    it("strips an ended id even when the hub snapshot still lists it", () => {
+        seedOptimisticLiveSession("sess-3", { caps: { browserName: "chrome" } });
+        markLiveSessionEnded("sess-3");
+        expect(mergeOptimisticLiveSessions({ "sess-3": { caps: { browserName: "chrome" } } })["sess-3"]).toBeUndefined();
+        reviveLiveSession("sess-3");
+        expect(mergeOptimisticLiveSessions({ "sess-3": { caps: { browserName: "chrome" }, quota: "hub" } })["sess-3"]?.quota).toBe(
+            "hub"
+        );
+    });
+
+    it("ignores empty ids and no-ops a revive of an unknown session", () => {
+        markLiveSessionEnded("");
+        reviveLiveSession("missing");
+        clearOptimisticLiveSession("");
+        seedOptimisticLiveSession("", { caps: { browserName: "chrome" } });
+        expect(mergeOptimisticLiveSessions({})).toEqual({});
+    });
+
+    it("attaches a live subscriber", () => {
+        const off = subscribeOptimisticLiveSessions(() => undefined);
+        off();
     });
 });

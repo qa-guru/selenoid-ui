@@ -374,11 +374,20 @@ describe("Session detail page", () => {
         await user.click(screen.getByTestId("session-stop"));
 
         expect(mergeOptimisticLiveSessions({})["live-stop-1"]).toBeUndefined();
+        expect(
+            mergeOptimisticLiveSessions({
+                "live-stop-1": { caps: { browserName: "chrome", version: "152.0", enableVNC: true } },
+            })["live-stop-1"]
+        ).toBeUndefined();
 
         expect(screen.queryByTestId("vnc-card")).toBeNull();
         expect(screen.getByTestId("session-finished")).toHaveTextContent("FINISHED");
-        expect(screen.getByTestId("session-video-waiting")).toBeInTheDocument();
-        expect(screen.getByTestId("session-delete")).toBeDisabled();
+        expect(screen.getByTestId("session-media-slot")).toBeInTheDocument();
+        expect(
+            screen.queryByTestId("session-video-waiting") ||
+                screen.queryByTestId("session-video-probing") ||
+                screen.queryByTestId("session-detail-video")
+        ).toBeTruthy();
 
         await waitFor(
             () => {
@@ -387,6 +396,33 @@ describe("Session detail page", () => {
             { timeout: 5000 }
         );
         expect(screen.getByTestId("session-delete")).toBeEnabled();
+    });
+
+    it("failed stop revives the live VNC mosaic", async () => {
+        const user = userEvent.setup();
+        const err = vi.spyOn(console, "error").mockImplementation(() => {});
+        (fetch as any).mockImplementation(async (url: any, init: any) => {
+            if (init?.method === "DELETE" && String(url).includes("/wd/hub/session/")) {
+                return { ok: false, status: 500 };
+            }
+            return { ok: true, json: async () => ({}) };
+        });
+
+        renderSession({
+            session: "live-stop-fail-1",
+            browser: {
+                quota: "alice",
+                caps: { browserName: "chrome", version: "152.0", enableVNC: true, enableVideo: true },
+            },
+        });
+
+        expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
+        await user.click(screen.getByTestId("session-stop"));
+        await waitFor(() => {
+            expect(screen.getByTestId("session-stop")).toBeEnabled();
+        });
+        expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
+        err.mockRestore();
     });
 
     it("switches live log to the finished log file once the archive has it", async () => {

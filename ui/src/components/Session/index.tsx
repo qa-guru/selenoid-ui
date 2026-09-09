@@ -11,7 +11,7 @@ import { fetchSessionById } from "../SessionArchive/api";
 import { LIVE_SESSION_GRACE_MS } from "../../util/waitForLiveSession";
 import { useMockSessionsEnabled } from "../../hooks/useMockSessionsEnabled";
 import { mockDetailsSession } from "../../lib/mockSessions";
-import { clearOptimisticLiveSession } from "../../lib/optimisticLive";
+import { markLiveSessionEnded, reviveLiveSession } from "../../lib/optimisticLive";
 import { StyledSession } from "./style.css";
 import { ARTIFACT_POLL_MS, ARTIFACT_POLL_TIMEOUT_MS } from "./sessionArtifactPoll";
 
@@ -68,10 +68,13 @@ const Session = ({ origin, session, browser }: any) => {
     }, [session]);
 
     const onStopping = useCallback(() => {
-        clearOptimisticLiveSession(session);
+        markLiveSessionEnded(session);
         setStoppedHere(true);
     }, [session]);
-    const onStopFailed = useCallback(() => setStoppedHere(false), []);
+    const onStopFailed = useCallback(() => {
+        reviveLiveSession(session);
+        setStoppedHere(false);
+    }, [session]);
 
     useEffect(() => {
         if (browser) {
@@ -203,6 +206,7 @@ const Session = ({ origin, session, browser }: any) => {
                         wasLive: wasLive && !showMockPreview,
                         finished: finishedInfo || stoppedHere,
                         artifacts: artifacts || {},
+                        artifactsStatus,
                         onStopping,
                         onStopFailed,
                     }}

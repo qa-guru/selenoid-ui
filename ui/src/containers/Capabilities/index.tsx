@@ -14,6 +14,7 @@ import {
     isPlaywrightBrowser,
     pickDefaultWebdriverBrowser,
     resizeSessionWindow,
+    minImageCapabilityError,
     openSessionUrl,
     sessionIdFrom,
     hubSessionErrorMessage,
@@ -53,6 +54,7 @@ import {
 } from "../../config/hubAuth";
 import { rememberHubAuthToken } from "../../config/hubSessionAuth";
 import { isMockSessionsEnabled, spawnCreatedMockSession } from "../../lib/mockSessions";
+import { seedOptimisticLiveSession } from "../../lib/optimisticLive";
 import { DEFAULT_STACK_UI } from "../../lib/defaultStack";
 import { CapabilitiesLaunchActions } from "../../components/CapabilitiesLaunchActions";
 
@@ -2278,6 +2280,15 @@ const Launch = ({
 
     const createSession = useCallback(async () => {
         onError("");
+        const minErr = minImageCapabilityError(version, {
+            enableVnc: enableVnc === "true",
+            enableVideo: enableVideo === "true",
+            enableHar: enableHar === "true",
+        });
+        if (minErr) {
+            onError(`Create Session rejected: ${minErr}`);
+            return;
+        }
         onLoading(true);
 
         const vnc = enableVnc === "true";
@@ -2541,6 +2552,15 @@ const Launch = ({
         }
 
         onError("");
+        const minErr = minImageCapabilityError(version, {
+            enableVnc: Boolean(pwSession.enableVnc),
+            enableVideo: Boolean(pwSession.enableVideo),
+            enableHar: Boolean(pwSession.enableHar),
+        });
+        if (minErr) {
+            onError(`Create Session rejected: ${minErr}`);
+            return;
+        }
         onLoading(true);
 
         if (isMockSessionsEnabled()) {
@@ -2620,6 +2640,18 @@ const Launch = ({
             // still hold bake-time defaults while the form only edited accessKey.
             rememberHubAuthToken(parseAccessKey(accessKey) ? accessKey : primeToken);
             retainPlaywrightSocket(sessionId, playwrightSocket.current!);
+            seedOptimisticLiveSession(
+                sessionId,
+                data.sessions?.[sessionId] || {
+                    caps: {
+                        browserName: name,
+                        version,
+                        enableVNC: Boolean(pwSession.enableVnc),
+                        enableVideo: Boolean(pwSession.enableVideo),
+                        name: pwSession.name,
+                    },
+                }
+            );
             navigate(`/sessions/${sessionId}`);
             onLoading(false);
         };

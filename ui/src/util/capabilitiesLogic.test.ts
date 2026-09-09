@@ -16,6 +16,8 @@ import {
     parseLabelsMap,
     parseScreenSize,
     pickDefaultWebdriverBrowser,
+    isMinBrowserVersion,
+    minImageCapabilityError,
     resizeSessionWindow,
     openSessionUrl,
     scheduleCreateSessionAbort,
@@ -176,6 +178,22 @@ describe("capabilitiesLogic", () => {
         );
     });
 
+    it("formats hub invalid-argument body from a -min image", async () => {
+        const response = new Response(
+            JSON.stringify({
+                value: {
+                    error: "invalid argument",
+                    message:
+                        "152.0-min is a headless CI image and does not support enableVideo — use the full image, or turn those options off",
+                },
+            }),
+            { status: 400 }
+        );
+        await expect(hubSessionErrorMessage(response)).resolves.toBe(
+            "Create Session failed: HTTP 400 — 152.0-min is a headless CI image and does not support enableVideo — use the full image, or turn those options off"
+        );
+    });
+
     it("maps AbortError / TimeoutError to a 5m Create Session timeout, never aborted-without-reason", () => {
         const nameless = new DOMException("signal is aborted without reason", "AbortError");
         const timedOut = new DOMException("Create Session timed out after 5m waiting for POST /wd/hub/session", "TimeoutError");
@@ -250,6 +268,21 @@ describe("capabilitiesLogic", () => {
                 { value: "ios_18.0", name: "ios", version: "18.0", protocol: "ios" },
             ])
         ).toBeUndefined();
+    });
+
+    it("isMinBrowserVersion detects catalog -min tags", () => {
+        expect(isMinBrowserVersion("152.0-min")).toBe(true);
+        expect(isMinBrowserVersion("152.0")).toBe(false);
+        expect(isMinBrowserVersion("")).toBe(false);
+    });
+
+    it("minImageCapabilityError rejects desktop extras on -min images", () => {
+        expect(minImageCapabilityError("152.0", { enableVnc: true, enableVideo: true })).toBeNull();
+        expect(minImageCapabilityError("152.0-min", {})).toBeNull();
+        expect(minImageCapabilityError("152.0-min", { enableVnc: true, enableVideo: true })).toBe(
+            "152.0-min is a headless CI image and does not support enableVNC, enableVideo — use the full image, or turn those options off"
+        );
+        expect(minImageCapabilityError("1.62.1-min", { enableHar: true })).toContain("enableHAR");
     });
 
     it("asBool treats the string false as false", () => {

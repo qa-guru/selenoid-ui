@@ -59,14 +59,16 @@ describe("CapabilitiesLaunchActions", () => {
         expect(create).not.toHaveTextContent("Create Session");
     });
 
-    it("surfaces Create Session error on the button until mouse leave", async () => {
+    it("surfaces Create Session error in an alert until dismiss", async () => {
         const user = userEvent.setup();
         const onClearError = vi.fn();
+        const message =
+            "Create Session rejected: 152.0-min is a headless CI image and does not support enableVideo — use the full image, or turn those options off";
         render(
             <CapabilitiesLaunchActions
                 loading={false}
                 disabled={false}
-                error="Create Session failed: HTTP 500 — Chrome instance exited"
+                error={message}
                 onCreateSession={vi.fn()}
                 onClearError={onClearError}
             />
@@ -74,10 +76,14 @@ describe("CapabilitiesLaunchActions", () => {
 
         const create = screen.getByTestId("capabilities-create-session");
         expect(create).toHaveClass("error-true");
-        expect(create).toHaveAttribute("title", "Create Session failed: HTTP 500 — Chrome instance exited");
+        expect(create).toHaveAttribute("title", message);
+        expect(screen.getByTestId("capabilities-create-error")).toHaveTextContent(message);
 
         await user.hover(create);
         await user.unhover(create);
+        expect(onClearError).not.toHaveBeenCalled();
+
+        await user.click(screen.getByTestId("capabilities-create-error-dismiss"));
         expect(onClearError).toHaveBeenCalled();
     });
 });

@@ -17,6 +17,7 @@ const SessionInfo = ({
     live = false,
     finished = false,
     artifacts = {},
+    artifactsStatus = "idle",
     onStopping,
     onStopFailed,
 }: any) => {
@@ -28,7 +29,9 @@ const SessionInfo = ({
     const [stopping, setStopping] = useState(false);
     const hasArtifacts = Boolean(artifacts.video || artifacts.log || artifacts.har);
     const canStop = Boolean(live && session);
-    const canDelete = Boolean(session && !live && hasArtifacts);
+    const archiveSettled =
+        artifactsStatus === "ready" || artifactsStatus === "missing" || artifactsStatus === "error";
+    const canDelete = Boolean(session && !live && (hasArtifacts || (finished && archiveSettled)));
     const starting = Boolean(live && browser.starting);
     const { name, displayName } = sessionName(caps);
     const showIdentity = Boolean(browser.quota || caps.browserName || caps.version || name);

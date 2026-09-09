@@ -10,11 +10,23 @@ export function CapabilitiesLaunchActions({ loading, disabled, error, onCreateSe
                 data-testid="capabilities-create-session"
                 disabled={disabled}
                 onClick={onCreateSession}
-                onMouseLeave={onClearError}
-                title={error}
+                title={error || undefined}
             >
                 {loading ? <BeatLoader size={3} color="currentColor" /> : "Create Session"}
             </button>
+            {error ? (
+                <div className="capabilities-create-error" data-testid="capabilities-create-error" role="alert">
+                    {error}
+                    <button
+                        type="button"
+                        className="capabilities-create-error__dismiss"
+                        data-testid="capabilities-create-error-dismiss"
+                        onClick={onClearError}
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            ) : null}
         </div>
     );
 }

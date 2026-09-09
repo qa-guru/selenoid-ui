@@ -446,8 +446,33 @@ export function findPlaywrightSession(
 
 type BrowserPick = { value: string; name: string; version: string; protocol?: string };
 
-function isMinBrowserVersion(version: string): boolean {
-    return version.endsWith("-min");
+export function isMinBrowserVersion(version: string): boolean {
+    return String(version || "").trim().endsWith("-min");
+}
+
+/** Hub/UI copy for -min + desktop extras. Hub returns the same text as W3C invalid argument. */
+export function minImageCapabilityError(
+    version: string,
+    flags: { enableVnc?: boolean; enableVideo?: boolean; enableHar?: boolean } = {}
+): string | null {
+    const catalogVersion = String(version || "").trim();
+    if (!isMinBrowserVersion(catalogVersion)) {
+        return null;
+    }
+    const unsupported: string[] = [];
+    if (flags.enableVnc) {
+        unsupported.push("enableVNC");
+    }
+    if (flags.enableVideo) {
+        unsupported.push("enableVideo");
+    }
+    if (flags.enableHar) {
+        unsupported.push("enableHAR");
+    }
+    if (!unsupported.length) {
+        return null;
+    }
+    return `${catalogVersion} is a headless CI image and does not support ${unsupported.join(", ")} — use the full image, or turn those options off`;
 }
 
 function newestByVersion(items: BrowserPick[]): BrowserPick | undefined {

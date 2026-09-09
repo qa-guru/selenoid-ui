@@ -63,7 +63,7 @@ const SessionVideo = ({ file }: any) => {
                 testId="session-video-panel"
                 titleTestId="session-video-title"
                 className="session-video-card"
-                bodyClassName="session-video-card__body"
+                bodyClassName={`session-video-card__body${ready ? "" : " session-video-waiting"}`}
                 actions={[
                     {
                         icon: <IconDownload />,

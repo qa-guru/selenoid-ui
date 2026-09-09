@@ -328,6 +328,60 @@ describe("SessionInfo", () => {
         vi.unstubAllGlobals();
     });
 
+    it("enables Delete when the archive settled with no files", async () => {
+        const user = userEvent.setup();
+        render(
+            <MemoryRouter initialEntries={["/sessions/empty-1"]}>
+                <Routes>
+                    <Route
+                        path="/sessions/:session"
+                        element={<SessionInfo session="empty-1" finished artifactsStatus="missing" />}
+                    />
+                    <Route path="/sessions" element={<div data-testid="sessions-list" />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const del = screen.getByTestId("session-delete");
+        expect(del).toBeEnabled();
+        await user.click(del);
+        expect(screen.getByTestId("sessions-list")).toBeInTheDocument();
+    });
+
+    it("delete treats missing artifact files as already gone", async () => {
+        const user = userEvent.setup();
+        const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+        vi.stubGlobal("fetch", fetchMock);
+
+        render(
+            <MemoryRouter initialEntries={["/sessions/fin-sess-404"]}>
+                <Routes>
+                    <Route
+                        path="/sessions/:session"
+                        element={
+                            <SessionInfo
+                                session="fin-sess-404"
+                                finished
+                                artifacts={{ video: "fin-sess-404.mp4" }}
+                            />
+                        }
+                    />
+                    <Route path="/sessions" element={<div data-testid="sessions-list" />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByTestId("session-delete"));
+        await waitFor(() => {
+            expect(screen.getByTestId("sessions-list")).toBeInTheDocument();
+        });
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/video/fin-sess-404.mp4",
+            expect.objectContaining({ method: "DELETE" })
+        );
+        vi.unstubAllGlobals();
+    });
+
     it("failed hub DELETE restores Stop and calls onStopFailed", async () => {
         const user = userEvent.setup();
         const onStopFailed = vi.fn();

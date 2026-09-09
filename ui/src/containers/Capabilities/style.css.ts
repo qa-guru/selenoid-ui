@@ -320,6 +320,28 @@ export const StyledCapabilities = styled.div`
     }
   }
 
+  .capabilities-create-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3, 10px);
+    color: ${errorColor};
+    font-size: 0.85em;
+    line-height: 1.35;
+    white-space: pre-wrap;
+  }
+
+  .capabilities-create-error__dismiss {
+    flex: 0 0 auto;
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    padding: 0;
+  }
+
   html.theme-light & {
     .panel.panel--terminal {
       --panel-bg: #ffffff;

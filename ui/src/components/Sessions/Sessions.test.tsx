@@ -85,7 +85,8 @@ describe("Sessions", () => {
         expect(resolution!.closest(".browser")).toContainElement(screen.getByText("120.0"));
         expect(resolution!.closest(".session__caps")).toBeNull();
 
-        const deleteBtn = screen.getByRole("button", { name: "Delete" });
+        const deleteBtn = screen.getByTestId("session-list-delete");
+        expect(deleteBtn).toHaveAttribute("aria-label", "Delete");
         expect(deleteBtn!).toHaveClass("icon-btn", "session-delete");
         expect(deleteBtn.querySelector(".dripicons-trash")).toBeNull();
         expect(deleteBtn.querySelector("svg")).toBeTruthy();

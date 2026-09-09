@@ -124,6 +124,7 @@ const Session = ({ id, session: { quota, caps, starting }, ref }: any) => {
                         className="icon-btn session-delete"
                         title="Delete"
                         aria-label="Delete"
+                        data-testid="session-list-delete"
                         disabled={deleting}
                         onClick={deleteSession}
                     >
