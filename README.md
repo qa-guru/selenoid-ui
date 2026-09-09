@@ -51,7 +51,7 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 | ----------------- | ----------------------------------------------------------------------------------------------- |
 | **GitHub**        | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)                                   |
 | **Docker Hub**    | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui)                             |
-| **Текущий релиз** | **v3.0.56** — [docs/RELEASE_v3.0.56.md](docs/RELEASE_v3.0.56.md) · `qaguru/selenoid-ui:v3.0.56` |
+| **Текущий релиз** | **v3.0.57** — [docs/RELEASE_v3.0.57.md](docs/RELEASE_v3.0.57.md) · `qaguru/selenoid-ui:v3.0.57` |
 
 ## Роль в экосистеме
 
