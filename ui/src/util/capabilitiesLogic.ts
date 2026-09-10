@@ -16,6 +16,9 @@ export function sessionIdFrom({ response }: { response?: SessionCreateResponse |
     return response?.sessionId || response?.value?.sessionId || "";
 }
 
+const CREATE_SESSION_FAILED = "Create Session failed";
+const CREATE_SESSION_REJECTED = "Create Session rejected";
+
 /**
  * nginx / validator 401 — login/password refused, not a hub crash.
  * Never echo the body (HTML or a leaked secret). Never mention HTTP 401.
@@ -23,25 +26,94 @@ export function sessionIdFrom({ response }: { response?: SessionCreateResponse |
 export const HUB_SESSION_UNAUTHORIZED_MESSAGE =
     "Create Session rejected: login and password were not accepted. Check authUser/authPass — your handle with selenoidToken, or the guest pair.";
 
-/** Hub / UI proxy error body → user-visible Create Session message. */
+export const HUB_SESSION_PROXY_MESSAGE =
+    "Create Session failed: the hub proxy did not respond. Retry, or check that Selenoid is running.";
+
+export const HUB_SESSION_UNAVAILABLE_MESSAGE =
+    "Create Session failed: the hub could not start the session. Check the container logs.";
+
+export const CREATE_SESSION_NETWORK_MESSAGE =
+    "Create Session failed: could not reach the hub. Check that Selenoid is running.";
+
+export function hubSessionMissingImageMessage(image: string): string {
+    return `${CREATE_SESSION_FAILED}: Docker image ${image} is not on this machine. Pull the image or choose another browser.`;
+}
+
+function looksLikeHtml(text: string): boolean {
+    return /<\s*(?:html|head|body|title|h1|center|hr)\b/i.test(text);
+}
+
+function isOpaqueErrorCode(detail: string): boolean {
+    return /^(unknown error|session not created|invalid argument|bad gateway|unauthorized|forbidden|internal server error)$/i.test(
+        detail
+    );
+}
+
+function sanitizeHubDetail(detail: string): string {
+    const cleaned = detail.replace(/\s+/g, " ").trim();
+    if (!cleaned || looksLikeHtml(cleaned) || isOpaqueErrorCode(cleaned)) {
+        return "";
+    }
+    return cleaned;
+}
+
+function extractHubDetail(data: unknown): string {
+    if (!data || typeof data !== "object") {
+        return "";
+    }
+    const rec = data as Record<string, unknown>;
+    const value = rec.value;
+    let detail = "";
+    if (value && typeof value === "object") {
+        const inner = value as Record<string, unknown>;
+        detail = String(inner.message || "").trim() || String(inner.error || "").trim();
+    }
+    if (!detail) {
+        detail = String(rec.message || "").trim() || String(rec.error || "").trim();
+    }
+    return sanitizeHubDetail(detail);
+}
+
+function plaqueFromHubDetail(status: number, detail: string): string {
+    const noImage = detail.match(/No such image:\s*(\S+)/i);
+    if (noImage) {
+        return hubSessionMissingImageMessage(noImage[1].replace(/[.,;"']+$/g, ""));
+    }
+    const daemon = detail.match(/Error response from daemon:\s*(.+)$/i);
+    if (daemon) {
+        return `${CREATE_SESSION_FAILED}: Docker could not create the container. ${daemon[1]}`;
+    }
+    if (detail) {
+        const kind = status >= 400 && status < 500 ? CREATE_SESSION_REJECTED : CREATE_SESSION_FAILED;
+        return `${kind}: ${detail}`;
+    }
+    if (status === 403) {
+        return `${CREATE_SESSION_REJECTED}: access denied.`;
+    }
+    if (status === 502 || status === 503 || status === 504) {
+        return HUB_SESSION_PROXY_MESSAGE;
+    }
+    if (status >= 500) {
+        return HUB_SESSION_UNAVAILABLE_MESSAGE;
+    }
+    if (status >= 400) {
+        return `${CREATE_SESSION_REJECTED}: the hub refused this request.`;
+    }
+    return HUB_SESSION_UNAVAILABLE_MESSAGE;
+}
+
+/** Hub / UI proxy error body → user-visible Create Session plaque. Never "HTTP 500". */
 export async function hubSessionErrorMessage(response: Response): Promise<string> {
     if (response.status === 401) {
         return HUB_SESSION_UNAUTHORIZED_MESSAGE;
     }
-    const prefix = `Create Session failed: HTTP ${response.status}`;
+    let detail = "";
     try {
-        const data = await response.json();
-        const value = data?.value;
-        const detail =
-            (typeof value === "object" &&
-                value &&
-                (String(value.message || "").trim() || String(value.error || "").trim())) ||
-            String(data?.message || "").trim() ||
-            String(data?.error || "").trim();
-        return detail ? `${prefix} — ${detail}` : prefix;
+        detail = extractHubDetail(await response.json());
     } catch {
-        return prefix;
+        detail = "";
     }
+    return plaqueFromHubDetail(response.status, detail);
 }
 
 /** Manual Create Session wait for POST /wd/hub/session (Android + WD). */
@@ -104,7 +176,10 @@ export function createSessionCatchMessage(
     if (!message || /aborted without reason/i.test(message)) {
         return createSessionTimeoutPlaque(timeoutMs);
     }
-    return `Create Session failed: ${message}`;
+    if (/^failed to fetch$|networkerror when attempting to fetch|load failed|network request failed/i.test(message)) {
+        return CREATE_SESSION_NETWORK_MESSAGE;
+    }
+    return `${CREATE_SESSION_FAILED}: ${message}`;
 }
 
 /** CSV / newline `KEY=value` → env string[]. Shared by WD caps and Playwright WS query. */

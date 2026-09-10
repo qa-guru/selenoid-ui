@@ -161,7 +161,7 @@ describe("Capabilities Android device panel", () => {
         const create = screen.getByTestId("capabilities-create-session");
         await waitFor(() => expect(create).toHaveClass("error-true"));
         expect(create).toBeEnabled();
-        expect(create).toHaveAttribute("title", "Create Session failed: HTTP 500 — android container failed");
+        expect(create).toHaveAttribute("title", "Create Session failed: android container failed");
         expect(screen.queryByTestId("session-route")).toBeNull();
 
         fetchMock.mockRestore();
@@ -274,7 +274,7 @@ describe("Capabilities Android Create Session errors", () => {
         }
     });
 
-    it("shows hub HTTP 500 body on the Create Session plaque", async () => {
+    it("shows hub error body on the Create Session plaque", async () => {
         const user = userEvent.setup();
         const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation((input: any) => {
             if (String(input).includes("/wd/hub/status")) {
@@ -297,7 +297,7 @@ describe("Capabilities Android Create Session errors", () => {
             await waitFor(() => {
                 expect(screen.getByTestId("capabilities-create-session")).toHaveAttribute(
                     "title",
-                    "Create Session failed: HTTP 500 — Android container died"
+                    "Create Session failed: Android container died"
                 );
             });
         } finally {

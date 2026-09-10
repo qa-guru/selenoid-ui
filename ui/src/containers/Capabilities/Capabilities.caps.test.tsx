@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
-import { HUB_SESSION_UNAUTHORIZED_MESSAGE } from "../../util/capabilitiesLogic";
+import { HUB_SESSION_UNAUTHORIZED_MESSAGE, CREATE_SESSION_NETWORK_MESSAGE, hubSessionMissingImageMessage } from "../../util/capabilitiesLogic";
 
 const BROWSERS = {
     chrome: {
@@ -423,9 +423,38 @@ describe("Capabilities boolean caps (seg canon)", () => {
         const create = screen.getByTestId("capabilities-create-session");
         await waitFor(() => expect(create).toHaveClass("error-true"));
         expect(create).toBeEnabled();
-        expect(create).toHaveAttribute("title", "Create Session failed: HTTP 500 — Chrome instance exited");
+        expect(create).toHaveAttribute("title", "Create Session failed: Chrome instance exited");
         expect(screen.getByTestId("capabilities-setup")).toBeInTheDocument();
         expect(screen.queryByTestId("session-route")).toBeNull();
+
+        fetchMock.mockRestore();
+    });
+
+    it("missing Docker image Create Session shows a pull plaque, not HTTP 500", async () => {
+        const user = userEvent.setup();
+        const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
+            ok: false,
+            status: 500,
+            json: async () => ({
+                value: {
+                    error: "session not created",
+                    message:
+                        "create container: Error response from daemon: No such image: qaguru/webdriver-chrome:152",
+                },
+            }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        const create = screen.getByTestId("capabilities-create-session");
+        const plaque = hubSessionMissingImageMessage("qaguru/webdriver-chrome:152");
+        await waitFor(() => expect(create).toHaveClass("error-true"));
+        expect(create).toHaveAttribute("title", plaque);
+        expect(screen.getByTestId("capabilities-create-error")).toHaveTextContent(plaque);
+        expect(create.getAttribute("title")).not.toMatch(/HTTP 500|Error response from daemon/i);
 
         fetchMock.mockRestore();
     });
@@ -470,7 +499,7 @@ describe("Capabilities boolean caps (seg canon)", () => {
         const create = screen.getByTestId("capabilities-create-session");
         await waitFor(() => expect(create).toHaveClass("error-true"));
         expect(create).toBeEnabled();
-        expect(create).toHaveAttribute("title", "Create Session failed: Failed to fetch");
+        expect(create).toHaveAttribute("title", CREATE_SESSION_NETWORK_MESSAGE);
         expect(screen.queryByTestId("session-route")).toBeNull();
 
         fetchMock.mockRestore();

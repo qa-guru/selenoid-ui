@@ -10,7 +10,11 @@ import {
     createSessionCatchMessage,
     DEFAULT_ANDROID_ORIENTATION,
     findPlaywrightSession,
+    CREATE_SESSION_NETWORK_MESSAGE,
+    HUB_SESSION_PROXY_MESSAGE,
+    HUB_SESSION_UNAVAILABLE_MESSAGE,
     hubSessionErrorMessage,
+    hubSessionMissingImageMessage,
     HUB_SESSION_UNAUTHORIZED_MESSAGE,
     isPlaywrightBrowser,
     parseEnvList,
@@ -175,7 +179,7 @@ describe("capabilitiesLogic", () => {
             { status: 500 }
         );
         await expect(hubSessionErrorMessage(response)).resolves.toBe(
-            "Create Session failed: HTTP 500 — Chrome instance exited"
+            "Create Session failed: Chrome instance exited"
         );
     });
 
@@ -206,7 +210,7 @@ describe("capabilitiesLogic", () => {
             { status: 400 }
         );
         await expect(hubSessionErrorMessage(response)).resolves.toBe(
-            "Create Session failed: HTTP 400 — 152.0-min is a headless CI image and does not support enableVideo — use the full image, or turn those options off"
+            "Create Session rejected: 152.0-min is a headless CI image and does not support enableVideo — use the full image, or turn those options off"
         );
     });
 
@@ -223,9 +227,8 @@ describe("capabilitiesLogic", () => {
     });
 
     it("maps network TypeError to Create Session failed, not AbortError", () => {
-        expect(createSessionCatchMessage(new TypeError("Failed to fetch"))).toBe(
-            "Create Session failed: Failed to fetch"
-        );
+        expect(createSessionCatchMessage(new TypeError("Failed to fetch"))).toBe(CREATE_SESSION_NETWORK_MESSAGE);
+        expect(createSessionCatchMessage(new TypeError("Failed to fetch"))).not.toMatch(/HTTP \d+/);
     });
 
     it("aborts Create Session with TimeoutError reason after the wait", () => {
@@ -415,19 +418,40 @@ describe("capabilitiesLogic", () => {
         expect(withApp["appium:orientation"]).toBe("LANDSCAPE");
     });
 
+    it("maps missing Docker image to a pull/choose-browser plaque, not a daemon dump", async () => {
+        const response = new Response(
+            JSON.stringify({
+                value: {
+                    error: "session not created",
+                    message:
+                        "create container: Error response from daemon: No such image: qaguru/webdriver-chrome:152",
+                },
+            }),
+            { status: 500 }
+        );
+        const message = await hubSessionErrorMessage(response);
+        expect(message).toBe(hubSessionMissingImageMessage("qaguru/webdriver-chrome:152"));
+        expect(message).not.toMatch(/HTTP 500|Error response from daemon/i);
+    });
+
     it("formats hub session error without JSON / with error-only / with top-level message", async () => {
         await expect(hubSessionErrorMessage(new Response("not-json", { status: 502 }))).resolves.toBe(
-            "Create Session failed: HTTP 502"
+            HUB_SESSION_PROXY_MESSAGE
         );
+        await expect(
+            hubSessionErrorMessage(new Response("<html><h1>502 Bad Gateway</h1></html>", { status: 502 }))
+        ).resolves.toBe(HUB_SESSION_PROXY_MESSAGE);
         await expect(
             hubSessionErrorMessage(new Response(JSON.stringify({ value: { error: "unknown error" } }), { status: 500 }))
-        ).resolves.toBe("Create Session failed: HTTP 500 — unknown error");
+        ).resolves.toBe(HUB_SESSION_UNAVAILABLE_MESSAGE);
         await expect(
             hubSessionErrorMessage(new Response(JSON.stringify({ error: "bad gateway" }), { status: 502 }))
-        ).resolves.toBe("Create Session failed: HTTP 502 — bad gateway");
+        ).resolves.toBe(HUB_SESSION_PROXY_MESSAGE);
         await expect(hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 500 }))).resolves.toBe(
-            "Create Session failed: HTTP 500"
+            HUB_SESSION_UNAVAILABLE_MESSAGE
         );
+        const empty500 = await hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 500 }));
+        expect(empty500).not.toMatch(/HTTP \d+/);
     });
 
     it("createSessionCatchMessage covers abort-like strings and empty errors", () => {
