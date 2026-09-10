@@ -320,19 +320,38 @@ export const StyledCapabilities = styled.div`
     }
   }
 
+  .capabilities-launch-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 10px);
+    min-width: 0;
+  }
+
   .capabilities-create-error {
     display: flex;
     align-items: flex-start;
     gap: var(--space-3, 10px);
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid ${errorColor};
+    border-radius: 3px;
+    background: rgba(255, 110, 89, 0.14);
     color: ${errorColor};
     font-size: 0.85em;
     line-height: 1.35;
+  }
+
+  .capabilities-create-error__text {
+    flex: 1 1 auto;
+    min-width: 0;
     white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
 
   .capabilities-create-error__dismiss {
     flex: 0 0 auto;
-    margin-left: auto;
     border: 0;
     background: transparent;
     color: inherit;
@@ -396,6 +415,15 @@ export const StyledCapabilities = styled.div`
           border-color: #eef0f3;
         }
       }
+
+      &.error-true {
+        border-color: ${errorColor};
+        color: ${errorColor};
+      }
+    }
+
+    .capabilities-create-error {
+      background: rgba(255, 110, 89, 0.1);
     }
   }
 

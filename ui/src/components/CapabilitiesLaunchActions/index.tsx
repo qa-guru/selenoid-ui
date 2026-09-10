@@ -16,7 +16,7 @@ export function CapabilitiesLaunchActions({ loading, disabled, error, onCreateSe
             </button>
             {error ? (
                 <div className="capabilities-create-error" data-testid="capabilities-create-error" role="alert">
-                    {error}
+                    <span className="capabilities-create-error__text">{error}</span>
                     <button
                         type="button"
                         className="capabilities-create-error__dismiss"

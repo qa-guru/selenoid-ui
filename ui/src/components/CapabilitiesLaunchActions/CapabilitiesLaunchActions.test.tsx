@@ -77,7 +77,9 @@ describe("CapabilitiesLaunchActions", () => {
         const create = screen.getByTestId("capabilities-create-session");
         expect(create).toHaveClass("error-true");
         expect(create).toHaveAttribute("title", message);
-        expect(screen.getByTestId("capabilities-create-error")).toHaveTextContent(message);
+        const plaque = screen.getByTestId("capabilities-create-error");
+        expect(plaque).toHaveTextContent(message);
+        expect(plaque.querySelector(".capabilities-create-error__text")).toHaveTextContent(message);
 
         await user.hover(create);
         await user.unhover(create);
