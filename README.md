@@ -51,7 +51,7 @@ Web-интерфейс для [qa-guru/selenoid](https://github.com/qa-guru/sele
 | ----------------- | ----------------------------------------------------------------------------------------------- |
 | **GitHub**        | [qa-guru/selenoid-ui](https://github.com/qa-guru/selenoid-ui)                                   |
 | **Docker Hub**    | [`qaguru/selenoid-ui`](https://hub.docker.com/r/qaguru/selenoid-ui)                             |
-| **Текущий релиз** | **v3.0.58** — [docs/RELEASE_v3.0.58.md](docs/RELEASE_v3.0.58.md) · `qaguru/selenoid-ui:v3.0.58` |
+| **Текущий релиз** | **v3.0.59** — [docs/RELEASE_v3.0.59.md](docs/RELEASE_v3.0.59.md) · `qaguru/selenoid-ui:v3.0.59` |
 
 ## Роль в экосистеме
 
@@ -127,7 +127,7 @@ clone_repo qa-guru/selenoid.qa.guru …   # LAST: copy + docker pull + hub re-re
 commit_push … deploy/browsers-production.json
 ```
 
-На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб **перечитывает** `browsers.json` (`kill -HUP` на pid, процесс не останавливается). UI не гасится — New Session берёт список версий с хаба (`/status`). Пины хаба (`qaguru/selenoid:v3.0.16`) и UI (`qaguru/selenoid-ui:v3.0.58`) **отдельные**. Полный `deploy.sh` (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
+На Box1 это **не** stop/start стека: копируется файл, `docker pull`, хаб **перечитывает** `browsers.json` (`kill -HUP` на pid, процесс не останавливается). UI не гасится — New Session берёт список версий с хаба (`/status`). Пины хаба (`qaguru/selenoid:v3.0.16`) и UI (`qaguru/selenoid-ui:v3.0.59`) **отдельные**. Полный `deploy.sh` (restart hub/UI) — только когда в dispatch явно передали тег хаба или UI.
 
 Таблица версий: [selenoid/docs/browser-versions.md](https://github.com/qa-guru/selenoid/blob/main/docs/browser-versions.md).
 
