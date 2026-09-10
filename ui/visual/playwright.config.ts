@@ -9,7 +9,8 @@ const uiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const osFolder = visualOsFolder();
 
 /**
- * Visual snapshots of ?mock=1 Live sessions / session pages.
+ * Visual snapshots of ?mock=1 Live sessions / session pages, plus
+ * session fullscreen geometry (VNC/log/HAR must fill the viewport).
  * Runs against Vite dev (no production build) — early CI gate.
  *
  * Baselines: visual/snapshots/<os>/  (macos | linux | windows)

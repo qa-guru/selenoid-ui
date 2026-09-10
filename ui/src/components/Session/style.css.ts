@@ -50,14 +50,15 @@ export const StyledSession = styled.div`
         min-height: 0;
     }
 
-    /* Hug VNC/video chrome. Do not override .vnc-window__screen aspect-ratio. */
+    /* Hug VNC/video chrome. Do not override .vnc-window__screen aspect-ratio.
+       Do not contain:layout on this slot — it becomes the abspos containing
+       block and traps .vnc-window-frame--fullscreen (inset:0 fills Viewport). */
     .session-media-slot {
         display: flex;
         flex-direction: column;
         align-self: start;
         min-width: 0;
         overflow: hidden;
-        contain: layout;
         width: 100%;
 
         > * {
@@ -66,8 +67,12 @@ export const StyledSession = styled.div`
             width: 100%;
         }
 
-        /* noVNC sets overflow:auto on its screen div — scrollbars shrink the
-           box, scaleViewport reflows, the window jumps. Keep the mount clipped. */
+        /* noVNC overflow:auto shrinks the box and scaleViewport reflows.
+           Isolate that on the screen, not the slot (fullscreen must escape). */
+        .vnc-window__screen {
+            contain: layout;
+        }
+
         .vnc-window__screen,
         .vnc-window__screen-mount,
         .vnc-screen,

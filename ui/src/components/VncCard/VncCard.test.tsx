@@ -114,6 +114,24 @@ describe("VncCard", () => {
         await user.click(screen.getByRole("button", { name: "Enter fullscreen" }));
         expect(onVNCFullscreenChange!).toHaveBeenCalledWith(true);
         expect(screen.getByRole("button", { name: "Exit fullscreen" })).toBeInTheDocument();
+        expect(document.querySelector(".vnc-window-frame")).toHaveClass("vnc-window-frame--fullscreen");
+    });
+
+    it("follows a controlled fullscreen prop from the session page", () => {
+        const { rerender } = renderVnc({ fullscreen: false });
+        expect(document.querySelector(".vnc-window-frame")).not.toHaveClass("vnc-window-frame--fullscreen");
+        rerender(
+            <MemoryRouter>
+                <VncCard
+                    session="sess-123"
+                    origin="http://localhost"
+                    browser={{ caps: { enableVNC: true } }}
+                    fullscreen
+                    onVNCFullscreenChange={vi.fn()}
+                />
+            </MemoryRouter>
+        );
+        expect(document.querySelector(".vnc-window-frame")).toHaveClass("vnc-window-frame--fullscreen");
     });
 
     it("toggles lock via VncScreen.lock", async () => {

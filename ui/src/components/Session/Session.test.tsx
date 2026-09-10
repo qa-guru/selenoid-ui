@@ -22,10 +22,17 @@ import { mergeOptimisticLiveSessions, resetOptimisticLiveSessions, seedOptimisti
 import { DEFAULT_STACK_UI } from "../../lib/defaultStack";
 
 vi.mock("../VncCard", () => ({
-    default: ({ onVNCFullscreenChange }: any) => (
-        <div>
-            <div data-testid="vnc-card">VNC</div>
-            <button type="button" data-testid="vnc-fullscreen" onClick={() => onVNCFullscreenChange?.(true)}>
+    default: ({ fullscreen, onVNCFullscreenChange }: any) => (
+        <div
+            data-testid="vnc-card"
+            className={fullscreen ? "vnc-window-frame vnc-window-frame--fullscreen" : "vnc-window-frame"}
+        >
+            VNC
+            <button
+                type="button"
+                data-testid="vnc-fullscreen"
+                onClick={() => onVNCFullscreenChange?.(!fullscreen)}
+            >
                 fs
             </button>
         </div>
@@ -33,9 +40,9 @@ vi.mock("../VncCard", () => ({
 }));
 
 vi.mock("../Log", () => ({
-    default: ({ onToggleFullscreen }: any) => (
-        <div>
-            <div data-testid="live-log">Log</div>
+    default: ({ fullscreen, onToggleFullscreen }: any) => (
+        <div data-testid="live-log" className={fullscreen ? "session-peer panel-host--fullscreen" : "session-peer"}>
+            Log
             <button type="button" data-testid="log-fullscreen" onClick={() => onToggleFullscreen?.()}>
                 fs
             </button>
@@ -635,9 +642,12 @@ describe("Session detail page", () => {
         });
 
         await user.click(screen.getByTestId("vnc-fullscreen"));
+        expect(screen.getByTestId("vnc-card")).toHaveClass("vnc-window-frame--fullscreen");
+        expect(screen.getByTestId("live-log")).not.toHaveClass("panel-host--fullscreen");
+
         await user.click(screen.getByTestId("log-fullscreen"));
-        expect(screen.getByTestId("vnc-card")).toBeInTheDocument();
-        expect(screen.getByTestId("live-log")).toBeInTheDocument();
+        expect(screen.getByTestId("live-log")).toHaveClass("panel-host--fullscreen");
+        expect(screen.getByTestId("vnc-card")).not.toHaveClass("vnc-window-frame--fullscreen");
     });
 
     it("toggles finished log and HAR fullscreen", async () => {
@@ -674,9 +684,11 @@ describe("Session detail page", () => {
             expect(screen.getByTestId("session-log-fullscreen")).toBeInTheDocument();
         });
         await user.click(screen.getByTestId("session-log-fullscreen"));
+        expect(screen.getByTestId("session-log-file")).toHaveClass("panel-host--fullscreen");
+
         await user.click(screen.getByTestId("session-har-fullscreen"));
-        expect(screen.getByTestId("session-log-file")).toBeInTheDocument();
-        expect(screen.getByTestId("session-har-viewer")).toBeInTheDocument();
+        expect(screen.getByTestId("session-har-viewer")).toHaveClass("panel-host--fullscreen");
+        expect(screen.getByTestId("session-log-file")).not.toHaveClass("panel-host--fullscreen");
     });
 
     it("shows ARTIFACTS NOT FOUND when Stop succeeds but the archive never lists the session", async () => {
