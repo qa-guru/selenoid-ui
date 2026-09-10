@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
+import { HUB_SESSION_UNAUTHORIZED_MESSAGE } from "../../util/capabilitiesLogic";
 
 const BROWSERS = {
     chrome: {
@@ -423,6 +424,34 @@ describe("Capabilities boolean caps (seg canon)", () => {
         await waitFor(() => expect(create).toHaveClass("error-true"));
         expect(create).toBeEnabled();
         expect(create).toHaveAttribute("title", "Create Session failed: HTTP 500 — Chrome instance exited");
+        expect(screen.getByTestId("capabilities-setup")).toBeInTheDocument();
+        expect(screen.queryByTestId("session-route")).toBeNull();
+
+        fetchMock.mockRestore();
+    });
+
+    it("401 Create Session stays on New Session with a login/password plaque, not HTTP 401", async () => {
+        const user = userEvent.setup();
+        const fetchMock = (vi.spyOn(globalThis, "fetch") as any).mockResolvedValue({
+            ok: false,
+            status: 401,
+            json: async () => ({ error: "Unauthorized", message: "token=secret-value" }),
+        });
+
+        renderCapabilities();
+        await selectChrome(user);
+        await screen.findByTestId("capabilities-caps");
+        await fillCapsField(user, "capabilities-caps-auth-user", "no-such-handle");
+        await fillCapsField(user, "capabilities-caps-auth-pass", "wrong-token");
+        await user.click(screen.getByTestId("capabilities-create-session"));
+
+        const create = screen.getByTestId("capabilities-create-session");
+        await waitFor(() => expect(create).toHaveClass("error-true"));
+        expect(create).toBeEnabled();
+        expect(create).toHaveAttribute("title", HUB_SESSION_UNAUTHORIZED_MESSAGE);
+        expect(screen.getByTestId("capabilities-create-error")).toHaveTextContent(HUB_SESSION_UNAUTHORIZED_MESSAGE);
+        expect(create.getAttribute("title")).not.toMatch(/HTTP 401/);
+        expect(screen.getByTestId("capabilities-create-error").textContent).not.toMatch(/secret-value|HTTP 401/);
         expect(screen.getByTestId("capabilities-setup")).toBeInTheDocument();
         expect(screen.queryByTestId("session-route")).toBeNull();
 

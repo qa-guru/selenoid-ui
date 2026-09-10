@@ -11,6 +11,7 @@ import {
     DEFAULT_ANDROID_ORIENTATION,
     findPlaywrightSession,
     hubSessionErrorMessage,
+    HUB_SESSION_UNAUTHORIZED_MESSAGE,
     isPlaywrightBrowser,
     parseEnvList,
     parseLabelsMap,
@@ -176,6 +177,21 @@ describe("capabilitiesLogic", () => {
         await expect(hubSessionErrorMessage(response)).resolves.toBe(
             "Create Session failed: HTTP 500 — Chrome instance exited"
         );
+    });
+
+    it("maps 401 to a login/password rejection, never HTTP 401 or a hub-down plaque", async () => {
+        const bodies = [
+            new Response("", { status: 401 }),
+            new Response("<html><h1>401 Authorization Required</h1></html>", { status: 401 }),
+            new Response(JSON.stringify({ error: "Unauthorized", message: "token=secret-value" }), { status: 401 }),
+        ];
+        for (const response of bodies) {
+            const message = await hubSessionErrorMessage(response);
+            expect(message).toBe(HUB_SESSION_UNAUTHORIZED_MESSAGE);
+            expect(message).not.toMatch(/HTTP 401/);
+            expect(message).not.toMatch(/hub (crashed|down|fell)|хаб упал/i);
+            expect(message).not.toMatch(/secret-value|Authorization Required/i);
+        }
     });
 
     it("formats hub invalid-argument body from a -min image", async () => {

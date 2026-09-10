@@ -16,8 +16,18 @@ export function sessionIdFrom({ response }: { response?: SessionCreateResponse |
     return response?.sessionId || response?.value?.sessionId || "";
 }
 
+/**
+ * nginx / validator 401 — login/password refused, not a hub crash.
+ * Never echo the body (HTML or a leaked secret). Never mention HTTP 401.
+ */
+export const HUB_SESSION_UNAUTHORIZED_MESSAGE =
+    "Create Session rejected: login and password were not accepted. Check authUser/authPass — your handle with selenoidToken, or the guest pair.";
+
 /** Hub / UI proxy error body → user-visible Create Session message. */
 export async function hubSessionErrorMessage(response: Response): Promise<string> {
+    if (response.status === 401) {
+        return HUB_SESSION_UNAUTHORIZED_MESSAGE;
+    }
     const prefix = `Create Session failed: HTTP ${response.status}`;
     try {
         const data = await response.json();
