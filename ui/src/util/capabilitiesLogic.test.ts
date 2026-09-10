@@ -435,8 +435,11 @@ describe("capabilitiesLogic", () => {
     });
 
     it("formats hub session error without JSON / with error-only / with top-level message", async () => {
-        await expect(hubSessionErrorMessage(new Response("not-json", { status: 502 }))).resolves.toBe(
-            HUB_SESSION_PROXY_MESSAGE
+        await expect(hubSessionErrorMessage(new Response("true", { status: 500 }))).resolves.toBe(
+            HUB_SESSION_UNAVAILABLE_MESSAGE
+        );
+        await expect(hubSessionErrorMessage(new Response("42", { status: 500 }))).resolves.toBe(
+            HUB_SESSION_UNAVAILABLE_MESSAGE
         );
         await expect(
             hubSessionErrorMessage(new Response("<html><h1>502 Bad Gateway</h1></html>", { status: 502 }))
@@ -452,6 +455,31 @@ describe("capabilitiesLogic", () => {
         );
         const empty500 = await hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 500 }));
         expect(empty500).not.toMatch(/HTTP \d+/);
+    });
+
+    it("maps daemon errors, 403, and empty 4xx without dumping HTTP codes", async () => {
+        await expect(
+            hubSessionErrorMessage(
+                new Response(
+                    JSON.stringify({
+                        value: { message: "Error response from daemon: Conflict. The container name is already in use." },
+                    }),
+                    { status: 500 }
+                )
+            )
+        ).resolves.toBe(
+            "Create Session failed: Docker could not create the container. Conflict. The container name is already in use."
+        );
+        await expect(hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 403 }))).resolves.toBe(
+            "Create Session rejected: access denied."
+        );
+        await expect(hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 400 }))).resolves.toBe(
+            "Create Session rejected: the hub refused this request."
+        );
+        await expect(hubSessionErrorMessage(new Response(JSON.stringify({}), { status: 200 }))).resolves.toBe(
+            HUB_SESSION_UNAVAILABLE_MESSAGE
+        );
+        expect(createSessionCatchMessage(new TypeError("Load failed"))).toBe(CREATE_SESSION_NETWORK_MESSAGE);
     });
 
     it("createSessionCatchMessage covers abort-like strings and empty errors", () => {
