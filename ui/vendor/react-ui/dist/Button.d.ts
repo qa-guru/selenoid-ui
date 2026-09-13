@@ -1,9 +1,14 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonOwnProps = {
     variant?: ButtonVariant;
     block?: boolean;
     children: ReactNode;
-}
-export declare function Button({ variant, block, className, children, type, ...rest }: ButtonProps): import("react").JSX.Element;
+};
+export type ButtonProps<C extends ElementType = 'button'> = ButtonOwnProps & Omit<ComponentPropsWithoutRef<C>, keyof ButtonOwnProps | 'as'> & {
+    /** Render as another element — e.g. `<a>` or a router `Link`. Defaults to `button`. */
+    as?: C;
+};
+export declare function Button<C extends ElementType = 'button'>({ as, variant, block, className, children, ...rest }: ButtonProps<C>): import("react").JSX.Element;
+export {};
 //# sourceMappingURL=Button.d.ts.map

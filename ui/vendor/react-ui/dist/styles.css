@@ -92,6 +92,8 @@
      shell-end uses the same token so top/bottom/right air match (no hardcode). */
   --plaque-seg-inset: var(--space-1);
   --plaque-shell-pad-x: var(--space-2);
+  /* Textarea plaque — air from resize handle to shell border (right = bottom). */
+  --plaque-textarea-end: 5px;
   --plaque-seg-chip-height: calc(var(--plaque-control-height) - 12px);
   --plaque-seg-chip-air: calc(
     (var(--plaque-seg-band-height) - var(--plaque-seg-chip-height)) / 2
@@ -406,6 +408,49 @@ html:not(.theme-light) .icon-btn .icon img {
   cursor: not-allowed;
 }
 
+/* select.css */
+.select {
+  display: block;
+  width: 100%;
+  min-height: var(--control-height-md);
+  min-width: var(--input-min-width);
+  padding: var(--space-2) calc(var(--space-3) + var(--plaque-chevron-size) + var(--plaque-select-text-gap)) var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-soft);
+  background-image: var(--plaque-chevron-glyph);
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: var(--plaque-chevron-size) 6px;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.select:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-text-muted));
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* textarea.css */
 .textarea {
   display: block;
@@ -446,6 +491,309 @@ html:not(.theme-light) .icon-btn .icon img {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: var(--font-size-sm);
   line-height: 1.6;
+}
+
+/* checkbox.css */
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+.checkbox__input {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.checkbox__input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.checkbox__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.checkbox:has(.checkbox__input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* radio.css */
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+.radio__input {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.radio__input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.radio__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.radio:has(.radio__input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* stack.css */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack--sm {
+  gap: var(--space-2);
+}
+
+.stack--lg {
+  gap: var(--space-6);
+}
+
+.stack--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+/* grid.css */
+.grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Fixed topology: exactly two slots (configurator / sidebar layouts) */
+.grid--2x1 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 769px) {
+  .grid--2x1 {
+    /* Default: independent column heights (no bottom magnet). */
+    align-items: start;
+  }
+
+  .grid--2x1 > :first-child {
+    align-self: start;
+  }
+
+  /*
+   * Sticky aside only: stretch containing block so panel--sticky / section--sticky
+   * can travel along main. Panel chrome itself must stay content-height
+   * (see configurator__layout--terminal .panel { flex: 0 1 auto }).
+   */
+  .grid--2x1:has(.panel--sticky, .section--sticky) > :last-child {
+    align-self: stretch;
+  }
+}
+
+.grid--1x2 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+}
+
+@media (max-width: 768px) {
+  .grid--2,
+  .grid--3,
+  .grid--4,
+  .grid--2x1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* sticky.css */
+/* Shared sticky offset — panel--sticky, section--sticky (desktop ≥769px) */
+
+@media (min-width: 769px) {
+  .panel--sticky,
+  .section--sticky {
+    position: sticky;
+    top: var(--space-6);
+    max-height: calc(100vh - 2 * var(--space-6));
+  }
+
+  /*
+   * Panel keeps .panel { overflow: hidden } clip — scrollport is
+   * .panel__body / .panel__code (one per column). overflow: auto here
+   * overrode that clip and, with overflow-x: hidden|clip, Chrome paints
+   * a classic ~15px gutter beside the macOS overlay thumb.
+   * Section has no inner body scrollport.
+   */
+  .section--sticky {
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* Fixed #app-header (autotests-builder, playground, …) */
+  :has(#app-header) .panel--sticky,
+  :has(#app-header) .section--sticky {
+    top: calc(var(--header-occupied-height) + var(--space-4));
+    max-height: calc(100vh - var(--header-occupied-height) - 2 * var(--space-4));
+  }
+}
+
+/* section.css */
+.section {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+}
+
+.section__title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.section__desc {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.section__body {
+  margin: 0;
+}
+
+/* text.css */
+.text {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.text--muted {
+  color: var(--color-text-muted);
+}
+
+.text--sm {
+  font-size: var(--font-size-sm);
+}
+
+/* label.css */
+.label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+/* field-caption.css */
+.field-caption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: stretch;
+  min-width: 0;
+}
+
+.field-caption__text {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+/* choice-card.css */
+.radio-group,
+.checkbox-group {
+  margin-bottom: var(--space-4);
+}
+
+.radio-group:last-child,
+.checkbox-group:last-child {
+  margin-bottom: 0;
+}
+
+.radio-group__title,
+.checkbox-group__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.radio-card,
+.checkbox-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.radio-card:hover,
+.checkbox-card:hover {
+  border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-primary));
+}
+
+.radio-card:has(.radio__input:checked),
+.checkbox-card:has(.checkbox__input:checked) {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.radio-card--muted,
+.checkbox-card--muted {
+  opacity: 0.65;
+}
+
+.radio-card .radio__input,
+.checkbox-card .checkbox__input {
+  margin-top: calc((1.5em - var(--icon-size-md)) / 2);
+}
+
+.radio-card__body,
+.checkbox-card__body {
+  flex: 1;
+  min-width: 0;
 }
 
 /* plaque-divider.css */
@@ -938,11 +1286,16 @@ html:not(.theme-light) .icon-btn .icon img {
   height: 0;
 }
 
+/* Label in wrap-band 1. align-self:start beats
+   `.plaque-field--divided .plaque-field__label { align-self: center }` —
+   shell align-items:start is not enough. Optical center stays inside the band
+   via height:band + inline-flex align-items:center. */
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label,
 .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__text {
   float: none;
   box-sizing: border-box;
   grid-column: 1;
+  align-self: start;
   width: var(--plaque-mixed-label-col, max-content);
   min-width: 0;
   max-width: 100%;
@@ -1066,11 +1419,19 @@ input.plaque-field__control {
 /*
  * Multiline control (note body, comments). Shell grows with rows; label and
  * divider stay on the first line. Value is left-aligned — not a param id.
+ * First line uses the same 1.35 as `__text` / `__label` (1.5 sits the
+ * placeholder below the caption). No select-trail — there is no chevron.
+ * Inner pad `--space-2` on all sides so the first line does not hug the
+ * divider (left-aligned, unlike input/select). Shell end air
+ * `--plaque-textarea-end` (5px) on right and bottom so the resize handle
+ * sits equally off the frame.
  */
 .plaque-field:has(> textarea.plaque-field__control) {
   height: auto;
   align-items: flex-start;
   overflow: visible;
+  padding-right: var(--plaque-textarea-end);
+  padding-bottom: var(--plaque-textarea-end);
 }
 
 .plaque-field:has(> textarea.plaque-field__control) > :is(.plaque-field__label, .plaque-field__text) {
@@ -1084,10 +1445,10 @@ input.plaque-field__control {
 }
 
 textarea.plaque-field__control {
-  padding: var(--space-2) var(--plaque-select-trail) var(--space-2) 0;
+  padding: var(--space-2);
   min-height: calc(var(--control-height-md) * 2);
   text-align: left;
-  line-height: 1.5;
+  line-height: 1.35;
   resize: vertical;
   field-sizing: content;
 }
@@ -1138,13 +1499,13 @@ textarea.plaque-field__control {
 .plaque-field > textarea.plaque-field__control.textarea {
   min-width: 0;
   min-height: calc(var(--control-height-md) * 2);
-  padding: var(--space-2) var(--plaque-select-trail) var(--space-2) 0;
+  padding: var(--space-2);
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   font-size: var(--font-size-sm);
-  line-height: 1.5;
+  line-height: 1.35;
 }
 
 .plaque-field > .plaque-field__control.input:focus-visible,
@@ -1316,6 +1677,25 @@ textarea.plaque-field__control {
 .plaque-field-grid--mixed .plaque-field-grid__cell--lg .plaque-field--divided:has(.plaque-field-seg-track),
 .plaque-field-grid--mixed .plaque-field-grid__cell--lg .plaque-field--divided:has(> :is(input, select).plaque-field__control) {
   grid-template-columns: min(var(--plaque-label-width-wide), var(--plaque-mixed-label-cqi)) 1px minmax(0, 1fr);
+}
+
+/* Full-width solo row — hug label (divider flush to text; stretch field fills rest).
+   Same 0,4,0 :has() siblings as the mixed default so this wins over 5.5rem.
+   Label overrides beat mixed `width: 100%` / ellipsis so max-content does not collapse. */
+.plaque-field-grid--solo > .plaque-field-grid__cell .plaque-field--divided,
+.plaque-field-grid--solo > .plaque-field-grid__cell .plaque-field--divided:has(.plaque-field-seg-track),
+.plaque-field-grid--solo > .plaque-field-grid__cell .plaque-field--divided:has(> :is(input, select).plaque-field__control) {
+  grid-template-columns: max-content 1px minmax(0, 1fr);
+  column-gap: 0;
+}
+
+.plaque-field-grid--solo .plaque-field--divided .plaque-field__label,
+.plaque-field-grid--solo .plaque-field--divided .plaque-field__text {
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* Checkstrip — compact multi-select (autotests-builder junitTags, …) */
@@ -1930,16 +2310,25 @@ html.theme-light .plaque-field-checkstrip--pill .plaque-field-checkstrip__item:h
   white-space: nowrap;
 }
 
-/* Pair rows inside magnet stack — never ellipsis short flags */
+/* Pair rows inside magnet stack — never ellipsis short flags.
+   `__cell` + :has(--many) matches magnet mixed specificity so hug wins. */
 .plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided,
 .plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided:has(.plaque-field-seg-track),
-.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided:has(> :is(input, select).plaque-field__control) {
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided:has(> :is(input, select).plaque-field__control),
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field-grid__cell .plaque-field--divided,
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field-grid__cell .plaque-field--divided:has(.plaque-field-seg-track),
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field-grid__cell .plaque-field--divided:has(> .plaque-field-seg-track--many),
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field-grid__cell .plaque-field--divided:has(> :is(input, select).plaque-field__control) {
   grid-template-columns: max-content 1px max-content;
   column-gap: 0;
+  width: max-content;
 }
 
 .plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided > .plaque-field__label,
-.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided > .plaque-field__text {
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided > .plaque-field__text,
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__label,
+.plaque-field-grid-stack--magnet .plaque-field-grid--pair .plaque-field--divided:has(> .plaque-field-seg-track--many) > .plaque-field__text {
+  width: auto;
   max-width: none;
   overflow: visible;
   text-overflow: clip;
@@ -2044,35 +2433,42 @@ html.theme-light .plaque-field-checkstrip--pill .plaque-field-checkstrip__item:h
   }
 }
 
-/* sticky.css */
-/* Shared sticky offset — panel--sticky, section--sticky (desktop ≥769px) */
+/* pyramid-layer-seg.css */
+/* pyramidLayer seg tints — palette F5 / Allure3 (--layer-* in tokens.css); product presets only */
 
-@media (min-width: 769px) {
-  .panel--sticky,
-  .section--sticky {
-    position: sticky;
-    top: var(--space-6);
-    max-height: calc(100vh - 2 * var(--space-6));
-  }
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="unit"].plaque-field-seg__btn--on {
+  border-color: var(--layer-unit);
+  background: color-mix(in srgb, var(--layer-unit) 18%, var(--color-surface));
+}
 
-  /*
-   * Panel keeps .panel { overflow: hidden } clip — scrollport is
-   * .panel__body / .panel__code (one per column). overflow: auto here
-   * overrode that clip and, with overflow-x: hidden|clip, Chrome paints
-   * a classic ~15px gutter beside the macOS overlay thumb.
-   * Section has no inner body scrollport.
-   */
-  .section--sticky {
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="component"].plaque-field-seg__btn--on {
+  border-color: var(--layer-component);
+  background: color-mix(in srgb, var(--layer-component) 18%, var(--color-surface));
+}
 
-  /* Fixed #app-header (autotests-builder, playground, …) */
-  :has(#app-header) .panel--sticky,
-  :has(#app-header) .section--sticky {
-    top: calc(var(--header-occupied-height) + var(--space-4));
-    max-height: calc(100vh - var(--header-occupied-height) - 2 * var(--space-4));
-  }
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="integration"].plaque-field-seg__btn--on {
+  border-color: var(--layer-integration);
+  background: color-mix(in srgb, var(--layer-integration) 18%, var(--color-surface));
+}
+
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="api"].plaque-field-seg__btn--on {
+  border-color: var(--layer-api);
+  background: color-mix(in srgb, var(--layer-api) 18%, var(--color-surface));
+}
+
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="ui"].plaque-field-seg__btn--on {
+  border-color: var(--layer-ui);
+  background: color-mix(in srgb, var(--layer-ui) 18%, var(--color-surface));
+}
+
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="e2e"].plaque-field-seg__btn--on {
+  border-color: var(--layer-e2e);
+  background: color-mix(in srgb, var(--layer-e2e) 18%, var(--color-surface));
+}
+
+[data-param-id="pyramidLayer"] .plaque-field-seg__btn[data-value="manual"].plaque-field-seg__btn--on {
+  border-color: var(--layer-manual);
+  background: color-mix(in srgb, var(--layer-manual) 18%, var(--color-surface));
 }
 
 /* panel.css */
@@ -2555,6 +2951,344 @@ html.theme-light .panel--terminal,
   width: 100%;
   height: 100%;
   min-height: 0;
+}
+
+/* indicator.css */
+/*
+ * Indicator — a small signal dot. Neutral (muted) by default; modifiers cover
+ * the semantic palette, the allure result statuses (aliases of the semantic
+ * colors) and the macOS-style window controls used in the panel bar.
+ *
+ * Colors come from tokens.css via --indicator-color; brightness is one
+ * color-mix step (--indicator-mix). Default 55% matches the panel--content bar
+ * dots. Use --solid for full brightness, --soft for an extra-dim state.
+ */
+
+.indicator {
+  --indicator-color: var(--color-text-muted);
+  --indicator-mix: 55%;
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--indicator-size);
+  height: var(--indicator-size);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--indicator-color) var(--indicator-mix), transparent);
+}
+
+/* Semantic signals */
+.indicator--neutral { --indicator-color: var(--color-text-muted); }
+.indicator--success { --indicator-color: var(--color-success); }
+.indicator--warning { --indicator-color: var(--color-warning); }
+.indicator--danger  { --indicator-color: var(--color-danger); }
+.indicator--info    { --indicator-color: var(--color-info); }
+
+/* Allure result statuses — alias the semantic palette (see tests-table.css) */
+.indicator--passed  { --indicator-color: var(--color-success); }
+.indicator--failed  { --indicator-color: var(--color-danger); }
+.indicator--broken  { --indicator-color: var(--color-warning); }
+.indicator--skipped { --indicator-color: var(--color-text-muted); }
+.indicator--unknown { --indicator-color: var(--color-text-muted); }
+
+/* Status families (Allure 3 dashboard tile dots) — chart swatches from tokens */
+.indicator--status-red    { --indicator-color: var(--color-status-failed); }
+.indicator--status-orange { --indicator-color: var(--color-status-orange); }
+.indicator--status-yellow { --indicator-color: var(--color-status-broken); }
+.indicator--status-purple { --indicator-color: var(--color-status-unknown); }
+.indicator--status-gray   { --indicator-color: var(--color-status-skipped); }
+.indicator--status-green  { --indicator-color: var(--color-status-passed-chart); }
+.indicator--status-blue   { --indicator-color: var(--color-info); }
+
+/* Window controls — macOS traffic-lights (same as panel bar dots) */
+.indicator--close    { --indicator-color: var(--indicator-close); }
+.indicator--minimize { --indicator-color: var(--indicator-minimize); }
+.indicator--maximize { --indicator-color: var(--indicator-maximize); }
+
+/* Brightness — solid (full) / soft (extra dim); default is the muted 55% bar look */
+.indicator--solid { --indicator-mix: 100%; }
+.indicator--soft  { --indicator-mix: 35%; }
+
+/* Row wrapper — evenly spaced indicators (e.g. a panel bar dot cluster) */
+.indicator-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--panel-dot-gap);
+  flex-shrink: 0;
+}
+
+/* callout.css */
+.callout {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.callout:empty {
+  display: none;
+}
+
+.callout--warning {
+  border-color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+}
+
+.callout--success {
+  border-color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface));
+}
+
+.callout__title {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+
+.callout__list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+/* brand-logo.css */
+/* Brand logo — Selenoid 3 + reusable qa.guru attribution (primitive)
+   Token-driven inline lockup: nested-square mark + wordmark + version accent.
+   Colour follows tokens, so light/dark switch automatically (см. tokens.css).
+   Mark height is capped to the wordmark cap-height, so it is never taller than "S". */
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42em;
+  font-family: var(--font-sans);
+  font-size: var(--brand-logo-size, 20px);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--color-brand-logo);
+}
+
+.brand-logo__mark {
+  display: block;
+  width: auto;
+  height: 0.72em; /* ≈ cap-height → не выше буквы S */
+  flex-shrink: 0;
+  color: var(--color-info); /* accent drives currentColor inside the mark */
+}
+
+/* Neon bloom only on dark surfaces; on light it stays a clean flat shape. */
+html:not(.theme-light) .brand-logo__mark {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--color-info) 60%, transparent));
+}
+
+.brand-logo__word {
+  font-weight: 500;
+  letter-spacing: -0.018em;
+  color: var(--color-brand-logo);
+}
+
+.brand-logo__ver {
+  display: inline-block;
+  margin-left: 0.18em;
+  font-family: "Arial Rounded MT Bold", "Trebuchet MS", var(--font-sans);
+  font-size: 1.06em;
+  font-weight: 700;
+  line-height: 0.8;
+  color: var(--color-info);
+}
+
+.brand-logo__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12em;
+}
+
+.brand-attribution {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  font-size: 0.36em;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+.brand-attribution > :first-child {
+  font-size: 0.82em;
+}
+
+.brand-attribution__name {
+  font-size: 1.08em;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--color-brand-logo);
+  opacity: 0.55;
+}
+
+.brand-attribution__dot {
+  color: var(--color-info);
+}
+
+.brand-logo--endorsed .brand-logo__mark {
+  height: 0.92em;
+}
+
+.brand-logo-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* allure-logo.css */
+/* Official Allure / TestOps logo family.
+   Fixed height; width follows each mark’s intrinsic ratio. */
+.allure-logo {
+  display: block;
+  width: auto;
+  height: var(--allure-logo-height, var(--allure-logo-size, 32px));
+  max-width: 100%;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* qa-guru-logo.css */
+/* QA.GURU brand mark (SSOT: assets/qa-guru-logo.svg). Fixed square; favicon + UI. */
+.qa-guru-logo {
+  display: block;
+  width: var(--qa-guru-logo-size, 32px);
+  height: var(--qa-guru-logo-size, 32px);
+  max-width: 100%;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* A8 board: light paper (#111 Q) + dark paper (on-dark asset). */
+.qa-guru-logo-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid var(--color-border, #d9d3c8);
+  border-radius: 12px;
+}
+
+.qa-guru-logo-pane {
+  padding: 12px 14px 10px;
+}
+
+.qa-guru-logo-pane--light {
+  background: #ffffff;
+  color: #1c1917;
+}
+
+.qa-guru-logo-pane--dark {
+  background: #151414;
+  color: #f1f5f9;
+}
+
+.qa-guru-logo-pane__label {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+/* tab.css */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tab {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.tab:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-primary));
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.tab--active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  font-weight: 600;
+}
+
+.tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* segmented-control.css */
+.segmented-control {
+  display: flex;
+  width: 100%;
+  gap: var(--space-1);
+  flex-wrap: nowrap;
+}
+
+.segmented-control__btn {
+  flex: 1 1 50%;
+  min-width: 0;
+  max-width: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height-md);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.segmented-control__btn:hover:not(:disabled) {
+  background: var(--color-surface-soft);
+}
+
+.segmented-control__btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.segmented-control__btn--active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  font-weight: 600;
+}
+
+.segmented-control__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* code-highlight.css */
@@ -3199,6 +3933,58 @@ html:has(.header--metrics-wrap) {
   color: var(--color-primary);
 }
 
+/* status.css */
+.status {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* chip.css */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.chip:hover:not(:disabled):not(.chip--static) {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-soft));
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.chip--active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface-soft));
+  color: var(--color-text);
+}
+
+.chip--static {
+  cursor: default;
+  opacity: 0.85;
+}
+
 /* status-tile.css */
 /* Status tile — compact label + state for dashboard rows and header slots */
 
@@ -3815,4 +4601,1326 @@ html:has(.header--metrics-wrap) {
 
 .har-detail summary:hover {
   color: var(--color-text, #ccc);
+}
+
+/* sparkline.css */
+/* Sparkline — duration trend cell primitive (phase 8.3) */
+
+.sparkline {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.sparkline--empty {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+/*
+ * Fluid cells set width:100% + a fixed height. Default SVG meet (xMidYMid)
+ * letterboxes the 88×28 viewBox and centers the stroke — headers then sit
+ * left of the drawn line. Builders set preserveAspectRatio="none".
+ */
+.sparkline--duration {
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.sparkline__area {
+  transition: fill 0.3s ease, fill-opacity 0.3s ease;
+}
+
+.sparkline__line {
+  transition: stroke 0.3s ease;
+}
+
+/* stability-cell.css */
+/* Stability cell — status dots + flaky badge (tests table column) */
+
+.stability-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 1.25rem;
+}
+
+.stability-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+
+.stability-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stability-cell .badge--flaky,
+.tests-table .badge--flaky {
+  min-width: 1.25rem;
+  padding: 0 0.35rem;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: color-mix(in srgb, var(--color-warning) 24%, transparent);
+  color: var(--color-warning);
+}
+
+/* tests-table.css */
+/* Tests table — DS primitive (sparklines via sparkline.css); kit panels.testsTable */
+
+.tests-panel {
+  margin-bottom: var(--space-3);
+}
+
+.tests-panel__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.tests-panel__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.tests-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-soft));
+}
+
+.tests-filters__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.tests-filters__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tests-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 0.72rem;
+  color: var(--color-text);
+}
+
+.tests-filter-chip__key {
+  color: var(--color-text-muted);
+}
+
+.tests-filters__clear {
+  margin-left: auto;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.tests-filters__clear:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.tests-table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.tests-table__summary {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tests-table-toolbar__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.tests-table-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.tests-table-page-size select {
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.75rem;
+}
+
+.tests-table-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.tests-table-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tests-table-pagination__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.tests-table-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tests-table-pagination__info {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.tests-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+}
+
+.tests-table {
+  width: 100%;
+  min-width: 52rem;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.tests-table th,
+.tests-table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tests-table th {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+}
+
+.tests-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tests-table__sort:hover {
+  color: var(--color-text);
+}
+
+.tests-table__sort::after {
+  content: "↕";
+  font-size: 0.62rem;
+  opacity: 0.35;
+}
+
+.tests-table__sort[aria-sort="ascending"]::after {
+  content: "↑";
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+.tests-table__sort[aria-sort="descending"]::after {
+  content: "↓";
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+.tests-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tests-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.tests-table__name {
+  font-weight: 500;
+  color: var(--color-text);
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tests-table__name[title] {
+  cursor: help;
+}
+
+.tests-table__status {
+  width: 7rem;
+}
+
+.tests-table__trend {
+  width: 6.5rem;
+}
+
+.tests-table__stability {
+  width: 8.5rem;
+}
+
+.tests-table__duration {
+  width: 10rem;
+}
+
+.tests-table__category {
+  width: 9rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.tests-table__empty {
+  margin: 0;
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.tests-table .badge--status-passed {
+  background: color-mix(in srgb, var(--color-success) 22%, transparent);
+  color: var(--color-success);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tests-table .badge--status-failed {
+  background: color-mix(in srgb, var(--color-danger) 22%, transparent);
+  color: var(--color-danger);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tests-table .badge--status-broken {
+  background: color-mix(in srgb, var(--color-warning) 22%, transparent);
+  color: var(--color-warning);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tests-table .badge--status-skipped,
+.tests-table .badge--status-unknown {
+  background: color-mix(in srgb, var(--color-text-muted) 18%, transparent);
+  color: var(--color-text-muted);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.duration-bar {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.duration-bar__value {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.duration-bar__track {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-border) 80%, transparent);
+  overflow: hidden;
+}
+
+.duration-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+  min-width: 2px;
+  transition: width 0.35s ease, background-color 0.3s ease;
+}
+
+.duration-bar__fill--passed {
+  background: var(--color-success);
+}
+
+.duration-bar__fill--failed,
+.duration-bar__fill--broken {
+  background: var(--color-danger);
+}
+
+/* quality-gate.css */
+/* Quality gate — callout (legacy) + hybrid tile (bar + split rules + qg-info). */
+
+.quality-gate:empty,
+.quality-gate[hidden] {
+  display: none;
+}
+
+/* ---- Callout (no bar) — variant A baseline, kit legacy ---- */
+
+.quality-gate:not(:has(.quality-gate__bar)) {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.quality-gate:not(:has(.quality-gate__bar)).quality-gate--passed {
+  border-color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
+}
+
+.quality-gate:not(:has(.quality-gate__bar)).quality-gate--failed {
+  border-color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__rules {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.25rem;
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__rule {
+  margin: 0;
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__rule + .quality-gate__rule {
+  margin-top: var(--space-1);
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__message {
+  color: var(--color-text);
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__rule-id {
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+}
+
+.quality-gate:not(:has(.quality-gate__bar)) .quality-gate__rule-id::before {
+  content: "·";
+  margin: 0 0.35em;
+}
+
+/* ---- Hybrid tile (D bar + H split id + C message + L formula) ---- */
+
+.quality-gate:has(.quality-gate__bar) {
+  /* Same chrome tokens as widget-tile (bar 31 · title 0.8125rem · inset from indicator). */
+  --wt-bar-height: 31px;
+  --wt-title-size: 0.8125rem;
+  --indicator-size: 10px;
+  --wt-bar-inset: calc((var(--wt-bar-height) - var(--indicator-size)) / 2);
+
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+/*
+ * Inside widget-tile: one chrome only. Tile owns the frame; QG is body content
+ * (its __bar plays the role of widget-tile__bar). Standalone demos keep the card.
+ *
+ * Do not combine `:has(...:has(...))` with other selectors in one rule — nested
+ * :has() can invalidate the whole comma list in Chromium.
+ */
+.widget-tile--quality-gate > .widget-tile__body {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.widget-tile--quality-gate > .widget-tile__body > .quality-gate {
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.quality-gate:has(.quality-gate__bar).quality-gate--failed {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+}
+
+.quality-gate:has(.quality-gate__bar).quality-gate--passed {
+  border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border));
+}
+
+.widget-tile--quality-gate > .widget-tile__body > .quality-gate.quality-gate--failed,
+.widget-tile--quality-gate > .widget-tile__body > .quality-gate.quality-gate--passed {
+  border: none;
+  background: transparent;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: var(--wt-bar-height);
+  min-height: var(--wt-bar-height);
+  padding: 0;
+  padding-left: var(--wt-bar-inset);
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-text) 3%, transparent);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+}
+
+/* Tile already clips corners — bar must not paint a second rounded card top. */
+.widget-tile--quality-gate > .widget-tile__body > .quality-gate > .quality-gate__bar {
+  border-radius: 0;
+}
+
+.quality-gate:has(.quality-gate__bar).quality-gate--failed .quality-gate__bar {
+  border-bottom-color: color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
+}
+
+.quality-gate:has(.quality-gate__bar).quality-gate--passed .quality-gate__bar {
+  border-bottom-color: color-mix(in srgb, var(--color-success) 25%, var(--color-border));
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar .indicator {
+  flex-shrink: 0;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar > .qg-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  line-height: 0;
+  /* Trailing inset only — top/bottom center in the 31px bar (trigger > indicator). */
+  padding: 0 var(--wt-bar-inset) 0 0;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar > .qg-info .qg-info__trigger {
+  /* Readable vs 10px status dot; still fits in --wt-bar-height 31. */
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar > .qg-info .qg-info__trigger .icon {
+  --icon-size-md: 1rem;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__bar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--wt-title-size, 0.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: right;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+
+.quality-gate:has(.quality-gate__bar).quality-gate--passed .quality-gate__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.5rem;
+  padding: var(--space-3);
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__verdict {
+  margin: 0;
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 600;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__verdict--ok {
+  color: var(--color-success);
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__rules {
+  display: grid;
+  /* id col grows with longest key; fit-content cap = 3× base (19.5rem). */
+  grid-template-columns: fit-content(19.5rem) 1fr;
+  grid-auto-rows: minmax(min-content, 1fr);
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__rule {
+  display: contents;
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__rule + .quality-gate__rule .quality-gate__rule-id,
+.quality-gate:has(.quality-gate__bar) .quality-gate__rule + .quality-gate__rule .quality-gate__rule-detail {
+  border-top: 1px solid var(--color-border);
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__rule-id {
+  box-sizing: border-box;
+  min-width: 6.5rem;
+  padding: var(--space-2) var(--space-3);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.8em;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface-soft));
+  border-right: 1px solid var(--color-border);
+  overflow-wrap: break-word;
+}
+
+.quality-gate:has(.quality-gate__bar).quality-gate--passed .quality-gate__rule-id {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface-soft));
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__rule-detail {
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__message {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.quality-gate:has(.quality-gate__bar) .quality-gate__formula {
+  margin: var(--space-1) 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--color-danger);
+}
+
+/* qg-info.css */
+/* Quality gate — info icon + hover popover with full config/result JSON. */
+
+.qg-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.qg-info__trigger {
+  /* Hit target ≥ icon; do not size to --indicator-size (status dots). */
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--color-text-muted);
+}
+
+.qg-info__trigger .icon {
+  --icon-size-md: 1rem;
+}
+
+.qg-info__trigger:hover,
+.qg-info:focus-within .qg-info__trigger,
+.qg-info--open .qg-info__trigger {
+  position: relative;
+  z-index: 101;
+  color: var(--color-text);
+}
+
+/* Pinned popover — toggle stays visibly pressed until second click. */
+.qg-info--pinned .qg-info__trigger,
+.qg-info__trigger[aria-expanded="true"] {
+  position: relative;
+  z-index: 101;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface-soft));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+}
+
+.qg-info--pinned .qg-info__trigger:hover,
+.qg-info__trigger[aria-expanded="true"]:hover {
+  background: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface-soft));
+}
+
+.qg-info__popover {
+  position: fixed;
+  z-index: 100;
+  width: min(28rem, calc(100vw - 4rem));
+  max-height: calc(100vh - 4rem);
+  height: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 16%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    visibility var(--duration-fast) var(--ease-out);
+}
+
+.qg-info--open .qg-info__popover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.qg-info__paths {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+}
+
+.qg-info__path {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.qg-info__path + .qg-info__path {
+  margin-top: var(--space-1);
+}
+
+.qg-info__path-label {
+  flex: 0 0 3.25rem;
+  color: var(--color-text-muted);
+}
+
+.qg-info__path-label::after {
+  content: ":";
+}
+
+.qg-info__path-value {
+  min-width: 0;
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.qg-info__path-link {
+  min-width: 0;
+  font-family: inherit;
+  font-size: inherit;
+  word-break: break-all;
+  /* Canon: light mono text + underline (not blue URL chrome). */
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-text) 55%, transparent);
+  text-underline-offset: 2px;
+}
+
+.qg-info__path-link:hover {
+  text-decoration-color: var(--color-text);
+}
+
+.qg-info__code.ch-code {
+  margin: 0;
+  padding: var(--space-2);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  border-radius: var(--radius-sm);
+}
+
+.qg-info__code:not(.ch-code) {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text);
+}
+
+/* Light report / standalone — JSON block follows surface, not terminal-dark default */
+html.theme-light .qg-info__popover.ch-theme--vscode .qg-info__code.ch-code,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .qg-info__code.ch-code {
+  --ch-code-bg: var(--color-surface-soft);
+  --ch-code-fg: var(--color-text);
+  background: var(--ch-code-bg);
+  color: var(--ch-code-fg);
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-key,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-key {
+  color: #0451a5;
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-str,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-str {
+  color: #a31515;
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-num,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-num {
+  color: #098658;
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-bool,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-bool,
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-null,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-null {
+  color: #0000ff;
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-punct,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-punct {
+  color: rgba(57, 58, 52, 0.55);
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-comment,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-comment {
+  color: #008000;
+}
+
+html.theme-light .qg-info__popover.ch-theme--vscode .ch-tok-cmd,
+html[data-theme="light"] .qg-info__popover.ch-theme--vscode .ch-tok-cmd {
+  color: #795e26;
+}
+
+/* chart-tile.css */
+/* Chart tile — widget body host for kit report panels (Highcharts / dom / svg) */
+
+/* display: flex ниже перебивает UA-правило [hidden] — восстанавливаем */
+.chart-tile[hidden] {
+  display: none;
+}
+
+.chart-tile {
+  --panel-bg: var(--color-surface-soft);
+  --panel-border: var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 168px;
+  padding: var(--space-3);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  background: var(--panel-bg);
+}
+
+.chart-tile .chart-tile__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.chart-tile__body {
+  flex: 1 1 auto;
+  min-height: 140px;
+  min-width: 0;
+}
+
+.chart-tile__body > .highcharts-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* widget-tile.css */
+/* Widget tile — Allure 3 dashboard card shell (bar + chart body).
+ *
+ * Canon (all ChartTypes):
+ *   1×1 → hard-square __body (подложка); equal --wt-pad on all sides; bar outside ratio.
+ *   Square layouts (cols===rows) keep the same hard-square body — never stretch to portrait.
+ *   One chrome: bar 31 · pad 6 · marks 1.12 (dashboard + Telegram collage).
+ *   Bar inset: --wt-bar-inset = (bar-height − indicator-size) / 2 — first indicator has
+ *   equal distance to top / left / bottom of the bar (trailing chrome uses the same inset).
+ * Format: __body aspect-ratio from --layout-WxH (default 1×1).
+ * Tier (footprint chrome): --tier-hero|regular|compact|micro
+ *   → mocks switch labels / axes / center values; see widget-tile-mocks.js.
+ * Mosaic span: --span-WxH (with .widget-mosaic) → grid footprint; keep layout in sync.
+ *
+ * Dots: compose .indicator + status-family modifiers (colours present in chart).
+ */
+
+.widget-tile {
+  --wt-bar-height: 31px;
+  --wt-pad: 6px;
+  --wt-title-size: 0.8125rem;
+  --wt-dot-gap: 5px;
+  --wt-mark-scale: 1.12;
+  --wt-font-scale: 1.08;
+  --wt-tier: regular;
+  --wt-square: 1; /* default layout 1×1 — hard-square body */
+  --indicator-size: 10px;
+  --indicator-mix: 100%;
+  /* First indicator: top = left = bottom. Trailing actions share the same inset. */
+  --wt-bar-inset: calc((var(--wt-bar-height) - var(--indicator-size)) / 2);
+
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0; /* reset UA figure margin (1em 40px) */
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* ---- Chrome ---- */
+
+.widget-tile__bar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: var(--wt-bar-height);
+  padding: 0 var(--wt-bar-inset);
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-text) 3%, transparent);
+  overflow: hidden;
+}
+
+.widget-tile__bar .indicator-row {
+  flex-shrink: 0;
+  gap: var(--wt-dot-gap);
+}
+
+.widget-tile__title {
+  /* flex:1 + text-align:right — прижата вправо; зазор до точек схлопывается раньше ellipsis */
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  font-size: var(--wt-title-size);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: right;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-tile__body {
+  /* flex-grow off: growing past aspect-ratio → portrait letterbox (unequal visual pad) */
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--wt-pad); /* equal inset — canon for every ChartType */
+  aspect-ratio: var(--wt-layout-cols, 1) / var(--wt-layout-rows, 1);
+  background: var(--color-surface);
+}
+
+.widget-tile__body > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+/* Square подложка: chart host stays 1×1 inside equal pad (all ChartTypes) */
+.widget-tile--layout-1x1 .widget-tile__body > svg,
+.widget-tile--layout-2x2 .widget-tile__body > svg,
+.widget-tile--layout-3x3 .widget-tile__body > svg,
+.widget-tile--layout-4x4 .widget-tile__body > svg,
+.widget-tile--span-1x1 .widget-tile__body > svg,
+.widget-tile--span-2x2 .widget-tile__body > svg,
+.widget-tile--span-3x3 .widget-tile__body > svg,
+.widget-tile--span-4x4 .widget-tile__body > svg,
+.widget-tile:not([class*="widget-tile--layout-"]):not([class*="widget-tile--span-"]) .widget-tile__body > svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+/* ---- Telegram collage ---- */
+
+/* Edge-to-edge chart — no body pad (bar keeps its own inset) */
+.widget-tile--bleed {
+  --wt-pad: 0;
+}
+
+/* ---- Content tier (footprint chrome; mocks read --wt-tier / class) ----
+ * hero    — full canvas / large span: % + subtitle, layer labels, axis ticks
+ * regular — mid span (e.g. 2×2): key value + chart; shorter secondary
+ * compact — strip spans (2×1, 3×1…): marks up, labels minimal / axis off
+ * micro   — 1×1 on N≥3: marks + optional single number; short bar title
+ */
+
+.widget-tile--tier-hero {
+  --wt-tier: hero;
+  --wt-font-scale: 1.12;
+  --wt-mark-scale: 1.05;
+}
+
+.widget-tile--tier-regular {
+  --wt-tier: regular;
+}
+
+.widget-tile--tier-compact {
+  --wt-tier: compact;
+  --wt-pad: 4px;
+  --wt-title-size: var(--font-size-xs);
+  --wt-mark-scale: 1.18;
+  --wt-font-scale: 1.15;
+}
+
+.widget-tile--tier-micro {
+  --wt-tier: micro;
+  --wt-bar-height: 22px;
+  --wt-pad: 2px;
+  --wt-title-size: 0.625rem;
+  --wt-dot-gap: 3px;
+  --wt-mark-scale: 1.28;
+  --wt-font-scale: 1.35;
+  --indicator-size: 7px;
+  border-radius: var(--radius-sm);
+}
+
+.widget-tile--tier-micro .widget-tile__bar {
+  padding: 0 var(--wt-bar-inset);
+  gap: 4px;
+}
+
+/* ---- Layout (body aspect = cols / rows; default 1×1 hard square) ---- */
+
+.widget-tile--layout-1x1 { --wt-layout-cols: 1; --wt-layout-rows: 1; --wt-square: 1; }
+.widget-tile--layout-1x2 { --wt-layout-cols: 1; --wt-layout-rows: 2; --wt-square: 0; }
+.widget-tile--layout-1x3 { --wt-layout-cols: 1; --wt-layout-rows: 3; --wt-square: 0; }
+.widget-tile--layout-1x4 { --wt-layout-cols: 1; --wt-layout-rows: 4; --wt-square: 0; }
+.widget-tile--layout-2x1 { --wt-layout-cols: 2; --wt-layout-rows: 1; --wt-square: 0; }
+.widget-tile--layout-2x2 { --wt-layout-cols: 2; --wt-layout-rows: 2; --wt-square: 1; }
+.widget-tile--layout-2x3 { --wt-layout-cols: 2; --wt-layout-rows: 3; --wt-square: 0; }
+.widget-tile--layout-2x4 { --wt-layout-cols: 2; --wt-layout-rows: 4; --wt-square: 0; }
+.widget-tile--layout-3x1 { --wt-layout-cols: 3; --wt-layout-rows: 1; --wt-square: 0; }
+.widget-tile--layout-3x2 { --wt-layout-cols: 3; --wt-layout-rows: 2; --wt-square: 0; }
+.widget-tile--layout-3x3 { --wt-layout-cols: 3; --wt-layout-rows: 3; --wt-square: 1; }
+.widget-tile--layout-3x4 { --wt-layout-cols: 3; --wt-layout-rows: 4; --wt-square: 0; }
+.widget-tile--layout-4x1 { --wt-layout-cols: 4; --wt-layout-rows: 1; --wt-square: 0; }
+.widget-tile--layout-4x2 { --wt-layout-cols: 4; --wt-layout-rows: 2; --wt-square: 0; }
+.widget-tile--layout-4x3 { --wt-layout-cols: 4; --wt-layout-rows: 3; --wt-square: 0; }
+.widget-tile--layout-4x4 { --wt-layout-cols: 4; --wt-layout-rows: 4; --wt-square: 1; }
+
+/* Square spans (W=H): hard-square body — mosaic must not portrait-stretch */
+.widget-tile--span-1x1,
+.widget-tile--span-2x2,
+.widget-tile--span-3x3,
+.widget-tile--span-4x4 {
+  --wt-square: 1;
+}
+
+.widget-tile--span-1x2,
+.widget-tile--span-1x3,
+.widget-tile--span-1x4,
+.widget-tile--span-2x1,
+.widget-tile--span-2x3,
+.widget-tile--span-2x4,
+.widget-tile--span-3x1,
+.widget-tile--span-3x2,
+.widget-tile--span-3x4,
+.widget-tile--span-4x1,
+.widget-tile--span-4x2,
+.widget-tile--span-4x3 {
+  --wt-square: 0;
+}
+
+/* widget-mosaic.css */
+/* Widget mosaic — tiles on a grid.
+
+ * Post canvas SSOT (Telegram export / sendPhoto):
+ *   .widget-mosaic--post          = 1024×1280 (portrait export; longest ≤1280)
+ *   .widget-mosaic--post-square   = 1024×1024 (square TG bubble preview)
+ * Substrate N (cells): .widget-mosaic--post-1 … --post-4
+ *   Valid span W×H only when W≤N and H≤N (classes .widget-tile--span-WxH).
+ *   Default --post without --post-N = alias of --post-4.
+ * Gap ≈14px opaque (sendPhoto→JPEG; alpha collapses to white).
+ * TG downscales if longest side >1280 (e.g. 1024×1300 → 1008×1280).
+ */
+
+.widget-mosaic {
+  --wt-post-width: 1024px;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  align-items: start;
+}
+
+.widget-mosaic--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.widget-mosaic--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Export canvas shell: size + gap + opaque substrate (grid N via --post-N) */
+.widget-mosaic--post,
+.widget-mosaic--post-square {
+  --wt-post-gap: 14px;
+  box-sizing: border-box;
+  width: var(--wt-post-width);
+  max-width: 100%;
+  gap: var(--wt-post-gap);
+  padding: var(--wt-post-gap);
+  align-items: stretch;
+  border: none;
+  border-radius: 0;
+  background: var(--color-surface-soft);
+  overflow: hidden;
+}
+
+/* Portrait export SSOT — default substrate 4×4 */
+.widget-mosaic--post {
+  --wt-post-height: 1280px;
+  height: var(--wt-post-height);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+/* Square TG preview SSOT — default substrate 4×4 */
+.widget-mosaic--post-square {
+  --wt-post-height: 1024px;
+  height: var(--wt-post-height);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+/* Substrate N×N — valid spans: W≤N, H≤N */
+.widget-mosaic--post-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-rows: repeat(1, minmax(0, 1fr));
+}
+
+.widget-mosaic--post-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.widget-mosaic--post-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.widget-mosaic--post-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+/* Default post tile: fill cell; square spans override below */
+.widget-mosaic--post .widget-tile,
+.widget-mosaic--post-square .widget-tile {
+  height: 100%;
+  min-height: 0;
+}
+
+.widget-mosaic--post .widget-tile__body,
+.widget-mosaic--post-square .widget-tile__body {
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Square spans: hard-square подложка + equal pad (canon 1×1 / W=W) — no portrait stretch */
+.widget-mosaic--post .widget-tile--span-1x1,
+.widget-mosaic--post .widget-tile--span-2x2,
+.widget-mosaic--post .widget-tile--span-3x3,
+.widget-mosaic--post .widget-tile--span-4x4,
+.widget-mosaic--post-square .widget-tile--span-1x1,
+.widget-mosaic--post-square .widget-tile--span-2x2,
+.widget-mosaic--post-square .widget-tile--span-3x3,
+.widget-mosaic--post-square .widget-tile--span-4x4 {
+  height: auto;
+  width: 100%;
+  align-self: center;
+}
+
+.widget-mosaic--post .widget-tile--span-1x1 .widget-tile__body,
+.widget-mosaic--post .widget-tile--span-2x2 .widget-tile__body,
+.widget-mosaic--post .widget-tile--span-3x3 .widget-tile__body,
+.widget-mosaic--post .widget-tile--span-4x4 .widget-tile__body,
+.widget-mosaic--post-square .widget-tile--span-1x1 .widget-tile__body,
+.widget-mosaic--post-square .widget-tile--span-2x2 .widget-tile__body,
+.widget-mosaic--post-square .widget-tile--span-3x3 .widget-tile__body,
+.widget-mosaic--post-square .widget-tile--span-4x4 .widget-tile__body {
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+.widget-mosaic--telegram {
+  max-width: var(--wt-post-width);
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 82%, var(--color-primary-on));
+}
+
+.widget-mosaic .widget-tile {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Spans — grid footprint W×H inside substrate N (use only when W≤N, H≤N) */
+.widget-tile--span-1x1 { grid-column: span 1; grid-row: span 1; }
+.widget-tile--span-1x2 { grid-column: span 1; grid-row: span 2; }
+.widget-tile--span-1x3 { grid-column: span 1; grid-row: span 3; }
+.widget-tile--span-1x4 { grid-column: span 1; grid-row: span 4; }
+.widget-tile--span-2x1 { grid-column: span 2; grid-row: span 1; }
+.widget-tile--span-2x2 { grid-column: span 2; grid-row: span 2; }
+.widget-tile--span-2x3 { grid-column: span 2; grid-row: span 3; }
+.widget-tile--span-2x4 { grid-column: span 2; grid-row: span 4; }
+.widget-tile--span-3x1 { grid-column: span 3; grid-row: span 1; }
+.widget-tile--span-3x2 { grid-column: span 3; grid-row: span 2; }
+.widget-tile--span-3x3 { grid-column: span 3; grid-row: span 3; }
+.widget-tile--span-3x4 { grid-column: span 3; grid-row: span 4; }
+.widget-tile--span-4x1 { grid-column: span 4; grid-row: span 1; }
+.widget-tile--span-4x2 { grid-column: span 4; grid-row: span 2; }
+.widget-tile--span-4x3 { grid-column: span 4; grid-row: span 3; }
+.widget-tile--span-4x4 { grid-column: span 4; grid-row: span 4; }
+
+@media (max-width: 768px) {
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square),
+  .widget-mosaic--2,
+  .widget-mosaic--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-1x1,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-1x2,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-1x3,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-1x4,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-2x1,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-2x2,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-2x3,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-2x4,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-3x1,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-3x2,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-3x3,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-3x4,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-4x1,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-4x2,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-4x3,
+  .widget-mosaic:not(.widget-mosaic--post):not(.widget-mosaic--post-square) .widget-tile--span-4x4 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
 }

@@ -49,7 +49,7 @@ export interface PanelProps {
     tone?: PanelTone;
     /**
      * Optional content inside `.panel__trail` after the title — canonical slot for
-     * terminal format tabs (`.tabs` / `.tab` / `.tab--active`) in the bar.
+     * terminal format tabs (`Tabs` / `Tab` → `.tabs` / `.tab` / `.tab--active`).
      */
     trail?: ReactNode;
     /**

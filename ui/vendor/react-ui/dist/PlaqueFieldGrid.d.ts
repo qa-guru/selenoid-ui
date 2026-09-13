@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 export type PlaqueFieldGridLayout = 'pair' | 'duo' | 'solo';
 export type PlaqueFieldGridCellSpan = 'sm' | 'md' | 'lg' | 'full';
 export interface PlaqueFieldGridProps {
-    /** Grid cells — any plaque fields (`PlaqueSelect`, `PlaqueFieldSeg`, `PlaqueTagstrip`, …). */
+    /** Grid cells — any plaque fields (`PlaqueSelect`, `PlaqueNumber`, `PlaqueFieldSeg`, `PlaqueTagstrip`, …). */
     children: ReactNode;
     /**
      * Row layout on the mixed 12-col grid (`configurator-option-presets#driver`):
