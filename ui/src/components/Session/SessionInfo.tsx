@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useHref, useLocation, useNavigate } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader";
 import { Badge, Button, Panel } from "@zero-design-system/react";
@@ -24,6 +24,7 @@ const SessionInfo = ({
     const location = useLocation();
     const navigate = useNavigate();
     const backTo = sessionsListTo(location.search);
+    const closeHref = useHref(backTo);
     const caps = browser.caps || {};
     const shortId = session ? session.substring(0, 8) : "";
     const [stopping, setStopping] = useState(false);
@@ -136,9 +137,14 @@ const SessionInfo = ({
                         >
                             Delete session
                         </Button>
-                        <Link to={backTo} className="btn btn--secondary" data-testid="session-close">
+                        <Button
+                            as="a"
+                            variant="secondary"
+                            href={closeHref}
+                            data-testid="session-close"
+                        >
                             Close session window
-                        </Link>
+                        </Button>
                     </div>
                 </div>
             </div>
