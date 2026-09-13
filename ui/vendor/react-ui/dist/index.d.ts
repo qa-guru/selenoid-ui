@@ -33,6 +33,8 @@ export { PlaqueFieldSegGrid } from './PlaqueFieldSegGrid';
 export type { PlaqueFieldSegGridProps } from './PlaqueFieldSegGrid';
 export { PlaqueFieldGrid } from './PlaqueFieldGrid';
 export type { PlaqueFieldGridProps, PlaqueFieldGridLayout } from './PlaqueFieldGrid';
+export { PlaqueFieldGridStack } from './PlaqueFieldGridStack';
+export type { PlaqueFieldGridStackProps, PlaqueFieldGridStackAlign } from './PlaqueFieldGridStack';
 export { usePlaqueFieldMagnet } from './usePlaqueFieldMagnet';
 export type { UsePlaqueFieldMagnetOptions } from './usePlaqueFieldMagnet';
 export { ThemeToggle } from './ThemeToggle';

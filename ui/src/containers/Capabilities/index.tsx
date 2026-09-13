@@ -65,11 +65,11 @@ import {
     Panel,
     PlaqueField,
     PlaqueFieldGrid,
+    PlaqueFieldGridStack,
     PlaqueFieldSeg as PlaqueFieldSegTyped,
     PlaqueSelect,
     PlaqueTagstrip,
     highlightOutput,
-    usePlaqueFieldMagnet,
 } from "@zero-design-system/react";
 
 const PlaqueFieldSeg = PlaqueFieldSegTyped as any;
@@ -1810,18 +1810,6 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     const driverStripAria = (groupItems: any, loadedLabel: any) =>
         groupItems.length ? loadedLabel : origin ? "No information about browsers" : "Loading browsers";
 
-    // Config panels default: magnet aligns label|divider across stack rows.
-    usePlaqueFieldMagnet({
-        enabled: true,
-        syncKey: [
-            webdriverOptions.length,
-            playwrightOptions.length,
-            androidOptions.length,
-            iosOptions.length,
-            value || "",
-        ].join(":"),
-    });
-
     const copySnippet = () => {
         const text = activeOutput;
         if (navigator.clipboard?.writeText) {
@@ -2012,9 +2000,15 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                           Tagstrips still wrap chips (--many); magnet does not lock 32px.
                           todo: Windows · Linux · Mac
                         */}
-                        <div
-                            className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
+                        <PlaqueFieldGridStack
                             data-testid="capabilities-driver-browsers"
+                            syncKey={[
+                                webdriverOptions.length,
+                                playwrightOptions.length,
+                                androidOptions.length,
+                                iosOptions.length,
+                                value || "",
+                            ].join(":")}
                         >
                             <PlaqueFieldGrid
                                 layout="solo"
@@ -2076,7 +2070,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                                     data-testid="capabilities-browser-select-ios"
                                 />
                             </PlaqueFieldGrid>
-                        </div>
+                        </PlaqueFieldGridStack>
                     </Panel>
                 </Launch>
                 <div className="code-panel">
@@ -2275,8 +2269,6 @@ const Launch = ({
     /** WD / Android Basic Auth wire token — never used to invent Playwright accessKey. */
     const wdAuthToken = formatAccessKey(authUser, authPass);
     const playwrightSocket = useRef<WebSocket | null>(null);
-    // Config stacks (Remote hub / Playwright / Android) share the magnet; iOS placeholder has no fields.
-    usePlaqueFieldMagnet({ enabled: Boolean(name) && !isIos });
 
     const createSession = useCallback(async () => {
         onError("");
@@ -2815,10 +2807,7 @@ const Launch = ({
                       conditional solo(harContent) + solo(enableLog|logName?) +
                       solo(timeZone) + solo(env) + solo(labels).
                     */}
-                    <div
-                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                        data-testid="capabilities-caps"
-                    >
+                    <PlaqueFieldGridStack data-testid="capabilities-caps">
                         <PlaqueFieldGrid
                             layout="solo"
                             aria-label="Remote URL"
@@ -3013,7 +3002,7 @@ const Launch = ({
                                 data-testid="caps-labels"
                             />
                         </PlaqueFieldGrid>
-                    </div>
+                    </PlaqueFieldGridStack>
                 </Panel>
             ) : null}
             {isPlaywright && name ? (
@@ -3027,10 +3016,7 @@ const Launch = ({
                       selenoid:options → WS query (parity with Remote hub + headless).
                       Proxy panel renders below (same order as WebDriver Remote hub → Browser capabilities).
                     */}
-                    <div
-                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                        data-testid="capabilities-playwright-caps"
-                    >
+                    <PlaqueFieldGridStack data-testid="capabilities-playwright-caps">
                         <PlaqueFieldGrid
                             layout="solo"
                             aria-label="Remote URL"
@@ -3236,7 +3222,7 @@ const Launch = ({
                                 data-testid="caps-playwright-labels"
                             />
                         </PlaqueFieldGrid>
-                    </div>
+                    </PlaqueFieldGridStack>
                 </Panel>
             ) : null}
             {isAndroid ? (
@@ -3247,10 +3233,7 @@ const Launch = ({
                     className="capabilities-config-panel"
                 >
                     {/* appium:* caps beyond image defaults + minimal selenoid:options. */}
-                    <div
-                        className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                        data-testid="capabilities-android-caps"
-                    >
+                    <PlaqueFieldGridStack data-testid="capabilities-android-caps">
                         <PlaqueFieldGrid
                             layout="solo"
                             aria-label="Remote URL"
@@ -3360,7 +3343,7 @@ const Launch = ({
                                 data-testid="caps-android-orientation"
                             />
                         </PlaqueFieldGrid>
-                    </div>
+                    </PlaqueFieldGridStack>
                 </Panel>
             ) : null}
             {isIos ? (
@@ -3391,10 +3374,7 @@ const Launch = ({
                               PW: newContext viewport + UA + DPR; hub query only screenResolution.
                               Course catalog. Off = desktop. Not Android/iOS grid images.
                             */}
-                            <div
-                                className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                                data-testid="capabilities-mobile-caps"
-                            >
+                            <PlaqueFieldGridStack data-testid="capabilities-mobile-caps">
                                 <PlaqueFieldGrid
                                     layout="solo"
                                     aria-label="Mobile device"
@@ -3414,7 +3394,7 @@ const Launch = ({
                                         ? "Off = desktop 1920×1080. Выбери устройство — окно VNC станет как телефон. UA, viewport и DPR — в newContext после connect (не Android/iOS)."
                                         : "Off = desktop 1920×1080. Выбери устройство — окно VNC и UA станут как в Chrome DevTools (не Android/iOS)."}
                                 </p>
-                            </div>
+                            </PlaqueFieldGridStack>
                         </Panel>
                     ) : null}
                     {showProxy ? (
@@ -3424,10 +3404,7 @@ const Launch = ({
                             titleTestId="capabilities-browser-title"
                             className="capabilities-config-panel"
                         >
-                            <div
-                                className="plaque-field-grid-stack plaque-field-grid-stack--magnet"
-                                data-testid="capabilities-browser-caps"
-                            >
+                            <PlaqueFieldGridStack data-testid="capabilities-browser-caps">
                                 <PlaqueFieldGrid
                                     layout="solo"
                                     aria-label="Proxy preset"
@@ -3472,7 +3449,7 @@ const Launch = ({
                                         data-testid="caps-proxy-port"
                                     />
                                 </PlaqueFieldGrid>
-                            </div>
+                            </PlaqueFieldGridStack>
                         </Panel>
                     ) : null}
                 </div>

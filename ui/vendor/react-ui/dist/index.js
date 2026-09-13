@@ -881,6 +881,39 @@ function PlaqueFieldGrid({
   return grid;
 }
 
+// src/PlaqueFieldGridStack.tsx
+function PlaqueFieldGridStack({
+  children,
+  align = "magnet",
+  magnetScriptSrc,
+  syncKey,
+  "aria-label": ariaLabel,
+  className,
+  "data-testid": testId
+}) {
+  const magnet = align === "magnet";
+  usePlaqueFieldMagnet({
+    enabled: magnet,
+    scriptSrc: magnetScriptSrc,
+    syncKey: syncKey ?? Children2.count(children)
+  });
+  return /* @__PURE__ */ jsx17(
+    "div",
+    {
+      className: cn(
+        "plaque-field-grid-stack",
+        magnet && "plaque-field-grid-stack--magnet",
+        align === "hug" && "plaque-field-grid-stack--hug",
+        className
+      ),
+      role: ariaLabel ? "group" : void 0,
+      "aria-label": ariaLabel,
+      "data-testid": testId,
+      children
+    }
+  );
+}
+
 // src/ThemeToggle.tsx
 import { useCallback as useCallback3, useEffect as useEffect4, useState as useState4 } from "react";
 
@@ -1897,6 +1930,7 @@ export {
   Panel,
   PlaqueField,
   PlaqueFieldGrid,
+  PlaqueFieldGridStack,
   PlaqueFieldSeg,
   PlaqueFieldSegGrid,
   PlaqueSelect,

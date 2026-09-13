@@ -213,6 +213,20 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         expect(within(stack!).getByTestId("capabilities-browser-select")).toBeInTheDocument();
     });
 
+    it("assembles plaque stacks via PlaqueFieldGridStack (not raw stack className)", async () => {
+        const fs = await import("node:fs/promises");
+        const path = await import("node:path");
+        const { fileURLToPath } = await import("node:url");
+        const dir = path.dirname(fileURLToPath(import.meta.url));
+        const src = await fs.readFile(path.join(dir, "index.tsx"), "utf8");
+
+        expect(src).toMatch(/PlaqueFieldGridStack/);
+        expect(src).toMatch(/data-testid="capabilities-driver-browsers"/);
+        expect(src).toMatch(/data-testid="capabilities-caps"/);
+        expect(src).not.toMatch(/className=["']plaque-field-grid-stack/);
+        expect(src).not.toMatch(/usePlaqueFieldMagnet/);
+    });
+
     it("locks Capabilities body to full-bleed 1:1:2 (no 6-col gutter clamp)", async () => {
         const fs = await import("node:fs/promises");
         const path = await import("node:path");
