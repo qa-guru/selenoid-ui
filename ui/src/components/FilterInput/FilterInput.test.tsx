@@ -27,5 +27,10 @@ describe("FilterInput", () => {
 
         await user.click(screen.getByTitle("Clear"));
         expect(onClear!).toHaveBeenCalledTimes(1);
+
+        const clear = screen.getByRole("button", { name: "Clear" });
+        expect(clear).toHaveClass("icon-btn", "filter-clear");
+        expect(clear.querySelectorAll(".icon")).toHaveLength(1);
+        expect(clear.querySelector(".icon .icon")).toBeNull();
     });
 });

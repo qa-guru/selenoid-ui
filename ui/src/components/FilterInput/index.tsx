@@ -1,11 +1,12 @@
 import React, { forwardRef } from "react";
 import styled from "styled-components";
-import { IconReset, Input } from "@zero-design-system/react";
+import { IconBtn, IconReset, Input } from "@zero-design-system/react";
 
 /**
  * Session filter, portaled into the canonical header `.header__search`.
- * Library `Input` (`.input`) + DS `icon-btn` clear (`IconReset`). Contract:
+ * Library `Input` (`.input`) + library `IconBtn` clear (`IconReset`). Contract:
  * `Filter...` placeholder, `session-filter-input` testid, titled Clear affordance.
+ * `IconBtn` owns `.icon`; keep `filter-clear` for overlay positioning.
  */
 const StyledPanelFilter = styled.div`
     position: relative;
@@ -48,18 +49,15 @@ export const FilterInput = forwardRef<HTMLInputElement, any>(function FilterInpu
                 aria-label="Filter sessions"
                 onChange={onChange}
             />
-            <button
-                type="button"
-                className="icon-btn filter-clear"
+            <IconBtn
+                className="filter-clear"
                 title="Clear"
                 aria-label="Clear"
                 style={{ visibility: !value ? "hidden" : "visible" }}
                 onClick={onClear}
             >
-                <span className="icon" aria-hidden="true">
-                    <IconReset />
-                </span>
-            </button>
+                <IconReset />
+            </IconBtn>
         </StyledPanelFilter>
     );
 });

@@ -88,6 +88,8 @@ describe("Sessions", () => {
         const deleteBtn = screen.getByTestId("session-list-delete");
         expect(deleteBtn).toHaveAttribute("aria-label", "Delete");
         expect(deleteBtn!).toHaveClass("icon-btn", "session-delete");
+        expect(deleteBtn.querySelectorAll(".icon")).toHaveLength(1);
+        expect(deleteBtn.querySelector(".icon .icon")).toBeNull();
         expect(deleteBtn.querySelector(".dripicons-trash")).toBeNull();
         expect(deleteBtn.querySelector("svg")).toBeTruthy();
 

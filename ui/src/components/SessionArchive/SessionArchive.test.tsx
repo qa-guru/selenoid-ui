@@ -170,6 +170,8 @@ describe("SessionArchive", () => {
         expect(row.querySelector(".session__caps")).toContainElement(screen.getByText("VIDEO"));
         expect(row.querySelector(".session__actions")).toContainElement(screen.getByTestId("session-delete"));
         expect(screen.getByTestId("session-delete")).toHaveClass("icon-btn", "session-delete");
+        expect(screen.getByTestId("session-delete").querySelectorAll(".icon")).toHaveLength(1);
+        expect(screen.getByTestId("session-delete").querySelector(".icon .icon")).toBeNull();
     });
 
     it("links har-only sessions into the detail page", async () => {

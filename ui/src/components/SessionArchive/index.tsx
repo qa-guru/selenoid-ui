@@ -4,7 +4,7 @@ import { CSSTransition } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import { StyledArchive } from "./style.css";
-import { IconTrash, Panel } from "@zero-design-system/react";
+import { IconBtn, IconTrash, Panel } from "@zero-design-system/react";
 import { useDeleteSession } from "./service";
 import { fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
 import type { SessionArchiveSortField, SessionArchiveSortOrder } from "./api";
@@ -322,23 +322,16 @@ const SessionRow = ({ session, onDeleted }: any) => {
                 <SessionCapBadges artifacts={{ video: session.video, log: session.log, har: session.har }} />
             </div>
             <div className="session__actions">
-                <button
-                    type="button"
-                    className="icon-btn session-delete"
+                <IconBtn
+                    className="session-delete"
                     title="Delete session"
                     aria-label="Delete session"
                     data-testid="session-delete"
                     disabled={deleting}
                     onClick={deleteSession}
                 >
-                    {deleting ? (
-                        <BeatLoader size={2} color={"#fff"} />
-                    ) : (
-                        <span className="icon" aria-hidden="true">
-                            <IconTrash />
-                        </span>
-                    )}
-                </button>
+                    {deleting ? <BeatLoader size={2} color={"#fff"} /> : <IconTrash />}
+                </IconBtn>
             </div>
         </div>
     );

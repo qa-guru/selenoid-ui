@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusTile, SelenoidMetrics } from "@zero-design-system/react";
+import { PlaqueDivider, StatusTile, SelenoidMetrics } from "@zero-design-system/react";
 
 /**
  * Compact live-stats cluster portaled into the canonical header `.header__slot`.
@@ -52,7 +52,7 @@ const HeaderStats = ({ state, sseStatus, selenoidStatus, version, statusTitle }:
 
     return (
         <div className="selenoid-header-group" data-testid="header-live-stats">
-            <span className="plaque-divider" aria-hidden="true" />
+            <PlaqueDivider />
             <StatusTile
                 id="sse-status"
                 label="SSE"
@@ -63,7 +63,7 @@ const HeaderStats = ({ state, sseStatus, selenoidStatus, version, statusTitle }:
                 data-testid="sse-status-badge"
                 aria-label={`SSE ${sse.state}`}
             />
-            <span className="plaque-divider" aria-hidden="true" />
+            <PlaqueDivider />
             <StatusTile
                 id="selenoid-status"
                 label="Selenoid"
@@ -74,7 +74,7 @@ const HeaderStats = ({ state, sseStatus, selenoidStatus, version, statusTitle }:
                 data-testid="selenoid-status-badge"
                 aria-label={`Selenoid ${hub.state}`}
             />
-            <span className="plaque-divider" aria-hidden="true" />
+            <PlaqueDivider />
             <SelenoidMetrics
                 usedPercent={usedPercent(total, used, pending)}
                 queued={queued}

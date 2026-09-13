@@ -65,6 +65,7 @@ describe("Viewport", () => {
         });
         expect(document.getElementById("selenoid-status")).toBeInTheDocument();
         expect(screen.getByTestId("header-live-stats")).toBeInTheDocument();
+        expect(screen.getByTestId("header-live-stats").querySelectorAll(":scope > .plaque-divider")).toHaveLength(3);
         expect(screen.getByTestId("sse-status-badge")).toHaveClass("status-tile--connected");
         expect(screen.getAllByText("Connected").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByTestId("selenoid-metrics")).toBeInTheDocument();

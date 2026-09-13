@@ -358,6 +358,18 @@ function Button({
   );
 }
 
+// src/IconBtn.tsx
+function IconBtn({
+  as,
+  className,
+  children,
+  ...rest
+}) {
+  const Component = as ?? "button";
+  const buttonType = Component === "button" ? { type: "button" } : {};
+  return /* @__PURE__ */ jsx8(Component, { ...buttonType, className: cn("icon-btn", className), ...rest, children: /* @__PURE__ */ jsx8("span", { className: "icon", "aria-hidden": "true", children }) });
+}
+
 // src/Input.tsx
 import { forwardRef } from "react";
 import { jsx as jsx9 } from "react/jsx-runtime";
@@ -524,6 +536,26 @@ function Panel({
         /* @__PURE__ */ jsx11("div", { className: cn("panel__body", bodyClassName), children }),
         foot != null ? /* @__PURE__ */ jsx11("div", { className: "panel__foot", children: foot }) : null
       ]
+    }
+  );
+}
+
+// src/PlaqueDivider.tsx
+function PlaqueDivider({
+  horizontal = false,
+  className,
+  ...rest
+}) {
+  return /* @__PURE__ */ jsx11(
+    "span",
+    {
+      className: cn(
+        "plaque-divider",
+        horizontal && "plaque-divider--horizontal",
+        className
+      ),
+      ...rest,
+      "aria-hidden": "true"
     }
   );
 }
@@ -1904,6 +1936,7 @@ export {
   ConnectionStatus,
   HAR_TIMING_KEYS,
   HarViewer,
+  IconBtn,
   IconChevronDown,
   IconChevronUp,
   IconClose,
@@ -1928,6 +1961,7 @@ export {
   Link,
   POLL_DEFAULT_MS,
   Panel,
+  PlaqueDivider,
   PlaqueField,
   PlaqueFieldGrid,
   PlaqueFieldGridStack,

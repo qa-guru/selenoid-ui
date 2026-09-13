@@ -4,7 +4,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
-import { IconTrash, Panel } from "@zero-design-system/react";
+import { IconBtn, IconTrash, Panel } from "@zero-design-system/react";
 import { useSessionDelete } from "./service";
 import { matchesSessionQuery, sessionIdShort, sortSessionIds } from "../../util/sessionsLogic";
 import { isManualSession } from "../../util/sessionIdentity";
@@ -119,23 +119,16 @@ const Session = ({ id, session: { quota, caps, starting }, ref }: any) => {
             </div>
             <div className="session__actions">
                 {manual && (
-                    <button
-                        type="button"
-                        className="icon-btn session-delete"
+                    <IconBtn
+                        className="session-delete"
                         title="Delete"
                         aria-label="Delete"
                         data-testid="session-list-delete"
                         disabled={deleting}
                         onClick={deleteSession}
                     >
-                        {deleting ? (
-                            <BeatLoader size={2} color={"#fff"} />
-                        ) : (
-                            <span className="icon" aria-hidden="true">
-                                <IconTrash />
-                            </span>
-                        )}
-                    </button>
+                        {deleting ? <BeatLoader size={2} color={"#fff"} /> : <IconTrash />}
+                    </IconBtn>
                 )}
             </div>
         </div>
