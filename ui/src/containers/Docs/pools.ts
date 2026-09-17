@@ -288,7 +288,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
         },
         hot: {
             human: "About 0.9 seconds when Java and Chrome are already warm.",
-            tech: "Java, hot pool: 0.9 seconds (#95).",
+            tech: "Java, hot pool: 0.9 seconds (#115).",
         },
     },
     {
@@ -307,7 +307,7 @@ export const COMPARISON_ROWS: ComparisonRow[] = [
             human:
                 "Login in Chrome is about 0.7 seconds. The rest is Jenkins starting the job.",
             tech:
-                "POST /pool/lease, then the running daemon, then POST /run takes about 622 milliseconds, then trap release in the same shell. About 0.3 seconds is the Jenkins Test stage around /run, not the browser. Git lives in a separate sync job.",
+                "POST /pool/lease, then the running daemon, then POST /run takes about 641 milliseconds, then trap release in the same shell. About 0.3 seconds is the Jenkins Test stage around /run, not the browser. Git lives in a separate sync job.",
         },
     },
     {
@@ -550,11 +550,11 @@ export const WALL_BY_POOL: Record<
     },
     hot: {
         totalLabel: "0.9s",
-        pin: "#95",
+        pin: "#115",
         totalSeconds: 0.9,
         layers: [
-            { id: "login", seconds: 0.622, pin: "~0.6s /run" },
-            { id: "jenkins-shell", seconds: 0.306, pin: "~0.3s pipeline/shell" },
+            { id: "login", seconds: 0.641, pin: "~0.6s /run" },
+            { id: "jenkins-shell", seconds: 0.301, pin: "~0.3s pipeline/shell" },
         ],
     },
 };
