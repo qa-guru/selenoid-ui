@@ -6,9 +6,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // tinypool passes execArgv and then Node ignores NODE_OPTIONS on workers.
 const vitestHeapArgv = ["--max-old-space-size=8192"];
-// v8 coverage + Allure in one process → invalid table size OOM. Coverage pass
-// sets ALLURE_SKIP=1; the RTL pass still writes ui/allure-results.
-const skipAllure = process.env.ALLURE_SKIP === "1";
 
 // Live / streaming endpoints must stay online-only: never precache, never answer
 // with the SPA navigateFallback. HashRouter keeps client routes under `/#/…`, so
@@ -217,17 +214,7 @@ export default defineConfig({
             "@novnc/novnc/lib/rfb.js": resolve(__dirname, "src/test/novncStub.ts"),
             "@novnc/novnc": resolve(__dirname, "src/test/novncStub.ts"),
         },
-        reporters: skipAllure
-            ? ["default"]
-            : [
-                  "default",
-                  [
-                      "allure-vitest/reporter",
-                      {
-                          resultsDir: "allure-results",
-                      },
-                  ],
-              ],
+        reporters: ["default", resolve(__dirname, "scripts/allure-lite-reporter.mjs")],
         coverage: {
             provider: "v8",
             reporter: ["lcov", "text"],
