@@ -210,9 +210,7 @@ export default defineConfig({
             },
         },
         include: ["src/**/*.test.{ts,tsx,js,jsx}"],
-        setupFiles: skipAllure
-            ? ["./src/test/setup.ts"]
-            : ["./src/test/setup.ts", "allure-vitest/setup"],
+        setupFiles: ["./src/test/setup.ts"],
         // Stub only under Vitest. A global resolve.alias to novncStub.ts was baked into
         // production (v2.3.0 Vite cut) and left the UI stuck on "VNC CONNECTING".
         alias: {

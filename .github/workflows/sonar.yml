@@ -11,6 +11,7 @@ on:
       - '**.go'
       - 'ui/**'
       - 'scripts/**'
+      - 'ci/**'
       - 'go.mod'
       - 'go.sum'
       - 'sonar-project.properties'
