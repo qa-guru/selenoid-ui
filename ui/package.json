@@ -24,10 +24,10 @@
         "start": "vite",
         "build": "vite build",
         "typecheck": "tsc -p tsconfig.json --noEmit",
-        "test": "ALLURE_LABEL_epic=selenoid-ui ALLURE_LABEL_layer=component ALLURE_LABEL_scope=react ALLURE_LABEL_framework=react-testing-library vitest run",
+        "test": "ALLURE_LABEL_epic=selenoid-ui ALLURE_LABEL_layer=component ALLURE_LABEL_scope=react ALLURE_LABEL_framework=react-testing-library node --max-old-space-size=8192 ./node_modules/vitest/vitest.mjs run",
         "test:visual": "playwright test -c visual/playwright.config.ts",
         "test:visual:update": "playwright test -c visual/playwright.config.ts --update-snapshots",
-        "test:coverage": "ALLURE_LABEL_epic=selenoid-ui ALLURE_LABEL_layer=component ALLURE_LABEL_scope=react ALLURE_LABEL_framework=react-testing-library vitest run --coverage",
+        "test:coverage": "ALLURE_LABEL_epic=selenoid-ui ALLURE_LABEL_layer=component ALLURE_LABEL_scope=react ALLURE_LABEL_framework=react-testing-library node --max-old-space-size=8192 ./node_modules/vitest/vitest.mjs run --coverage",
         "test:watch": "vitest",
         "preview": "vite preview",
         "format": "prettier --write '{,!(node_modules|.git|build|coverage|scripts)/**/}*.{js,ts,tsx,json,jsx,md}'"
