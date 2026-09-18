@@ -201,14 +201,12 @@ export default defineConfig({
         pool: "forks",
         poolOptions: {
             forks: {
-                singleFork: ciVitest,
                 execArgv: vitestHeapArgv,
             },
             threads: {
                 execArgv: vitestHeapArgv,
             },
         },
-        ...(ciVitest ? { fileParallelism: false, maxWorkers: 1 } : {}),
         include: ["src/**/*.test.{ts,tsx,js,jsx}"],
         setupFiles: ciVitest
             ? ["./src/test/setup.ts"]
