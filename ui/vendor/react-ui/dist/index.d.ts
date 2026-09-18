@@ -85,6 +85,8 @@ export { StabilityCell, stabilityStatusLabel } from './StabilityCell';
 export type { StabilityCellProps, StabilityHistoryPoint, StabilityLang, } from './StabilityCell';
 export { TestsTable } from './TestsTable';
 export type { TestsTableProps, TestsTableRow, TestsTableLang, } from './TestsTable';
+export { HelpInfo } from './HelpInfo';
+export type { HelpInfoProps, HelpInfoItem } from './HelpInfo';
 export { QgInfo } from './QgInfo';
 export type { QgInfoProps, QgInfoFileSource } from './QgInfo';
 export { QualityGate } from './QualityGate';
@@ -93,6 +95,8 @@ export { SonarQualityGate, sonarProjectStatusToQualityGateOptions, mapSonarCondi
 export type { SonarQualityGateProps, SonarProjectStatus, SonarCondition, SonarQgInfoSource, } from './SonarQualityGate';
 export { PlaqueField } from './PlaqueField';
 export type { PlaqueFieldProps, PlaqueFieldLabelVariant, PlaqueFieldControlElement, } from './PlaqueField';
+export { PlaqueFieldValue } from './PlaqueFieldValue';
+export type { PlaqueFieldValueProps, PlaqueFieldValueAs, } from './PlaqueFieldValue';
 export { PlaqueSelect } from './PlaqueSelect';
 export type { PlaqueSelectProps, PlaqueSelectOption } from './PlaqueSelect';
 export { PlaqueNumber } from './PlaqueNumber';

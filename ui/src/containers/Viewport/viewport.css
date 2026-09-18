@@ -1,0 +1,28 @@
+/* SPA shell under the fixed canonical header (#app-header / header.css).
+   Tokens: /css/tokens.css in index.html. Do not redeclare design tokens here.
+   Do not import page.css — its global h1/p would restyle Stats/Docs. */
+
+html,
+body {
+  width: 100%;
+  width: 100vw;
+  height: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  min-width: 100vw;
+  overflow: auto;
+}
+
+body {
+  /* Offset content below the fixed header. */
+  padding-top: var(--header-occupied-height);
+}
+
+/* Positioned containing block for VNC/app fullscreen
+   (`position: absolute; inset: 0` fills this box). */
+.viewport {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--header-occupied-height));
+}

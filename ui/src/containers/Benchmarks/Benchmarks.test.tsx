@@ -1,8 +1,12 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { PerfBenchmarkDoc } from "../../perf-benchmark/types";
 import Benchmarks from "./index";
+import "./benchmarks.css";
 
 const fixture: PerfBenchmarkDoc = {
     version: 1,
@@ -71,6 +75,35 @@ const fixture: PerfBenchmarkDoc = {
 };
 
 describe("Benchmarks", () => {
+    it("uses a class shell instead of styled-components", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const css = readFileSync(join(dir, "benchmarks.css"), "utf8");
+
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(readdirSync(dir).some((name) => name.endsWith(".css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toMatch(/\.benchmarks\s*\{[^}]*width:\s*100%/s);
+        expect(css).toMatch(/\.benchmarks\s+h1\s*\{/);
+        expect(css.split("\n").some((line) => /^\s*h1\s*\{/.test(line))).toBe(false);
+        for (const name of readdirSync(dir)) {
+            if (/\.(tsx?|jsx?)$/.test(name) && !/\.test\.(tsx?|jsx?)$/.test(name)) {
+                expect(readFileSync(join(dir, name), "utf8"), name).not.toMatch(
+                    /styled-components|StyledBenchmarks/
+                );
+            }
+        }
+
+        render(<Benchmarks data={fixture} />);
+
+        const host = screen.getByTestId("benchmarks-page");
+        expect(host).toHaveClass("benchmarks");
+        expect(getComputedStyle(host).width).toBe("100%");
+        expect(getComputedStyle(host).boxSizing).toBe("border-box");
+        expect(getComputedStyle(screen.getByRole("heading", { level: 1 })).fontWeight).toBe("400");
+        expect(host.querySelector(":scope > .benchmarks__filters")).toBeTruthy();
+        expect(host.querySelector(":scope > .benchmarks__lead")).toBeTruthy();
+    });
+
     it("renders Catalog rows from fixture JSON", () => {
         render(<Benchmarks data={fixture} />);
 

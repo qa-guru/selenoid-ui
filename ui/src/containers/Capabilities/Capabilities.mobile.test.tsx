@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import Capabilities from "./index";
+import "./capabilities.css";
 import { mobileDeviceById } from "../../util/capabilitiesMobileEmulation";
 
 const BROWSERS = {

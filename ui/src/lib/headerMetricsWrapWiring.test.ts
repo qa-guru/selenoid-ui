@@ -37,7 +37,7 @@ describe("header metrics-wrap wiring (synced from design-system)", () => {
     });
 
     it("hides .header__burger with specificity above .icon-btn", () => {
-        // Vite injects @zero-design-system/react/styles.css after <link href="/css/header.css">.
+        // Host must not inject @zero-design-system/react/styles.css after /css/header.css.
         // `.header__burger { display: none }` (0,1,0) loses to `.icon-btn { display: inline-flex }`.
         const css = readFileSync(HEADER_CSS, "utf8");
         expect(css).toMatch(/\.header\s+\.header__burger\s*\{[^}]*display:\s*none/);

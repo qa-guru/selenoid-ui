@@ -4,7 +4,6 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import BrowserPools from "./BrowserPools";
 import CatalogPage, { type CatalogPageProps } from "./CatalogPage";
 import ResourcesPage from "./ResourcesPage";
-import { StyledDocs } from "./style.css";
 
 const TOC = [
     { to: "/docs", label: "Browser pools", testid: "docs-nav-pools", end: true },
@@ -14,7 +13,7 @@ const TOC = [
 
 const Docs = ({ hubBrowsers, browserProtocols }: CatalogPageProps) => {
     return (
-        <StyledDocs data-testid="docs-page">
+        <div className="docs" data-testid="docs-page">
             <nav className="docs__toc" aria-label="Docs" data-testid="docs-nav">
                 {TOC.map((item) => (
                     <NavLink
@@ -35,7 +34,7 @@ const Docs = ({ hubBrowsers, browserProtocols }: CatalogPageProps) => {
                     <Route path="resources" element={<ResourcesPage />} />
                 </Routes>
             </div>
-        </StyledDocs>
+        </div>
     );
 };
 

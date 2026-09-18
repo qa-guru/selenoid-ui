@@ -12,7 +12,6 @@ import { LIVE_SESSION_GRACE_MS } from "../../util/waitForLiveSession";
 import { useMockSessionsEnabled } from "../../hooks/useMockSessionsEnabled";
 import { mockDetailsSession } from "../../lib/mockSessions";
 import { markLiveSessionEnded, reviveLiveSession } from "../../lib/optimisticLive";
-import { StyledSession } from "./style.css";
 import { ARTIFACT_POLL_MS, ARTIFACT_POLL_TIMEOUT_MS } from "./sessionArtifactPoll";
 
 /** Empty-state hourglass — same composition as Sessions / Archive. */
@@ -196,7 +195,7 @@ const Session = ({ origin, session, browser }: any) => {
     const showEndedNotFound = wasLive && !hubLive && !showMockPreview && artifactsStatus === "missing";
 
     return (
-        <StyledSession data-testid="session-page">
+        <div className="session-page" data-testid="session-page">
             {showSessionInfo && (
                 <SessionInfo
                     {...{
@@ -336,7 +335,7 @@ const Session = ({ origin, session, browser }: any) => {
                     </div>
                 </Panel>
             )}
-        </StyledSession>
+        </div>
     );
 };
 

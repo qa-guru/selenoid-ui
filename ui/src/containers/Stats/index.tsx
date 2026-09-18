@@ -1,12 +1,11 @@
 import React from "react";
-import { StyledStats } from "./style.css";
 
 import Browsers from "../../components/Browsers";
 import PoolSlots from "../../components/PoolSlots";
 
 const Stats = ({ state, browsers }: any) => {
     return (
-        <StyledStats>
+        <div className="stats">
             <Browsers browsers={browsers} totalUsed={state.used} />
             <PoolSlots
                 title="Warm pool"
@@ -20,7 +19,7 @@ const Stats = ({ state, browsers }: any) => {
                 titleTestId="hot-slots-title"
                 slots={state.hotSlots}
             />
-        </StyledStats>
+        </div>
     );
 };
 

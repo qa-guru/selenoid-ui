@@ -11,7 +11,6 @@ import { DEFAULT_STACK_AUTH_LOGIN, DEFAULT_STACK_AUTH_ME, DEFAULT_STACK_LOGIN, D
 import { fullscreenAction } from "../fullscreenAction";
 
 import "xterm/css/xterm.css";
-import { StyledLog } from "./style.css";
 import colors from "ansi-256-colors";
 
 const RESIZE_DEBOUNCE_MS = 100;
@@ -342,7 +341,7 @@ export default class Log extends Component<any, any> {
     render() {
         const { hidden, className, session, browser = {}, fullscreen, onToggleFullscreen } = this.props;
         const logFile = session ? logFileName(session, browser.caps) : "";
-        const hostClass = [className, `hidden-${hidden}`, fullscreen ? "panel-host--fullscreen" : ""]
+        const hostClass = ["log-host", className, `hidden-${hidden}`, fullscreen ? "panel-host--fullscreen" : ""]
             .filter(Boolean)
             .join(" ");
         const actions = [
@@ -368,7 +367,7 @@ export default class Log extends Component<any, any> {
         ];
 
         return (
-            <StyledLog className={hostClass}>
+            <div className={hostClass}>
                 <Panel
                     variant="terminal"
                     title="Session logs"
@@ -386,7 +385,7 @@ export default class Log extends Component<any, any> {
                         }}
                     />
                 </Panel>
-            </StyledLog>
+            </div>
         );
     }
 }

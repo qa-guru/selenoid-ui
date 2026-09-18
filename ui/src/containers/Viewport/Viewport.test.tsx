@@ -1,8 +1,12 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Viewport from "./index";
+import "./viewport.css";
 
 vi.mock("../../hooks/useUiFeed", () => ({
     useUiFeed: () => ({
@@ -135,5 +139,36 @@ describe("Viewport", () => {
         expect(screen.getByTestId("docs-page")).toBeInTheDocument();
         expect(screen.getByTestId("docs-resources")).toBeInTheDocument();
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Resources");
+    });
+
+    it("uses a class shell instead of createGlobalStyle", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const tsx = readFileSync(join(dir, "index.tsx"), "utf8");
+        const css = readFileSync(join(dir, "viewport.css"), "utf8");
+
+        expect(tsx).not.toMatch(/createGlobalStyle|StyledViewport|styled-components/);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toContain("padding-top: var(--header-occupied-height)");
+        expect(css).toMatch(/\.viewport\s*\{[^}]*position:\s*relative/s);
+        expect(css).toContain("min-height: calc(100vh - var(--header-occupied-height))");
+
+        injectHeaderSlots();
+        renderViewport();
+        expect(screen.getByTestId("viewport")).toHaveClass("viewport");
+    });
+
+    it("keeps header offset and a positioned VNC containing block", () => {
+        injectHeaderSlots();
+        renderViewport();
+
+        // jsdom does not resolve var() — the token name in computed padding
+        // still proves the offset rule attached to body.
+        expect(getComputedStyle(document.body).paddingTop).toContain("--header-occupied-height");
+
+        const shell = screen.getByTestId("viewport");
+        expect(getComputedStyle(shell).position).toBe("relative");
+        expect(getComputedStyle(shell).display).toBe("flex");
+        expect(getComputedStyle(shell).flexDirection).toBe("column");
+        expect(getComputedStyle(shell).minHeight).toContain("--header-occupied-height");
     });
 });

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IconDownload, Panel } from "@zero-design-system/react";
 
-import { StyledSessionVideo } from "./style.css";
-
 const VIDEO_PROBE_MS = 2500;
 
 function SessionVideoWaiting() {
@@ -55,7 +53,7 @@ const SessionVideo = ({ file }: any) => {
     }
 
     return (
-        <StyledSessionVideo data-testid="session-video-panel-wrap">
+        <div className="session-video-panel-wrap" data-testid="session-video-panel-wrap">
             <Panel
                 variant="terminal"
                 barChrome
@@ -86,7 +84,7 @@ const SessionVideo = ({ file }: any) => {
                     <SessionVideoWaiting />
                 )}
             </Panel>
-        </StyledSessionVideo>
+        </div>
     );
 };
 

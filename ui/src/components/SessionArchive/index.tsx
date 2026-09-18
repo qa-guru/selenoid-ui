@@ -3,7 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import BeatLoader from "react-spinners/BeatLoader";
 
-import { StyledArchive } from "./style.css";
 import { IconBtn, IconTrash, Panel } from "@zero-design-system/react";
 import { useDeleteSession } from "./service";
 import { fetchSessionPage, SESSION_PAGE_SIZE } from "./api";
@@ -175,7 +174,7 @@ const SessionArchive = ({ query = "" }: any) => {
     const showPager = total > limit;
 
     return (
-        <StyledArchive>
+        <div className="archive-page">
             <Panel
                 title="Finished sessions"
                 testId="archive-panel"
@@ -255,7 +254,7 @@ const SessionArchive = ({ query = "" }: any) => {
                     </div>
                 </CSSTransition>
             </Panel>
-        </StyledArchive>
+        </div>
     );
 };
 

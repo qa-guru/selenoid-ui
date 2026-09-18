@@ -1,0 +1,22 @@
+/* Session filter host in the header search slot.
+   Tokens: /css/tokens.css in index.html. Do not redeclare :root here. */
+
+.filter-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.filter-input .input {
+  padding-right: calc(var(--control-height-md) + var(--space-1, 4px));
+}
+
+.filter-input .filter-clear {
+  position: absolute;
+  right: var(--space-1, 4px);
+  width: calc(var(--control-height-md) - 2 * var(--space-1, 4px));
+  height: calc(var(--control-height-md) - 2 * var(--space-1, 4px));
+  color: var(--color-text-muted, #999);
+}

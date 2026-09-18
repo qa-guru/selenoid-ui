@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
+import "./capabilities.css";
 
 const ACCESS_KEY = "test_user:test_pass";
 

@@ -1,27 +1,10 @@
 import React from "react";
-import styled from "styled-components";
 
 import { StatsElement } from "./StatsElement";
 
-const StyledQuota = styled(StatsElement)`
-    width: auto;
-    min-width: 115px;
-
-    .numbers {
-        flex: 2;
-        font-weight: 300;
-        font-size: 2em;
-
-        .pending {
-            font-size: 0.7em;
-            color: var(--color-text-muted, #ccc);
-        }
-    }
-`;
-
 const Quota = ({ used = "?", pending = "?", total = "?" }: any) => {
     return (
-        <StyledQuota>
+        <StatsElement className="stats-quota">
             <div className="title">QUOTA</div>
             <div className="numbers">
                 <span title="Used - how many containers run in parallel right now">{used}</span>{" "}
@@ -30,7 +13,7 @@ const Quota = ({ used = "?", pending = "?", total = "?" }: any) => {
                 </span>{" "}
                 / <span title="Total - how many containers can run in parallel">{total}</span>
             </div>
-        </StyledQuota>
+        </StatsElement>
     );
 };
 

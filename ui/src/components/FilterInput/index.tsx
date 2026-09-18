@@ -1,5 +1,4 @@
 import React, { forwardRef } from "react";
-import styled from "styled-components";
 import { IconBtn, IconReset, Input } from "@zero-design-system/react";
 
 /**
@@ -8,29 +7,10 @@ import { IconBtn, IconReset, Input } from "@zero-design-system/react";
  * `Filter...` placeholder, `session-filter-input` testid, titled Clear affordance.
  * `IconBtn` owns `.icon`; keep `filter-clear` for overlay positioning.
  */
-const StyledPanelFilter = styled.div`
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-width: 0;
-
-    .input {
-        padding-right: calc(var(--control-height-md) + var(--space-1, 4px));
-    }
-
-    .filter-clear {
-        position: absolute;
-        right: var(--space-1, 4px);
-        width: calc(var(--control-height-md) - 2 * var(--space-1, 4px));
-        height: calc(var(--control-height-md) - 2 * var(--space-1, 4px));
-        color: var(--color-text-muted, #999);
-    }
-`;
-
 export const FilterInput = forwardRef<HTMLInputElement, any>(function FilterInput({ value, onChange, onClear }, ref) {
     return (
-        <StyledPanelFilter
+        <div
+            className="filter-input"
             onClick={() => {
                 if (ref && typeof ref !== "function" && ref.current) {
                     ref.current.focus();
@@ -58,6 +38,6 @@ export const FilterInput = forwardRef<HTMLInputElement, any>(function FilterInpu
             >
                 <IconReset />
             </IconBtn>
-        </StyledPanelFilter>
+        </div>
     );
 });

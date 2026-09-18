@@ -1,33 +1,17 @@
 import React from "react";
-import styled from "styled-components";
 import { StatsElement } from "./StatsElement";
-
-const StyledQueue = styled(StatsElement)`
-    width: auto;
-    min-width: 45px;
-    .used {
-        flex: 2;
-        font-weight: 300;
-        font-size: 2em;
-
-        .small {
-            font-size: 0.5em;
-            padding-left: var(--space-1, 3px);
-        }
-    }
-`;
 
 const Used = ({ used, pending, total }: any) => {
     const perc = total > 0 ? (((used + pending) / total) * 100).toFixed() : "?";
 
     return (
-        <StyledQueue>
+        <StatsElement className="stats-used">
             <div className="title">USED</div>
             <div className="used">
                 {perc}
                 <span className="small">%</span>
             </div>
-        </StyledQueue>
+        </StatsElement>
     );
 };
 

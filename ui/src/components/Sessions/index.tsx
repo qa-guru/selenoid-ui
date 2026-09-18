@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import { StyledSessions } from "./style.css";
 import BeatLoader from "react-spinners/BeatLoader";
 
 import { IconBtn, IconTrash, Panel } from "@zero-design-system/react";
@@ -48,7 +47,7 @@ const Sessions = ({ sessions = {}, query = "" }: any) => {
     };
 
     return (
-        <StyledSessions>
+        <div className="sessions-page">
             <Panel
                 title="Live sessions"
                 testId="sessions-panel"
@@ -88,7 +87,7 @@ const Sessions = ({ sessions = {}, query = "" }: any) => {
                     </div>
                 </CSSTransition>
             </Panel>
-        </StyledSessions>
+        </div>
     );
 };
 

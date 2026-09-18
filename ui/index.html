@@ -6,18 +6,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="theme-color" content="#151414" />
         <title>Selenoid UI</title>
+
+        <!-- Peer design-system CSS (SSOT: design-system/css → public/css).
+             Do not load the react-ui styles barrel — that dual-loads :root.
+             Keep in sync with scripts/sync-design-system-static.sh. -->
+        <link rel="stylesheet" href="/css/tokens.css" />
         <style>
             html,
             body {
                 margin: 0;
-                background: #151414;
+                background: var(--color-surface);
+                color: var(--color-text);
             }
         </style>
-
-        <!-- Canonical design-system header peer CSS (SSOT: design-system).
-             <AppHeader> mounts #app-header + /js/header.js; the host serves the
-             header styles. Keep in sync with public/css/. -->
-        <link rel="stylesheet" href="/css/tokens.css" />
         <link rel="stylesheet" href="/css/link.css" />
         <link rel="stylesheet" href="/css/input.css" />
         <link rel="stylesheet" href="/css/icon.css" />
@@ -30,6 +31,26 @@
         <link rel="stylesheet" href="/css/selenoid-metrics.css" />
         <link rel="stylesheet" href="/css/panel.css" />
         <link rel="stylesheet" href="/css/tab.css" />
+        <link rel="stylesheet" href="/css/plaque-field.css" />
+        <link rel="stylesheet" href="/css/code-highlight.css" />
+        <link rel="stylesheet" href="/css/window-control.css" />
+        <link rel="stylesheet" href="/css/connection-status.css" />
+        <link rel="stylesheet" href="/css/vnc-window.css" />
+        <link rel="stylesheet" href="/css/har-viewer.css" />
+        <link rel="stylesheet" href="/src/containers/Viewport/viewport.css" />
+        <link rel="stylesheet" href="/src/components/SessionIdentity/session-identity.css" />
+        <link rel="stylesheet" href="/src/components/Sessions/sessions.css" />
+        <link rel="stylesheet" href="/src/components/SessionArchive/session-archive.css" />
+        <link rel="stylesheet" href="/src/components/Session/session.css" />
+        <link rel="stylesheet" href="/src/components/Log/log.css" />
+        <link rel="stylesheet" href="/src/components/FilterInput/filter-input.css" />
+        <link rel="stylesheet" href="/src/components/Browsers/browsers.css" />
+        <link rel="stylesheet" href="/src/containers/Stats/stats.css" />
+        <link rel="stylesheet" href="/src/containers/Docs/docs.css" />
+        <link rel="stylesheet" href="/src/containers/Benchmarks/benchmarks.css" />
+        <link rel="stylesheet" href="/src/containers/Capabilities/capabilities.css" />
+        <link rel="stylesheet" href="/src/components/Stats/stats-element.css" />
+        <link rel="stylesheet" href="/src/components/VncCard/mock-vnc-desktop.css" />
         <link rel="stylesheet" href="/css/header.css" />
     </head>
     <body>

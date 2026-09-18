@@ -51,12 +51,13 @@ describe("Log chrome → Panel terminal", () => {
         expect(screen.queryByTestId("session-log-download")).toBeNull();
         expect(panel.querySelector(".log-card__body .term")).toBeTruthy();
         expect(container.querySelector(".log-card__content")).toBeNull();
+        expect(container.firstChild).toHaveClass("log-host");
     });
 
     it("keeps hidden-true for Session fullscreen interaction", () => {
         const { container } = render(<Log hidden />);
 
-        expect(container.firstChild).toHaveClass("hidden-true");
+        expect(container.firstChild).toHaveClass("log-host", "hidden-true");
         expect(screen.getByTestId("session-log-panel")).toBeInTheDocument();
     });
 

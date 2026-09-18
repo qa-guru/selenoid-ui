@@ -47,6 +47,7 @@ vi.mock("@novnc/novnc/lib/rfb.js", () => ({
 }));
 
 import VncScreen from "./VncScreen";
+import "./mock-vnc-desktop.css";
 
 describe("VncScreen mock preview", () => {
     beforeEach(() => {
@@ -71,6 +72,12 @@ describe("VncScreen mock preview", () => {
         );
 
         expect(screen.getByTestId("mock-vnc-desktop")).toBeInTheDocument();
+        expect(screen.getByTestId("mock-vnc-desktop")).toHaveClass("vnc-mock-desktop");
+        expect(getComputedStyle(screen.getByTestId("mock-vnc-desktop")).width).toBe("100%");
+        expect(getComputedStyle(screen.getByTestId("mock-vnc-desktop")).boxSizing).toBe("border-box");
+        expect(getComputedStyle(screen.getByRole("heading", { name: "Login Form" })).fontWeight).toBe(
+            "500"
+        );
         expect(screen.getByRole("heading", { name: "Login Form" })).toBeInTheDocument();
         expect(onUpdateState).toHaveBeenCalledWith("connected");
         expect(rfbCtor).not.toHaveBeenCalled();

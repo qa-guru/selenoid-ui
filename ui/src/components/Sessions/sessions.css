@@ -1,0 +1,86 @@
+/* Live sessions list under the Viewport shell.
+   Tokens: /css/tokens.css in index.html. Do not redeclare :root here.
+   Identity row rules live in SessionIdentity/session-identity.css. */
+
+.sessions-page {
+  box-sizing: border-box;
+  width: 100%;
+  overflow-y: auto;
+  padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
+}
+
+.sessions-page .sessions-panel {
+  width: 100%;
+}
+
+.sessions-page .sessions-panel__body {
+  padding: 0;
+  min-height: 60px;
+}
+
+.sessions-page .no-any {
+  color: var(--color-text, #fff);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3, 10px);
+  font-size: 1em;
+  min-height: 60px;
+  padding: 10px var(--space-5, 16px);
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.sessions-page .no-any .icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.sessions-page .no-any .icon svg {
+  width: 1.1em;
+  height: 1.1em;
+  display: block;
+}
+
+.sessions-page .no-any .nosession-any-text {
+  margin: 0;
+}
+
+/* don't show until all sessions are gone */
+.sessions-page .no-any_state-enter-active {
+  display: none;
+}
+
+.sessions-page .sessions__list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0 var(--space-5, 16px);
+  box-sizing: border-box;
+}
+
+.sessions-page .session {
+  transition: opacity 0.5s;
+}
+
+.sessions-page .session_state-enter {
+  opacity: 0.01;
+}
+
+.sessions-page .session_state-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.sessions-page .session_state-exit {
+  opacity: 1;
+}
+
+.sessions-page .session_state-exit-active {
+  opacity: 0.01;
+  transition: opacity 500ms ease-out;
+}

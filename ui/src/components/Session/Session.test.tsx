@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -67,6 +70,30 @@ describe("Session detail page", () => {
         vi.unstubAllGlobals();
         window.history.replaceState(null, "", "/");
         resetOptimisticLiveSessions();
+    });
+
+    it("uses a class shell instead of styled-components", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const tsx = readFileSync(join(dir, "index.tsx"), "utf8");
+        const video = readFileSync(join(dir, "SessionVideo.tsx"), "utf8");
+        const logFile = readFileSync(join(dir, "SessionLogFile.tsx"), "utf8");
+        const css = readFileSync(join(dir, "session.css"), "utf8");
+
+        expect(tsx).not.toMatch(/styled-components|StyledSession/);
+        expect(video).not.toMatch(/styled-components|StyledSession/);
+        expect(logFile).not.toMatch(/styled-components|StyledLog/);
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toMatch(/\.session-page\s*\{[^}]*flex:\s*1/s);
+
+        renderSession({
+            session: "live-shell-1",
+            browser: {
+                quota: "alice",
+                caps: { browserName: "chrome", version: "120", enableVNC: true },
+            },
+        });
+        expect(screen.getByTestId("session-page")).toHaveClass("session-page");
     });
 
     it("shows live VNC + log when browser is present", () => {
@@ -152,6 +179,7 @@ describe("Session detail page", () => {
         await waitFor(() => {
             expect(screen.getByTestId("session-log-file-body")).toHaveTextContent("line one");
         });
+        expect(screen.getByTestId("session-log-file")).toHaveClass("log-host", "session-peer");
         const logFetch = (fetch as any).mock.calls.find((call: any) => String(call[0]).includes("/logs/fin-1.log"));
         expect(logFetch?.[1]?.credentials).toBe("omit");
         expect(logFetch?.[1]?.headers?.Authorization).toMatch(/^Basic /);

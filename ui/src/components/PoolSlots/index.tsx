@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Panel } from "@zero-design-system/react";
-import { StyledBrowsers } from "../Browsers/style.css";
 import type { PoolSlot } from "../../types/hub";
 
 function slotLabel(slot: PoolSlot) {
@@ -30,7 +29,7 @@ const PoolSlots = ({
     const rows = Array.isArray(slots) ? slots : [];
 
     return (
-        <StyledBrowsers>
+        <div className="browsers">
             <Panel title={title} testId={testId} titleTestId={titleTestId} className="browsers-panel" bodyClassName="browsers-panel__body">
                 <div className="browsers-table-wrap">
                     <table className="browsers-table">
@@ -66,7 +65,7 @@ const PoolSlots = ({
                     </table>
                 </div>
             </Panel>
-        </StyledBrowsers>
+        </div>
     );
 };
 

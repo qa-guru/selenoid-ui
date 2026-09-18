@@ -15,9 +15,14 @@ type PlaqueFieldShared = {
     labelVariant?: PlaqueFieldLabelVariant;
     onChange?: ChangeEventHandler<PlaqueFieldControlElement>;
 };
-export type PlaqueFieldProps = PlaqueFieldShared & Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'onChange'> & Pick<TextareaHTMLAttributes<HTMLTextAreaElement>, 'rows'> & {
+export type PlaqueFieldProps = PlaqueFieldShared & Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'onChange' | 'type'> & Pick<TextareaHTMLAttributes<HTMLTextAreaElement>, 'rows'> & {
     /** `textarea` control — note body / comments. Default is single-line `input`. */
     multiline?: boolean;
+    /**
+     * Text-like controls only. Native `file` chrome is not a plaque slot —
+     * compose `PlaqueFieldValue` (catalog `plaque-field-value`).
+     */
+    type?: Exclude<InputHTMLAttributes<HTMLInputElement>['type'], 'file'>;
 };
 /**
  * Divided plaque with a text `input` or `textarea` control. Canon:

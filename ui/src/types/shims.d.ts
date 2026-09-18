@@ -55,11 +55,6 @@ declare module "*.css" {
     export default css;
 }
 
-declare module "@zero-design-system/react/styles.css" {
-    const css: string;
-    export default css;
-}
-
 declare module "*?v=*" {
     const mod: unknown;
     export default mod;

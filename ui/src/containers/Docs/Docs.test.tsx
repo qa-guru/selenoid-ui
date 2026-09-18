@@ -1,3 +1,6 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -10,6 +13,7 @@ import { BROWSERS_FILE, listCatalogImages } from "./catalogImages";
 import CatalogPage from "./CatalogPage";
 import { COMPARISON_ROWS, FEATURE_ROWS, ONE_RUN_ROWS } from "./pools";
 import { RESOURCE_SERVICES } from "./resources";
+import "./docs.css";
 
 function renderDocs(path = "/docs") {
     return render(
@@ -22,6 +26,35 @@ function renderDocs(path = "/docs") {
 }
 
 describe("Docs", () => {
+    it("uses a class shell instead of styled-components", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const css = readFileSync(join(dir, "docs.css"), "utf8");
+
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(readdirSync(dir).some((name) => name.endsWith(".css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toMatch(/\.docs\s*\{[^}]*display:\s*grid/s);
+        expect(css).toMatch(/\.docs\s+h1\s*\{/);
+        expect(css.split("\n").some((line) => /^\s*h1\s*\{/.test(line))).toBe(false);
+        for (const name of readdirSync(dir)) {
+            if (/\.(tsx?|jsx?)$/.test(name) && !/\.test\.(tsx?|jsx?)$/.test(name)) {
+                expect(readFileSync(join(dir, name), "utf8"), name).not.toMatch(/styled-components|StyledDocs/);
+            }
+        }
+
+        renderDocs();
+
+        const host = screen.getByTestId("docs-page");
+        expect(host).toHaveClass("docs");
+        expect(getComputedStyle(host).display).toBe("grid");
+        expect(getComputedStyle(host).width).toBe("100%");
+        expect(getComputedStyle(host).boxSizing).toBe("border-box");
+        expect(getComputedStyle(host).alignItems).toBe("start");
+        expect(host.querySelector(":scope > .docs__toc")).toBeTruthy();
+        expect(host.querySelector(":scope > .docs__article")).toBeTruthy();
+        expect(getComputedStyle(screen.getByRole("heading", { level: 1 })).fontWeight).toBe("400");
+    });
+
     it("renders the browser-pools comparison", () => {
         renderDocs();
 

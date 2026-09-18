@@ -1,7 +1,11 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import Browsers from "./index";
 import { usageBarColor } from "./Browser";
+import "./browsers.css";
 
 describe("usageBarColor", () => {
     it("maps load bands to DS semantic tokens", () => {
@@ -15,6 +19,40 @@ describe("usageBarColor", () => {
 });
 
 describe("Browsers", () => {
+    it("uses a class shell instead of styled-components", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const tsx = readFileSync(join(dir, "index.tsx"), "utf8");
+        const css = readFileSync(join(dir, "browsers.css"), "utf8");
+
+        expect(tsx).not.toMatch(/styled-components|StyledBrowsers/);
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(readdirSync(dir).some((name) => name.endsWith(".css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toMatch(/\.browsers\s*\{[^}]*max-width:\s*520px/s);
+        expect(css).toMatch(/\.browsers-panel\s*\{[^}]*width:\s*100%/s);
+        expect(css).toMatch(/\.browsers-table\s*\{[^}]*border-collapse:\s*collapse/s);
+        expect(css).toMatch(/\.usage-bar\s*\{[^}]*height:\s*100%/s);
+
+        render(
+            <Browsers
+                totalUsed={10}
+                browsers={{
+                    firefox: 2,
+                    chrome: 7,
+                }}
+            />
+        );
+
+        const host = screen.getByTestId("browsers-panel").closest(".browsers");
+        expect(host).toBeTruthy();
+        expect(getComputedStyle(host!).maxWidth).toBe("520px");
+        expect(getComputedStyle(host!).width).toBe("100%");
+        expect(screen.getByTestId("browsers-panel")).toHaveClass("browsers-panel");
+        expect(screen.getByRole("table")).toHaveClass("browsers-table");
+        expect(getComputedStyle(screen.getByRole("table")).borderCollapse).toBe("collapse");
+        expect(getComputedStyle(screen.getAllByTestId("browser-usage-bar")[0]).height).toBe("100%");
+    });
+
     it("renders panel table rows sorted by count with token usage-bar", () => {
         render(
             <Browsers

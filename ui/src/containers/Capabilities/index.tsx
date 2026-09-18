@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import CodeHighlight from "../../components/CodeHighlight";
 import "highlight.js/styles/sunburst.css";
 
-import { StyledCapabilities } from "./style.css";
-
 import { retainPlaywrightSocket } from "../../util/playwrightSessions";
 import {
     browserProtocol,
@@ -73,7 +71,6 @@ import {
 } from "@zero-design-system/react";
 
 const PlaqueFieldSeg = PlaqueFieldSegTyped as any;
-import "@zero-design-system/react/styles.css";
 
 /**
  * Capabilities session options → react-ui wrapper → hub caps key.
@@ -1841,7 +1838,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
     };
 
     return (
-        <StyledCapabilities>
+        <div className="capabilities" data-testid="capabilities-page">
             <div className="capabilities-body" data-testid="capabilities-body">
                     <Launch
                         browser={browser}
@@ -2196,7 +2193,7 @@ const Capabilities = ({ browsers = {}, browserProtocols = {}, sessions = {}, ori
                     </Panel>
                 </div>
             </div>
-        </StyledCapabilities>
+        </div>
     );
 };
 

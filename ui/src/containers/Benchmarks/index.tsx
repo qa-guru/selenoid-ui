@@ -25,7 +25,6 @@ import {
     poolShort,
     uniqueSorted,
 } from "./filter";
-import { StyledBenchmarks } from "./style.css";
 
 const doc = perfDoc as PerfBenchmarkDoc;
 
@@ -653,7 +652,7 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
         "https://github.com/qa-guru/selenoid-tests/blob/main/docs/har-benchmark/MATRIX.md";
 
     return (
-        <StyledBenchmarks data-testid="benchmarks-page">
+        <div className="benchmarks" data-testid="benchmarks-page">
             <h1>Benchmarks</h1>
             <p className="benchmarks__lead">
                 Published performance runs: wall time, session create latency, host CPU/RAM, and
@@ -809,7 +808,7 @@ const Benchmarks = ({ data = doc }: { data?: PerfBenchmarkDoc }) => {
                     </a>
                 </p>
             </section>
-        </StyledBenchmarks>
+        </div>
     );
 };
 

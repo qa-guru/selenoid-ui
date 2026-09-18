@@ -1,0 +1,68 @@
+/* Header quota / queued / used widgets (legacy StatsElement).
+   Tokens: /css/tokens.css in index.html. Do not redeclare :root here. */
+
+.stats-element {
+  height: 80px;
+  text-transform: uppercase;
+  color: var(--color-text, #fff);
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: var(--space-4, 15px);
+  margin-left: var(--space-4, 15px);
+}
+
+.stats-element .title {
+  padding-top: var(--space-3, 10px);
+  font-size: 0.8em;
+  flex: 1;
+}
+
+.stats-quota {
+  width: auto;
+  min-width: 115px;
+}
+
+.stats-quota .numbers {
+  flex: 2;
+  font-weight: 300;
+  font-size: 2em;
+}
+
+.stats-quota .numbers .pending {
+  font-size: 0.7em;
+  color: var(--color-text-muted, #ccc);
+}
+
+.stats-queue {
+  width: auto;
+  min-width: 45px;
+}
+
+.stats-queue .queued {
+  flex: 2;
+  font-weight: 300;
+  font-size: 2em;
+}
+
+.stats-used {
+  width: auto;
+  min-width: 45px;
+}
+
+.stats-used .used {
+  flex: 2;
+  font-weight: 300;
+  font-size: 2em;
+}
+
+.stats-used .used .small {
+  font-size: 0.5em;
+  padding-left: var(--space-1, 3px);
+}
+
+.stats-separator {
+  height: 60px;
+  border-left: 1px dashed var(--color-border-strong, #555f6a);
+}

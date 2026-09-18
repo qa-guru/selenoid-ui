@@ -1,9 +1,14 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import Sessions from "./index";
 import { sessionIdShort } from "../../util/sessionsLogic";
+import "../SessionIdentity/session-identity.css";
+import "./sessions.css";
 
 const deleteSession = vi.fn();
 
@@ -42,6 +47,22 @@ function renderSessions(props = {}, { route = "/sessions" }: { route?: string } 
 }
 
 describe("Sessions", () => {
+    it("uses a class shell instead of styled-components", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const tsx = readFileSync(join(dir, "index.tsx"), "utf8");
+        const css = readFileSync(join(dir, "sessions.css"), "utf8");
+
+        expect(tsx).not.toMatch(/styled-components|StyledSessions/);
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toMatch(/\.sessions-page\s*\{[^}]*overflow-y:\s*auto/s);
+
+        renderSessions();
+        expect(screen.getByTestId("sessions-panel").closest(".sessions-page")).toBeTruthy();
+        expect(getComputedStyle(screen.getByText("chrome").closest(".session")!).display).toBe("flex");
+        expect(getComputedStyle(screen.getByText("chrome").closest(".session")!).minHeight).toBe("44px");
+    });
+
     it("renders session list without filter", () => {
         renderSessions();
 
@@ -71,6 +92,7 @@ describe("Sessions", () => {
         expect(empty!).toBeTruthy();
         expect(empty!.querySelector(".dripicons-hourglass")).toBeNull();
         expect(empty!.querySelector("svg")).toBeTruthy();
+        expect(getComputedStyle(empty!).display).toBe("flex");
     });
 
     it("renders Badge caps and icon-btn delete without dripicons", () => {

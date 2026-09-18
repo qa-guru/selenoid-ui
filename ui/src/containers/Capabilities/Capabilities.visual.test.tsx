@@ -1,8 +1,12 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Capabilities from "./index";
+import "./capabilities.css";
 
 const BROWSERS = {
     chrome: {
@@ -69,6 +73,39 @@ function expectColor(actual: any, expectedHex: any) {
 }
 
 describe("Capabilities visual contract (Driver + Remote hub + Browser caps panels)", () => {
+    it("uses a class shell instead of styled-components", () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const css = readFileSync(join(dir, "capabilities.css"), "utf8");
+
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(readdirSync(dir).some((name) => name.endsWith(".css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).toMatch(/\.capabilities\s*\{[^}]*width:\s*100%/s);
+        expect(css).toMatch(/\.capabilities\s+\.setup\s*\{/);
+        expect(css.split("\n").some((line) => /^\s*\.setup\s*\{/.test(line))).toBe(false);
+        expect(css).toMatch(/html\.theme-light\s+\.capabilities/);
+        expect(css).not.toMatch(/html\.theme-light\s+&/);
+        expect(css).toMatch(/\.capabilities \.new-session:hover/);
+        expect(css).toMatch(/\.capabilities pre\.hljs,\s*\.capabilities code\.hljs/);
+        for (const name of readdirSync(dir)) {
+            if (/\.(tsx?|jsx?)$/.test(name) && !/\.test\.(tsx?|jsx?)$/.test(name)) {
+                expect(readFileSync(join(dir, name), "utf8"), name).not.toMatch(
+                    /styled-components|StyledCapabilities/
+                );
+            }
+        }
+
+        renderCapabilities();
+
+        const host = screen.getByTestId("capabilities-page");
+        expect(host).toHaveClass("capabilities");
+        expect(getComputedStyle(host).width).toBe("100%");
+        expect(getComputedStyle(host).display).toBe("block");
+        expect(getComputedStyle(host).position).toBe("relative");
+        expect(host.querySelector(":scope > .capabilities-body")).toBeTruthy();
+        expect(screen.getByTestId("capabilities-body")).toBeInTheDocument();
+    });
+
     it("renders Driver panel with Webdriver / Playwright / Android tagstrips", () => {
         renderCapabilities();
 
@@ -232,7 +269,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         const path = await import("node:path");
         const { fileURLToPath } = await import("node:url");
         const dir = path.dirname(fileURLToPath(import.meta.url));
-        const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
+        const css = await fs.readFile(path.join(dir, "capabilities.css"), "utf8");
 
         expect(css!).toMatch(
             /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)\s+minmax\(0,\s*2fr\)/
@@ -249,9 +286,9 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         const path = await import("node:path");
         const { fileURLToPath } = await import("node:url");
         const dir = path.dirname(fileURLToPath(import.meta.url));
-        const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
+        const css = await fs.readFile(path.join(dir, "capabilities.css"), "utf8");
 
-        expect(css!).toMatch(/\.setup,\s*\.setup-side\s*\{[\s\S]*?overflow-y:\s*auto/);
+        expect(css!).toMatch(/\.capabilities \.setup,\s*\.capabilities \.setup-side\s*\{[\s\S]*?overflow-y:\s*auto/);
         expect(css!).toMatch(/flex:\s*0 0 auto/);
         expect(css!).toMatch(/min-height:\s*auto/);
         expect(css!).toMatch(/\.panel__body\s*\{[\s\S]*?overflow:\s*visible/);
@@ -265,7 +302,7 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
         const path = await import("node:path");
         const { fileURLToPath } = await import("node:url");
         const dir = path.dirname(fileURLToPath(import.meta.url));
-        const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
+        const css = await fs.readFile(path.join(dir, "capabilities.css"), "utf8");
 
         expect(css!).not.toMatch(/overflow-wrap:\s*anywhere/);
         expect(css!).toMatch(/overflow-wrap:\s*break-word/);
@@ -281,14 +318,14 @@ describe("Capabilities visual contract (Driver + Remote hub + Browser caps panel
             path.join(dir, "../../../public/css/panel.css"),
             "utf8"
         );
-        const css = await fs.readFile(path.join(dir, "style.css.ts"), "utf8");
+        const css = await fs.readFile(path.join(dir, "capabilities.css"), "utf8");
 
         expect(panelCss!).toMatch(
             /html\.theme-light\s+\.panel--terminal[\s\S]*?--panel-bg:\s*#ffffff/
         );
-        expect(css!).toMatch(/html\.theme-light\s+&/);
+        expect(css!).toMatch(/html\.theme-light\s+\.capabilities/);
         expect(css!).toMatch(
-            /html\.theme-light\s+&[\s\S]*?\.new-session\s*\{[\s\S]*?background-color:\s*#ffffff/
+            /html\.theme-light\s+\.capabilities[\s\S]*?\.new-session\s*\{[\s\S]*?background-color:\s*#ffffff/
         );
     });
 

@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Panel } from "@zero-design-system/react";
-import { StyledBrowsers } from "./style.css";
 import Browser from "./Browser";
 
 function descendingCount(browsers: any) {
@@ -19,7 +18,7 @@ const Browsers = ({ totalUsed, browsers }: any) => {
     }
 
     return (
-        <StyledBrowsers>
+        <div className="browsers">
             <Panel
                 title="Browser usage"
                 testId="browsers-panel"
@@ -44,7 +43,7 @@ const Browsers = ({ totalUsed, browsers }: any) => {
                     </table>
                 </div>
             </Panel>
-        </StyledBrowsers>
+        </div>
     );
 };
 

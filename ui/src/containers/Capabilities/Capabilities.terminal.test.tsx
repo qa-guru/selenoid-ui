@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import Capabilities from "./index";
+import "./capabilities.css";
 
 const BROWSERS = {
     chrome: {

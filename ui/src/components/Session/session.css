@@ -1,0 +1,387 @@
+/* Session detail page under the Viewport shell.
+   Tokens: /css/tokens.css in index.html. Do not redeclare :root here.
+   Identity row rules live in SessionIdentity/session-identity.css. */
+
+.session-page {
+  box-sizing: border-box;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  min-height: calc(100vh - var(--header-occupied-height, var(--header-height, 40px)));
+  height: auto;
+  max-height: none;
+  /* Page shell gutter — same as Sessions list (.sessions-page). */
+  padding: var(--wt-post-gap, 14px) var(--wt-post-gap, 14px) 0;
+}
+
+/* Mosaic gutter between VNC and Log — same --wt-post-gap as page shell / HAR.
+   Screen height still follows VncWindow aspect-ratio (no 520px letterbox). */
+.session-page .interactive {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto;
+  justify-content: stretch;
+  align-items: stretch;
+  box-sizing: border-box;
+  width: 100%;
+  flex: 0 1 auto;
+  min-height: 0;
+  padding: 0 0 var(--wt-post-gap, 14px);
+  gap: var(--wt-post-gap, 14px);
+}
+
+@media (max-width: 999px) {
+  .session-page {
+    height: auto;
+    max-height: none;
+  }
+
+  .session-page .interactive {
+    grid-template-columns: minmax(0, 1fr);
+    flex: 0 0 auto;
+  }
+}
+
+.session-page .session-interactive-card {
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Hug VNC/video chrome. Do not override .vnc-window__screen aspect-ratio.
+   Do not contain:layout on this slot — it becomes the abspos containing
+   block and traps .vnc-window-frame--fullscreen (inset:0 fills Viewport). */
+.session-page .session-media-slot {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.session-page .session-media-slot > * {
+  flex: 0 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+/* noVNC overflow:auto shrinks the box and scaleViewport reflows.
+   Isolate that on the screen, not the slot (fullscreen must escape). */
+.session-page .session-media-slot .vnc-window__screen {
+  contain: layout;
+}
+
+.session-page .session-media-slot .vnc-window__screen,
+.session-page .session-media-slot .vnc-window__screen-mount,
+.session-page .session-media-slot .vnc-screen,
+.session-page .session-media-slot .vnc-screen > div {
+  overflow: hidden !important;
+}
+
+/* Keep lock/copy/paste/fs in the bar while connecting so chrome width
+   does not collapse when the session becomes connected (or the reverse
+   on Stop → video). Vendor vnc-window.css still uses display:none. */
+.session-page .session-media-slot .vnc-window--connecting .vnc-window__session-control,
+.session-page .session-media-slot .vnc-window--disconnecting .vnc-window__session-control,
+.session-page .session-media-slot .vnc-window--disconnected .vnc-window__session-control {
+  display: inline-flex;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Same row height as VNC; body is the column scrollport. height:0 so
+   log content does not inflate the grid row (VNC stays put). */
+.session-page .session-log-slot {
+  align-self: stretch;
+  height: 0;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.session-page .session-log-slot > * {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Log-only (no VNC): same default screen as VncWindow (16/9), not hug-to-one-line. */
+.session-page .session-log-slot--solo {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+  align-self: start;
+}
+
+.session-page .session-log-slot--solo > * {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 999px) {
+  .session-page .session-log-slot:not(.session-log-slot--solo) {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .session-page .session-log-slot:not(.session-log-slot--solo) > * {
+    flex: 1 0 auto;
+    min-height: 0;
+    height: auto;
+  }
+}
+
+.session-page .session-media-slot > .session-video-card,
+.session-page .session-media-slot > [data-testid="session-video-panel-wrap"] {
+  flex: 0 1 auto;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+}
+
+.session-page .session-media-slot > .session-video-card,
+.session-page .session-media-slot > [data-testid="session-video-panel-wrap"] .session-video-card {
+  flex: 0 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+.session-page .session-video-waiting {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3, 10px);
+  flex: 0 1 auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  color: var(--color-text-muted, #aaa);
+  font-size: 0.95em;
+}
+
+.session-page .session-video-waiting__icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.session-page .session-video-waiting__icon svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* Full-width HAR under VNC + Log. Hug rows; grow down when a row expands.
+   Page scrolls — VNC row stays above, not resized. */
+.session-page .session-har-slot {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: auto;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 var(--wt-post-gap, 14px);
+}
+
+.session-page .session-har-slot .har-viewer,
+.session-page .session-har-slot .har-card {
+  flex: 1 0 auto;
+  min-height: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.session-page .session-har-slot .har-viewer.panel-host--fullscreen {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.session-page .session-har-slot .har-card.panel--terminal > .har-card__body {
+  flex: 1 0 auto;
+  min-height: 160px;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+@media (max-width: 999px) {
+  .session-page .session-har-slot {
+    flex: 0 0 auto;
+    overflow: visible;
+    height: auto;
+  }
+
+  .session-page .session-har-slot .har-viewer,
+  .session-page .session-har-slot .har-card {
+    height: auto;
+  }
+
+  .session-page .session-har-slot .har-card.panel--terminal > .har-card__body {
+    overflow: visible;
+  }
+}
+
+.session-page .session-info-panel {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 var(--wt-post-gap, 14px);
+  /* Content height only — Panel default flex:1 ate the viewport and
+     clipped VNC + Log. Same override as Capabilities .setup .panel. */
+  flex: 0 0 auto;
+}
+
+.session-page .session-info-panel.panel--terminal > .session-info-panel__body {
+  padding: var(--space-3, 10px) var(--space-4, 15px);
+}
+
+.session-page .session-info {
+  color: var(--color-text, #fff);
+}
+
+.session-page .session-info__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3, 10px) var(--space-4, 15px);
+  min-width: 0;
+  font-size: 0.82em;
+}
+
+.session-page .session-info .session__fields {
+  flex: 1 1 160px;
+}
+
+.session-page .session-info__additional {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.session-page .session-info__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  flex: 1 0 100%;
+}
+
+.session-page .session-info__actions .btn,
+.session-page .session-info__actions .badge {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  isolation: isolate;
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: var(--plaque-control-height, 32px);
+  padding: var(--space-1, 4px) var(--space-3, 10px);
+  font-size: var(--font-size-sm, 12px);
+  line-height: 1.2;
+}
+
+.session-page .session-info__actions .btn:focus-visible {
+  outline-offset: -2px;
+}
+
+.session-page .session-info__actions .btn--danger:hover:not(:disabled),
+.session-page .session-info__actions .btn--danger:active:not(:disabled) {
+  filter: none;
+}
+
+.session-page .session-info__actions .badge {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.session-page .session-missing {
+  color: var(--color-text-muted, #aaa);
+  padding: var(--space-8, 30px) var(--space-4, 15px);
+  text-align: center;
+}
+
+/* Same empty-state shell as Sessions / Archive (.no-any inside Panel). */
+.session-page .session-missing-panel {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 var(--wt-post-gap, 14px);
+  flex: 0 0 auto;
+}
+
+.session-page .session-missing-panel__body {
+  padding: 0;
+  min-height: 60px;
+}
+
+.session-page .no-any {
+  color: var(--color-text, #fff);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3, 10px);
+  font-size: 1.2em;
+  min-height: 60px;
+  padding: 10px var(--space-5, 16px);
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.session-page .no-any .icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.session-page .no-any .icon svg {
+  width: 1.1em;
+  height: 1.1em;
+  display: block;
+}
+
+.session-page .no-any .nosession-any-text {
+  margin: 0;
+}
+
+.session-video-panel-wrap {
+  width: 100%;
+}
+
+.session-video-panel-wrap .session-video-card {
+  width: 100%;
+}
+
+.session-video-panel-wrap .session-video-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex: 0 1 auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  background-color: var(--color-surface-deep, #131614);
+}
+
+.session-video-panel-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}

@@ -3,7 +3,6 @@ import { IconDownload, Panel } from "@zero-design-system/react";
 
 import { downloadWithHubAuth, hubFetch } from "../../config/hubAuth";
 import { resolveHubAuthToken } from "../../config/hubSessionAuth";
-import { StyledLog } from "../Log/style.css";
 import { fullscreenAction } from "../fullscreenAction";
 
 /**
@@ -58,8 +57,8 @@ const SessionLogFile = ({ file, fullscreen, onToggleFullscreen }: any) => {
     }
 
     return (
-        <StyledLog
-            className={`session-peer${fullscreen ? " panel-host--fullscreen" : ""}`}
+        <div
+            className={`log-host session-peer${fullscreen ? " panel-host--fullscreen" : ""}`}
             data-testid="session-log-file"
         >
             <Panel
@@ -97,7 +96,7 @@ const SessionLogFile = ({ file, fullscreen, onToggleFullscreen }: any) => {
                     </div>
                 )}
             </Panel>
-        </StyledLog>
+        </div>
     );
 };
 

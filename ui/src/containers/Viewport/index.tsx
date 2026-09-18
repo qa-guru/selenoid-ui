@@ -2,8 +2,6 @@ import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 
-import { GlobalStyle, StyledViewport } from "./styles.css";
-
 import "event-source-polyfill";
 
 import { FilterInput } from "../../components/FilterInput";
@@ -57,8 +55,6 @@ const Viewport = () => {
 
     return (
         <>
-            <GlobalStyle />
-
             {searchSlot &&
                 createPortal(
                     <FilterInput
@@ -82,7 +78,7 @@ const Viewport = () => {
                     statsSlot
                 )}
 
-            <StyledViewport>
+            <div className="viewport" data-testid="viewport">
                 <Routes>
                     <Route path="/" element={<Navigate to="/statistics" replace />} />
 
@@ -133,7 +129,7 @@ const Viewport = () => {
 
                     <Route path="/sessions/:session" element={<SessionRoute origin={origin} sessions={sessions} />} />
                 </Routes>
-            </StyledViewport>
+            </div>
         </>
     );
 };

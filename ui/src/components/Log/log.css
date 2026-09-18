@@ -1,0 +1,179 @@
+/* Session log panel host. Tokens: /css/tokens.css in index.html. Do not redeclare :root here. */
+
+.log-host {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: start;
+  width: 100%;
+}
+
+.log-host.hidden-true {
+  display: none;
+}
+
+.log-host.panel-host--fullscreen {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+.log-host.panel-host--fullscreen .log-card {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  align-self: stretch;
+}
+
+.log-host.session-peer {
+  align-items: stretch;
+  flex: 1 1 auto;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  min-height: 0;
+  height: 100%;
+}
+
+.log-host.session-peer .log-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  align-self: stretch;
+}
+
+/* Column scrollport — beats .panel--terminal > .panel__body clip. */
+.log-host.session-peer .log-card.panel--terminal > .log-card__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  overscroll-behavior-y: contain;
+}
+
+.log-host.session-peer .log-card .term {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.log-host.session-peer .log-card .log-file-pre {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+.log-host.session-peer .log-card .log-file-empty {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.log-host .log-card {
+  /* Terminal canon: content-height (no fixed VNC screen magnet / inner scroll). */
+  height: auto;
+  width: 100%;
+  flex: 0 1 auto;
+  align-self: start;
+  min-height: 0;
+}
+
+.log-host .log-card .log-card__body {
+  width: 100%;
+  height: auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  display: block;
+  overflow: visible;
+  padding: 0;
+}
+
+/* xterm mount — not a second panel; same surface as panel--terminal body. */
+.log-host .log-card .term {
+  min-height: 40px;
+  width: 100%;
+  padding: var(--space-3, 12px);
+  padding-bottom: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: transparent;
+}
+
+.log-host .log-card .term .terminal,
+.log-host .log-card .term .xterm {
+  color: var(--panel-code-color, var(--color-text, #fff));
+  font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 20px;
+  width: 100%;
+  background-color: transparent;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Panel body is the column scrollport; xterm canvas hugs lines. */
+.log-host .log-card .term .xterm-viewport {
+  background-color: transparent !important;
+  overflow: hidden !important;
+}
+
+.log-host .log-card .term .xterm-screen {
+  overflow: hidden;
+}
+
+.log-host .log-file-pre {
+  margin: 0;
+  padding: var(--space-3, 12px);
+  max-height: none;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--panel-code-color, var(--color-text, #fff));
+  font-family: "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.log-host .log-file-empty {
+  padding: 24px 16px;
+  color: var(--color-text-muted, #999);
+  font-size: 13px;
+  text-align: center;
+}
+
+.log-host .log-info {
+  display: inline-flex;
+  margin: auto;
+  justify-content: center;
+  line-height: 20px;
+  width: 200px;
+  color: var(--color-text-muted, #999);
+}
+
+.log-host .log-info__version-separator {
+  margin-right: var(--space-1, 4px);
+  margin-left: var(--space-1, 4px);
+  font-size: 0.6em;
+  color: var(--color-text, #fff);
+}
+
+.log-host .log-info__session {
+  line-height: 20px;
+  font-size: 0.8em;
+  color: var(--color-text-muted, #999);
+  text-align: center;
+}

@@ -1,9 +1,14 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import SessionArchive from "./index";
+import "../SessionIdentity/session-identity.css";
+import "./session-archive.css";
 
 function renderArchive(ui: any = <SessionArchive />, { route = "/sessions" }: { route?: string } = {}) {
     const router = createMemoryRouter(
@@ -24,6 +29,35 @@ describe("SessionArchive", () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+    });
+
+    it("uses a class shell instead of styled-components", async () => {
+        const dir = dirname(fileURLToPath(import.meta.url));
+        const tsx = readFileSync(join(dir, "index.tsx"), "utf8");
+        const css = readFileSync(join(dir, "session-archive.css"), "utf8");
+
+        expect(tsx).not.toMatch(/styled-components|StyledArchive/);
+        expect(existsSync(join(dir, "style.css.ts"))).toBe(false);
+        expect(css).not.toMatch(/(?:^|})\s*:root\b/m);
+        expect(css).not.toMatch(/sessionIdentityCss/);
+        expect(css).toMatch(/\.archive-page\s*\{[^}]*--archive-cols:/s);
+
+        (fetch as any).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                sessions: [{ id: "sess-1", name: "LoginTest", quota: "alice", video: "sess-1.mp4" }],
+                total: 1,
+                limit: 10,
+                offset: 0,
+            }),
+        });
+
+        renderArchive();
+        await waitFor(() => expect(screen.getByTestId("session-card")).toBeInTheDocument());
+        expect(screen.getByTestId("archive-panel").closest(".archive-page")).toBeTruthy();
+        expect(getComputedStyle(screen.getByTestId("archive-sort")).display).toBe("grid");
+        expect(getComputedStyle(screen.getByTestId("session-card")).display).toBe("grid");
+        expect(getComputedStyle(screen.getByTestId("session-name")).overflow).toBe("hidden");
     });
 
     it("loads first page and shows pager when total exceeds page size", async () => {

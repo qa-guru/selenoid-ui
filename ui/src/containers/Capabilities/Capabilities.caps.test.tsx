@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
+import "./capabilities.css";
 import { HUB_SESSION_UNAUTHORIZED_MESSAGE, CREATE_SESSION_NETWORK_MESSAGE, hubSessionMissingImageMessage } from "../../util/capabilitiesLogic";
 
 const BROWSERS = {

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Capabilities from "./index";
+import "./capabilities.css";
 import {
     isMockLiveSession,
     mergeMockLiveSessions,
