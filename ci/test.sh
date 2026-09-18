@@ -10,8 +10,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/sync-design-system-static.sh"
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
 yarn --cwd ui typecheck
-# v8 coverage dies with "invalid table size" (~765MB) even with 8GB heap + single
-# fork; Allure still writes from the default reporter. Go coverage stays below.
+# Parent + CI vitest forks get 8GB; v8 coverage still skipped (invalid table size).
+export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=8192"
 yarn --cwd ui test
 test -d ui/allure-results
 yarn --cwd ui playwright install --with-deps chromium

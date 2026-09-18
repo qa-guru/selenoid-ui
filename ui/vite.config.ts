@@ -4,8 +4,9 @@ import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Coverage + Allure in parallel forks OOMs GHA (invalid table size ~765MB/worker).
-const coverageRun = process.argv.includes("--coverage");
+// GHA workers default to ~765MB and die (invalid table size) with Allure/css.
+const constrainedVitest =
+    process.env.CI === "true" || process.argv.includes("--coverage");
 
 // Live / streaming endpoints must stay online-only: never precache, never answer
 // with the SPA navigateFallback. HashRouter keeps client routes under `/#/…`, so
@@ -197,7 +198,7 @@ export default defineConfig({
         environment: "jsdom",
         css: true,
         globals: true,
-        ...(coverageRun
+        ...(constrainedVitest
             ? {
                   pool: "forks" as const,
                   fileParallelism: false,
