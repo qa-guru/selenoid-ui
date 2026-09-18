@@ -90,6 +90,7 @@ jobs:
       - name: Job summary
         if: always()
         env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonar.qa.guru' }}
         run: |
           {
@@ -99,3 +100,8 @@ jobs:
             echo "- dashboard: ${SONAR_HOST_URL%/}/dashboard?id=selenoid-ui"
             echo "- commit: \`${GITHUB_SHA:0:7}\`"
           } >> "$GITHUB_STEP_SUMMARY"
+          echo "::group::quality gate"
+          curl -sf -u "${SONAR_TOKEN}:" \
+            "${SONAR_HOST_URL%/}/api/qualitygates/project_status?projectKey=selenoid-ui" \
+            | python3 -m json.tool
+          echo "::endgroup::"

@@ -49,6 +49,9 @@ describe("header Stats widgets", () => {
         expect(used).toHaveTextContent("30");
         expect(used?.querySelector(".small")).toHaveTextContent("%");
 
+        rerender(<Used used={0} pending={0} total={0} />);
+        expect(screen.getByText("USED").closest(".stats-used")).toHaveTextContent("?");
+
         rerender(<Separator />);
         const sep = container.querySelector(".stats-separator");
         expect(sep).toBeTruthy();

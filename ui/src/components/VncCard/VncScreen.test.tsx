@@ -47,6 +47,7 @@ vi.mock("@novnc/novnc/lib/rfb.js", () => ({
 }));
 
 import VncScreen from "./VncScreen";
+import { MockVncDesktop } from "./MockVncDesktop";
 import "./mock-vnc-desktop.css";
 
 describe("VncScreen mock preview", () => {
@@ -81,6 +82,11 @@ describe("VncScreen mock preview", () => {
         expect(screen.getByRole("heading", { name: "Login Form" })).toBeInTheDocument();
         expect(onUpdateState).toHaveBeenCalledWith("connected");
         expect(rfbCtor).not.toHaveBeenCalled();
+    });
+
+    it("labels the mock desktop without a browserName cap", () => {
+        render(<MockVncDesktop caps={{}} />);
+        expect(screen.getByLabelText("Mock VNC desktop")).toBeInTheDocument();
     });
 
     it("stays connecting without RFB for the starting freeze mock", () => {
