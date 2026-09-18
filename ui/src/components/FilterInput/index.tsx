@@ -16,6 +16,15 @@ export const FilterInput = forwardRef<HTMLInputElement, any>(function FilterInpu
                     ref.current.focus();
                 }
             }}
+            onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") {
+                    return;
+                }
+                event.preventDefault();
+                if (ref && typeof ref !== "function" && ref.current) {
+                    ref.current.focus();
+                }
+            }}
         >
             <Input
                 ref={ref}

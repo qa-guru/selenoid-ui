@@ -61,9 +61,11 @@ export default class VncCard extends Component<any, any> {
     };
 
     handleLock = () => {
-        const unlocked = !this.state.unlocked;
-        this.setState({ unlocked });
-        this.screen && this.screen.lock(unlocked);
+        this.setState((prev) => {
+            const unlocked = !prev.unlocked;
+            this.screen && this.screen.lock(unlocked);
+            return { unlocked };
+        });
     };
 
     render() {
