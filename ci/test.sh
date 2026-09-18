@@ -9,12 +9,7 @@ test -f ui/package.json
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/sync-design-system-static.sh"
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
-yarn --cwd ui typecheck
-# Parent + worker heap (tinypool execArgv otherwise drops NODE_OPTIONS).
-export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=8192"
-yarn --cwd ui test:coverage
-test -d ui/allure-results
-test -f ui/coverage/lcov.info
+"$ROOT/ci/ui-vitest.sh"
 yarn --cwd ui playwright install --with-deps chromium
 yarn --cwd ui test:visual
 yarn --cwd ui build

@@ -6,6 +6,9 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // tinypool passes execArgv and then Node ignores NODE_OPTIONS on workers.
 const vitestHeapArgv = ["--max-old-space-size=8192"];
+// v8 coverage + Allure in one process → invalid table size OOM. Coverage pass
+// sets ALLURE_SKIP=1; the RTL pass still writes ui/allure-results.
+const skipAllure = process.env.ALLURE_SKIP === "1";
 
 // Live / streaming endpoints must stay online-only: never precache, never answer
 // with the SPA navigateFallback. HashRouter keeps client routes under `/#/…`, so
@@ -207,22 +210,26 @@ export default defineConfig({
             },
         },
         include: ["src/**/*.test.{ts,tsx,js,jsx}"],
-        setupFiles: ["./src/test/setup.ts", "allure-vitest/setup"],
+        setupFiles: skipAllure
+            ? ["./src/test/setup.ts"]
+            : ["./src/test/setup.ts", "allure-vitest/setup"],
         // Stub only under Vitest. A global resolve.alias to novncStub.ts was baked into
         // production (v2.3.0 Vite cut) and left the UI stuck on "VNC CONNECTING".
         alias: {
             "@novnc/novnc/lib/rfb.js": resolve(__dirname, "src/test/novncStub.ts"),
             "@novnc/novnc": resolve(__dirname, "src/test/novncStub.ts"),
         },
-        reporters: [
-            "default",
-            [
-                "allure-vitest/reporter",
-                {
-                    resultsDir: "allure-results",
-                },
-            ],
-        ],
+        reporters: skipAllure
+            ? ["default"]
+            : [
+                  "default",
+                  [
+                      "allure-vitest/reporter",
+                      {
+                          resultsDir: "allure-results",
+                      },
+                  ],
+              ],
         coverage: {
             provider: "v8",
             reporter: ["lcov", "text"],
