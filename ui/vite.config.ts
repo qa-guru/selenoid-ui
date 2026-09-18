@@ -6,7 +6,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // tinypool passes execArgv and then Node ignores NODE_OPTIONS on workers.
 const vitestHeapArgv = ["--max-old-space-size=8192"];
-const ciVitest = Boolean(process.env.CI) && process.env.CI !== "false";
 
 // Live / streaming endpoints must stay online-only: never precache, never answer
 // with the SPA navigateFallback. HashRouter keeps client routes under `/#/…`, so
@@ -208,26 +207,22 @@ export default defineConfig({
             },
         },
         include: ["src/**/*.test.{ts,tsx,js,jsx}"],
-        setupFiles: ciVitest
-            ? ["./src/test/setup.ts"]
-            : ["./src/test/setup.ts", "allure-vitest/setup"],
+        setupFiles: ["./src/test/setup.ts", "allure-vitest/setup"],
         // Stub only under Vitest. A global resolve.alias to novncStub.ts was baked into
         // production (v2.3.0 Vite cut) and left the UI stuck on "VNC CONNECTING".
         alias: {
             "@novnc/novnc/lib/rfb.js": resolve(__dirname, "src/test/novncStub.ts"),
             "@novnc/novnc": resolve(__dirname, "src/test/novncStub.ts"),
         },
-        reporters: ciVitest
-            ? ["default"]
-            : [
-                  "default",
-                  [
-                      "allure-vitest/reporter",
-                      {
-                          resultsDir: "allure-results",
-                      },
-                  ],
-              ],
+        reporters: [
+            "default",
+            [
+                "allure-vitest/reporter",
+                {
+                    resultsDir: "allure-results",
+                },
+            ],
+        ],
         coverage: {
             provider: "v8",
             reporter: ["lcov", "text"],

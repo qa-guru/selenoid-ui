@@ -293,6 +293,8 @@ describe("peer /css/* (no react-ui styles.css barrel)", () => {
             );
         }
         expect(readFileSync(join(UI_ROOT, "package.json"), "utf8")).not.toMatch(/"styled-components"/);
+        expect(readFileSync(join(UI_ROOT, "yarn.lock"), "utf8")).not.toMatch(/^styled-components@/m);
+        expect(existsSync(join(UI_ROOT, "package-lock.json"))).toBe(false);
     });
 
     it("sync script copies session CSS and plaque-field @import deps", () => {
