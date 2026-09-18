@@ -105,3 +105,8 @@ jobs:
             "${SONAR_HOST_URL%/}/api/qualitygates/project_status?projectKey=selenoid-ui" \
             | python3 -m json.tool
           echo "::endgroup::"
+          echo "::group::new bugs"
+          curl -sf -u "${SONAR_TOKEN}:" \
+            "${SONAR_HOST_URL%/}/api/issues/search?componentKeys=selenoid-ui&types=BUG&sinceLeakPeriod=true&resolved=false&ps=50" \
+            | python3 -m json.tool
+          echo "::endgroup::"
