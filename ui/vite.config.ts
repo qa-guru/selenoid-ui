@@ -4,6 +4,9 @@ import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Coverage + Allure in parallel forks OOMs GHA (invalid table size ~765MB/worker).
+const coverageRun = process.argv.includes("--coverage");
+
 // Live / streaming endpoints must stay online-only: never precache, never answer
 // with the SPA navigateFallback. HashRouter keeps client routes under `/#/…`, so
 // manifest start_url/scope stay `/` (document URL is `/`).
@@ -194,6 +197,19 @@ export default defineConfig({
         environment: "jsdom",
         css: true,
         globals: true,
+        ...(coverageRun
+            ? {
+                  pool: "forks" as const,
+                  fileParallelism: false,
+                  maxWorkers: 1,
+                  poolOptions: {
+                      forks: {
+                          singleFork: true,
+                          execArgv: ["--max-old-space-size=8192"],
+                      },
+                  },
+              }
+            : {}),
         include: ["src/**/*.test.{ts,tsx,js,jsx}"],
         setupFiles: ["./src/test/setup.ts", "allure-vitest/setup"],
         // Stub only under Vitest. A global resolve.alias to novncStub.ts was baked into

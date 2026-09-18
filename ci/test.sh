@@ -10,7 +10,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 "$ROOT/scripts/sync-design-system-static.sh"
 yarn --cwd ui install --frozen-lockfile 2>/dev/null || yarn --cwd ui install
 yarn --cwd ui typecheck
-# Coverage + Allure reporters OOM on default 2GB heap (invalid table size).
+# Vitest worker threads ignore parent NODE_OPTIONS; coverage config uses one
+# fork + execArgv heap. Keep this for the yarn/node parent process too.
 export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=8192"
 yarn --cwd ui test:coverage
 test -d ui/allure-results
