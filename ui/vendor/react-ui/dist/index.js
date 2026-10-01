@@ -898,15 +898,30 @@ function Callout({
 
 // src/BrandLogo.tsx
 import { Fragment, jsx as jsx24, jsxs as jsxs13 } from "react/jsx-runtime";
-var DEFAULT_MARK_SRC = "../assets/stack-icons/norm/selenoid3.svg";
-function BrandLogoMark({ src }) {
-  return /* @__PURE__ */ jsx24(
-    "img",
+function BrandLogoMark() {
+  return /* @__PURE__ */ jsxs13(
+    "svg",
     {
       className: "brand-logo__mark",
-      src,
-      alt: "",
-      "aria-hidden": "true"
+      viewBox: "0 0 24 24",
+      xmlns: "http://www.w3.org/2000/svg",
+      fill: "none",
+      "aria-hidden": "true",
+      children: [
+        /* @__PURE__ */ jsx24(
+          "rect",
+          {
+            x: "1.6",
+            y: "1.6",
+            width: "20.8",
+            height: "20.8",
+            rx: "6.2",
+            stroke: "currentColor",
+            strokeWidth: "2.2"
+          }
+        ),
+        /* @__PURE__ */ jsx24("rect", { x: "7", y: "7", width: "10", height: "10", rx: "3", fill: "currentColor" })
+      ]
     }
   );
 }
@@ -926,7 +941,6 @@ function BrandLogo({
   size,
   word = "Selenoid",
   ver = "3",
-  markSrc = DEFAULT_MARK_SRC,
   className,
   style,
   "aria-label": ariaLabel,
@@ -945,7 +959,7 @@ function BrandLogo({
     className
   );
   const content = /* @__PURE__ */ jsxs13(Fragment, { children: [
-    /* @__PURE__ */ jsx24(BrandLogoMark, { src: markSrc }),
+    /* @__PURE__ */ jsx24(BrandLogoMark, {}),
     /* @__PURE__ */ jsxs13(
       "span",
       {

@@ -114,8 +114,6 @@
   );
   --plaque-chevron-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23f1f5f9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --icon-size-md: 18px;
-  /* Stack icon slot (css/stack-icon.css); stack-matrix / stack-hero override locally. */
-  --stack-icon-size: 32px;
   --input-min-width: 200px;
   --panel-dot-gap: 5px;
   --panel-dot-size: 8px;
