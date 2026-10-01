@@ -32,6 +32,11 @@ cp "$DS/js/pwa-register.js" "$ROOT/ui/src/pwa/pwa-register.js"
 
 cp "$DS/templates/header.html" "$UI_PUBLIC/templates/header.html"
 
+# Leading-brand mark: header.html references ../assets/stack-icons/norm/selenoid3.svg
+# (document-relative → /assets/… on the deployed origin), so the asset must ship.
+mkdir -p "$UI_PUBLIC/assets/stack-icons/norm"
+cp "$DS/assets/stack-icons/norm/selenoid3.svg" "$UI_PUBLIC/assets/stack-icons/norm/"
+
 # Wiring guard: metrics adaptive must stay hooked in the synced header.js.
 # Prevents the CSS-without-observe drift that killed wrap on narrow viewports.
 HEADER_JS="$UI_PUBLIC/js/header.js"

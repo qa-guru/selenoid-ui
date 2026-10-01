@@ -10,6 +10,8 @@ export interface BrandLogoProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElem
     word?: string;
     /** Version accent inside the wordmark. Default `3`. */
     ver?: string;
+    /** Mark asset → `img.brand-logo__mark src`. Default: DS stack-icons path. */
+    markSrc?: string;
 }
 export interface BrandAttributionProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
     /** Standalone catalog size (`12px`). Nested composition leaves CSS `0.36em`. */
@@ -19,14 +21,14 @@ export interface BrandAttributionProps extends Omit<HTMLAttributes<HTMLSpanEleme
  * Selenoid lockup (`.brand-logo` / `.brand-logo-link`). Thin wrapper —
  * markup SSOT: `design-system/templates/brand-logo.html` /
  * `css/brand-logo.css`. Catalog: `preview/chrome.html#section-brand-logo`.
- * Inline nested-square `svg.brand-logo__mark` (not `header__brand-logo`,
- * not `img`, not a vendor asset). Size `--brand-logo-size` (default `20px`).
+ * `img.brand-logo__mark` → stack-icon asset `norm/selenoid3.svg`
+ * (`markSrc` overrides). Size `--brand-logo-size` (default `20px`).
  * Default `data-testid` `brand-logo` (template + catalog plain); endorsed
  * composition has none. `href` → `<a>`, otherwise `<span>`. Not `QaGuruLogo`,
  * `AllureLogo`, `AppHeader`, `Badge`, `Status`, `StatusTile`, `Indicator`,
  * `Callout`, `Panel`.
  */
-export declare function BrandLogo({ href, endorsed, size, word, ver, className, style, 'aria-label': ariaLabel, ...rest }: BrandLogoProps): import("react").JSX.Element;
+export declare function BrandLogo({ href, endorsed, size, word, ver, markSrc, className, style, 'aria-label': ariaLabel, ...rest }: BrandLogoProps): import("react").JSX.Element;
 /**
  * Reusable `by qa.guru` byline (`span.brand-attribution`). Catalog standalone
  * uses `size={12}` (`font-size: 12px`). Nested under endorsed `BrandLogo`
