@@ -8,15 +8,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
-                "cpu": "box1-selenoid java-jdk21-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -25,18 +25,18 @@
             "session_create_p50_ms": null,
             "session_create_p95_ms": null,
             "cpu_avg_pct": null,
-            "cpu_peak_pct": 111,
+            "cpu_peak_pct": null,
             "ram_avg_mb": null,
-            "ram_peak_mb": 315,
-            "video_kb": 0,
-            "log_kb": 0,
+            "ram_peak_mb": null,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-java-wd-cold-1-p1-headless-none",
             "status": "ok",
-            "measured_at": "2026-08-20T23:22:20Z",
+            "measured_at": "2026-11-06T22:35:17Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -44,9 +44,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 3.578,
-            "note": "job #29 SUCCESS UserIdCause; one-shot docker stats peak; no Allure; Checkout NOT_EXECUTED; Test 2.935s",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool/12/"
+            "wall_time_s": 4.19,
+            "note": "job #31 SUCCESS; Test stage 4.19s; servedPool=cold (forced by enableHar/Video/VNC caps per contract)",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool/31/"
         },
         {
             "language": "java",
@@ -54,15 +54,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
-                "cpu": "box1-selenoid java-jdk21-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -71,18 +71,18 @@
             "session_create_p50_ms": null,
             "session_create_p95_ms": null,
             "cpu_avg_pct": null,
-            "cpu_peak_pct": 105,
+            "cpu_peak_pct": null,
             "ram_avg_mb": null,
-            "ram_peak_mb": 352,
-            "video_kb": 44,
-            "log_kb": 73,
-            "har_kb": 48,
-            "artifacts_total_kb": 165,
+            "ram_peak_mb": null,
+            "video_kb": null,
+            "log_kb": null,
+            "har_kb": null,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-java-wd-cold-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T23:22:40Z",
+            "measured_at": "2026-11-06T22:35:21Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -90,9 +90,9 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 6.311,
-            "note": "job #35 SUCCESS UserIdCause; heavy video 44KB + har 48KB + lite-like 73KB; one-shot docker stats peak; no generate; Test 6.377s",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/16/"
+            "wall_time_s": 5.233,
+            "note": "job #37 SUCCESS; Test stage 5.233s; cold full artifacts video+log+har-bodies",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/37/"
         },
         {
             "language": "java",
@@ -317,7 +317,7 @@
             "log_kb": 0,
             "har_kb": 49,
             "artifacts_total_kb": 49,
-            "note": "same one-shot as har-meta \u2014 Java has no bodies mode yet; labeled bodies for schema; wall_ms=3995"
+            "note": "same one-shot as har-meta — Java has no bodies mode yet; labeled bodies for schema; wall_ms=3995"
         },
         {
             "language": "java",
@@ -460,15 +460,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
-                "cpu": "box1-selenoid java-jdk21-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -477,18 +477,18 @@
             "session_create_p50_ms": null,
             "session_create_p95_ms": null,
             "cpu_avg_pct": null,
-            "cpu_peak_pct": 152,
+            "cpu_peak_pct": null,
             "ram_avg_mb": null,
-            "ram_peak_mb": 315,
-            "video_kb": 0,
-            "log_kb": 0,
+            "ram_peak_mb": null,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-java-wd-warm-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T23:21:40Z",
+            "measured_at": "2026-11-06T20:18:41Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -496,9 +496,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 2.934,
-            "note": "job #40 SUCCESS UserIdCause; one-shot docker stats peak on box1 (agent+browsers); no Allure; Checkout NOT_EXECUTED; Test 3.559s",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/21/"
+            "wall_time_s": 3.585,
+            "note": "job #74 SUCCESS; Test stage 3.585s; first real warm run after version-pin fix (servedPool=warm slot=pool-chrome-1)",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/74/"
         },
         {
             "language": "java",
@@ -506,15 +506,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.13",
-                "ui": "3.0.46",
-                "cm": "3.0.3",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
-                "cpu": "box1-selenoid java-jdk21-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -523,18 +523,18 @@
             "session_create_p50_ms": null,
             "session_create_p95_ms": null,
             "cpu_avg_pct": null,
-            "cpu_peak_pct": 143,
+            "cpu_peak_pct": null,
             "ram_avg_mb": null,
-            "ram_peak_mb": 315,
-            "video_kb": 0,
-            "log_kb": 73,
+            "ram_peak_mb": null,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 73,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-java-wd-warm-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T23:22:00Z",
+            "measured_at": "2026-11-06T22:41:02Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -542,9 +542,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 4.578,
-            "note": "job #33 SUCCESS UserIdCause; lite screenshot/source/console 73KB; no video/HAR; one-shot docker stats peak; Test 4.323s; not generate",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/12/"
+            "wall_time_s": 7.246,
+            "note": "job #36 SUCCESS; Test stage 7.246s; warm slot reuse, Allure lite attachments",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/36/"
         },
         {
             "language": "java",
@@ -552,15 +552,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0-min",
+            "browser": "chrome/157.0-min",
             "versions": {
-                "hub": "3.0.13",
-                "ui": "3.0.48",
-                "cm": "3.0.3",
-                "browser_image": "149-min"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157-min"
             },
             "host": {
-                "cpu": "box1-selenoid java-jdk21-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -572,15 +572,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T22:11:56Z",
+            "measured_at": "2026-11-06T21:48:16Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -588,9 +588,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 0.942,
-            "note": "job #115 SUCCESS; Test stage 942 ms; display 0.942; /run 641 ms; Jenkins wall 1405 ms; one sh lease+/run+trap release; POST /pool/lease; daemon reuse :17890; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/115/"
+            "wall_time_s": 1.168,
+            "note": "job #132 SUCCESS; Test stage 1.168s; hot-chrome-min-1 CfT 157.0.8103.38; /run 779ms",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/132/"
         },
         {
             "language": "java",
@@ -598,15 +598,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0-min",
+            "browser": "chrome/157.0-min",
             "versions": {
-                "hub": "3.0.13",
-                "ui": "3.0.48",
-                "cm": "3.0.3",
-                "browser_image": "149-min"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157-min"
             },
             "host": {
-                "cpu": "box1-selenoid java-jdk21-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -618,15 +618,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-java-wd-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T22:22:22Z",
+            "measured_at": "2026-11-06T22:41:07Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -634,9 +634,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 1.357,
-            "note": "job #2 SUCCESS; live pin is java-hot-pool-lite (not light-attachments); Allure lite screenshot/page source/console; 3 attachments; no allure generate on wall; /run 801 ms; Test 1357 ms; Jenkins wall 2036 ms; daemon :17891; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-lite/2/"
+            "wall_time_s": 1.308,
+            "note": "job #6 SUCCESS; Test stage 1.308s; lite attachments>=2 verified; daemon :17891",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-lite/6/"
         },
         {
             "language": "python",
@@ -644,12 +644,12 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
                 "cpu": "python-python314-jenkins-agent",
@@ -664,15 +664,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-python-wd-cold-1-p1-headless-none",
             "status": "ok",
-            "measured_at": "2026-08-14T20:52:00Z",
+            "measured_at": "2026-11-06T22:44:57Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -680,9 +680,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 5.408,
-            "note": "headless; enableHAR forces cold docker; no Allure; job #2 SUCCESS",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool/"
+            "wall_time_s": 3.018,
+            "note": "job #133 SUCCESS; Test stage 3.018s; venv warm; servedPool=cold",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool/133/"
         },
         {
             "language": "python",
@@ -690,12 +690,12 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
                 "cpu": "python-python314-jenkins-agent",
@@ -718,7 +718,7 @@
             "failed": 0,
             "id": "jenkins-python-wd-cold-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-14T20:55:00Z",
+            "measured_at": "2026-11-06T22:35:32Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -726,9 +726,9 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 25.884,
-            "note": "video+VNC+HAR+screenshot+page source+console \u2192 cold docker; job #3 SUCCESS; Allure 3",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool-full-attachments/"
+            "wall_time_s": 4.164,
+            "note": "job #162: test PASSED (1 passed) in 4.164s; build FAILED only on post Allure-generate (kit plugin resolution); no artifacts lost",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool-full-attachments/162/"
         },
         {
             "language": "python",
@@ -736,58 +736,12 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0",
+            "browser": "chrome/157.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
-            },
-            "host": {
-                "cpu": "python-python314-jenkins-agent",
-                "cores": 8,
-                "ram_gb": 32,
-                "os": "Debian 12",
-                "note": "Jenkins language agent pool; public selenoid.qa.guru hub; wall_time_s = job duration"
-            },
-            "session_create_p50_ms": null,
-            "session_create_p95_ms": null,
-            "cpu_avg_pct": null,
-            "cpu_peak_pct": null,
-            "ram_avg_mb": null,
-            "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
-            "har_kb": 0,
-            "artifacts_total_kb": 0,
-            "passed": 1,
-            "failed": 0,
-            "id": "jenkins-python-wd-warm-1-p1-none",
-            "status": "ok",
-            "measured_at": "2026-08-14T20:52:00Z",
-            "image_flavor": "warm",
-            "pool": "warm-pool",
-            "artifacts": {
-                "video": false,
-                "log": false,
-                "har": "off"
-            },
-            "wall_time_s": 3.541,
-            "note": "container-reuse job #2 SUCCESS; no Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-warm-pool/"
-        },
-        {
-            "language": "python",
-            "protocol": "webdriver",
-            "suite_size": "1",
-            "tests_count": 1,
-            "parallel": 1,
-            "browser": "chrome/149.0",
-            "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "149"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
             },
             "host": {
                 "cpu": "python-python314-jenkins-agent",
@@ -804,13 +758,59 @@
             "ram_peak_mb": null,
             "video_kb": null,
             "log_kb": null,
-            "har_kb": null,
+            "har_kb": 0,
+            "artifacts_total_kb": null,
+            "passed": 1,
+            "failed": 0,
+            "id": "jenkins-python-wd-warm-1-p1-none",
+            "status": "ok",
+            "measured_at": "2026-11-06T22:04:57Z",
+            "image_flavor": "warm",
+            "pool": "warm-pool",
+            "artifacts": {
+                "video": false,
+                "log": false,
+                "har": "off"
+            },
+            "wall_time_s": 2.944,
+            "note": "job #32 SUCCESS; Test stage 2.944s; warm slot reuse",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-warm-pool/32/"
+        },
+        {
+            "language": "python",
+            "protocol": "webdriver",
+            "suite_size": "1",
+            "tests_count": 1,
+            "parallel": 1,
+            "browser": "chrome/157.0",
+            "versions": {
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157"
+            },
+            "host": {
+                "cpu": "python-python314-jenkins-agent",
+                "cores": 8,
+                "ram_gb": 32,
+                "os": "Debian 12",
+                "note": "Jenkins language agent pool; public selenoid.qa.guru hub; wall_time_s = job duration"
+            },
+            "session_create_p50_ms": null,
+            "session_create_p95_ms": null,
+            "cpu_avg_pct": null,
+            "cpu_peak_pct": null,
+            "ram_avg_mb": null,
+            "ram_peak_mb": null,
+            "video_kb": null,
+            "log_kb": null,
+            "har_kb": 0,
             "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-python-wd-warm-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-15T16:08:00Z",
+            "measured_at": "2026-11-06T22:35:28Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -818,9 +818,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 30.813,
-            "note": "container-reuse + Allure screenshot/page source/console; no video/VNC/HAR; job #2 SUCCESS",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-warm-pool-full-attachments/"
+            "wall_time_s": 2.727,
+            "note": "job #27: test PASSED in 2.727s; build FAILED only on post Allure-generate (kit plugin resolution)",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-warm-pool-full-attachments/27/"
         },
         {
             "language": "python",
@@ -828,15 +828,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0-min",
+            "browser": "chrome/157.0-min",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.48",
-                "cm": "3.0.2",
-                "browser_image": "149-min"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157-min"
             },
             "host": {
-                "cpu": "box1-selenoid python-python314-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -848,15 +848,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-python-wd-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T22:11:56Z",
+            "measured_at": "2026-11-06T21:40:56Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -864,9 +864,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 0.942,
-            "note": "job #22 SUCCESS; Test stage 942 ms; display 0.942; /run 612 ms; Jenkins wall 1404 ms; daemon reuse :17980; slot pool-hot-chrome-min-2; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/22/"
+            "wall_time_s": 0.912,
+            "note": "job #38 SUCCESS; Test stage 0.912s; /run succeeded=1 978ms; daemon :17980",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/38/"
         },
         {
             "language": "python",
@@ -874,15 +874,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "chrome/149.0-min",
+            "browser": "chrome/157.0-min",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.48",
-                "cm": "3.0.2",
-                "browser_image": "149-min"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "157-min"
             },
             "host": {
-                "cpu": "box1-selenoid python-python314-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -894,15 +894,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-python-wd-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T22:22:22Z",
+            "measured_at": "2026-11-06T22:35:27Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -910,9 +910,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 0.971,
-            "note": "job #2 SUCCESS; live pin is python-hot-pool-lite (not light-attachments); Allure lite screenshot/page source/console; 3 attachments; no generate; /run 719 ms; Test 971 ms; Jenkins wall 1660 ms; daemon :17981; slot pool-hot-chrome-min-2",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-lite/2/"
+            "wall_time_s": 1.336,
+            "note": "job #4 SUCCESS; Test stage 1.336s; hot-min-2 lease, /run 922ms",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-lite/4/"
         },
         {
             "language": "js",
@@ -920,12 +920,12 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "playwright-chromium/1.61.1",
+            "browser": "playwright-chromium/1.65.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "1.61.1"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "1.65.0"
             },
             "host": {
                 "cpu": "js-node24-jenkins-agent",
@@ -940,15 +940,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-js-pw-cold-1-p1-headless-none",
             "status": "ok",
-            "measured_at": "2026-08-14T20:52:00Z",
+            "measured_at": "2026-11-06T22:35:35Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -956,9 +956,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 3.756,
-            "note": "Playwright WS always cold docker; no Allure; job #2 SUCCESS",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool/"
+            "wall_time_s": 3.659,
+            "note": "job #11 SUCCESS; Test stage 3.659s; playwright endpoint pinned 1.65.0",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool/11/"
         },
         {
             "language": "js",
@@ -966,12 +966,12 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "playwright-chromium/1.61.1",
+            "browser": "playwright-chromium/1.65.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "1.61.1"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "1.65.0"
             },
             "host": {
                 "cpu": "js-node24-jenkins-agent",
@@ -994,7 +994,7 @@
             "failed": 0,
             "id": "jenkins-js-pw-cold-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-14T20:55:00Z",
+            "measured_at": "2026-11-06T22:35:36Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -1002,9 +1002,9 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 4.227,
-            "note": "video+VNC+HAR+screenshot+page source+console \u2192 PW WS cold docker; job #3 SUCCESS; Allure 3",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool-full-attachments/"
+            "wall_time_s": 17.106,
+            "note": "job #8: test PASSED (1 passed) 17.106s incl kit npm install 11s; build FAILED only on post Allure-generate (kit plugin resolution)",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool-full-attachments/8/"
         },
         {
             "language": "js",
@@ -1012,15 +1012,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "playwright-chromium/1.61.1",
+            "browser": "playwright-chromium/1.65.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "1.61.1"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "1.65.0"
             },
             "host": {
-                "cpu": "box1-selenoid js-node24-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -1032,15 +1032,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-js-pw-warm-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T02:49:32Z",
+            "measured_at": "2026-11-06T22:04:57Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -1048,9 +1048,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 3.032,
-            "note": "job #2 SUCCESS; reuse (Checkout skipped); POST /pool/reserve pool-pw-chromium-min-1; npm test 1.4s; not #1 27.402s first git+npm ci; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool/2/"
+            "wall_time_s": 2.611,
+            "note": "job #7 SUCCESS; Test stage 2.611s; reserve pool-pw-chromium-min-1",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool/7/"
         },
         {
             "language": "js",
@@ -1058,15 +1058,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "playwright-chromium/1.61.1",
+            "browser": "playwright-chromium/1.65.0",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.32",
-                "cm": "3.0.2",
-                "browser_image": "1.61.1"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "1.65.0"
             },
             "host": {
-                "cpu": "box1-selenoid js-node24-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -1078,15 +1078,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-js-pw-warm-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T02:50:22Z",
+            "measured_at": "2026-11-06T22:35:39Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -1094,9 +1094,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 13.68,
-            "note": "job #2 SUCCESS; Allure lite screenshot/page source/console; 3 attachments; allure generate+archive on wall; POST /pool/reserve pool-pw-chromium-min-1; not #1 43.308s first git+npm+kit; not video/VNC/HAR",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool-full-attachments/2/"
+            "wall_time_s": 3.328,
+            "note": "job #6 SUCCESS; Test stage 3.328s",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool-full-attachments/6/"
         },
         {
             "language": "js",
@@ -1104,15 +1104,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "playwright-chromium/1.61.1-min",
+            "browser": "playwright-chromium/1.65.0-min",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.48",
-                "cm": "3.0.2",
-                "browser_image": "1.61.1-min"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "1.65.0-min"
             },
             "host": {
-                "cpu": "box1-selenoid js-node24-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -1124,15 +1124,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-js-pw-hot-1-p1-none",
             "status": "ok",
-            "measured_at": "2026-08-20T22:11:56Z",
+            "measured_at": "2026-11-06T21:26:01Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -1140,9 +1140,9 @@
                 "log": false,
                 "har": "off"
             },
-            "wall_time_s": 0.623,
-            "note": "job #12 SUCCESS; Test stage 623 ms; display 0.623; /run 291 ms; Jenkins wall 1021 ms; daemon reuse :17990; not Allure",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/12/"
+            "wall_time_s": 0.998,
+            "note": "job #27 SUCCESS; Test stage 0.998s; hot-pw-min lease",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/27/"
         },
         {
             "language": "js",
@@ -1150,15 +1150,15 @@
             "suite_size": "1",
             "tests_count": 1,
             "parallel": 1,
-            "browser": "playwright-chromium/1.61.1-min",
+            "browser": "playwright-chromium/1.65.0-min",
             "versions": {
-                "hub": "3.0.11",
-                "ui": "3.0.48",
-                "cm": "3.0.2",
-                "browser_image": "1.61.1-min"
+                "hub": "3.0.17",
+                "ui": "3.0.62",
+                "cm": "1.3.1-17-geb0a44b",
+                "browser_image": "1.65.0-min"
             },
             "host": {
-                "cpu": "box1-selenoid js-node24-jenkins-warm-agent-1",
+                "cpu": "box1-selenoid",
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
@@ -1170,15 +1170,15 @@
             "cpu_peak_pct": null,
             "ram_avg_mb": null,
             "ram_peak_mb": null,
-            "video_kb": 0,
-            "log_kb": 0,
+            "video_kb": null,
+            "log_kb": null,
             "har_kb": 0,
-            "artifacts_total_kb": 0,
+            "artifacts_total_kb": null,
             "passed": 1,
             "failed": 0,
             "id": "jenkins-js-pw-hot-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-08-20T22:22:22Z",
+            "measured_at": "2026-11-06T22:44:42Z",
             "image_flavor": "min",
             "pool": "hot-pool",
             "artifacts": {
@@ -1186,9 +1186,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 0.666,
-            "note": "job #2 SUCCESS; live pin is js-hot-pool-lite (not light-attachments); Allure lite screenshot/page source/console; 12 attachments; no generate; /run 347 ms; Test 666 ms; Jenkins wall 1358 ms; daemon :17991",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-lite/2/"
+            "wall_time_s": 0.959,
+            "note": "job #7 SUCCESS; Test stage 0.959s; /run 526ms; daemon :17991",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-lite/7/"
         },
         {
             "id": "catalog-go-pw-warm-few-p5-none",
@@ -1218,7 +1218,7 @@
                 "cores": 8,
                 "ram_gb": 32,
                 "os": "Debian 12",
-                "note": "placeholder \u2014 fill after first measured run"
+                "note": "placeholder — fill after first measured run"
             },
             "wall_time_s": null,
             "session_create_p50_ms": null,
@@ -1233,7 +1233,7 @@
             "artifacts_total_kb": 0,
             "passed": null,
             "failed": null,
-            "note": "scale\u00d7parallel cell: few \u00d75, artifacts off"
+            "note": "scale×parallel cell: few ×5, artifacts off"
         },
         {
             "id": "scale-go-pw-warm-1-p1-none",
@@ -1492,7 +1492,7 @@
             "artifacts_total_kb": 0,
             "passed": null,
             "failed": null,
-            "note": "warm-pool delta vs cold few\u00d75"
+            "note": "warm-pool delta vs cold few×5"
         },
         {
             "id": "art-go-wd-warm-1-p1-none",

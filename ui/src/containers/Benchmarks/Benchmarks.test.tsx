@@ -208,13 +208,13 @@ describe("Benchmarks", () => {
         const table = screen.getByTestId("benchmarks-jenkins");
         const warmNone = table.querySelector('[data-run-id="jenkins-java-wd-warm-1-p1-none"]');
         expect(warmNone).not.toBeNull();
-        expect(warmNone).toHaveTextContent("2.934");
+        expect(warmNone).toHaveTextContent("3.585");
         expect(warmNone).toHaveAttribute("data-status", "ok");
         expect(warmNone).toHaveAttribute("data-variant", "none");
-        const pin = within(table).getByRole("link", { name: /^warm-pool #21$/ });
+        const pin = within(table).getByRole("link", { name: /^warm-pool #74$/ });
         expect(pin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/21/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool/74/"
         );
 
         const jsWarmNone = table.querySelector('[data-run-id="jenkins-js-pw-warm-1-p1-none"]');
@@ -223,38 +223,38 @@ describe("Benchmarks", () => {
         );
         expect(jsWarmNone).toHaveAttribute("data-status", "ok");
         expect(jsWarmLite).toHaveAttribute("data-status", "ok");
-        expect(jsWarmNone).toHaveTextContent("3.032");
-        expect(jsWarmLite).toHaveTextContent("13.68");
+        expect(jsWarmNone).toHaveTextContent("2.611");
+        expect(jsWarmLite).toHaveTextContent("3.328");
         expect(jsWarmLite).toHaveAttribute("data-variant", "allure-lite");
-        const jsWarmPin = within(table).getByRole("link", { name: /js-warm-pool #2/ });
+        const jsWarmPin = within(table).getByRole("link", { name: /js-warm-pool #7/ });
         expect(jsWarmPin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool/2/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool/7/"
         );
         const jsWarmLitePin = within(table).getByRole("link", {
-            name: /js-warm-pool-full-attachments #2/,
+            name: /js-warm-pool-full-attachments #6/,
         });
         expect(jsWarmLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool-full-attachments/2/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-warm-pool-full-attachments/6/"
         );
 
         const hotNone = table.querySelector('[data-run-id="jenkins-java-wd-hot-1-p1-none"]');
         expect(hotNone).toHaveAttribute("data-status", "ok");
-        expect(hotNone).toHaveTextContent("0.9");
-        const hotPin = within(table).getByRole("link", { name: /hot-pool #115/ });
+        expect(hotNone).toHaveTextContent("1.168");
+        const hotPin = within(table).getByRole("link", { name: /hot-pool #132/ });
         expect(hotPin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/115/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool/132/"
         );
 
         const jsHotNone = table.querySelector('[data-run-id="jenkins-js-pw-hot-1-p1-none"]');
         expect(jsHotNone).toHaveAttribute("data-status", "ok");
-        expect(jsHotNone).toHaveTextContent("0.623");
-        const jsHotPin = within(table).getByRole("link", { name: /js-hot-pool #12/ });
+        expect(jsHotNone).toHaveTextContent("0.998");
+        const jsHotPin = within(table).getByRole("link", { name: /js-hot-pool #27/ });
         expect(jsHotPin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/12/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool/27/"
         );
 
         const hotLite = table.querySelector(
@@ -262,22 +262,22 @@ describe("Benchmarks", () => {
         );
         expect(hotLite).toHaveAttribute("data-status", "ok");
         expect(hotLite).toHaveAttribute("data-variant", "allure-lite");
-        expect(hotLite).toHaveTextContent("1.357");
+        expect(hotLite).toHaveTextContent("1.308");
         const hotLitePin = within(table).getByRole("link", {
-            name: /^hot-pool-lite #2$/,
+            name: /^hot-pool-lite #6$/,
         });
         expect(hotLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-lite/2/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-hot-pool-lite/6/"
         );
 
         const pyHotNone = table.querySelector('[data-run-id="jenkins-python-wd-hot-1-p1-none"]');
         expect(pyHotNone).toHaveAttribute("data-status", "ok");
-        expect(pyHotNone).toHaveTextContent("0.942");
-        const pyHotPin = within(table).getByRole("link", { name: /python-hot-pool #22/ });
+        expect(pyHotNone).toHaveTextContent("0.912");
+        const pyHotPin = within(table).getByRole("link", { name: /python-hot-pool #38/ });
         expect(pyHotPin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/22/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool/38/"
         );
 
         const pyHotLite = table.querySelector(
@@ -285,13 +285,13 @@ describe("Benchmarks", () => {
         );
         expect(pyHotLite).toHaveAttribute("data-status", "ok");
         expect(pyHotLite).toHaveAttribute("data-variant", "allure-lite");
-        expect(pyHotLite).toHaveTextContent("0.971");
+        expect(pyHotLite).toHaveTextContent("1.336");
         const pyHotLitePin = within(table).getByRole("link", {
-            name: /^python-hot-pool-lite #2$/,
+            name: /^python-hot-pool-lite #4$/,
         });
         expect(pyHotLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-lite/2/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-hot-pool-lite/4/"
         );
 
         const jsHotLite = table.querySelector(
@@ -299,13 +299,13 @@ describe("Benchmarks", () => {
         );
         expect(jsHotLite).toHaveAttribute("data-status", "ok");
         expect(jsHotLite).toHaveAttribute("data-variant", "allure-lite");
-        expect(jsHotLite).toHaveTextContent("0.666");
+        expect(jsHotLite).toHaveTextContent("0.959");
         const jsHotLitePin = within(table).getByRole("link", {
-            name: /^js-hot-pool-lite #2$/,
+            name: /^js-hot-pool-lite #7$/,
         });
         expect(jsHotLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-lite/2/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-hot-pool-lite/7/"
         );
 
         const heavy = table.querySelector(
@@ -318,21 +318,21 @@ describe("Benchmarks", () => {
         expect(lite).toHaveAttribute("data-variant", "allure-lite");
         expect(heavy).toHaveTextContent("allure-heavy");
         expect(lite).toHaveTextContent("allure-lite");
-        expect(heavy).toHaveTextContent("6.311");
-        expect(lite).toHaveTextContent("4.578");
+        expect(heavy).toHaveTextContent("5.233");
+        expect(lite).toHaveTextContent("7.246");
         const coldHeavyPin = within(table).getByRole("link", {
-            name: /^cold-pool-full-attachments #16$/,
+            name: /^cold-pool-full-attachments #37$/,
         });
         expect(coldHeavyPin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/16/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-cold-pool-full-attachments/37/"
         );
         const warmLitePin = within(table).getByRole("link", {
-            name: /^warm-pool-full-attachments #12$/,
+            name: /^warm-pool-full-attachments #36$/,
         });
         expect(warmLitePin).toHaveAttribute(
             "href",
-            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/12/"
+            "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-java-warm-pool-full-attachments/36/"
         );
         expect(table.querySelectorAll("tbody tr")).toHaveLength(18);
     });
