@@ -53,6 +53,30 @@ export type PoolSlot = {
     protocol?: string;
     pool?: string;
     reservedBy?: string | null;
+    reservedAt?: string | null;
+    leaseExpiresAt?: string | null;
+    sessionCount?: number;
+    ageSec?: number;
+    recycling?: boolean;
+    recyclePending?: boolean;
+};
+
+/** One recent session's pool routing decision (hub /status poolRouting.recent). */
+export type PoolRoute = {
+    session?: string;
+    pool?: string;
+    requested?: string;
+    slot?: string;
+    reason?: string;
+    at?: string;
+};
+
+/** Pool serve counters + recent routing decisions on hub /status. */
+export type PoolRouting = {
+    warmServed?: number;
+    coldServed?: number;
+    warmFallbacks?: number;
+    recent?: PoolRoute[];
 };
 
 export type HubState = {
@@ -66,6 +90,7 @@ export type HubState = {
     hotTotal?: number;
     warmSlots?: PoolSlot[];
     hotSlots?: PoolSlot[];
+    poolRouting?: PoolRouting;
     [key: string]: unknown;
 };
 

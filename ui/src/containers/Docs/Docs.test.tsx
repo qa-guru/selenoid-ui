@@ -155,6 +155,63 @@ describe("Docs", () => {
         );
     });
 
+    it("renders the Pool API contract page", async () => {
+        const user = userEvent.setup();
+        renderDocs();
+
+        await user.click(screen.getByTestId("docs-nav-pool-api"));
+
+        expect(screen.getByTestId("docs-nav-pool-api")).toHaveClass("is-active");
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Pool API — the exact contract");
+
+        const page = screen.getByTestId("docs-pool-api");
+        expect(page).toHaveTextContent("selenoid:options.pool");
+        expect(page).toHaveTextContent("labels.pool");
+
+        const selector = screen.getByTestId("docs-selector-table");
+        expect(selector).toHaveTextContent("Prefer warm, fall back to cold");
+        expect(selector).toHaveTextContent("Strict — warm slot or a visible error");
+        expect(selector).toHaveTextContent("Rejected: invalid argument");
+
+        expect(screen.getByTestId("docs-response-excerpt")).toHaveTextContent('"servedPool": "warm"');
+        const reasons = screen.getByTestId("docs-reason-table");
+        expect(reasons).toHaveTextContent("sidecar-caps");
+        expect(reasons).toHaveTextContent("warm-unavailable");
+        expect(reasons).toHaveTextContent("version-pin");
+
+        const reserve = screen.getByTestId("docs-endpoint-reserve");
+        expect(reserve).toHaveTextContent("POST /pool/reserve");
+        expect(reserve).toHaveTextContent('"ttlSec"');
+        expect(reserve).toHaveTextContent("leaseExpiresAt");
+        const lease = screen.getByTestId("docs-endpoint-lease");
+        expect(lease).toHaveTextContent("TOP-LEVEL = live driver session");
+        expect(lease).toHaveTextContent("hot-chrome-min-1:4444");
+        expect(lease).toHaveTextContent("driverSessionId");
+        const release = screen.getByTestId("docs-endpoint-release");
+        expect(release).toHaveTextContent("killSession");
+        expect(release).toHaveTextContent("alreadyFree");
+        expect(release).toHaveTextContent("is reserved by");
+        const renew = screen.getByTestId("docs-endpoint-renew");
+        expect(renew).toHaveTextContent("POST /pool/renew");
+        const slots = screen.getByTestId("docs-endpoint-slots");
+        expect(slots).toHaveTextContent("sessionCount");
+        expect(slots).toHaveTextContent("ageSec");
+
+        const lifecycle = screen.getByTestId("docs-lifecycle-table");
+        expect(lifecycle).toHaveTextContent("lease_ttl");
+        expect(lifecycle).toHaveTextContent("recycle_after_sessions");
+        expect(lifecycle).toHaveTextContent("reaper");
+
+        const status = screen.getByTestId("docs-status-table");
+        expect(status).toHaveTextContent("poolRouting.warmFallbacks");
+        expect(status).toHaveTextContent("poolRouting.recent[]");
+
+        const daemons = screen.getByTestId("docs-daemons-table");
+        expect(daemons).toHaveTextContent("HotJunitDaemon :17890");
+        expect(daemons).toHaveTextContent(":17990");
+        expect(daemons).toHaveTextContent(":17991");
+    });
+
     it("renders the catalog reload without bouncing hub or UI", async () => {
         const user = userEvent.setup();
         renderDocs();

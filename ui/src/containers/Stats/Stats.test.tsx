@@ -36,9 +36,10 @@ describe("Stats", () => {
         expect(getComputedStyle(host!).justifyContent).toBe("center");
         expect(getComputedStyle(host!).alignItems).toBe("flex-start");
         expect(getComputedStyle(host!).boxSizing).toBe("border-box");
-        expect(host!.querySelectorAll(":scope > .browsers")).toHaveLength(3);
+        expect(host!.querySelectorAll(":scope > .browsers")).toHaveLength(4);
         expect(screen.getByTestId("browsers-panel").closest(".browsers")).toBeTruthy();
         expect(screen.getByTestId("warm-slots-panel").closest(".browsers")).toBeTruthy();
         expect(screen.getByTestId("hot-slots-panel").closest(".browsers")).toBeTruthy();
+        expect(screen.getByTestId("pool-routing-panel").closest(".browsers")).toBeTruthy();
     });
 });

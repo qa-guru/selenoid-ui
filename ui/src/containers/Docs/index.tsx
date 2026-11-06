@@ -3,10 +3,12 @@ import { NavLink, Route, Routes } from "react-router-dom";
 
 import BrowserPools from "./BrowserPools";
 import CatalogPage, { type CatalogPageProps } from "./CatalogPage";
+import PoolApiPage from "./PoolApiPage";
 import ResourcesPage from "./ResourcesPage";
 
 const TOC = [
     { to: "/docs", label: "Browser pools", testid: "docs-nav-pools", end: true },
+    { to: "/docs/pool-api", label: "Pool API", testid: "docs-nav-pool-api", end: false },
     { to: "/docs/catalog", label: "Browsers catalog", testid: "docs-nav-catalog", end: false },
     { to: "/docs/resources", label: "Resources", testid: "docs-nav-resources", end: false },
 ] as const;
@@ -30,6 +32,7 @@ const Docs = ({ hubBrowsers, browserProtocols }: CatalogPageProps) => {
             <div className="docs__article">
                 <Routes>
                     <Route index element={<BrowserPools />} />
+                    <Route path="pool-api" element={<PoolApiPage />} />
                     <Route path="catalog" element={<CatalogPage hubBrowsers={hubBrowsers} browserProtocols={browserProtocols} />} />
                     <Route path="resources" element={<ResourcesPage />} />
                 </Routes>

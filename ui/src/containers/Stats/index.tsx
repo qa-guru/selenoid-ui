@@ -2,6 +2,7 @@ import React from "react";
 
 import Browsers from "../../components/Browsers";
 import PoolSlots from "../../components/PoolSlots";
+import PoolRoutingPanel from "../../components/PoolRouting";
 
 const Stats = ({ state, browsers }: any) => {
     return (
@@ -19,6 +20,7 @@ const Stats = ({ state, browsers }: any) => {
                 titleTestId="hot-slots-title"
                 slots={state.hotSlots}
             />
+            <PoolRoutingPanel routing={state.poolRouting} />
         </div>
     );
 };

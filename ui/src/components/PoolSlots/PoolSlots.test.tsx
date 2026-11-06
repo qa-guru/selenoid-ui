@@ -31,7 +31,49 @@ describe("PoolSlots", () => {
         expect(within(rows[0]).getByText("webdriver")).toBeInTheDocument();
         expect(within(rows[0]).getByText("Ready")).toBeInTheDocument();
         expect(within(rows[1]).getByText("chromium")).toBeInTheDocument();
-        expect(within(rows[1]).getByText("Reserved")).toBeInTheDocument();
+        expect(within(rows[1]).getByText("Reserved: jenkins")).toBeInTheDocument();
+    });
+
+    it("shows age, session count and recycling state", () => {
+        render(
+            <PoolSlots
+                title="Warm pool"
+                testId="warm-slots-panel"
+                titleTestId="warm-slots-title"
+                slots={[
+                    {
+                        id: "pool-chrome-1",
+                        browser: "chrome",
+                        protocol: "webdriver",
+                        pool: "warm",
+                        ageSec: 3700,
+                        sessionCount: 12,
+                    },
+                    {
+                        id: "pool-chrome-2",
+                        browser: "chrome",
+                        protocol: "webdriver",
+                        pool: "warm",
+                        recycling: true,
+                        ageSec: 120,
+                    },
+                    {
+                        id: "pool-pw-1",
+                        browser: "chromium",
+                        protocol: "playwright",
+                        pool: "warm",
+                        recyclePending: true,
+                    },
+                ]}
+            />
+        );
+
+        const rows = screen.getAllByTestId("pool-slot-row");
+        expect(rows).toHaveLength(3);
+        expect(within(rows[0]).getByText("1h1m")).toBeInTheDocument();
+        expect(within(rows[0]).getByText("12")).toBeInTheDocument();
+        expect(within(rows[1]).getByText("Recycling")).toBeInTheDocument();
+        expect(within(rows[2]).getByText("Ready (recycle due)")).toBeInTheDocument();
     });
 
     it("shows empty state when there are no slots", () => {
