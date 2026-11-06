@@ -2,7 +2,7 @@ module github.com/qa-guru/selenoid-ui
 
 go 1.27
 
-toolchain go1.27.0
+toolchain go1.27.3
 
 require (
 	github.com/aandryashin/matchers v0.0.0-20161126170413-435295ea180e
