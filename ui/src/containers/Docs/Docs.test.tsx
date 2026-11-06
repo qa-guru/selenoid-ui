@@ -262,7 +262,7 @@ describe("Docs", () => {
         expect(screen.getByTestId("docs-catalog-images").querySelectorAll("tbody tr")).toHaveLength(
             listCatalogImages(BROWSERS_FILE).length
         );
-        expect(screen.getByTestId("docs-catalog-images")).toHaveTextContent("qaguru/playwright-chromium:1.62.1");
+        expect(screen.getByTestId("docs-catalog-images")).toHaveTextContent("qaguru/playwright-chromium:1.65.0");
         expect(screen.getByTestId("docs-catalog-images")).toHaveTextContent("qaguru/android:16");
         expect(screen.getByTestId("docs-catalog-hub-scripts").querySelectorAll("article")).toHaveLength(
             CATALOG_HUB_SCRIPTS.length
