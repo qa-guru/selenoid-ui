@@ -718,7 +718,7 @@
             "failed": 0,
             "id": "jenkins-python-wd-cold-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-11-06T22:35:32Z",
+            "measured_at": "2026-11-07T00:05:07Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -726,9 +726,9 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 4.164,
-            "note": "job #162: test PASSED (1 passed) in 4.164s; build FAILED only on post Allure-generate (kit plugin resolution); no artifacts lost",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool-full-attachments/162/"
+            "wall_time_s": 4.109,
+            "note": "job #163 SUCCESS; Test stage 4.109s; cold full artifacts video+log+har-bodies",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-cold-pool-full-attachments/163/"
         },
         {
             "language": "python",
@@ -810,7 +810,7 @@
             "failed": 0,
             "id": "jenkins-python-wd-warm-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-11-06T22:35:28Z",
+            "measured_at": "2026-11-07T00:05:07Z",
             "image_flavor": "warm",
             "pool": "warm-pool",
             "artifacts": {
@@ -818,9 +818,9 @@
                 "log": true,
                 "har": "off"
             },
-            "wall_time_s": 2.727,
-            "note": "job #27: test PASSED in 2.727s; build FAILED only on post Allure-generate (kit plugin resolution)",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-warm-pool-full-attachments/27/"
+            "wall_time_s": 3.051,
+            "note": "job #28 SUCCESS; Test stage 3.051s; warm slot reuse, full artifacts",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-python-warm-pool-full-attachments/28/"
         },
         {
             "language": "python",
@@ -994,7 +994,7 @@
             "failed": 0,
             "id": "jenkins-js-pw-cold-1-p1-full-attachments",
             "status": "ok",
-            "measured_at": "2026-11-06T22:35:36Z",
+            "measured_at": "2026-11-07T00:05:07Z",
             "image_flavor": "warm",
             "pool": "cold",
             "artifacts": {
@@ -1002,9 +1002,9 @@
                 "log": true,
                 "har": "bodies"
             },
-            "wall_time_s": 17.106,
-            "note": "job #8: test PASSED (1 passed) 17.106s incl kit npm install 11s; build FAILED only on post Allure-generate (kit plugin resolution)",
-            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool-full-attachments/8/"
+            "wall_time_s": 4.232,
+            "note": "job #9 SUCCESS; Test stage 4.232s; cold full artifacts video+log+har-bodies",
+            "jenkins_url": "https://jenkins.qa.guru/job/autotests-ai-multistack-tests-pipeline-js-cold-pool-full-attachments/9/"
         },
         {
             "language": "js",
